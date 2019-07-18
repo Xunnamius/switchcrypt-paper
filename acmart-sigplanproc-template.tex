@@ -1,5 +1,5 @@
 %% For double-blind review submission, w/o CCS and ACM Reference (max submission space)
-%\documentclass[sigplan,10pt,review,anonymous]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
+\documentclass[sigplan,10pt,review,anonymous]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
 %% For double-blind review submission, w/ CCS and ACM Reference
 %\documentclass[sigplan,10pt,review,anonymous]{acmart}\settopmatter{printfolios=true}
 %% For single-blind review submission, w/o CCS and ACM Reference (max submission space)
@@ -7,7 +7,7 @@
 %% For single-blind review submission, w/ CCS and ACM Reference
 %\documentclass[sigplan,10pt,review]{acmart}\settopmatter{printfolios=true}
 %% For final camera-ready submission, w/ required CCS and ACM Reference
-\documentclass[sigplan,10pt]{acmart}\settopmatter{}
+%\documentclass[sigplan,10pt]{acmart}\settopmatter{}
 
 %% Use this to kill the ACM conference paragraph text from the first page for
 %% review submissions (along with printacmref=false in documentclass)
@@ -105,6 +105,10 @@
 \newcommand{\MHz}{\,MHz}
 \newcommand{\GHz}{\,GHz}
 
+%% Project name
+\newcommand{\SYSTEM}{SwitchBox}
+\newcommand{\SYSTEMURI}{https://git.xunn.io/closed-source/research/strongbox2}
+
 %% Reference parts of the paper
 \newcommand{\figref}[1]{Fig.~\ref{fig:#1}}
 \newcommand{\figsref}[2]{Figures~\ref{fig:#1} and~\ref{fig:#2}}
@@ -132,7 +136,6 @@
 \newcommand{\PUNT}[1]{}
 \newcommand{\TODO}[1]{\textcolor{gray}{\textbf{\ [TODO:\ #1]\ }}}
 \newcommand{\FIX}[1]{\textcolor{red}{\textbf{\ [FIX:\ #1]\ }}}
-\newcommand{\StrongBoxURI}{https://git.xunn.io/research/buselfs-public}
 
 %% For algorithms
 \newcommand{\LineComment}[1]{\Statex \hfill\textit{#1}}
@@ -213,14 +216,12 @@
 %% Conference information
 %% Supplied to authors by publisher for camera-ready submission;
 %% use defaults for review submission.
-\acmYear{2018}
-\acmConference[ASPLOS'18]{2018 Architectural Support for Programming Languages
-and Operating Systems}{March 24--28, 2018}{Williamsburg, VA, USA}
-\acmBooktitle{ASPLOS '18: 2018 Architectural Support for Programming Languages
-and Operating Systems, March 24--28, 2018, Williamsburg, VA, USA}
-\acmPrice{15.00}
-\acmDOI{10.1145/3173162.3173183} % \acmDOI{10.1145/nnnnnnn.nnnnnnn}
-\acmISBN{978-1-4503-4911-6/18/03} % \acmISBN{978-x-xxxx-xxxx-x/YY/MM}
+\acmYear{2019}
+\acmConference[ASPLOS'19]{}{}{}
+\acmBooktitle{}
+\acmPrice{}
+\acmDOI{} % \acmDOI{10.1145/nnnnnnn.nnnnnnn}
+\acmISBN{} % \acmISBN{978-x-xxxx-xxxx-x/YY/MM}
 \startPage{1}
 
 %% Copyright information
@@ -231,7 +232,7 @@ and Operating Systems, March 24--28, 2018, Williamsburg, VA, USA}
 \setcopyright{acmcopyright}
 %\setcopyright{acmlicensed}
 %\setcopyright{rightsretained}
-\copyrightyear{2018}           %% If different from \acmYear
+\copyrightyear{2019}           %% If different from \acmYear
 
 %% Citation style
 %\citestyle{acmauthoryear}  %% For author/year citations
@@ -261,8 +262,8 @@ and Operating Systems, March 24--28, 2018, Williamsburg, VA, USA}
 %\title[StrongBox: Confidentiality, Integrity, and Performance]{StrongBox:
 %Confidentiality, Integrity, and Performance using Stream Ciphers for Full Drive
 %Encryption}
-\title{StrongBox: Confidentiality, Integrity, and Performance using Stream
-Ciphers for Full Drive Encryption}
+\title{SwitchBox: Security, Energy, and Performance Tradeoffs Leveraging LFS
+Behavior in Stream Cipher Based Full Drive Encryption}
 %% [Short Title] is optional;
                                         %% when present, will be used in
                                         %% header instead of Full Title.
@@ -313,7 +314,7 @@ Ciphers for Full Drive Encryption}
 }
 \email{haryadi@cs.uchicago.edu}
 
-\author{Ariel J. Feldman}
+\author{David Cash}
 \affiliation{
   %\position{Position1}
   %\department{Department1}              %% \department is recommended
@@ -324,7 +325,7 @@ Ciphers for Full Drive Encryption}
   % \postcode{60637}
   % \country{USA}
 }
-\email{arielfeldman@cs.uchicago.edu}
+\email{davidcash@cs.uchicago.edu}
 
 
 \author{Henry Hoffmann}
@@ -349,45 +350,8 @@ Ciphers for Full Drive Encryption}
 
 %% 2012 ACM Computing Classification System (CSS) concepts
 %% Generate at 'http://dl.acm.org/ccs/ccs.cfm'.
-\begin{CCSXML}
-<ccs2012>
-<concept>
-<concept_id>10002951.10002952.10002971.10003451.10002976</concept_id>
-<concept_desc>Information systems~Data encryption</concept_desc>
-<concept_significance>500</concept_significance>
-</concept>
-<concept>
-<concept_id>10002951.10003152.10003153.10003158.10003452</concept_id>
-<concept_desc>Information systems~Flash memory</concept_desc>
-<concept_significance>300</concept_significance>
-</concept>
-<concept>
-<concept_id>10002978.10002979.10002982.10011598</concept_id>
-<concept_desc>Security and privacy~Block and stream ciphers</concept_desc>
-<concept_significance>500</concept_significance>
-</concept>
-<concept>
-<concept_id>10002978.10002979.10002982.10011600</concept_id>
-<concept_desc>Security and privacy~Hash functions and message authentication codes</concept_desc>
-<concept_significance>500</concept_significance>
-</concept>
-<concept>
-<concept_id>10002978.10002979.10002980</concept_id>
-<concept_desc>Security and privacy~Key management</concept_desc>
-<concept_significance>300</concept_significance>
-</concept>
-<concept>
-<concept_id>10002978.10003001.10003002</concept_id>
-<concept_desc>Security and privacy~Tamper-proof and tamper-resistant designs</concept_desc>
-<concept_significance>100</concept_significance>
-</concept>
-<concept>
-<concept_id>10011007.10010940.10010941.10010949.10003512</concept_id>
-<concept_desc>Software and its engineering~File systems management</concept_desc>
-<concept_significance>500</concept_significance>
-</concept>
-</ccs2012>
-\end{CCSXML}
+% \begin{CCSXML}
+% \end{CCSXML}
 
 \ccsdesc[500]{Information systems~Data encryption}
 \ccsdesc[300]{Information systems~Flash memory}
@@ -401,8 +365,7 @@ Ciphers for Full Drive Encryption}
 
 %% Keywords
 %% comma (ASPLOS uses SEMICOLONS!) separated list
-\keywords{AES-XTS\@; full disk encryption; replay protected memory block;
-log-structured; high read performance; dm-crypt}
+\keywords{}
 %% \keywords are mandatory in final camera-ready submission
 
 
@@ -422,6 +385,8 @@ log-structured; high read performance; dm-crypt}
 \input{6_related}
 \input{7_conclusion}
 \input{8_acks}
+
+\cite{*}
 
 %% Start a new page for your references:
 \clearpage
