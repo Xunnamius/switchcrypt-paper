@@ -26,6 +26,7 @@ save-temporary: generate-pdf
 	if test -e *.out; then mv *.out out; fi
 	if test -e *.log; then mv *.log out; fi
 	if test -e *.xml; then mv *.xml out; fi
+	if test -e *.cut; then mv *.cut out; fi
 	if test -e *.fls; then mv *.fls out; fi
 	if test -e *.fdb*; then mv *.fdb* out; fi
 	if test -e *.auxlock; then mv *.auxlock out; fi
@@ -38,5 +39,5 @@ $(CRNAME): $(TOP-LEVEL-ROOT).pdf
 
 clean:
 	rm -f *.bbl *.blg *-blx.bib
-	rm -f *.pdf *.aux* *.log *.out *.xml *.fls *.fdb* *.gz
+	rm -f *.pdf *.aux* *.log *.out *.xml *.fls *.fdb* *.gz *.cut
 	rm -rf out _minted*
