@@ -4,7 +4,7 @@ GHOSTSCRIPT=\gs
 
 TEX-FILES = *.tex
 BIB-FILES = *.bib
-TOP-LEVEL-ROOT = acmart-sigplanproc-template
+TOP-LEVEL-ROOT = _paper
 CRNAME = dickens-dnschk
 
 all: generate-pdf save-temporary $(CRNAME)

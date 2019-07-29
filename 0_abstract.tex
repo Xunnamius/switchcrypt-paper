@@ -1,21 +1,26 @@
 \begin{abstract}
 
-Full-drive encryption (FDE) is a tier-one concern in modern systems increasingly
-backed by solid-state storage. By leveraging the proliferation of trusted
-hardware and the behavior of solid-state Flash Translation Layers (FTL)---which
-operate similarly to Log-structured File Systems (LFS)---we can improve I/O
-performance by as much as $2.36\times$ while offering stronger integrity
-guarantees than the state of the art. But this append-mostly overwrite-averse
-FTL/LFS behavior is further exploitable. By taking advantage of this behavior,
-we can trade off I/O performance or total filesystem energy use for stronger
-security guarantees without loss of generality.
+Full-drive encryption (FDE) is a primary concern among several in modern systems
+increasingly backed by solid-state storage. Prior work with stream cipher based
+FDE demonstrates that, by selecting the fastest stream cipher statically at
+compile time, we can achieve improved I/O throughput over block cipher based FDE
+while offering stronger security guarantees. This is ideal when the only
+optimization target is throughput; however, throughput is not the only primary
+concern---others frequently include security and energy use. For instance: the
+cipher with the highest throughput may not provide security guarantees at the
+desired strength; similarly, the cipher with the strongest security guarantees
+may not be efficient enough given the current energy budget.
 
-In this paper, we demonstrate that this trade off space exists. We further
-characterize this space and provide a software mechanism to navigate it: the
-\SYSTEM{} filesystem. We implement \SYSTEM{} on an ARM big.LITTLE mobile
-processor and test its performance under the popular F2FS LFS. We find that
-\SYSTEM{} is flexible enough to satisfy a wide range of performance and security
-constraints. \TODO{Perhaps a sentence-long general explanation of the use cases
-and the most interesting result(s) from them.}
+In this paper, we show these competing concerns form a tradeoff space between
+energy, security, and performance. We further characterize this space and
+present \SYSTEM{}, a software mechanism to navigate such a space dynamically and
+at runtime via \emph{cipher scheduling}. This is accomplished by taking
+advantage of the overwrite-averse "append-mostly" behavior of the underlying
+solid-state storage to trade throughput or total energy use of the file system
+for desired security guarantees. We implement \SYSTEM{} on an ARM big.LITTLE
+mobile processor and test its performance under the popular F2FS LFS. We find
+that \SYSTEM{} is flexible enough to satisfy a wide range of performance and
+security constraints. \TODO{Perhaps a sentence-long general explanation of the
+use cases and the most interesting result(s) from them?}
 
 \end{abstract}
