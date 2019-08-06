@@ -1,3 +1,30 @@
 \section{Introduction}\label{sec:introduction}
 
-Todo!
+\TODO{There are many competing concerns modern systems must balance.}
+
+Full-Drive Encryption (FDE) is important. What is what, what it does, why it's
+important.
+
+\TODO{Security (FDE) is one such important concern; performance and energy-use
+are others.}
+
+\TODO{Prior work on balancing these concerns is static and offline; a single
+optimal configuration and cipher is chosen given only the most generic usecase; inflexible;
+cannot adapt to changes in resource availability or runtime environment.}
+
+Prior work focuses on performance vs the state of the art AES-XTS. Speedup is
+accomplished using stream ciphers over block ciphers.
+
+\TODO{However, prior work on using fast stream ciphers for FDE yield deeper
+insights; performance win over AES-XTS comes from "append-mostly" behavior of
+underlying LFS and we can leverage this further to create a mechanism for
+changing ciphers online during runtime to meet dynamic latency, energy, and
+security goals with minimal overhead.}
+
+\TODO{Why this flexibility is useful and why anyone would want to pay some
+overhead to take advantage of it: a taste of possibilities and the coming
+usecases.}
+
+\TODO{We present: SwitchBox!}
+
+\TODO{Explanation of remaining sections.}
