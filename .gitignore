@@ -1,1 +1,8 @@
 out/
+*.aux
+*.auxlock
+*.bbl
+*.blg
+*.log
+*.out
+_paper.pdf
