@@ -1,16 +1,44 @@
 \section{Introduction}\label{sec:introduction}
 
-\TODO{There are many competing concerns modern systems must balance.}
+There are several important concerns modern filesystems must balance.
+Paramount among them are: security of data at rest; performance, \ie{I/O latency
+or throughput}); and overall energy budget. However, these concerns exist in
+contention with one another. \TODO{More?}
 
-Full-Drive Encryption (FDE) is important. What is what, what it does, why it's
-important.
+The state of the art for securing data at rest is Full-Drive Encryption
+(FDE)\footnote{The common term is full-\emph{disk} encryption, but this work
+targets SSDs, so we use \emph{drive}.}. FDE employs a complex algorithm or
+cryptographic \emph{cipher} to encrypt, decrypt, and authenticate backing store
+contents on the fly. Understandably, this comes with considerable impact on
+system performance and energy use. \TODO{Android M FDE example from Google.
+Perhaps another from someone else. \cite{Google}} Yet, end users expect their
+device to be secure \emph{and} performant \emph{and} energy efficient, hence
+these concerns must be balanced with respect to the most general use case.
 
-\TODO{Security (FDE) is one such important concern; performance and energy-use
-are others.}
+Prior work on balancing the FDE's impact on performance and energy efficiency
+focuses on choice of cipher, as different ciphers express different performance
+and efficiency characteristics and offer contrasting security guarantees from
+one another. The standard choice in FDE is the AES \emph{block cipher} in XTS
+mode (AES-XTS). However, Dickens et al. show that we can achieve improved
+performance versus AES-XTS and other block ciphers while providing a stronger
+integrity guarantee by choosing a \emph{stream cipher} instead, such as the
+ChaCha20\cite{ChaCha20} stream cipher.
 
-\TODO{Prior work on balancing these concerns is static and offline; a single
-optimal configuration and cipher is chosen given only the most generic usecase; inflexible;
-cannot adapt to changes in resource availability or runtime environment.}
+But ChaCha20 is not the only stream cipher we can configure for use with FDE.
+Other stream ciphers exist with a plethora of different performance
+characteristics and security properties beyond integrity guarantees. These
+include: the reduced round ChaCha8\cite{ChaCha8}, SalsaX\cite{SalsaX}, mimicking
+a stream cipher with AES in counter mode (AES-CTS)\cite{AES-CTR},
+Rabbit\cite{Rabbit}, Sosemanuk\cite{Sosemanuk}, Freestyle\cite{Freestyle}, et
+cetera. Given these various configurations points, prior work requires a static
+configuration choice made offline at compile time or initialization; a single
+cipher configuration is deemed optimal given only the most generic usecase.
+However, the cipher configuration providing the fastest I/O throughput may be
+different than the configuration providing the strongest security guarantees,
+and both may differ from the configuration that uses the least amount of energy.
+Unfortunately, this is inflexible; while filesystems work to must balance
+security, energy, and performance, a static compile-time configuration choice
+cannot adapt to changes in resource availability or runtime environment.
 
 Prior work focuses on performance vs the state of the art AES-XTS. Speedup is
 accomplished using stream ciphers over block ciphers.
