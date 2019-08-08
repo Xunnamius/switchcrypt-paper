@@ -23,6 +23,9 @@
 Prior work leveraging Log-structured File System (LFS) behavior to enable the
 use of stream ciphers for FDE naturally lends itself to transitioning encrypted
 data between different ciphers during runtime. This is because 1) encryption and
-decryption of nuggets occurs independently of one another and 2) LFS
-"append-mostly" behavior avoids overwrites by ensuring all write operations
-target "empty" (\ie{initialized with random data}) space on the backing store.
+decryption of nuggets \TODO{Should nuggets be introduced earlier?} occurs
+independently of one another and 2) LFS "append-mostly" behavior avoids
+overwrites by ensuring all write operations target "empty" (\ie{initialized with
+random data}) space on the backing store.
+
+
