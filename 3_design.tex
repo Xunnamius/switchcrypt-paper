@@ -2,39 +2,4 @@
 
 Todo!
 
-\subsection{Quantifying the Security Dimension}
 
-To reason about trading off the security guarantees provided by various ciphers,
-a loose ranking of these ciphers must be established. This ranking ranges from
-\emph{offers more security} to \emph{offers less security}. For our purposes, we
-arrived at three key features that, when scored, give us something akin to an
-ideal distribution:
-
-\begin{itemize}
-
- \item \emph{Output randomization.} A cipher that exhibits output randomization
- can output ciphertext non-deterministically given the same input, which is
- extremely useful for FDE\@. This is a binary feature in that a cipher either
- outputs deterministically or it does not. A cipher with output randomization
- scores a 1 for this feature while a cipher without it scores a 0.
-
- \item \emph{Resistance to cryptanalysis.} A cipher that is resistant to
- cryptanalysis can resist theoretical cryptanalytical attacks such as
- known-plaintext and chosen-plaintext attacks, offline key-guessing attacks, et
- cetera. Scores for this feature range from 0 to 1, where 0.5 represents
- standard resistance to cryptanalysis for stream ciphers in the general case\@.
-
- \item \emph{Round count vs standard.} The ciphers we examine in this research
- are all constructed around the notion of "rounds," where a higher number of
- rounds implies a stronger confidentiality guarantee. This feature represents
- how many rounds the cipher executes compared to the accepted "standard" round
- count for that cipher. For instance, ChaCha8 is a reduced round version of the
- standardized ChaCha20. Variants are distributed evenly from 0-1. For instance,
- ChaCha8 scores 0, ChaCha12 scores 0.5, and ChaCha20 scores 1\@.
-
-\end{itemize}
-
-The ideal rank distribution would be a continuous “security gradient”.
-Unfortunately, in reality, the best we can do is a discrete and non-uniform
-distribution, but for the purpose of quantifying our tradeoff space, it is
-adequate.

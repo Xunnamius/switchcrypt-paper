@@ -1,8 +1,8 @@
 \section{Introduction}\label{sec:introduction}
 
-There are several important concerns modern filesystems must balance.
-Paramount among them are: security of data at rest; performance, \ie{I/O latency
-or throughput}); and overall energy budget. However, these concerns exist in
+There are several important concerns modern filesystems must balance. Paramount
+among them are: security of data at rest; performance, \ie{I/O latency or
+throughput}); and overall energy budget. However, these concerns exist in
 contention with one another. \TODO{More?}
 
 The state of the art for securing data at rest is Full-Drive Encryption
@@ -17,43 +17,46 @@ balanced with respect to the most general use case.
 
 Prior work on balancing the FDE's impact on performance and energy efficiency
 focuses on choice of cipher, as different ciphers express different performance
-and efficiency characteristics while offering contrasting security guarantees. 
-The standard choice in FDE is the AES \emph{block cipher} in XTS
-mode (AES-XTS). The recent StrongBox project, however, shows that \emph{stream ciphers} achieve
+and efficiency characteristics while offering contrasting security guarantees.
+The standard choice in FDE is the AES \emph{block cipher} in XTS mode (AES-XTS).
+The recent StrongBox project, however, shows that \emph{stream ciphers} achieve
 improved performance versus AES-XTS and other block ciphers while providing a
-stronger integrity guarantee, at the cost of a small amount of metadata overhead \cite{StrongBox}. This prior work specifically uses 
-the ChaCha20 stream cipher\cite{ChaCha20} as its AES replacement.
+stronger integrity guarantee, at the cost of a small amount of metadata overhead
+\cite{StrongBox}. This prior work specifically uses the ChaCha20 stream
+cipher\cite{ChaCha20} as its AES replacement.
 
 But ChaCha20 is not the only stream cipher we can configure for use with FDE.
-Other stream ciphers exist with a plethora of performance
-characteristics and security properties beyond integrity guarantees. These
-include: the reduced round ChaCha8\cite{ChaCha8}, SalsaX\cite{SalsaX}, mimicking
-a stream cipher with AES in counter mode (AES-CTR)\cite{AES-CTR},
-Rabbit\cite{Rabbit}, Sosemanuk\cite{Sosemanuk}, Freestyle\cite{Freestyle}, et
-cetera. Thus, the choice of stream cipher can be viewed as a key \emph{configuration} parameter for FDE.  
-%Prior work requires a static
-%configuration choice made offline at compile- or boot-time---a single
-%cipher configuration is chosen to work generally well for all possible scenarios that might arise at runtime.
+Other stream ciphers exist with a plethora of performance characteristics and
+security properties beyond integrity guarantees. These include: the reduced
+round ChaCha8\cite{ChaCha8}, SalsaX\cite{SalsaX}, mimicking a stream cipher with
+AES in counter mode (AES-CTR)\cite{AES-CTR}, Rabbit\cite{Rabbit},
+Sosemanuk\cite{Sosemanuk}, Freestyle\cite{Freestyle}, et cetera. Thus, the
+choice of stream cipher can be viewed as a key \emph{configuration} parameter
+for FDE.
+
+%Prior work requires a static configuration choice made offline at compile- or
+%boot-time---a single cipher configuration is chosen to work generally well for
+%all possible scenarios that might arise at runtime.
 The cipher configuration providing the fastest I/O throughput is almost always
 different than the configuration providing the strongest security guarantees,
 and both may differ from the configuration that uses the least amount of energy.
-\TODO{Hank: I still think we could improve the flow in this paragraph, but we can fine tune later.}
+\TODO{Hank: I still think we could improve the flow in this paragraph, but we
+can fine tune later.}
 
-While configuration parameters allow filesystems to balance security,
-energy, and performance, a static,  compile- or boot-time configuration choice cannot adapt
-to changes that might arise at runtime.  Such changes include resource availability, runtime environment, or even the required latency, security and energy. Hence, any static
-configuration will unilaterally sacrifice one concern for another until the filesystem can be shut down and restarted.
+While configuration parameters allow filesystems to balance security, energy,
+and performance, a static,  compile- or boot-time configuration choice cannot
+adapt to changes that might arise at runtime.  Such changes include resource
+availability, runtime environment, or even the required latency, security and
+energy. Hence, any static configuration will unilaterally sacrifice one concern
+for another until the filesystem can be shut down and restarted.
 
-Fortunately, the StrongBox project provides deeper insights: the performance improvement of stream ciphers over
-AES-XTS comes from 1) the "append-mostly" behavior of underlying log-structured filesystems (LFSs) and
-2) the organization of the backing store into discrete units a layer above the
-block and sector storage paradigm. We can leverage these insights to create a
-novel tradeoff mechanism for \emph{online cipher configuration switching} to meet
-dynamic latency, energy, and security goals with minimal overhead.
-
-\TODO{Why this flexibility is useful and why anyone would want to pay some
-overhead to take advantage of it: a taste of possibilities and the coming
-usecases? Or save that for motivation?} \TODO{Hank: MY suggestion is that this intro is very compact and to the point right now.  I think the current structure would not need this paragraph, but woudl be well suited to a more fleshed out motivation section where you show that flexiblity really is useful in some areas.  So, I am suggesting omitting the paragraph stub and going right to the brief description of switchbox.}
+Fortunately, the StrongBox project provides deeper insights: the performance
+improvement of stream ciphers over AES-XTS comes from 1) the "append-mostly"
+behavior of underlying log-structured filesystems (LFSs) and 2) the organization
+of the backing store into discrete units a layer above the block and sector
+storage paradigm. We can leverage these insights to create a novel tradeoff
+mechanism for \emph{online cipher configuration switching} to meet dynamic
+latency, energy, and security goals with minimal overhead.
 
 \TODO{We present: SwitchBox! We demonstrate SwitchBox's effectiveness on ...; we
 measure using ...; we further demonstrate with usecases ...}
