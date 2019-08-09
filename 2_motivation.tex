@@ -2,19 +2,19 @@
 
 % Overview
 
-To enable the use of stream ciphers for performant FDE, StrongBox leverages two
-key insights: 1) the overwrite-averse \emph{append-mostly} behavior of
-Log-structured File Systems (LFS) and 2) the division of the backing store into
-discrete same-size metadata-managed units \emph{above the block I/O layer}
-referred to as \emph{nuggets}. When an overwrite does occur during I/O,
-StrongBox rekeys the affected nugget(s) (\ie{changes the keystream}) to prevent
+To use stream ciphers for performant FDE, StrongBox leverages two key insights:
+1) the overwrite-averse \emph{append-mostly} behavior of Log-structured File
+Systems (LFS) and 2) the division of the backing store into discrete same-size
+metadata-managed units \emph{above the block I/O layer} referred to as
+\emph{nuggets}. When the rare overwrite does occur during I/O, StrongBox
+modifies the cipher keystream or \emph{rekeys} the affected nugget(s) to prevent
 a confidentiality violation.
 
-These insights naturally lead to transitioning encrypted data between different
-ciphers during runtime. This is because 1) encryption and decryption of nuggets
-occurs independently of one another and 2) LFS append-mostly behavior avoids
-overwrites by ensuring all write operations target "empty" (\ie{initialized with
-random data}) space on the backing store.
+This approach naturally leads to transitioning individual nuggets between any
+cipher during runtime. This is because 1) encryption and decryption of nuggets
+is compartmentalized; nugget-level operations occur independently of one another
+and 2) all rekeying operations end up committing data to "empty"
+(\ie{initialized with random data}) space on the backing store.
 
 We can build on this behavior by abstracting the rekeying process out into a
 \emph{re-ciphering} process, whereby the key \emph{and the cipher used to
@@ -54,10 +54,7 @@ quantification of cipher security:
 
 \end{itemize}
 
-The ideal rank distribution would be a continuous “security gradient”.
-Unfortunately, in reality, the best we can do is a discrete and non-uniform
-distribution, but for the purpose of quantifying security, it is
-adequate.
+
 
 \subsection{Tradeoff Spaces}
 
