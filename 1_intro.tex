@@ -11,7 +11,7 @@ targets SSDs, so we use \emph{drive}.}. FDE employs a \emph{cryptographic
 cipher} to encrypt, decrypt, and authenticate backing store contents on the fly.
 Understandably, this comes with considerable impact on system performance and
 energy use. \TODO{Android M FDE example from Google. Perhaps another from
-someone else. \cite{Google}} Yet, end users expect their device to be secure
+someone else~\cite{Google}.} Yet, end users expect their device to be secure
 \emph{and} performant \emph{and} energy efficient, hence these concerns must be
 balanced with respect to the most general use case.
 
@@ -21,16 +21,16 @@ and efficiency characteristics while offering contrasting security guarantees.
 The standard choice in FDE is the AES \emph{block cipher} in XTS mode (AES-XTS).
 The recent StrongBox project, however, shows that \emph{stream ciphers} achieve
 improved performance versus AES-XTS and other block ciphers while providing a
-stronger integrity guarantee, at the cost of a small amount of metadata overhead
-\cite{StrongBox}. This prior work specifically uses the ChaCha20 stream
-cipher\cite{ChaCha20} as its AES replacement.
+stronger integrity guarantee, at the cost of a small amount of metadata
+overhead~\cite{StrongBox}. This prior work specifically uses the ChaCha20 stream
+cipher~\cite{ChaCha20} as its AES replacement.
 
 But ChaCha20 is not the only stream cipher we can configure for use with FDE.
 Other stream ciphers exist with a plethora of performance characteristics and
 security properties beyond integrity guarantees. These include: the reduced
-round ChaCha8\cite{ChaCha8}, SalsaX\cite{SalsaX}, mimicking a stream cipher with
-AES in counter mode (AES-CTR)\cite{AES-CTR}, Rabbit\cite{Rabbit},
-Sosemanuk\cite{Sosemanuk}, Freestyle\cite{Freestyle}, et cetera. Thus, the
+round ChaCha8~\cite{ChaCha8}, SalsaX~\cite{SalsaX}, mimicking a stream cipher
+with AES in counter mode (AES-CTR)~\cite{AES-CTR}, Rabbit~\cite{Rabbit},
+Sosemanuk~\cite{Sosemanuk}, Freestyle~\cite{Freestyle}, et cetera. Thus, the
 choice of stream cipher can be viewed as a key \emph{configuration} parameter
 for FDE.
 
@@ -52,13 +52,13 @@ for another until the filesystem can be shut down and restarted.
 
 Fortunately, the StrongBox project provides deeper insights: the performance
 improvement of stream ciphers over AES-XTS comes from 1) the "append-mostly"
-behavior of underlying log-structured filesystems (LFSs) and 2) the organization
+behavior of underlying log-structured filesystems (LFS) and 2) the organization
 of the backing store into discrete units a layer above the block and sector
 storage paradigm. We can leverage these insights to create a novel tradeoff
 mechanism for \emph{online cipher configuration switching} to meet dynamic
 latency, energy, and security goals with minimal overhead.
 
 \TODO{We present: \SYSTEM{}! We demonstrate \SYSTEM{}'s effectiveness on ...; we
-measure using ...; we further demonstrate with usecases ...}
+measure using ...; we further demonstrate with use cases ...}
 
-\TODO{Explanation of remaining sections.}
+\TODO{Short explanation of the remaining structure of the paper.}
