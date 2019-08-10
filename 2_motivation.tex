@@ -149,22 +149,35 @@ points with shapes versus the other version of this chart (above) which shows
 none of this}
 
 % Or should this be a new section?
-Two examples motivating this mechanism follow. The first illustrates the need for \emph{temporal} switching, where the desired security and energy tradeoffs change over time.  The second motivates \emph{spatial} switching where the desired tradeoff is different for different parts of the same file.  \\
+Two examples motivating this mechanism follow. The first illustrates the need
+for \emph{temporal} switching, where the desired security and energy tradeoffs
+change over time.  The second motivates \emph{spatial} switching where the
+desired tradeoff is different for different parts of the same file.\\
 
 
 \noindent
 \textbf{Temporal switching: streaming video with a curtailed energy budget}
 
-\TODO{Are we stepping on the use case section with this?} \TODO{No, in fact it will be a nice symmetry: you pose these as problems at the beginning and then solve them at the end. }
+\TODO{Are we stepping on the use case section with this?} \TODO{No, in fact it
+will be a nice symmetry: you pose these as problems at the beginning and then
+solve them at the end. }
 
-\TODO{I am surprised to see this works with reading a video.  If the video is stored with a high security, don't you have to decrypt it before you read and pay that high-cost (in energy) no matter what?  I had expected writing a new video where I could start with high-security and then switch to writing the second part with lower-security to save battery life.  The first (reading) is even better, but it is not clear to me how we can do that while still obeying the laws of physics---I hope I missed something, but if I did, it needs to be added to the description.}
-Suppose we were streaming a video stored our mobile device to a WiFi connected
-television or projector. We want to store video and other data on our device as
-securely as possible, so we chose to initialize the system at configuration
-point offering very strong security. \figref{energy-latency-linearity}
-correlates stronger security guarantees with greater total energy use, meaning
-our device is using a lot more energy to facilitate FDE at this configuration
-point.
+\TODO{Hank: I am surprised to see this works with reading a video. If the video
+is stored with a high security, don't you have to decrypt it before you read and
+pay that high-cost (in energy) no matter what?  I had expected writing a new
+video where I could start with high-security and then switch to writing the
+second part with lower-security to save battery life.  The first (reading) is
+even better, but it is not clear to me how we can do that while still obeying
+the laws of physics---I hope I missed something, but if I did, it needs to be
+added to the description.} \TODO{Bernard: You are correct, I will rephrase to
+explicitly indicate streaming multiple times instead of just once. That way, the
+example will make sense.} Suppose we were streaming a video stored our mobile
+device to a WiFi connected television or projector. We want to store video and
+other data on our device as securely as possible, so we chose to initialize the
+system at configuration point offering very strong security.
+\figref{energy-latency-linearity} correlates stronger security guarantees with
+greater total energy use, meaning our device is using a lot more energy to
+facilitate FDE at this configuration point.
 
 Eventually, our device determines its remaining battery life is too low and
 enters an energy saving mode. With a traditional filesystem, we are stuck with
