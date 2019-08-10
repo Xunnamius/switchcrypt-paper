@@ -89,9 +89,24 @@ nugget be re-encrypted "just-in-time" using the active cipher.
 
 Rather than re-encrypt the entire backing store every time the active cipher
 changes, this strategy limits the performance impact of cipher switching to
-individual nuggets. This price is paid only once during the initial
+individual nuggets. Similar to rekeying in the original StrongBox construction,
+the heavy price of re-encryption is paid only once during the initial
 re-encryption, after which the nugget is accessed normally during I/O until the
-active cipher switches again.
+active cipher is switched again.
+
+There are several forms the forward strategy can take. The default and most
+intuitive is \emph{0-forward}, in which \SYSTEM{} immediately transitions
+individual nuggets encountered during I/O to the active cipher is they are not
+using it. The forward strategy can also take the form of \emph{N-forward}, where
+\SYSTEM{} attempts to take advantage of spatial sequential locality to
+transition whole sets of nuggets into the active cipher.
+
+We can trivially expand the forward strategy to encompass the entire backing
+store by selecting N equal to the total number of nuggets managed by \SYSTEM{}.
+This would have the effect of re-encrypting large swaths of the backing store
+upon every I/O operation where a nugget encrypted with the non-active cipher is
+encountered. Of course, this has the same effect as simply reinitializing the
+filesystem with the new cipher.
 
 \subsubsection{Selective}
 
