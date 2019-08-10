@@ -45,11 +45,11 @@ quantification of cipher security (see: \tblref{security-quant}).
  standard resistance to cryptanalysis for stream ciphers in the general case\@.
 
  \item \emph{Round count vs standard.} The ciphers we examine in this research
- are all constructed around the notion of "rounds," where a higher number of
- rounds implies a stronger confidentiality guarantee. This feature represents
+ are all constructed around the notion of \emph{rounds}, where a higher number
+ of rounds implies a stronger confidentiality guarantee. This feature represents
  how many rounds the cipher executes compared to the accepted "standard" round
  count for that cipher. For instance, ChaCha8 is a reduced round version of the
- standardized ChaCha20. Variants are distributed evenly from 0-1. For instance,
+ standard ChaCha20. Variants are distributed evenly from 0-1. For instance,
  ChaCha8 scores 0, ChaCha12 scores 0.5, and ChaCha20 scores 1\@.
 
 \end{itemize}
@@ -87,7 +87,16 @@ quantification of cipher security (see: \tblref{security-quant}).
    \caption{\TODO{Caption goes here}\TODO{No curve in this version!}}\label{fig:40mb-read-frontier}
 \end{figure}
 
-\figref{fig:40mb-read-frontier} shows.
+\figref{40mb-read-frontier} shows the security versus I/O latency static
+tradeoff between different stream ciphers under StrongBox when completing a 40MB
+read of encrypted storage. The experiment was performed on an ARM big.LITTLE
+Exynos Octa processor, which is similar to the processors used in the Samsung
+Galaxy line of phones and other devices. \TODO{In the LaTeX figure, parateo
+frontier is X while other results are some other shape. Explain this here.}
+
+Ciphers with relatively stronger security guarantees result in higher latency
+for I/O operations while ciphers with relatively weaker security guarantees
+result in lower latency.
 
 \begin{figure}[ht]
  \centering
@@ -95,8 +104,19 @@ quantification of cipher security (see: \tblref{security-quant}).
    \caption{\TODO{Caption goes here}}\label{fig:energy-latency-linearity}
 \end{figure}
 
-\subsection{The Need for Dynamic Tradeoff Management}
+\figref{energy-latency-linearity} shows that, for the stream ciphers included in
+our experiments, there is a linear relationship between cipher performance and
+total energy used during the I/O operation.
 
-\subsubsection{Example A's Name Goes Here}
+With prior work, \TODO{we could cite other filesystems and storage layers here
+other than just StrongBox, such as ZFS, dmcrypt?} cipher configuration is made
+statically at compile time or at filesystem initialization. This forces
+developers and end-users to choose a configuration that works best in the most
+general case and stick with it, even if a different configuration becomes more
+optimal at a later point. \TODO{This paragraph should be fleshed out more.}
 
-\subsubsection{Example B's Name Goes Here}
+For example:
+
+\textbf{Streaming video to networked devices within a curtailed energy budget}
+
+\textbf{}
