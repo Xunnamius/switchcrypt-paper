@@ -26,6 +26,12 @@ Benefit: we can "future-proof" our encrypted highly sensitive data against more
 powerful future attacks/less trustworthy ciphers while preserving the
 performance win from using a faster less secure cipher.
 
+\begin{figure}[ht]
+ \centering
+  \includegraphics[width=\linewidth]{drawn/8.png}
+   \caption{\TODO{Caption goes here}}\label{fig:mirrored-vs-selective}
+\end{figure}
+
 \subsection{Balancing Security Goals with a Constrained Energy Budget}
 
 When our mobile devices enter power saving mode, it is usually because the total
@@ -48,6 +54,12 @@ cipher switching, the filesystem can react dynamically to the system's total
 energy budget while still aiming for the most performant (least latency)
 configuration.
 
+\begin{figure}[ht]
+ \centering
+  \includegraphics[width=\linewidth]{drawn/7.png}
+   \caption{\TODO{Caption goes here}}\label{fig:energy-budget}
+\end{figure}
+
 \subsection{Responding to End-of-Life Slowdown in Solid State Drives}
 
 Due to garbage collection and the append-mostly nature of SSDs and other NAND
@@ -62,6 +74,12 @@ former encrypted state.
 
 Benefit: we can mitigate the performance loss of a slowing SSD by using a faster
 but less secure cipher.
+
+\begin{figure}[ht]
+ \centering
+  \includegraphics[width=\linewidth]{drawn/6.png}
+   \caption{\TODO{Caption goes here}}\label{fig:eol}
+\end{figure}
 
 \subsection{Custody Panic: Securing Device Data Under Duress}
 
