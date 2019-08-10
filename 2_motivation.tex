@@ -79,7 +79,7 @@ quantification of cipher security (see: \tblref{security-quant}).
    \label{tbl:security-quant}
 \end{table}
 
-\subsection{Tradeoff Spaces}
+\subsection{Statically Trading off Energy/Latency for Security}
 
 \begin{figure}[ht]
  \centering
@@ -113,10 +113,20 @@ other than just StrongBox, such as ZFS, dmcrypt?} cipher configuration is made
 statically at compile time or at filesystem initialization. This forces
 developers and end-users to choose a configuration that works best in the most
 general case and stick with it, even if a different configuration becomes more
-optimal at a later point. \TODO{This paragraph should be fleshed out more.}
+optimal at a later point. The only way to switch ciphers when a new
+configuration becomes more optimal is to remake the entire filesystem.
+\TODO{This paragraph should be fleshed out more?}
 
-For example:
+\subsection{Dynamically Trading off Energy/Latency for Security}
 
-\textbf{Streaming video to networked devices within a curtailed energy budget}
+For example:\\
 
+\noindent
+\textbf{Streaming video to networked devices with a curtailed energy budget}
+
+Text.\\
+
+\noindent
 \textbf{Massive multi-cipher document with variable security regions}
+
+Text.
