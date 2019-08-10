@@ -89,8 +89,8 @@ cipher, however, the forward strategy dictates that this nugget be re-encrypted
 "just-in-time" using the active cipher before completing the I/O operation. If a
 particular nugget encrypted with the non-active cipher is never encountered
 during I/O, it is never re-encrypted and remains on the backing store in its
-original state. In this way, the forward strategy represents temporal cipher
-switching.
+original state. In this way, the forward strategy represents a form of temporal
+cipher switching.
 
 Rather than re-encrypt the entire backing store every time the active cipher
 changes, this strategy limits the performance impact of cipher switching to
@@ -102,22 +102,34 @@ active cipher is switched again.
 There are several forms the forward strategy can take. The default and most
 intuitive is \emph{0-forward}, in which \SYSTEM{} immediately transitions
 individual nuggets encountered during I/O to the active cipher is they are not
-using it. The forward strategy can also take the form of \emph{N-forward}, where
-\SYSTEM{} attempts to take advantage of spatial sequential locality to
-transition whole sets of nuggets into the active cipher.
+using it. Over time, if various I/O operations end up touching every nugget in
+the backing store, the encrypted state of every nugget will eventually become
+consistent with the currently active cipher.
 
-We can trivially expand the forward strategy to encompass the entire backing
-store by selecting N equal to the total number of nuggets managed by \SYSTEM{}.
-This would have the effect of re-encrypting large swaths of the backing store
-upon every I/O operation where a nugget encrypted with the non-active cipher is
-encountered. Of course, this has the same effect as simply re-initializing the
-entire filesystem with the new cipher.
+The forward strategy can also take the form of \emph{N-forward}, where \SYSTEM{}
+attempts to take advantage of spatial sequential locality to transition whole
+sets of nuggets into the active cipher. We can trivially expand the forward
+strategy to encompass the entire backing store by selecting N equal to the total
+number of nuggets managed by \SYSTEM{}. This would have the effect of
+re-encrypting large swaths of the backing store upon every I/O operation where a
+nugget encrypted with the non-active cipher is encountered. Of course, this has
+the same effect as simply re-initializing the entire filesystem with the new
+cipher.
 
 \subsubsection{Selective}
 
-\SYSTEM{} allows each individual nugget to exist encrypted using one cipher or
-the other. Unlike the forward strategy, which schedules individual nuggets be
-re-encrypted at some point in time \emph{after} the active cipher is switched
+When \SYSTEM{} is initialized with the selective strategy, the backing store is
+partitioned into two regions governed exclusively by the primary and secondary
+ciphers, respectively. All nuggets in the first partition are encrypted with the
+primary cipher while all nuggets in the second partition are encrypted with the
+secondary cipher.
+
+Hence, unlike the forward strategy, which schedules individual nuggets to be
+re-encrypted at some point in time \emph{after} the active cipher is switched,
+the selective strategy allows the wider system to indicate \emph{where} on the
+backing store an I/O operation should occur: either in one partition or the
+other. In this way, the selective strategy represents a form of spatial cipher
+switching.
 
 \subsubsection{Mirrored}
 
