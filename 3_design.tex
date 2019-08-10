@@ -55,21 +55,23 @@ details and a discussion of the overall implications and limitations of
 Upon initialization, prior work requires a single cipher to be selected. The
 specified cipher---ideally along the pareto frontier---is then used to encrypt
 and decrypt all data on the filesystem. With \SYSTEM{}, however, \emph{a pair of
-ciphers are selected along the pareto frontier} upon initialization, depending
-on the concerns of the user. These ciphers are referred to as the \emph{primary
-cipher} and the \emph{secondary cipher} and represent the static configuration
-points along the pareto frontier between which \SYSTEM{} navigates.
+ciphers are selected} upon initialization, depending on the concerns of the
+end-user. These ciphers are referred to as the \emph{primary cipher} and the
+\emph{secondary cipher} respectively, and represent the static configuration
+points along the pareto frontier between which \SYSTEM{} can navigate.
 
-The active cipher is used to interact with the backings tore. Initially, the
-primary cipher is the active cipher. Until the wider system indicates that
-\SYSTEM{} should use a different cipher to interact with the backing store,
-\SYSTEM{} functions identically to StrongBox in that it uses that single stream
-cipher to encrypt and decrypt all nuggets during I/O.
+At any moment, the currently active cipher is used to interact with the backing
+store. Initially, the primary cipher is the active cipher. Until the wider
+system indicates that \SYSTEM{} should use a different cipher to interact with
+the backing store, \SYSTEM{} functions identically to StrongBox in that it uses
+the primary cipher to encrypt and decrypt all nuggets during I/O.
 
 However, switching the active cipher dynamically allows \SYSTEM{} to achieve
 optimal configuration points that are otherwise unachievable with prior work.
-However, it is entirely non-trivial to determine \emph{when} to re-encrypt a
-nugget with a different cipher and \emph{where} to direct the output of that
+The wider system determines if the primary or secondary cipher should be the
+active cipher at any given moment, and \SYSTEM{} responds immediately.
+Unfortunately, it is entirely non-trivial to determine \emph{when} to re-encrypt
+a nugget with a different cipher and \emph{where} to direct the output of that
 cipher.
 
 Hence, cipher switching \emph{strategies} are the mechanism by which \SYSTEM{}
@@ -80,11 +82,16 @@ in
 
 \subsubsection{Forward}
 
-The forward switching strategy allows each individual nugget to exist encrypted
-using one cipher or the other. Other parts of the operating system can indicate
-which cipher \SYSTEM{} should be using to interact with the backing store at any
-time. When \SYSTEM{} receives the signal it is determined that the system should be interacting with nuggets
-encrypted in a specific form.
+\SYSTEM{} allows each individual nugget to exist encrypted using one cipher or
+the other. When a nugget is encountered during I/O that is encrypted using a
+cipher other than the active cipher, the forward strategy dictates that this
+nugget be re-encrypted "just-in-time" using the active cipher.
+
+Rather than re-encrypt the entire backing store every time the active cipher
+changes, this strategy limits the performance impact of cipher switching to
+individual nuggets. This price is paid only once during the initial
+re-encryption, after which the nugget is accessed normally during I/O until the
+active cipher switches again.
 
 \subsubsection{Selective}
 
@@ -143,6 +150,6 @@ cipher be active over the other.
 
 \subsection{Discussion}
 
-\TODO{Limitations}.
+\TODO{Limitation 1: }
 
 
