@@ -100,9 +100,13 @@ encrypted in a specific form.
 Our \SYSTEM{} implementation consists of 9,491 lines of C code; our test suite
 consists of 6,077 lines of C code. All together, our solution is comprised of
 15,568 lines of C code. \SYSTEM{} uses OpenSSL version 1.1.0h and LibSodium
-version 1.0.12 for its AES-XTS implementation. \TODO{Sentence or two about the
-origin of estream cipher implementations}. As with the original StrongBox, the
-Merkle Tree implementation is from the Secure Block Device~\cite{SBD}. \SYSTEM{}
+version 1.0.12 for its AES-XTS and AES-CTR implementations. Open source ARM NEON
+optimized implementations of ChaCha are provided by
+Floodyberry~\cite{Floodyberry}. The Freestyle cipher implementation is from the
+original paper~\cite{Freestyle}. The eSTREAM Profile 1 cipher implementations
+are from the open source libestream cryptographic library~\cite{libestream} by
+Lucas Clemente Vella. As with the original StrongBox, the Merkle Tree
+implementation is from the Secure Block Device~\cite{SBD}. \SYSTEM{}
 implementation is publicly available open-source.\footnote{\SystemURI}.
 
 For a fair comparison with the original StrongBox implementation, we mirror
