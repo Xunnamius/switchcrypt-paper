@@ -42,10 +42,17 @@ primary and secondary ciphers. \TODO{Spell out the acronym the first time it is 
 \end{figure}
 
 The backing store is the storage medium \SYSTEM{} operates on. The layout of the
-backing store is illustrated with \figref{backstore}. \TODO{Do we redescribe the
-backing store from StrongBox, or should we link to the original paper? Or should
-we skip talking about the backing store at all and just briefly describe nuggets
-here? It's not very different from StrongBox's. An extra header was added.}
+backing store is illustrated in \figref{backstore}. In the \textit{body} section
+of the backing store layout, end-user data is partitioned into a series of
+same-size \emph{logical blocks}---which are distinct from the concept of
+\emph{physical drive blocks}---we refer to these wider logical blocks as
+\emph{nuggets}, marked \textit{NUG}. Hence, a nugget consists of one or more
+physical drive blocks along with per-nugget metadata indicating if the nugget
+was encrypted with the primary or the secondary cipher. \TODO{Do we redescribe
+the rest of the backing store from StrongBox, or should we link to the original
+paper? Or should we skip talking about the backing store at all and more briefly
+describe nuggets here? It's all not very different from StrongBox's, i.e. an
+extra header was added.}
 
 In the rest of this section, we describe our cipher switching strategies. We
 also discuss the pluggable stream cipher API and other design challenges. This
@@ -121,7 +128,7 @@ The forward strategy can also take the form of \emph{N-forward}, where \SYSTEM{}
 attempts to take advantage of spatial sequential locality to transition whole
 sets of nuggets into the active cipher. We can trivially expand the forward
 strategy to encompass the entire backing store by selecting N equal to the total
-number of nuggets managed by \SYSTEM{}. This would have the effect of
+number of nuggets managed by \SYSTEM{}. This would have the overhead of
 re-encrypting large swaths of the backing store upon every I/O operation where a
 nugget encrypted with the non-active cipher is encountered. Of course, this has
 the same effect as simply re-initializing the entire filesystem with the new
@@ -164,18 +171,64 @@ cipher switching.
 \TODO{Always use present tense in technical writing.  It should be we develop instead of we developed.}
 We developed an API to allow any stream cipher or any cipher that can pose as a
 stream cipher to be used with \SYSTEM{} without modification, including ciphers
-with residual output, \eg{Freestyle}. \SYSTEM{} exposes a common encryption and
+with residual output, \eg{Freestyle}. \TODO{I don't know what residual output is, so please expand on the differences between ciphers that causes problems. But before you do, see the note below on challenges.} \SYSTEM{} exposes a common encryption and
 decryption interface, including read and write handles, that allow \SYSTEM{} to
 transition nuggets between arbitrary ciphers at the behest of the wider system.
 \TODO{This section is odd here.  Having a whole subsection seems to imply that it is as important as the switching strategies, but having a short paragraph implies it is more of a side note.  In addition, it is not clear what purpose this discussion serves. I think you need more setup about how different stream ciphers might appear to all be interchangeable, but they are not, so we need a common interface---again, sometimes it is actually helpful to state what feels obvious to you.}
 
-\subsection{Challenges}
+\subsection{Challenge: Beware Naive Forward Switching}
 
-\TODO{Performance overhead paragraph}
+It is tempting to implement forward switching such that a nugget is re-encrypted
+during I/O if its metadata indicates that it was previously encrypted using the
+non-active cipher. However, such a naive implementation can have disastrous
+effects on performance depending on the workload.
 
-\TODO{Spatial overhead paragraph}
+First, a nugget is considered "pristine" if it has not had any data written into
+it yet. \SYSTEM{} determines if a nugget is pristine by checking the state of
+the transaction journal for that nugget. A pristine nugget will have a clean
+transaction journal.
 
-\TODO{Is it really just overhead?  I think there are a couple of other challenges, like: when to switch?  Which blocks to switch?  How to make ChaCha type ciphers work with Freestyle type ciphers?  Basically, every piece of the system that you think is interesting is probably interesting because it addresses some challenge.  For that reason, I think this section should be moved earlier, as it should be a discussion of the challenges that need to be overcome by the design.  So, the flow would be overview (what we want to do), challenges (why it is hard), description of key components (with references to how they help us accomplish the overall goal and how they address the challenges), then implementation (how do we go from the conceptual design to a working system)}.
+All nuggets start out as pristine. All nuggets start out with metadata
+indicating that they're to be encrypted and decrypted by the primary cipher
+(which is the initially active cipher when \SYSTEM{} is first initialized). This
+is true \emph{even if the nugget has not been written to yet}. This means, on
+read and write operations after the secondary cipher becomes the active cipher
+using a naively implemented forward switching strategy, every write operation
+will trigger a re-keying, which carries significant overhead.
+
+The solution is to divide forward switching into \emph{soft re-encryption} and
+\emph{hard re-encryption}. Fortunately, the \SYSTEM{} design lends itself nicely
+to such a distinction for free, as per-nugget metadata is managed separately
+from a nugget's actual data.
+
+During soft re-encryption, only the nugget's metadata is changed to indicate
+that the nugget can be encrypted and decrypted with the newly active cipher but
+\emph{without actually re-encrypting the nugget data itself}. This keeps the
+nugget in a "pristine" condition, preserving \SYSTEM{}'s ability to write data
+into it without triggering a costly rekeying operation every time, preserving
+the original StrongBox's performance advantage. At the same time, \SYSTEM{} can
+now use the newly active cipher to interact with the nugget as expected.
+
+On the other hand, during hard re-encryption, the nugget's metadata is changed
+to match the active cipher \emph{and} the nugget data is re-encrypted using the
+new cipher. When using forward switching other that 0-forward, \ie{N-forward}
+where $N > 0$, only read operations are allowed to trigger hard re-encryption
+for nuggets other than the currently active nugget. This is still not enough to
+preserve StrongBox's performance advantage, however, as I/O operations can span
+multiple nuggets, and attempting to take advantage of spatial locality after
+interacting with every nugget is counterproductive. Hence, only the last nugget
+touched by a read or write operation will trigger the more aggressive N-forward
+behavior if $N > 0$.
+
+These considerations have the effect of 1) preserving the original StrongBox
+performance advantage over prior work and 2) allowing more aggressive N-forward
+behavior (where $N > 0$) to take advantage of spatial locality during read-heavy
+workloads to result in a further performance advantage (c.f.
+\secref{evaluation}).
+
+
+
+\TODO{Note: Hank wrote the followign before the Challenge section was updated, some of it is still relevant.  Earlier text: Are the challenges really just overhead?  I think there are a couple of other challenges, like: when to switch?  Which blocks to switch?  How to make ChaCha type ciphers work with Freestyle type ciphers?  Basically, every piece of the system that you think is interesting is probably interesting because it addresses some challenge.  For that reason, I think this section should be moved earlier, as it should be a discussion of the challenges that need to be overcome by the design.  So, the flow would be overview (what we want to do), challenges (why it is hard), description of key components (with references to how they help us accomplish the overall goal and how they address the challenges), then implementation (how do we go from the conceptual design to a working system)}.
 
 \subsection{Implementation}
 
@@ -205,9 +258,8 @@ cipher or the secondary cipher. However, there is no technical limitation
 preventing various different nuggets encrypted with three, four, or more unique
 ciphers from co-existing on the backing store. \TODO{Good detail.  In this case, remove the discussion above about how we just support two ciphers.}
 
-\subsubsection{Indicating a cipher switch should occur}
-\TODO{As a style thing, you should avoid a subsub (or any breakdown) if there is only one piece.  Usually a section with only one subsection indicates that there is some organizational problem in the document.  }
-
+\subsubsection{Indicating a Cipher Switch Should Occur}
+\TODO{As a style thing, you should avoid a subsub (or any breakdown) if there is only one piece.  Usually a section with only one subsection indicates that there is some organizational problem in the document. Update: I wrote this before I merged with the new design section.  Now it is not relevant to this text, but I will leave it here as general advice.  Just comment it out after reading. }
 
 When \SYSTEM{} should be using the primary cipher or the secondary cipher to
 interact with the backing store, this intent is communicated via POSIX message
@@ -216,6 +268,26 @@ message queue be used over any other method of inter-process communication (IPC)
 so long as \SYSTEM{} is notified asynchronously when the wider system desires
 one cipher be active over the other. \TODO{I am not sure why this section is here.  It is either too much detail, or more likely there is some important issue, but whatever that is needs to be stated much more explicitly.  Like maybe the problem is that the use needs to actually communicate with the \SYSTEM{} implementation and we need a mechanism to do that?  Anyway, assuming you expand this a little so it is clear what problem is being addressed, then you can just make this another paragraph in implementation instead of splitting it out into a subsub.}
 
+\TODO{I think the discussion here only covers temporal switching.  I believe you should indicate that for this paragraph and then have a second paragraph that talks about how to indicate that a spatial switch should occur (and you might need a different method for mirrored and selective).  Correct me if I am wrong, but I believe that the selective switch will require the IOp to indicate that this data needs to be handled in one way or another.}
+
+\subsubsection{Backing Store Initialization}
+
+To operate securely, \SYSTEM{} must be seeded with random data initially rather
+than have the backing store consist of all zeroes. This is a one-time cost paid
+during initialization and has no tangible effect on performance.
+
+If nuggets are not seeded with random data initially, any write operation into
+an "empty" nugget might leak information or constitute an overwrite where the
+predictable state of the backing store (\ie{initialized to all zeroes}) leads to
+an overwrite-style condition.
+
+%\subsection{Discussion}
+% Should this be saved for the evaluation section? Should some of the other
+% parts of this section be broken off into a discussion subsection?
+
+
 \subsection{Discussion}
 % Should this be saved for the evaluation section?
 \TODO{You should include a discussion here if it is a conceptual discussion, for example about the benefits and limitations of the proposed design.}
+
+\TODO{I have one major issue at this point in the document.  I don't think we should wait until discussion to address it, but I am writing about it here because it was not addressed anywhere else.  I feel like we need some discussion of threat model or something.  For example, I really like the mirroring strategy, but I think it breaks if an attacker has physical access to the drive, right?  Like if they have to request IO through the OS, I think it works becuase the os or hypervisor can hide the mirrored side, but you can't hide that if I can just read bytes off the drive itself, right?  Sort of similar for forward.  We really do need to say something about when these are applicable and when they aren't.}
