@@ -6,7 +6,7 @@
 
 \section{\SYSTEM{} Design}\label{sec:design}
 
-\TODO{Exactly how much of the original StrongBox should be explained here? Is
+\TODO{How much of the original StrongBox should be explained here? Is
 this too much? Too little?}
 
 \SYSTEM{}, like StrongBox, is a translation layer positioned between the block
@@ -37,9 +37,11 @@ underlying backing store through the device controller block I/O layer.
    \caption{Layout of \SYSTEM{}'s backing storage.}\label{fig:backstore}
 \end{figure}
 
-\TODO{Backing store paragraph}
-
-\TODO{Key insights and contributions paragraph (if necessary?)}
+The backing store is the storage medium \SYSTEM{} operates on. The layout of the
+backing store is illustrated with \figref{backstore}. \TODO{Do we redescribe the
+backing store from StrongBox, or should we link to the original paper? Or should
+we skip talking about the backing store at all and just briefly describe nuggets
+here? It's not very different from StrongBox's. An extra header was added.}
 
 In the rest of this section, we describe our cipher switching strategies,
 pluggable stream cipher API, and related design challenges with these
@@ -49,21 +51,35 @@ details and a discussion of the overall implications and limitations of
 
 \subsection{Cipher Switching Strategies}
 
-\TODO{A sentence}
+Upon initialization, prior work requires a single cipher to be selected. The
+specified cipher---ideally along the pareto frontier---is then used to encrypt
+and decrypt all data on the filesystem. With \SYSTEM{}, however, \emph{a pair of
+ciphers are selected along the pareto frontier} upon initialization depending on
+the concerns of the user. These ciphers are the static configuration points
+between which \SYSTEM{} navigates.
 
-\subsubsection{Forward-Opportunistic}
+Switching ciphers dynamically allows \SYSTEM{} to achieve optimal configuration
+points that are otherwise unachievable with prior work. However, it is entirely
+non-trivial to determine \emph{when} to switch ciphers and \emph{where} to
+direct cipher output.
+
+Hence, cipher switching \emph{strategies} are the mechanism by which \SYSTEM{}
+can effectively transition nuggets between different encrypted states
+dynamically, thus providing a mechanism to navigate the tradeoff space presented
+in
+\figref{fig:40mb-read-with-forward}. \TODO{Expound on this all more? Reword?}
+
+\subsubsection{Forward}
+
+The forward switching strategy allows each individual nugget to exist encrypted
+using one cipher or the other. When the system determines that a nugget should
+transition from one cipher to the other.
+
+\subsubsection{Selective}
 
 \TODO{A paragraph}
 
-\subsubsection{Forward-Immediate}
-
-\TODO{A paragraph}
-
-\subsubsection{Selective-Immediate}
-
-\TODO{A paragraph}
-
-\subsubsection{Mirrored-Immediate}
+\subsubsection{Mirrored}
 
 \TODO{A paragraph}
 
@@ -92,6 +108,10 @@ their use of the BUSE~\cite{BUSE} virtual block device as our device controller.
 BUSE is a thin (200 LoC) wrapper around the standard Linux Network Block Device
 (NBD). Buse allows an operating system to transact block I/O requests to and
 from virtual block devices exposed via domain socket.
+
+In the purposes of our implementation, we limit cipher switching to pairs of
+ciphers. However, there is no reason nuggets encrypted with three, four, or more
+ciphers could not exist in harmony on the same backing store.
 
 \subsection{Discussion}
 
