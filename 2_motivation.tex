@@ -114,7 +114,7 @@ statically at compile time or at filesystem initialization. This forces
 developers and end-users to choose a configuration that works best in the most
 general case and stick with it, even if a different configuration becomes more
 optimal at a later point. The only way to switch ciphers when a new
-configuration becomes more optimal is to remake the entire underlying
+configuration becomes more optimal is to recreate the entire underlying
 filesystem, which is rarely desirable. \TODO{This paragraph should be fleshed
 out more?}
 
@@ -165,9 +165,37 @@ used to stream the video so that we stay within our curtailed energy budget.
 
 When we return to a non-curtailed energy budget, the system can return to its
 more secure configuration dynamically, allowing the cipher strength of the
-backing store to eventually recover.\\
+backing store to eventually recover without having to recreate the entire
+underlying filesystem.\\
 
 \noindent
 \textbf{Massive multi-cipher document}
 
-Text.
+Suppose a large organization that is working on a document with hundreds of
+gigabytes of data. The organization is decentralized, so this document must pass
+back and forth among several disparate parties who are constantly encrypting and
+decrypting certain sections of it to work on. Of course, this document is the
+target of frequent brute force, supply chain, and other confidentiality
+violating attacks by powerful adversaries with unknown and potentially unlimited
+means at their disposal. The confidentiality of the document must never be
+violated, so it must be encrypted. However, some tiny amount of the data
+dispersed throughout the document is \emph{highly} sensitive; and while a
+confidentiality violation of the wider document would be embarrassing, a
+confidentiality violation of this very sensitive data would very likely destroy
+the organization in its entirety.
+
+With prior work, this organization is limited to static configurations that
+generally fall within two camps: 1) encrypt the entire document with a cipher
+providing the strongest security guarantees possible to protect the small amount
+of highly sensitive data, which would add an unacceptable overhead to the
+frequent encryption and decryption operations of the organization during I/O or
+2) encrypt the entire document with a cipher providing the least amount of
+latency during I/O, which could potentially leave the organization vulnerable to
+its adversaries.
+
+However, with the ability to operate at points between the discrete
+configurations available to prior work, a dynamic system can encrypt highly
+sensitive portions of the backing store with the cipher with the strongest
+security guarantees while allowing the rest of the document to be encrypted with
+the standard cipher so as to not unduly burden the employees of this
+organization as they operate on the document.
