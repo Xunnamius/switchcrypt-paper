@@ -6,23 +6,39 @@
 
 \section{\SYSTEM{} Design}\label{sec:design}
 
-\TODO{How much of the original StrongBox should be explained here? Is
-this too much? Too little?} \TODO{Hank: This is a good overview.  Right now, the level of detail feels right to me. There are two things missing, however.  First, we need a clear delineation between prior work and this paper.  One way to make that distinction is to point at the diagram and say this piece is new.  Another way would be if it is a conceptual difference.  I believe this case is a combination of both: (1) there is at least some new metadata to be added (to accomodate freestyle IIRC) plus I would assume that StrongBox does not include a field for cipher in the nugget and (2) there is the conceptual change that now each nugget can have a different scheme (not just key). Second thing that is missing: need to talk about what is coming in the section.  This second thing should relate to the first, as we should spend most of the time talking about what is new for this paper.}
+\TODO{How much of the original StrongBox should be explained here? Is this too
+much? Too little?} \TODO{Hank: This is a good overview.  Right now, the level of
+detail feels right to me. There are two things missing, however.  First, we need
+a clear delineation between prior work and this paper.  One way to make that
+distinction is to point at the diagram and say this piece is new.  Another way
+would be if it is a conceptual difference.  I believe this case is a combination
+of both: (1) there is at least some new metadata to be added (to accomodate
+freestyle IIRC) plus I would assume that StrongBox does not include a field for
+cipher in the nugget and (2) there is the conceptual change that now each nugget
+can have a different scheme (not just key). Second thing that is missing: need
+to talk about what is coming in the section.  This second thing should relate to
+the first, as we should spend most of the time talking about what is new for
+this paper.}
 
-\SYSTEM{}, like StrongBox and Adiantum, is a translation layer positioned between the block
-layer and the operating system's virtual file system~\cite{StrongBox}. There are
-several places \SYSTEM{} could be implemented in the system stack: as part of an
-actual kernel Log-structured File System (LFS) module like the F2FS filesystem,
-as a block device or virtual block device in the manner of dm-crypt, or within a
-device controller such as an SSD drive controller's FTL~\cite{StrongBox}.
+\SYSTEM{}, like StrongBox and Adiantum, is a translation layer positioned
+between the block layer and the operating system's virtual file
+system~\cite{StrongBox}. There are several places \SYSTEM{} could be implemented
+in the system stack: as part of an actual kernel Log-structured File System
+(LFS) module like the F2FS filesystem, as a block device or virtual block device
+in the manner of dm-crypt, or within a device controller such as an SSD drive
+controller's FTL~\cite{StrongBox}.
 
 \figref{overview} illustrates the \SYSTEM{} design. \SYSTEM{} manages five
 metadata components: an in-memory \emph{Merkle Tree}; two drive-backed byte
 arrays, \ie{the \emph{Keycount Store} and the \emph{Transaction Journal}}; a
 globally persistent cryptographically secure monotonic counter; and a flexible
-drive-backed store for per-nugget cipher-specific metadata. For our
-monotonic counter implementation, we used a \emph{Replay Protected Memory Block}
-(RPMB). \TODO{Citation would be good here.  But, it is a little strange to get so specific in this part of the text.  I would either save it for a later implementation section (or evaluation).  Or, if you think that the existence of these counters might be controversial, then say we use RPMB, but we could have used many others such as...}
+drive-backed store for per-nugget cipher-specific metadata. For our monotonic
+counter implementation, we used a \emph{Replay Protected Memory Block} (RPMB).
+\TODO{Citation would be good here.  But, it is a little strange to get so
+specific in this part of the text.  I would either save it for a later
+implementation section (or evaluation).  Or, if you think that the existence of
+these counters might be controversial, then say we use RPMB, but we could have
+used many others such as...}
 
 These five components are tightly integrated into the cryptographic driver,
 which handles data encryption, decryption, overwrite detection, integrity
@@ -33,7 +49,8 @@ Linux Virtual Filesystem Switch (VFS) as well as 2) the underlying backing store
 through the device controller block I/O layer.
 
 \SYSTEM{} uses IPC to receive commands to toggle the active cipher between the
-primary and secondary ciphers. \TODO{Spell out the acronym the first time it is used.}
+primary and secondary ciphers. \TODO{Spell out the acronym the first time it is
+used.}
 
 \begin{figure}[t]
  \centering
@@ -62,12 +79,20 @@ discussion of the overall implications and limitations of \SYSTEM{}'s design.
 \subsection{Cipher Switching Strategies}
 
 Upon initialization, prior work requires a single cipher to be selected. The
-specified cipher---ideally along the pareto frontier of security and energy tradeoffs---is then used to encrypt
-and decrypt all data on the filesystem. With \SYSTEM{}, however, \emph{a pair of
-ciphers are selected} upon initialization, depending on the concerns of the
-end-user. These ciphers are referred to as the \emph{primary cipher} and the
-\emph{secondary cipher} respectively, and represent the static configuration
-points along the pareto frontier between which \SYSTEM{} can navigate. \TODO{{Do you really have to know these ahead of time? If I had a cipher API and managed the implementation as a DLL, could I switch to any cipher, by just building a new DLL? Is there any reason, you couldn't have three or four or N ciphers and switch between all of them?  I ask all these questions because I want you to separate the conceptual idea, which should be as broad as possible, from the specific choices you had to make to demonstrate the idea (which may be much more restricted).  Here we want to discuss the conceptual ideas and save details for the implementation.}
+specified cipher---ideally along the pareto frontier of security and energy
+tradeoffs---is then used to encrypt and decrypt all data on the filesystem. With
+\SYSTEM{}, however, \emph{a pair of ciphers are selected} upon initialization,
+depending on the concerns of the end-user. These ciphers are referred to as the
+\emph{primary cipher} and the \emph{secondary cipher} respectively, and
+represent the static configuration points along the pareto frontier between
+which \SYSTEM{} can navigate. \TODO{Do you really have to know these ahead of
+time? If I had a cipher API and managed the implementation as a DLL, could I
+switch to any cipher, by just building a new DLL? Is there any reason, you
+couldn't have three or four or N ciphers and switch between all of them?  I ask
+all these questions because I want you to separate the conceptual idea, which
+should be as broad as possible, from the specific choices you had to make to
+demonstrate the idea (which may be much more restricted).  Here we want to
+discuss the conceptual ideas and save details for the implementation.}
 
 At any moment, the currently active cipher is used to interact with the backing
 store. Initially, the primary cipher is the active cipher. Until the wider
@@ -81,22 +106,22 @@ The wider system determines if the primary or secondary cipher should be the
 active cipher at any given moment, and \SYSTEM{} responds immediately.
 Unfortunately, it is entirely non-trivial to determine \emph{when} to re-encrypt
 a nugget with a different cipher and \emph{where} to direct the output of that
-cipher. \TODO{Don't just say it is difficult, make an argument about why it is 
-	difficult.  It is often very helpful to say things that are obvious to you 
-	because they won't be obvious to the reader, but will help build intuition 
-	for what is coming.  For example, you can say that one simple approach would 
-	immediately convert the entire drive, but the cost of doing that conversion 
-	might consume more energy than would be saved in future accesses.  I do like 
-	using where and when to set up spatial and temporal switching.  }
+cipher. \TODO{Don't just say it is difficult, make an argument about why it is
+difficult.  It is often very helpful to say things that are obvious to you
+because they won't be obvious to the reader, but will help build intuition for
+what is coming.  For example, you can say that one simple approach would
+immediately convert the entire drive, but the cost of doing that conversion
+might consume more energy than would be saved in future accesses.  I do like
+using where and when to set up spatial and temporal switching.  }
 
 Hence, cipher switching \emph{strategies} are the mechanism by which \SYSTEM{}
 can effectively transition nuggets between different encrypted states
 dynamically, thus providing a mechanism to navigate the tradeoff space presented
 in \figref{40mb-read-with-forward}. \TODO{Expound on this all more? Reword?
-Delete? Different chart referenced here instead?} \TODO{Hank: expound! Go ahead 
-and say that when to target the new encryption is temporal switching and we propose 
-a specific strategy, \emph{Forward}, to handle it.  Where to switch is spatial 
-switching and we propose two strategies to deal with that.}
+Delete? Different chart referenced here instead?} \TODO{Hank: expound! Go ahead
+and say that when to target the new encryption is temporal switching and we
+propose a specific strategy, \emph{Forward}, to handle it.  Where to switch is
+spatial switching and we propose two strategies to deal with that.}
 
 \subsubsection{Forward}
 
@@ -168,13 +193,21 @@ cipher switching.
 
 \subsection{Pluggable Stream Cipher API}
 
-\TODO{Always use present tense in technical writing.  It should be we develop instead of we developed.}
-We developed an API to allow any stream cipher or any cipher that can pose as a
-stream cipher to be used with \SYSTEM{} without modification, including ciphers
-with residual output, \eg{Freestyle}. \TODO{I don't know what residual output is, so please expand on the differences between ciphers that causes problems. But before you do, see the note below on challenges.} \SYSTEM{} exposes a common encryption and
-decryption interface, including read and write handles, that allow \SYSTEM{} to
-transition nuggets between arbitrary ciphers at the behest of the wider system.
-\TODO{This section is odd here.  Having a whole subsection seems to imply that it is as important as the switching strategies, but having a short paragraph implies it is more of a side note.  In addition, it is not clear what purpose this discussion serves. I think you need more setup about how different stream ciphers might appear to all be interchangeable, but they are not, so we need a common interface---again, sometimes it is actually helpful to state what feels obvious to you.}
+\TODO{Always use present tense in technical writing.  It should be we develop
+instead of we developed.} We developed an API to allow any stream cipher or any
+cipher that can pose as a stream cipher to be used with \SYSTEM{} without
+modification, including ciphers with residual output, \eg{Freestyle}. \TODO{I
+don't know what residual output is, so please expand on the differences between
+ciphers that causes problems. But before you do, see the note below on
+challenges.} \SYSTEM{} exposes a common encryption and decryption interface,
+including read and write handles, that allow \SYSTEM{} to transition nuggets
+between arbitrary ciphers at the behest of the wider system. \TODO{This section
+is odd here.  Having a whole subsection seems to imply that it is as important
+as the switching strategies, but having a short paragraph implies it is more of
+a side note.  In addition, it is not clear what purpose this discussion serves.
+I think you need more setup about how different stream ciphers might appear to
+all be interchangeable, but they are not, so we need a common interface---again,
+sometimes it is actually helpful to state what feels obvious to you.}
 
 \subsection{Challenge: Beware Naive Forward Switching}
 
@@ -226,9 +259,18 @@ behavior (where $N > 0$) to take advantage of spatial locality during read-heavy
 workloads to result in a further performance advantage (c.f.
 \secref{evaluation}).
 
-
-
-\TODO{Note: Hank wrote the followign before the Challenge section was updated, some of it is still relevant.  Earlier text: Are the challenges really just overhead?  I think there are a couple of other challenges, like: when to switch?  Which blocks to switch?  How to make ChaCha type ciphers work with Freestyle type ciphers?  Basically, every piece of the system that you think is interesting is probably interesting because it addresses some challenge.  For that reason, I think this section should be moved earlier, as it should be a discussion of the challenges that need to be overcome by the design.  So, the flow would be overview (what we want to do), challenges (why it is hard), description of key components (with references to how they help us accomplish the overall goal and how they address the challenges), then implementation (how do we go from the conceptual design to a working system)}.
+\TODO{Note: Hank wrote the followign before the Challenge section was updated,
+some of it is still relevant.  Earlier text: Are the challenges really just
+overhead?  I think there are a couple of other challenges, like: when to switch?
+Which blocks to switch?  How to make ChaCha type ciphers work with Freestyle
+type ciphers?  Basically, every piece of the system that you think is
+interesting is probably interesting because it addresses some challenge.  For
+that reason, I think this section should be moved earlier, as it should be a
+discussion of the challenges that need to be overcome by the design.  So, the
+flow would be overview (what we want to do), challenges (why it is hard),
+description of key components (with references to how they help us accomplish
+the overall goal and how they address the challenges), then implementation (how
+do we go from the conceptual design to a working system)}.
 
 \subsection{Implementation}
 
@@ -256,19 +298,36 @@ For the purposes of our implementation, we make the choice of ciphers binary:
 either the system wants \SYSTEM{} to access the backing store using the primary
 cipher or the secondary cipher. However, there is no technical limitation
 preventing various different nuggets encrypted with three, four, or more unique
-ciphers from co-existing on the backing store. \TODO{Good detail.  In this case, remove the discussion above about how we just support two ciphers.}
+ciphers from co-existing on the backing store. \TODO{Good detail.  In this case,
+remove the discussion above about how we just support two ciphers.}
 
 \subsubsection{Indicating a Cipher Switch Should Occur}
-\TODO{As a style thing, you should avoid a subsub (or any breakdown) if there is only one piece.  Usually a section with only one subsection indicates that there is some organizational problem in the document. Update: I wrote this before I merged with the new design section.  Now it is not relevant to this text, but I will leave it here as general advice.  Just comment it out after reading. }
+\TODO{As a style thing, you should avoid a subsub (or any breakdown) if there is
+only one piece.  Usually a section with only one subsection indicates that there
+is some organizational problem in the document. Update: I wrote this before I
+merged with the new design section.  Now it is not relevant to this text, but I
+will leave it here as general advice.  Just comment it out after reading. }
 
 When \SYSTEM{} should be using the primary cipher or the secondary cipher to
 interact with the backing store, this intent is communicated via POSIX message
 queue in our implementation. It is not a requirement of \SYSTEM{} that a POSIX
 message queue be used over any other method of inter-process communication (IPC)
 so long as \SYSTEM{} is notified asynchronously when the wider system desires
-one cipher be active over the other. \TODO{I am not sure why this section is here.  It is either too much detail, or more likely there is some important issue, but whatever that is needs to be stated much more explicitly.  Like maybe the problem is that the use needs to actually communicate with the \SYSTEM{} implementation and we need a mechanism to do that?  Anyway, assuming you expand this a little so it is clear what problem is being addressed, then you can just make this another paragraph in implementation instead of splitting it out into a subsub.}
+one cipher be active over the other. \TODO{I am not sure why this section is
+here.  It is either too much detail, or more likely there is some important
+issue, but whatever that is needs to be stated much more explicitly.  Like maybe
+the problem is that the use needs to actually communicate with the \SYSTEM{}
+implementation and we need a mechanism to do that?  Anyway, assuming you expand
+this a little so it is clear what problem is being addressed, then you can just
+make this another paragraph in implementation instead of splitting it out into a
+subsub.}
 
-\TODO{I think the discussion here only covers temporal switching.  I believe you should indicate that for this paragraph and then have a second paragraph that talks about how to indicate that a spatial switch should occur (and you might need a different method for mirrored and selective).  Correct me if I am wrong, but I believe that the selective switch will require the IOp to indicate that this data needs to be handled in one way or another.}
+\TODO{I think the discussion here only covers temporal switching.  I believe you
+should indicate that for this paragraph and then have a second paragraph that
+talks about how to indicate that a spatial switch should occur (and you might
+need a different method for mirrored and selective).  Correct me if I am wrong,
+but I believe that the selective switch will require the IOp to indicate that
+this data needs to be handled in one way or another.}
 
 \subsubsection{Backing Store Initialization}
 
@@ -285,9 +344,21 @@ an overwrite-style condition.
 % Should this be saved for the evaluation section? Should some of the other
 % parts of this section be broken off into a discussion subsection?
 
-
 \subsection{Discussion}
 % Should this be saved for the evaluation section?
-\TODO{You should include a discussion here if it is a conceptual discussion, for example about the benefits and limitations of the proposed design.}
+\TODO{You should include a discussion here if it is a conceptual discussion, for
+example about the benefits and limitations of the proposed design.}
 
-\TODO{I have one major issue at this point in the document.  I don't think we should wait until discussion to address it, but I am writing about it here because it was not addressed anywhere else.  I feel like we need some discussion of threat model or something.  For example, I really like the mirroring strategy, but I think it breaks if an attacker has physical access to the drive, right?  Like if they have to request IO through the OS, I think it works becuase the os or hypervisor can hide the mirrored side, but you can't hide that if I can just read bytes off the drive itself, right?  Sort of similar for forward.  We really do need to say something about when these are applicable and when they aren't.}
+\TODO{Hank: I have one major issue at this point in the document.  I don't think
+we should wait until discussion to address it, but I am writing about it here
+because it was not addressed anywhere else.  I feel like we need some discussion
+of threat model or something.  For example, I really like the mirroring
+strategy, but I think it breaks if an attacker has physical access to the drive,
+right?  Like if they have to request IO through the OS, I think it works becuase
+the os or hypervisor can hide the mirrored side, but you can't hide that if I
+can just read bytes off the drive itself, right?  Sort of similar for forward.
+We really do need to say something about when these are applicable and when they
+aren't.}\TODO{Bernard: Agreed (here and in your email)! We definitely need a
+threat model subsection somewhere. The way I've been conceptualizing it is: the
+OS can quickly kill half of the mirrored strategy with TRIM. But otherwise, yes,
+the data will exist in both forms.}
