@@ -127,13 +127,26 @@ secondary cipher.
 Hence, unlike the forward strategy, which schedules individual nuggets to be
 re-encrypted at some point in time \emph{after} the active cipher is switched,
 the selective strategy allows the wider system to indicate \emph{where} on the
-backing store an I/O operation should occur: either in one partition or the
-other. In this way, the selective strategy represents a form of spatial cipher
-switching.
+backing store a read or write operation should occur: either in one partition or
+the other. In this way, the selective strategy represents a form of spatial
+cipher switching where different regions of the backing store can store
+different pieces of data.
 
 \subsubsection{Mirrored}
 
-\TODO{A paragraph}
+Similar to the selective strategy, when \SYSTEM{} is initialized with the
+mirrored strategy, the backing store is partitioned into two regions governed
+exclusively by the primary and secondary ciphers, respectively. All nuggets in
+the first partition are encrypted with the primary cipher while all nuggets in
+the second partition are encrypted with the secondary cipher.
+
+However, unlike the selective strategy, all write operations that hit one
+partition are mirrored into the other partition immediately. The mirrored
+strategy merely allows the wider system to indicate where on the backing store a
+\emph{read} operation should occur. As a result, both regions of the backing
+store will always be in a consistent state and share the same data. In this way,
+the mirrored strategy, like the selective strategy, represents a form of spatial
+cipher switching.
 
 \subsection{Pluggable Stream Cipher API}
 
