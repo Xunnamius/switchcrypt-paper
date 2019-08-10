@@ -1,6 +1,6 @@
 \section{\SYSTEM{} Case Studies} \label{sec:usecases}
 
-\subsection{Variable Security Regions (VSR)}
+\subsection{Intra-file Variable Security Regions (VSR)}
 
 Communicating classified materials, grand jury testimony, corporate secrets,
 etc. require the highest level of discretion when handled, yet sensitive
@@ -26,7 +26,7 @@ Benefit: we can "future-proof" our encrypted highly sensitive data against more
 powerful future attacks/less trustworthy ciphers while preserving the
 performance win from using a faster less secure cipher.
 
-\subsection{Constrained Energy Budget}
+\subsection{Balancing Security Goals with a Constrained Energy Budget}
 
 When our mobile devices enter power saving mode, it is usually because the total
 energy/power budget for the device has become constrained for one reason or
@@ -48,7 +48,7 @@ cipher switching, the filesystem can react dynamically to the system's total
 energy budget while still aiming for the most performant (least latency)
 configuration.
 
-\subsection{SSD End-of-Life Offset}
+\subsection{Responding to End-of-Life Slowdown in Solid State Drives}
 
 Due to garbage collection and the append-mostly nature of SSDs and other NAND
 devices, as free space becomes constrained, performance drops off a cliff. This
@@ -63,7 +63,7 @@ former encrypted state.
 Benefit: we can mitigate the performance loss of a slowing SSD by using a faster
 but less secure cipher.
 
-\subsection{Custody Panic}
+\subsection{Custody Panic: Securing Device Data Under Duress}
 
 Nation-state and other adversaries have truly extensive compute resources at
 their disposal, as well as knowledge of side-channels and access to technology
