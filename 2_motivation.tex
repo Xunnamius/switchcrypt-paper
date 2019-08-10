@@ -1,7 +1,7 @@
 \section{Motivation}\label{sec:motivation}
 
 % Overview
-
+\TODO{We might be able to forgo the next three paragraphs in this spot.  They could be really useful in the design section as an overview of Strongbox.  Here, though, they are talking about how to dynamically switch and in this section, I think we just need to motivate that dynamically switching might be a good idea.  Then say how to do it in the next section.}
 To use stream ciphers for performant FDE, StrongBox leverages two key insights:
 1) the overwrite-averse \emph{append-mostly} behavior of Log-structured File
 Systems (LFS) and 2) the division of the backing store into discrete same-size
@@ -23,12 +23,18 @@ trade off between different ciphers and their characteristics dynamically,
 whereas prior work can only accomplish a static tradeoff at compile time or
 at filesystem initialization.
 
+\TODO{I think we can get away with one paragraph as an overview for this section.  Here is my suggestion:}
+Our goal is to dynamically trade security for performance or energy.  To ensure that these tradeoffs are made optimally, it is desirable to quantify the security of various ciphers, which can be challenging when different schemes are resistant to different types of attacks. So, we first propose a method for quantitative cipher comparison, and then present some empirical results showing the wide range of security and energy tradeoffs that are available with state-of-the-art ciphers.  We conclude by discussing example scenarios where user requirements for security and energy usage change dynamically.
+
+
 \subsection{Quantifying the Security Dimension}
 
 To reason about trading off the security guarantees provided by various ciphers,
-the strength of these guarantees must be quantified through scoring. For our
-purposes, we arrived at three key features that, when scored, give us a useful
+the strength of these guarantees must be quantified through scoring. \TODO{We do not want to say "For our purposes."  We want to propose something that would be useful for as many people as possible.  Also, I want to be very careful about attribution here.  Is this scoring system all stuff you came up with?  Did David help at all?  Is there anything here we can cite?  Basically, if this is all original work, then we should claim it as a contribution and argue that it is a generally useful scheme.  If some or all of it is prior work, that is fine, too, we just need to attribute those pieces and make it clear that others have already argued this is a useful way to compare ciphers.  No matter what, we need a stronger argument for this scheme than just that it serves our purposes.} For our
+purposes, we consider three key features that, when scored, give us a useful
 quantification of cipher security (see: \tblref{security-quant}).
+
+\TODO{It might be worth talking about why it is hard to quantify security.  Maybe mention that if this is not your area, you might think it could be quantified by the time to brute force, but there is more subtlety than that including what assumptions you make about the attacker's access. }
 
 \begin{itemize}
 
@@ -36,13 +42,14 @@ quantification of cipher security (see: \tblref{security-quant}).
  can output ciphertext non-deterministically given the same input, which is
  extremely useful for FDE\@. This is a binary feature in that a cipher either
  outputs deterministically or it does not. A cipher with output randomization
- scores a 1 for this feature while a cipher without it scores a 0.
+ scores a 1 for this feature while a cipher without it scores a 0. \TODO{So, how does AES-XTS get a 0.2?}
 
  \item \emph{Resistance to cryptanalysis.} A cipher that is resistant to
  cryptanalysis can resist theoretical cryptanalytical attacks such as
  known-plaintext and chosen-plaintext attacks, offline key-guessing attacks, et
  cetera. Scores for this feature range from 0 to 1, where 0.5 represents
  standard resistance to cryptanalysis for stream ciphers in the general case\@.
+ \TODO{Can we rename this feature?  I feel like "resistance to cryptanalysis" should be equivalent to the overall cipher strength just going by the meaning of the words.  Also, this bullet needs to be expanded more.  Are these attacks a strict hierarchy, like if you are resistant to offline key-guessing attacks are you resistant to everything below that?  Also, since this is a key point of the paper, we cannot just use et cetera, but we need to list all attacks we consider to arrive at this score. }
 
  \item \emph{Round count vs standard.} The ciphers we examine in this research
  are all constructed around the notion of \emph{rounds}, where a higher number
@@ -50,9 +57,11 @@ quantification of cipher security (see: \tblref{security-quant}).
  how many rounds the cipher executes compared to the accepted "standard" round
  count for that cipher. For instance, ChaCha8 is a reduced round version of the
  standard ChaCha20. Variants are distributed evenly from 0-1. For instance,
- ChaCha8 scores 0, ChaCha12 scores 0.5, and ChaCha20 scores 1\@.
+ ChaCha8 scores 0, ChaCha12 scores 0.5, and ChaCha20 scores 1\@. 
 
 \end{itemize}
+
+\TODO{It is very important that any reader who was sufficiently motivated could follow the above bullets and arrive at the same values you have in this table.  If that is not the case, then we don't have a quantifiable metric of security as much as a mapping of our own objective scores onto a number.  For example, Rabbit gets a CR of 0.4.  I am not sure how that number is derived, but we have to have a deterministic process so that everyone who applied it would arrive at the same number.  In general, I think this section just needs more detail.  The right level of detail is explain it so that anyone who read the section would derive the same numbers that you have in this table.}
 
 \begin{table}[]
    \begin{tabular}{@{}lllll@{}}
@@ -110,20 +119,20 @@ total energy used during the I/O operation.
 
 With prior work, \TODO{we could cite other filesystems and storage layers here
 other than just StrongBox, such as ZFS, dmcrypt?} cipher configuration is made
-statically at compile time or at filesystem initialization. This forces
+statically at compile time or at filesystem initialization. This static choice forces
 developers and end-users to choose a configuration that works best in the most
 general case and stick with it, even if a different configuration becomes more
 optimal at a later point. The only way to switch ciphers when a new
 configuration becomes more optimal is to recreate the entire underlying
 filesystem, which is rarely desirable. \TODO{This paragraph should be fleshed
-out more?}
+out more?} \TODO{Yes, please do flesh it out more.  Add the citations you suggested.  I think you should start with the good thing: different ciphers have a wide range of energy/latency vs security properties.  Then you can highlight the two key drawbacks (maybe even bullet-point them): (1) They don't actually form a continous tradeoff space, but represent discrete points, and what if you need to be in the middle? and (2) They are fixed by the time the system finishes booting (?) and if requirements change online the system requires a reboot.}
 
 \subsection{Dynamically Trading off Energy/Latency for Security}
 
 \begin{figure}[ht]
  \centering
   \includegraphics[width=0.8\linewidth]{drawn/1.png}
-   \caption{\TODO{Caption goes here}\TODO{Include pareto curve in this version??}}\label{fig:40mb-read-with-forward}
+   \caption{\TODO{Caption goes here}\TODO{Include pareto curve in this version??}\TODO{No pareto curve here.  I don't think we need a figure in this one.}}\label{fig:40mb-read-with-forward}
 \end{figure}
 
 But what if our system didn't have to sit at a static configuration point, even
@@ -140,13 +149,15 @@ points with shapes versus the other version of this chart (above) which shows
 none of this}
 
 % Or should this be a new section?
-Two examples motivating this mechanism follow.\\
+Two examples motivating this mechanism follow. The first illustrates the need for \emph{temporal} switching, where the desired security and energy tradeoffs change over time.  The second motivates \emph{spatial} switching where the desired tradeoff is different for different parts of the same file.  \\
+
 
 \noindent
 \textbf{Temporal switching: streaming video with a curtailed energy budget}
 
-\TODO{Are we stepping on the use case section with this?}
+\TODO{Are we stepping on the use case section with this?} \TODO{No, in fact it will be a nice symmetry: you pose these as problems at the beginning and then solve them at the end. }
 
+\TODO{I am surprised to see this works with reading a video.  If the video is stored with a high security, don't you have to decrypt it before you read and pay that high-cost (in energy) no matter what?  I had expected writing a new video where I could start with high-security and then switch to writing the second part with lower-security to save battery life.  The first (reading) is even better, but it is not clear to me how we can do that while still obeying the laws of physics---I hope I missed something, but if I did, it needs to be added to the description.}
 Suppose we were streaming a video stored our mobile device to a WiFi connected
 television or projector. We want to store video and other data on our device as
 securely as possible, so we chose to initialize the system at configuration
