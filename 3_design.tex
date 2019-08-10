@@ -150,7 +150,8 @@ cipher switching.
 
 \subsection{Pluggable Stream Cipher API}
 
-\TODO{Some paragraphs}
+We developed a stream cipher API to allow any stream cipher to be used with
+\SYSTEM{} without modification. 
 
 \subsection{Challenges}
 
@@ -177,7 +178,7 @@ open-source\footnote{\SystemURI}.
 For a fair comparison with the original StrongBox implementation, we mirror
 their use of the BUSE~\cite{BUSE} virtual block device as our device controller.
 BUSE is a thin (200 LoC) wrapper around the standard Linux Network Block Device
-(NBD). Buse allows an operating system to transact block I/O requests to and
+(NBD). BUSE allows an operating system to transact block I/O requests to and
 from virtual block devices exposed via domain socket.
 
 For the purposes of our implementation, we make the choice of ciphers binary:
@@ -191,9 +192,9 @@ ciphers from co-existing on the backing store.
 When \SYSTEM{} should be using the primary cipher or the secondary cipher to
 interact with the backing store, this intent is communicated via POSIX message
 queue in our implementation. It is not a requirement of \SYSTEM{} that a POSIX
-message queue be used over any other method of inter-process communication so
-long as \SYSTEM{} is notified asynchronously when the wider system desires one
-cipher be active over the other.
+message queue be used over any other method of inter-process communication (IPC)
+so long as \SYSTEM{} is notified asynchronously when the wider system desires
+one cipher be active over the other.
 
 \subsection{Discussion}
 
