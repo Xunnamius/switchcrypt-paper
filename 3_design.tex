@@ -168,12 +168,12 @@ consists of 6,077 lines of C code. All together, our solution is comprised of
 \SYSTEM{} uses OpenSSL version 1.1.0h and LibSodium version 1.0.12 for its
 AES-XTS and AES-CTR implementations. Open source ARM NEON optimized
 implementations of ChaCha are provided by Floodyberry~\cite{Floodyberry}. The
-Freestyle cipher implementation is from the original paper~\cite{Freestyle}. The
-eSTREAM Profile 1 cipher implementations are from the open source libestream
-cryptographic library~\cite{libestream} by Lucas Clemente Vella. As with the
-original StrongBox, the Merkle Tree implementation is from the Secure Block
-Device~\cite{SBD}. \SYSTEM{} implementation is publicly available
-open-source\footnote{\SystemURI}.
+Freestyle cipher reference implementation is from the original Freestyle
+paper~\cite{Freestyle}. The eSTREAM Profile 1 cipher implementations are from
+the open source libestream cryptographic library~\cite{libestream} by Lucas
+Clemente Vella. As with the original StrongBox construction, the Merkle Tree
+implementation is from the Secure Block Device~\cite{SBD}. \SYSTEM{}
+implementation is publicly available open-source\footnote{\SystemURI}.
 
 For a fair comparison with the original StrongBox implementation, we mirror
 their use of the BUSE~\cite{BUSE} virtual block device as our device controller.
