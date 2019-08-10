@@ -191,7 +191,9 @@ using a naively implemented forward switching strategy, every write operation
 will trigger a re-keying, which carries significant overhead.
 
 The solution is to divide forward switching into \emph{soft re-encryption} and
-\emph{hard re-encryption}.
+\emph{hard re-encryption}. Fortunately, the \SYSTEM{} design lends itself nicely
+to such a distinction for free, as per-nugget metadata is managed separately
+from a nugget's actual data.
 
 During soft re-encryption, only the nugget's metadata is changed to indicate
 that the nugget can be encrypted and decrypted with the newly active cipher but
@@ -211,6 +213,12 @@ multiple nuggets, and attempting to take advantage of spatial locality after
 interacting with every nugget is counterproductive. Hence, only the last nugget
 touched by a read or write operation will trigger the more aggressive N-forward
 behavior if $N > 0$.
+
+These considerations have the effect of 1) preserving the original StrongBox
+performance advantage over prior work and 2) allowing more aggressive N-forward
+behavior (where $N > 0$) to take advantage of spatial locality during read-heavy
+workloads to result in a further performance advantage (c.f.
+\secref{evaluation}).
 
 \subsection{Implementation}
 
@@ -240,7 +248,7 @@ cipher or the secondary cipher. However, there is no technical limitation
 preventing various different nuggets encrypted with three, four, or more unique
 ciphers from co-existing on the backing store.
 
-\subsubsection{Indicating a cipher switch should occur}
+\subsubsection{Indicating a Cipher Switch Should Occur}
 
 When \SYSTEM{} should be using the primary cipher or the secondary cipher to
 interact with the backing store, this intent is communicated via POSIX message
@@ -249,7 +257,7 @@ message queue be used over any other method of inter-process communication (IPC)
 so long as \SYSTEM{} is notified asynchronously when the wider system desires
 one cipher be active over the other.
 
-\subsubsection{Backing store initialization}
+\subsubsection{Backing Store Initialization}
 
 To operate securely, \SYSTEM{} must be seeded with random data initially rather
 than have the backing store consist of all zeroes. This is a one-time cost paid
@@ -261,4 +269,5 @@ predictable state of the backing store (\ie{initialized to all zeroes}) leads to
 an overwrite-style condition.
 
 %\subsection{Discussion}
-% Should this be saved for the evaluation section?
+% Should this be saved for the evaluation section? Should some of the other
+% parts of this section be broken off into a discussion subsection?
