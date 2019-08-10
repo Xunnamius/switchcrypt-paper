@@ -150,22 +150,19 @@ store will always be in a consistent state and share the same data. In this way,
 the mirrored strategy, like the selective strategy, represents a form of spatial
 cipher switching.
 
-% \subsection{Pluggable Stream Cipher API} Should we talk about Pluggable Stream
-% Cipher API in its own section, or just as a challenge?
-
-\subsection{Challenges}
-
-\TODO{Performance overhead paragraph}
-
-\TODO{Spatial overhead paragraph}
-
-\TODO{Pluggable Stream Cipher API}
+\subsection{Pluggable Stream Cipher API}
 
 We developed an API to allow any stream cipher or any cipher that can pose as a
 stream cipher to be used with \SYSTEM{} without modification, including ciphers
 with residual output, \eg{Freestyle}. \SYSTEM{} exposes a common encryption and
 decryption interface, including read and write handles, that allow \SYSTEM{} to
 transition nuggets between arbitrary ciphers at the behest of the wider system.
+
+\subsection{Challenges}
+
+\TODO{Performance overhead paragraph}
+
+\TODO{Spatial overhead paragraph}
 
 \subsection{Implementation}
 
