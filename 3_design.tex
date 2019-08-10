@@ -26,10 +26,11 @@ monotonic counter implementation, we used a \emph{Replay Protected Memory Block}
 
 These five components are tightly integrated into the cryptographic driver,
 which handles data encryption, decryption, overwrite detection, integrity
-protection, and the application of cipher switching strategies. The
-cryptographic driver interacts with 1) the overlying LFS through traditional I/O
-passed through the Linux Virtual Filesystem Switch (VFS) as well as 2) the
-underlying backing store through the device controller block I/O layer.
+protection, communication with the wider system to determine the active cipher,
+and the application of cipher switching strategies. The cryptographic driver
+interacts with 1) the overlying LFS through traditional I/O passed through the
+Linux Virtual Filesystem Switch (VFS) as well as 2) the underlying backing store
+through the device controller block I/O layer.
 
 \begin{figure}[t]
  \centering
@@ -54,14 +55,22 @@ details and a discussion of the overall implications and limitations of
 Upon initialization, prior work requires a single cipher to be selected. The
 specified cipher---ideally along the pareto frontier---is then used to encrypt
 and decrypt all data on the filesystem. With \SYSTEM{}, however, \emph{a pair of
-ciphers are selected along the pareto frontier} upon initialization depending on
-the concerns of the user. These ciphers are the static configuration points
-between which \SYSTEM{} navigates.
+ciphers are selected along the pareto frontier} upon initialization, depending
+on the concerns of the user. These ciphers are referred to as the \emph{primary
+cipher} and the \emph{secondary cipher} and represent the static configuration
+points along the pareto frontier between which \SYSTEM{} navigates.
 
-Switching ciphers dynamically allows \SYSTEM{} to achieve optimal configuration
-points that are otherwise unachievable with prior work. However, it is entirely
-non-trivial to determine \emph{when} to switch ciphers and \emph{where} to
-direct cipher output.
+The active cipher is used to interact with the backings tore. Initially, the
+primary cipher is the active cipher. Until the wider system indicates that
+\SYSTEM{} should use a different cipher to interact with the backing store,
+\SYSTEM{} functions identically to StrongBox in that it uses that single stream
+cipher to encrypt and decrypt all nuggets during I/O.
+
+However, switching the active cipher dynamically allows \SYSTEM{} to achieve
+optimal configuration points that are otherwise unachievable with prior work.
+However, it is entirely non-trivial to determine \emph{when} to re-encrypt a
+nugget with a different cipher and \emph{where} to direct the output of that
+cipher.
 
 Hence, cipher switching \emph{strategies} are the mechanism by which \SYSTEM{}
 can effectively transition nuggets between different encrypted states
@@ -99,15 +108,17 @@ encrypted in a specific form.
 
 Our \SYSTEM{} implementation consists of 9,491 lines of C code; our test suite
 consists of 6,077 lines of C code. All together, our solution is comprised of
-15,568 lines of C code. \SYSTEM{} uses OpenSSL version 1.1.0h and LibSodium
-version 1.0.12 for its AES-XTS and AES-CTR implementations. Open source ARM NEON
-optimized implementations of ChaCha are provided by
-Floodyberry~\cite{Floodyberry}. The Freestyle cipher implementation is from the
-original paper~\cite{Freestyle}. The eSTREAM Profile 1 cipher implementations
-are from the open source libestream cryptographic library~\cite{libestream} by
-Lucas Clemente Vella. As with the original StrongBox, the Merkle Tree
-implementation is from the Secure Block Device~\cite{SBD}. \SYSTEM{}
-implementation is publicly available open-source.\footnote{\SystemURI}.
+15,568 lines of C code.
+
+\SYSTEM{} uses OpenSSL version 1.1.0h and LibSodium version 1.0.12 for its
+AES-XTS and AES-CTR implementations. Open source ARM NEON optimized
+implementations of ChaCha are provided by Floodyberry~\cite{Floodyberry}. The
+Freestyle cipher implementation is from the original paper~\cite{Freestyle}. The
+eSTREAM Profile 1 cipher implementations are from the open source libestream
+cryptographic library~\cite{libestream} by Lucas Clemente Vella. As with the
+original StrongBox, the Merkle Tree implementation is from the Secure Block
+Device~\cite{SBD}. \SYSTEM{} implementation is publicly available
+open-source.\footnote{\SystemURI}.
 
 For a fair comparison with the original StrongBox implementation, we mirror
 their use of the BUSE~\cite{BUSE} virtual block device as our device controller.
@@ -123,15 +134,15 @@ ciphers from co-existing on the backing store.
 
 \subsubsection{Indicating a cipher switch should occur}
 
-When the system should be using one cipher over the other to interact with the
-backing store, this intent is communicated via POSIX message queue in our
-implementation. It is not a requirement of \SYSTEM{} that a POSIX message queue
-be used over any other method of inter-process communication so long as
-\SYSTEM{} is notified asynchronously when the wider system desires one cipher be
-active over the other.
+When \SYSTEM{} should be using the primary cipher or the secondary cipher to
+interact with the backing store, this intent is communicated via POSIX message
+queue in our implementation. It is not a requirement of \SYSTEM{} that a POSIX
+message queue be used over any other method of inter-process communication so
+long as \SYSTEM{} is notified asynchronously when the wider system desires one
+cipher be active over the other.
 
 \subsection{Discussion}
 
-
+\TODO{Limitations}.
 
 
