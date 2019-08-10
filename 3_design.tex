@@ -32,6 +32,9 @@ interacts with 1) the overlying LFS through traditional I/O passed through the
 Linux Virtual Filesystem Switch (VFS) as well as 2) the underlying backing store
 through the device controller block I/O layer.
 
+\SYSTEM{} uses IPC to receive commands to toggle the active cipher between the
+primary and secondary ciphers.
+
 \begin{figure}[t]
  \centering
   \includegraphics[width=\linewidth]{backstore.png}
