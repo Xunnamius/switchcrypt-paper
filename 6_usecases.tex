@@ -1,19 +1,78 @@
 \section{\SYSTEM{} Case Studies} \label{sec:usecases}
 
-\TODO{Use the better titles from the powerpoint/use case writeups from earlier}
+\subsection{Intra-file Variable Security Regions (VSR)}
 
-\subsection{Variable Security Regions (VSR)}
+Communicating classified materials, grand jury testimony, corporate secrets,
+etc. require the highest level of discretion when handled, yet sensitive
+information like this often appears within a (much) larger amount of data that
+we care less about in context.
 
-\TODO{Some paragraphs}
+In this scenario, a user wants to indicate one or more regions of a file are
+more sensitive than the others. For example, perhaps banking transaction
+information is littered throughout a document; perhaps passwords and other
+sensitive or compromising information exists within a much larger data file.
+This sensitive information would be encrypted using a less performant (sometimes
+dramatically so) cipher in exchange for a stronger security guarantee.
 
-\subsection{Constrained Energy Budget}
+The user will not experience a significant performance hit when perusing the
+data if the bulk of it is encrypted using a high performance cipher.
+Simultaneously, the more sensitive data regions are future-proofed and more
+resilient to attack using a high security cipher.
 
-\TODO{Some paragraphs}
+A "VSR" is a region of a file that is crypted with the alternative
+rather than the primary cipher that encrypts the remaining majority of the file.
 
-\subsection{SSD End-of-Life Offset}
+Benefit: we can "future-proof" our encrypted highly sensitive data against more
+powerful future attacks/less trustworthy ciphers while preserving the
+performance win from using a faster less secure cipher.
 
-\TODO{Some paragraphs}
+\subsection{Balancing Security Goals with a Constrained Energy Budget}
 
-\subsection{Custody Panic}
+When our mobile devices enter power saving mode, it is usually because the total
+energy/power budget for the device has become constrained for one reason or
+another.
 
-\TODO{Some paragraphs}
+When a device enters this mode, all software and components are configured by
+the OS to use as little of the available energy as possible. The filesystem
+should be made to behave in a manner that is energy-aware as well.
+
+Our goal is to use as little energy as possible (while reasonably preserving
+filesystem performance) until the energy budget changes or the device dies.
+
+Benefit: When constantly streaming data, e.g. using DLNA to stream a high
+resolution video wirelessly to a TV on the same network, the ability to adapt to
+time-varying data rates and QoS requirements while maintaining confidentiality
+and integrity guarantees is paramount. This can be done by trading off a set of
+security guarantees with respect to the energy spent crypting each bit. With
+cipher switching, the filesystem can react dynamically to the system's total
+energy budget while still aiming for the most performant (least latency)
+configuration.
+
+\subsection{Responding to End-of-Life Slowdown in Solid State Drives}
+
+Due to garbage collection and the append-mostly nature of SSDs and other NAND
+devices, as free space becomes constrained, performance drops off a cliff. This
+is a well-studied issue (see related work).
+
+If the filesystem is made aware when the backing store is in such a state, we
+can offset some of the (drastic) performance loss by swapping the ciphers of hot
+nuggets to the fastest cipher available until the disk space problem is
+remedied, after which the system can detect return the swapped nuggets to their
+former encrypted state.
+
+Benefit: we can mitigate the performance loss of a slowing SSD by using a faster
+but less secure cipher.
+
+\subsection{Custody Panic: Securing Device Data Under Duress}
+
+Nation-state and other adversaries have truly extensive compute resources at
+their disposal, as well as knowledge of side-channels and access to technology
+like q-bit computers.
+
+Suppose one were attempting to re-enter a country through a border checkpoint
+after visiting family when one is stopped. Your mobile device is confiscated and
+placed in custody of the State. In such a scenario, it would be useful if the
+device could swap itself into a more secure state as quickly as possible.
+
+Benefit: greater security guarantee achieved using the highest security
+encryption available versus powerful adversaries with unknown means and motive.
