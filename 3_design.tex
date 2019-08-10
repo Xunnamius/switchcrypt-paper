@@ -47,11 +47,10 @@ backing store from StrongBox, or should we link to the original paper? Or should
 we skip talking about the backing store at all and just briefly describe nuggets
 here? It's not very different from StrongBox's. An extra header was added.}
 
-In the rest of this section, we describe our cipher switching strategies,
-pluggable stream cipher API, and related design challenges with these
-components. This is followed by an explanation of implementation-specific
-details and a discussion of the overall implications and limitations of
-\SYSTEM{}'s design.
+In the rest of this section, we describe our cipher switching strategies. We
+also discuss the pluggable stream cipher API and other design challenges. This
+is followed by an explanation of implementation-specific details and a
+discussion of the overall implications and limitations of \SYSTEM{}'s design.
 
 \subsection{Cipher Switching Strategies}
 
@@ -80,8 +79,8 @@ cipher.
 Hence, cipher switching \emph{strategies} are the mechanism by which \SYSTEM{}
 can effectively transition nuggets between different encrypted states
 dynamically, thus providing a mechanism to navigate the tradeoff space presented
-in
-\figref{fig:40mb-read-with-forward}. \TODO{Expound on this all more? Reword? Delete?}
+in \figref{40mb-read-with-forward}. \TODO{Expound on this all more? Reword?
+Delete? Different chart referenced here instead?}
 
 \subsubsection{Forward}
 
@@ -145,22 +144,28 @@ the second partition are encrypted with the secondary cipher.
 
 However, unlike the selective strategy, all write operations that hit one
 partition are mirrored into the other partition immediately. The mirrored
-strategy merely allows the wider system to indicate where on the backing store a
+strategy allows the wider system to indicate where on the backing store a
 \emph{read} operation should occur. As a result, both regions of the backing
 store will always be in a consistent state and share the same data. In this way,
 the mirrored strategy, like the selective strategy, represents a form of spatial
 cipher switching.
 
-\subsection{Pluggable Stream Cipher API}
-
-We developed a stream cipher API to allow any stream cipher to be used with
-\SYSTEM{} without modification. 
+% \subsection{Pluggable Stream Cipher API} Should we talk about Pluggable Stream
+% Cipher API in its own section, or just as a challenge?
 
 \subsection{Challenges}
 
 \TODO{Performance overhead paragraph}
 
 \TODO{Spatial overhead paragraph}
+
+\TODO{Pluggable Stream Cipher API}
+
+We developed an API to allow any stream cipher or any cipher that can pose as a
+stream cipher to be used with \SYSTEM{} without modification, including ciphers
+with residual output, \eg{Freestyle}. \SYSTEM{} exposes a common encryption and
+decryption interface, including read and write handles, that allow \SYSTEM{} to
+transition nuggets between arbitrary ciphers at the behest of the wider system.
 
 \subsection{Implementation}
 
