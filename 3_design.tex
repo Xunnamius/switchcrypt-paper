@@ -72,8 +72,10 @@ in
 \subsubsection{Forward}
 
 The forward switching strategy allows each individual nugget to exist encrypted
-using one cipher or the other. When the system determines that a nugget should
-transition from one cipher to the other.
+using one cipher or the other. Other parts of the operating system can indicate
+which cipher \SYSTEM{} should be using to interact with the backing store at any
+time. When \SYSTEM{} receives the signal it is determined that the system should be interacting with nuggets
+encrypted in a specific form.
 
 \subsubsection{Selective}
 
@@ -93,7 +95,7 @@ transition from one cipher to the other.
 
 \TODO{Spatial overhead paragraph}
 
-\subsection{Implementation}\label{sec:implementation}
+\subsection{Implementation}
 
 Our \SYSTEM{} implementation consists of 9,491 lines of C code; our test suite
 consists of 6,077 lines of C code. All together, our solution is comprised of
@@ -109,10 +111,23 @@ BUSE is a thin (200 LoC) wrapper around the standard Linux Network Block Device
 (NBD). Buse allows an operating system to transact block I/O requests to and
 from virtual block devices exposed via domain socket.
 
-In the purposes of our implementation, we limit cipher switching to pairs of
-ciphers. However, there is no reason nuggets encrypted with three, four, or more
-ciphers could not exist in harmony on the same backing store.
+For the purposes of our implementation, we make the choice of ciphers binary:
+either the system wants \SYSTEM{} to access the backing store using the primary
+cipher or the secondary cipher. However, there is no technical limitation
+preventing various different nuggets encrypted with three, four, or more unique
+ciphers from co-existing on the backing store.
+
+\subsubsection{Indicating a cipher switch should occur}
+
+When the system should be using one cipher over the other to interact with the
+backing store, this intent is communicated via POSIX message queue in our
+implementation. It is not a requirement of \SYSTEM{} that a POSIX message queue
+be used over any other method of inter-process communication so long as
+\SYSTEM{} is notified asynchronously when the wider system desires one cipher be
+active over the other.
 
 \subsection{Discussion}
 
-\TODO{Limitations.}
+
+
+
