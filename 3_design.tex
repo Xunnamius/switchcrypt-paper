@@ -42,10 +42,17 @@ primary and secondary ciphers.
 \end{figure}
 
 The backing store is the storage medium \SYSTEM{} operates on. The layout of the
-backing store is illustrated with \figref{backstore}. \TODO{Do we redescribe the
-backing store from StrongBox, or should we link to the original paper? Or should
-we skip talking about the backing store at all and just briefly describe nuggets
-here? It's not very different from StrongBox's. An extra header was added.}
+backing store is illustrated in \figref{backstore}. In the \textit{body} section
+of the backing store layout, end-user data is partitioned into a series of
+same-size \emph{logical blocks}---which are distinct from the concept of
+\emph{physical drive blocks}---we refer to these wider logical blocks as
+\emph{nuggets}, marked \textit{NUG}. Hence, a nugget consists of one or more
+physical drive blocks along with per-nugget metadata indicating if the nugget
+was encrypted with the primary or the secondary cipher. \TODO{Do we redescribe
+the rest of the backing store from StrongBox, or should we link to the original
+paper? Or should we skip talking about the backing store at all and more briefly
+describe nuggets here? It's all not very different from StrongBox's, i.e. an
+extra header was added.}
 
 In the rest of this section, we describe our cipher switching strategies. We
 also discuss the pluggable stream cipher API and other design challenges. This
@@ -112,7 +119,7 @@ The forward strategy can also take the form of \emph{N-forward}, where \SYSTEM{}
 attempts to take advantage of spatial sequential locality to transition whole
 sets of nuggets into the active cipher. We can trivially expand the forward
 strategy to encompass the entire backing store by selecting N equal to the total
-number of nuggets managed by \SYSTEM{}. This would have the effect of
+number of nuggets managed by \SYSTEM{}. This would have the overhead of
 re-encrypting large swaths of the backing store upon every I/O operation where a
 nugget encrypted with the non-active cipher is encountered. Of course, this has
 the same effect as simply re-initializing the entire filesystem with the new
@@ -154,15 +161,56 @@ cipher switching.
 
 We developed an API to allow any stream cipher or any cipher that can pose as a
 stream cipher to be used with \SYSTEM{} without modification, including ciphers
-with residual output, \eg{Freestyle}. \SYSTEM{} exposes a common encryption and
-decryption interface, including read and write handles, that allow \SYSTEM{} to
-transition nuggets between arbitrary ciphers at the behest of the wider system.
+with residual output, \eg{Freestyle}. This output is considered \emph{per-nugget
+metadata} as part of the pluggable stream cipher API and is committed by
+\SYSTEM{} along with other metadata indicating which cipher the current nugget
+was encrypted with.
 
-\subsection{Challenges}
+\SYSTEM{} exposes a common encryption and decryption interface, including read
+and write handles, that allow \SYSTEM{} to transition nuggets between arbitrary
+ciphers at the behest of the wider system.
 
-\TODO{Performance overhead paragraph}
+\subsection{Challenge: beware naive forward switching}
 
-\TODO{Spatial overhead paragraph}
+It is tempting to implement forward switching such that a nugget is re-encrypted
+during I/O if its metadata indicates that it was previously encrypted using the
+non-active cipher. However, such a naive implementation can have disastrous
+effects on performance depending on the workload.
+
+First, a nugget is considered "pristine" if it has not has any data written into
+it yet. \SYSTEM{} determines if a nugget is pristine by checking the state of
+the transaction journal for that nugget. A pristine nugget will have a clean
+transaction journal.
+
+All nuggets start out as pristine. All nuggets start out with metadata
+indicating that they're to be encrypted and decrypted by the primary cipher
+(which is the initially active cipher when \SYSTEM{} is first initialized). This
+is true \emph{even if the nugget has not been written to yet}. This means, on
+read and write operations after the secondary cipher becomes the active cipher
+using a naively implemented forward switching strategy, every write operation
+will trigger a re-keying, which carries significant overhead.
+
+The solution is to divide forward switching into \emph{soft re-encryption} and
+\emph{hard re-encryption}.
+
+During soft re-encryption, only the nugget's metadata is changed to indicate
+that the nugget can be encrypted and decrypted with the newly active cipher but
+\emph{without actually re-encrypting the nugget data itself}. This keeps the
+nugget in a "pristine" condition, preserving \SYSTEM{}'s ability to write data
+into it without triggering a costly rekeying operation every time, preserving
+the original StrongBox's performance advantage. At the same time, \SYSTEM{} can
+now use the newly active cipher to interact with the nugget as expected.
+
+On the other hand, during hard re-encryption, the nugget's metadata is changed
+to match the active cipher \emph{and} the nugget data is re-encrypted using the
+new cipher. When using forward switching other that 0-forward, \ie{N-forward}
+where $N > 0$, only read operations are allowed to trigger hard re-encryption
+for nuggets other than the currently active nugget. This is still not enough to
+preserve StrongBox's performance advantage, however, as I/O operations can span
+multiple nuggets, and attempting to take advantage of spatial locality after
+interacting with every nugget is counterproductive. Hence, only the last nugget
+touched by a read or write operation will trigger the more aggressive N-forward
+behavior if $N > 0$.
 
 \subsection{Implementation}
 
@@ -200,6 +248,17 @@ queue in our implementation. It is not a requirement of \SYSTEM{} that a POSIX
 message queue be used over any other method of inter-process communication (IPC)
 so long as \SYSTEM{} is notified asynchronously when the wider system desires
 one cipher be active over the other.
+
+\subsubsection{Backing store initialization}
+
+To operate securely, \SYSTEM{} must be seeded with random data initially rather
+than have the backing store consist of all zeroes. This is a one-time cost paid
+during initialization and has no tangible effect on performance.
+
+If nuggets are not seeded with random data initially, any write operation into
+an "empty" nugget might leak information or constitute an overwrite where the
+predictable state of the backing store (\ie{initialized to all zeroes}) leads to
+an overwrite-style condition.
 
 %\subsection{Discussion}
 % Should this be saved for the evaluation section?
