@@ -39,11 +39,18 @@ In this section we answer the following questions:
    \caption{\TODO{Caption goes here}}\label{fig:navigating-the-space}
 \end{figure}
 
-\figref{navigating-the-space} shows the performance of \SYSTEM{} using the
-0-forward switching strategy. We focus on three ciphers: ChaCha8, ChaCha20, and
-Freestyle in its "fast" configuration. \TODO{Should there be a "ciphers" section
-somewhere that describes all the various ciphers and cipher configurations?
-Would that go in the design section?}
+\figref{navigating-the-space} shows the 40MB read performance of three ciphers:
+ChaCha8, ChaCha20, and Freestyle in its "fast" configuration. This illustrates
+the tradeoff space between latency/energy and security for these three static
+discrete pareto optimal configurations attainable via prior work. On the other
+hand, \figref{navigating-the-space} illustrates the flexibility of \SYSTEM{}
+using the 0-forward switching strategy compared to prior work. additionally
+shows the 40MB read performance of \SYSTEM{} 
+
+\TODO{Should there be a "ciphers" section somewhere that describes all the
+various ciphers and cipher configurations? Would that best go in the design
+section?}
+
 
 \begin{figure}[ht]
  \centering
