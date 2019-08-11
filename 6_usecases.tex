@@ -1,5 +1,7 @@
 \section{\SYSTEM{} Case Studies} \label{sec:usecases}
 
+\TODO{At a high-level, all of these are good, but the devil is always in the details. I think it is important to get them as fully fleshed-out as possible as soon as possible.  I really want to see the real data and see the discussion about what happens if a user was forced to reconfigure.  If you already have the data and just haven't added the real charts yet, you could also spend some time just writing the text that will go with them. }
+
 \subsection{Intra-file Variable Security Regions (VSR)}
 
 Communicating classified materials, grand jury testimony, corporate secrets,
@@ -53,6 +55,7 @@ security guarantees with respect to the energy spent crypting each bit. With
 cipher switching, the filesystem can react dynamically to the system's total
 energy budget while still aiming for the most performant (least latency)
 configuration.
+\TODO{See my earlier comment (in email or some other TODO) about reading vs. writing.  It seems fairly clear to me that you can make this work for writes, but I don't see hwo this works for reads. If the video is stored in a strong cipher, don't you have to decrypt it at that strength?  Where does the energy win come from on reads?}
 
 \begin{figure}[ht]
  \centering
@@ -94,3 +97,5 @@ device could swap itself into a more secure state as quickly as possible.
 
 Benefit: greater security guarantee achieved using the highest security
 encryption available versus powerful adversaries with unknown means and motive.
+
+\TODO{Dumb question: this scenario assumes you are worried about the data, but can't wipe the drive, right?  Is that a plausible scenario? }
