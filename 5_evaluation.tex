@@ -1,5 +1,6 @@
 \section{Evaluation}\label{sec:evaluation}
 
+
 \subsection{Experimental Setup}
 
 We implement \SYSTEM{} on a Hardkernel Odroid XU3 ARM big.LITTLE system with
@@ -7,21 +8,33 @@ Samsung Exynos 5422 A15/A7 heterogeneous multi-processing quad core CPUs at
 maximum clock speed, 2 gigabyte LPDDR3 RAM at 933 MHz, and an eMMC5.0 HS400
 backing store running Ubuntu Trusty 14.04.6 LTS, kernel version 3.10.106.
 
-The maximum theoretical memory bandwidth for this model is 14.9GB/s\@. Our
-observed maximum memory bandwidth is 4.5GB/s.
+The maximum theoretical memory bandwidth for this model is 14.9GB/s\@.
+Our observed maximum memory bandwidth is 4.5GB/s. \TODO{I think you
+  need to sy that you are using a ram drive, right? Probably before
+  you mention the memory bandwidth.  Also, this setup section needs to
+  describe all of the different workloads you use and why; i.e., what
+  they are representative of.}
 
 \subsection{Experimental Methodology}
-
 In this section we answer the following questions:
-
 \begin{enumerate}
- \item Can \SYSTEM{} reach dynamic configuration points in the tradeoff space?
+ \item Does incorporation of cipher-switching change the threat analysis? 
+ \item Can \SYSTEM{} reach security/energy tradeoffs that are not reachable with prior work?
+ \item What switching strategy works best in which scenario? For which workload?
  \item What is the performance overhead of each cipher switching strategy?
  \item What is the storage overhead of each cipher switching strategy?
- \item What switching strategy works best in which scenario? For which workload?
 \end{enumerate}
 
+\TODO{ Each of these quetions should become a subsection (although you
+  might just have a single overhead subsection, rather than two. Also,
+  I really want a security analysis section in the evaluation, and I
+  added a first question to cover that.  I think you can basically reuse the table from the strongbox paper, but have a different column for forward, selective, and mirrored. }
+
+\TODO{As I read through what is in here now, I also realize there needs to be some discussion of the different sizes and how they relate.  I would prefer one exhaustive set of charts and then something that says these trends are similar across workloads, so from now on we just focus on 40MB or something. Or if there is a really significant difference for different workloads, then we will have to show different sizes and you will need to justify that choice.}
+
 \TODO{(see LaTeX source for some hidden charts here)}
+
+\TODO{This section still needs a lot of work.  Right now, even the outline of the section is unclear.  I expect a subsection for each of the questions above.  Then for each subsection, there should be a description of exactly how the experiments were setup to answer this question, a description of the chart (what are the axes, what are the points/lines/bars), a textual description of the results in the chart, and then the conclusion we can draw regarding the question for that subsection.  }
 
 \PUNT{\begin{figure}[ht]
  \centering
@@ -52,7 +65,7 @@ tradeoff space that are unachievable via prior work.
 
 \TODO{Should there be a "ciphers" section somewhere that describes all the
 various ciphers and cipher configurations? Would that best go in the design
-section? Or perhaps here in the evaluation?}
+section? Or perhaps here in the evaluation?} \TODO{It should probably be in methodology or setup.  You can save some space by mentioning them all in the motivation section and then referring back to that list here.  It is also a little surprising that only three end up being pareto-optimal, so that is worth a sentence or two of discussion.}
 
 \begin{figure}[ht]
  \centering
