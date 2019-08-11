@@ -17,11 +17,13 @@ In this section we answer the following questions:
 \begin{enumerate}
  \item Can \SYSTEM{} reach dynamic configuration points in the tradeoff space?
  \item What is the performance overhead of each cipher switching strategy?
- \item What is the metadata overhead of each cipher switching strategy?
+ \item What is the storage overhead of each cipher switching strategy?
  \item What switching strategy works best in which scenario? For which workload?
 \end{enumerate}
 
-\begin{figure}[ht]
+\TODO{(see LaTeX source for some hidden charts here)}
+
+\PUNT{\begin{figure}[ht]
  \centering
   \includegraphics[width=\linewidth]{drawn/2.png}
    \caption{\TODO{Caption goes here}\TODO{Necessary chart? Or should we punt it to the dissertation and simply explain somewhere that the curves are congruent with the original?}}\label{fig:40mb-vs-1kb-read}
@@ -31,7 +33,7 @@ In this section we answer the following questions:
  \centering
   \includegraphics[width=\linewidth]{drawn/3.png}
    \caption{\TODO{Caption goes here}\TODO{Necessary chart? Or should we punt it to the dissertation and we simply explain somewhere that the curves are congruent with the original?}}\label{fig:40mb-read-vs-write}
-\end{figure}
+\end{figure}}
 
 \begin{figure}[ht]
  \centering
@@ -58,4 +60,40 @@ section? Or perhaps here in the evaluation?}
    \caption{\TODO{Caption goes here}}\label{fig:strategy-vs-strategy}
 \end{figure}
 
+\figref{strategy-vs-strategy} show the the performance of forward, mirrored, and
+selective strategies against two 40MB read and write workloads: Freerun and
+WORM. \TODO{Explain these two workloads.} Additionally, the time required to
+transition the entire backing store from one cipher to the other is included
+\TODO{This is "time to cipher switch" or TTCS, but this is renamed in the actual
+figure.}
 
+1-forward and 2-forward have overhead that makes them slower than forward 0 for
+sequential and random freerun. However, WORM workload shows 1-forward
+outperforming 0-forward by \TODO{include percentage (it's small)}. This is
+because WORM workload characteristics allow benefits of more aggressive forward
+switching to be realized \TODO{Elaborate}.
+
+The mirrored and selective switching strategies achieve read parity with the
+static cipher configurations, hence their performance. However, mirrored stacks
+write latency of both ciphers in the pair because writes are mirrored across
+both partitions. On the other hand, selective switching achieves write parity
+with the static configuration. Mirrored and selective are not preferable to
+forward in all circumstances because drive space is traded off; in our
+experiments, half the drive is lost to partitioning.
+
+\TODO{Word these paragraphs better. Include numbers from chart to be more
+specific.}
+
+Selective is usually preferable to mirrored due to mirrored strategy's egregious
+write overhead. However, forward and selective take a comparatively long time to
+transition the entire backing store from one cipher to the other while mirrored
+can achieve this virtually instantaneously. If it is not desirable to maintain
+both encrypted versions of data on the backing store, one partition or the other
+can be TRIM-ed and the data deleted relatively quickly. On the other hand, when
+using the selective strategy, it is not possible to transition the backing store
+entirely to one cipher or another (hence no bar for TTCS). For the forward
+strategy, it takes a long time. \TODO{Specific numbers from chart need to go in
+here.}
+
+\TODO{Perhaps explain a bit more about when one cipher is preferable to another?
+Or do the previous paragraphs hit on this enough already?}
