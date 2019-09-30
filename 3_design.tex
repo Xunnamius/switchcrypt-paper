@@ -22,7 +22,7 @@ this paper.}
 
 \SYSTEM{}, like StrongBox and Adiantum, is a translation layer positioned
 between the block layer and the operating system's virtual file
-system~\cite{StrongBox}. There are several places \SYSTEM{} could be implemented
+system~\cite{StrongBox,Adiantum}. There are several places \SYSTEM{} could be implemented
 in the system stack: as part of an actual kernel Log-structured File System
 (LFS) module like the F2FS filesystem, as a block device or virtual block device
 in the manner of dm-crypt, or within a device controller such as an SSD drive
@@ -316,7 +316,7 @@ so long as \SYSTEM{} is notified asynchronously when the wider system desires
 one cipher be active over the other. \TODO{I am not sure why this section is
 here.  It is either too much detail, or more likely there is some important
 issue, but whatever that is needs to be stated much more explicitly.  Like maybe
-the problem is that the use needs to actually communicate with the \SYSTEM{}
+the problem is that the user needs to actually communicate with the \SYSTEM{}
 implementation and we need a mechanism to do that?  Anyway, assuming you expand
 this a little so it is clear what problem is being addressed, then you can just
 make this another paragraph in implementation instead of splitting it out into a
