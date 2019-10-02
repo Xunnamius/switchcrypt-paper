@@ -39,9 +39,9 @@ And ChaCha20 is not the only stream cipher we can choose for FDE. Other stream
 ciphers exist with a variety of different performance characteristics and
 opposing security properties. Some of these include: ChaCha variants with
 different round counts (e.g., ChaCha8 \cite{ChaCha8} and ChaCha20
-\cite{ChaCha20}), SalsaX~\cite{SalsaX}, AES in counter mode
-(AES-CTR)~\cite{AES-CTR}, Rabbit~\cite{Rabbit}, Sosemanuk~\cite{Sosemanuk},
-Freestyle~\cite{Freestyle}, et cetera.
+\cite{ChaCha20}) or special modes (e.g., Freestyle~\cite{Freestyle}),
+SalsaX~\cite{SalsaX}, AES in counter mode (AES-CTR)~\cite{AES-CTR},
+Rabbit~\cite{Rabbit}, Sosemanuk~\cite{Sosemanuk},, et cetera.
 
 In this way, the choice of (stream) cipher can be viewed as a key
 \emph{configuration} parameter for systems supporting FDE; \ie{the configuration
@@ -56,10 +56,15 @@ saver'' functionality.
 
 Hence, any static configuration will inevitably sacrifice one concern for
 another, even when it is not optimal. But what if our system did not have to sit
+<<<<<<< HEAD
 at a static configuration point, especially when another configuration becomes more
 desirable later on?
+=======
+at a static configuration point, even when another configuration became more
+optimal later on?
+>>>>>>> 80b9ac468e976f6d6e29137f26d7393900ada0f4
 
-\subsubsection{Our Contributions}
+\subsection{Our Contributions}
 
 We introduce a simple scheme to quantify the security ``strength'' of
 arbitrary stream ciphers based on a subset of properties relevant to

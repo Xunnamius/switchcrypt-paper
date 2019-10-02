@@ -3,7 +3,7 @@
 
 \subsection{Experimental Setup}
 
-We implement \SYSTEM{} on a Hardkernel Odroid XU3 ARM big.LITTLE system with
+We implement SwitchBox on a Hardkernel Odroid XU3 ARM big.LITTLE system with
 Samsung Exynos 5422 A15/A7 heterogeneous multi-processing quad core CPUs at
 maximum clock speed, 2 gigabyte LPDDR3 RAM at 933 MHz, and an eMMC5.0 HS400
 backing store running Ubuntu Trusty 14.04.6 LTS, kernel version 3.10.106.
@@ -19,7 +19,7 @@ Our observed maximum memory bandwidth is 4.5GB/s. \TODO{I think you
 In this section we answer the following questions:
 \begin{enumerate}
  \item Does incorporation of cipher-switching change the threat analysis? 
- \item Can \SYSTEM{} reach security/energy tradeoffs that are not reachable with prior work?
+ \item Can SwitchBox reach security/energy tradeoffs that are not reachable with prior work?
  \item What switching strategy works best in which scenario? For which workload?
  \item What is the performance overhead of each cipher switching strategy?
  \item What is the storage overhead of each cipher switching strategy?
@@ -59,7 +59,7 @@ ChaCha8, ChaCha20, and Freestyle in its "fast" configuration. This illustrates
 the tradeoff space between latency/energy and security for these three static
 discrete pareto optimal configurations achievable offline via prior work.
 \figref{navigating-the-space} additionally illustrates the flexibility of
-\SYSTEM{} using the 0-forward switching strategy to reach pareto optimal dynamic
+SwitchBox using the 0-forward switching strategy to reach pareto optimal dynamic
 configuration points \emph{between} traditional static configuration in the
 tradeoff space that are unachievable via prior work.
 

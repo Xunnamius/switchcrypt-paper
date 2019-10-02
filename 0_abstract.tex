@@ -11,14 +11,14 @@ with other key concerns like the strength of the encryption and energy usage.
 
 In this paper, we show that drive management requires navigating a tradeoff
 space between energy, security, and performance. We further characterize this
-space and present \SYSTEM{}, a software mechanism to navigate such a space
+space and present SwitchBox, a software mechanism to navigate such a space
 dynamically and at runtime via \emph{cipher switching}, which can be done in
 space or time. The key insight in this approach is achieving low-overhead
 switching by leveraging the overwrite-averse, append-mostly behavior of the
 underlying solid-state storage to trade throughput or total energy use for
-desired security guarantees. We implement \SYSTEM{} on an ARM big.LITTLE mobile
+desired security guarantees. We implement SwitchBox on an ARM big.LITTLE mobile
 processor and test its performance under the popular F2FS LFS. We find that
-\SYSTEM{}'s flexibility satisfies a wide range of performance and security
+SwitchBox's flexibility satisfies a wide range of performance and security
 constraints. \TODO{Perhaps a sentence-long general explanation of the use cases
 and the most interesting result(s) from them?}
 
