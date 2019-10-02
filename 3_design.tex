@@ -1,10 +1,10 @@
+\section{SwitchBox Design}\label{sec:design}
+
 \begin{figure}[t]
  \centering
   \includegraphics[width=\linewidth]{overview.png}
-   \caption{Overview of the \SYSTEM{} construction.}\label{fig:overview}
+   \caption{Overview of the SwitchBox construction.}\label{fig:overview}
 \end{figure}
-
-\section{\SYSTEM{} Design}\label{sec:design}
 
 \subsection{Quantifying the Security Dimension}
 
@@ -231,15 +231,15 @@ to talk about what is coming in the section.  This second thing should relate to
 the first, as we should spend most of the time talking about what is new for
 this paper.}
 
-\SYSTEM{}, like StrongBox and Adiantum, is a translation layer positioned
+SwitchBox, like StrongBox and Adiantum, is a translation layer positioned
 between the block layer and the operating system's virtual file
-system~\cite{StrongBox}. There are several places \SYSTEM{} could be implemented
+system~\cite{StrongBox}. There are several places SwitchBox could be implemented
 in the system stack: as part of an actual kernel Log-structured File System
 (LFS) module like the F2FS filesystem, as a block device or virtual block device
 in the manner of dm-crypt, or within a device controller such as an SSD drive
 controller's FTL~\cite{StrongBox}.
 
-\figref{overview} illustrates the \SYSTEM{} design. \SYSTEM{} manages five
+\figref{overview} illustrates the SwitchBox design. SwitchBox manages five
 metadata components: an in-memory \emph{Merkle Tree}; two drive-backed byte
 arrays, \ie{the \emph{Keycount Store} and the \emph{Transaction Journal}}; a
 globally persistent cryptographically secure monotonic counter; and a flexible
@@ -259,17 +259,17 @@ interacts with 1) the overlying LFS through traditional I/O passed through the
 Linux Virtual Filesystem Switch (VFS) as well as 2) the underlying backing store
 through the device controller block I/O layer.
 
-\SYSTEM{} uses IPC to receive commands to toggle the active cipher between the
+SwitchBox uses IPC to receive commands to toggle the active cipher between the
 primary and secondary ciphers. \TODO{Spell out the acronym the first time it is
 used.}
 
 \begin{figure}[t]
  \centering
   \includegraphics[width=\linewidth]{backstore.png}
-   \caption{Layout of \SYSTEM{}'s backing storage.}\label{fig:backstore2}
+   \caption{Layout of SwitchBox's backing storage.}\label{fig:backstore2}
 \end{figure}
 
-The backing store is the storage medium \SYSTEM{} operates on. The layout of the
+The backing store is the storage medium SwitchBox operates on. The layout of the
 backing store is illustrated in \figref{backstore2}. In the \textit{body} section
 of the backing store layout, end-user data is partitioned into a series of
 same-size \emph{logical blocks}---which are distinct from the concept of
@@ -285,18 +285,18 @@ extra header was added.}
 In the rest of this section, we describe our cipher switching strategies. We
 also discuss the pluggable stream cipher API and other design challenges. This
 is followed by an explanation of implementation-specific details and a
-discussion of the overall implications and limitations of \SYSTEM{}'s design.
+discussion of the overall implications and limitations of SwitchBox's design.
 
 \subsection{Cipher Switching Strategies}
 
 Upon initialization, prior work requires a single cipher to be selected. The
 specified cipher---ideally along the pareto frontier of security and energy
 tradeoffs---is then used to encrypt and decrypt all data on the filesystem. With
-\SYSTEM{}, however, \emph{a pair of ciphers are selected} upon initialization,
+SwitchBox, however, \emph{a pair of ciphers are selected} upon initialization,
 depending on the concerns of the end-user. These ciphers are referred to as the
 \emph{primary cipher} and the \emph{secondary cipher} respectively, and
 represent the static configuration points along the pareto frontier between
-which \SYSTEM{} can navigate. \TODO{Do you really have to know these ahead of
+which SwitchBox can navigate. \TODO{Do you really have to know these ahead of
 time? If I had a cipher API and managed the implementation as a DLL, could I
 switch to any cipher, by just building a new DLL? Is there any reason, you
 couldn't have three or four or N ciphers and switch between all of them?  I ask
@@ -307,14 +307,14 @@ discuss the conceptual ideas and save details for the implementation.}
 
 At any moment, the currently active cipher is used to interact with the backing
 store. Initially, the primary cipher is the active cipher. Until the wider
-system indicates that \SYSTEM{} should use a different cipher to interact with
-the backing store, \SYSTEM{} functions identically to StrongBox in that it uses
+system indicates that SwitchBox should use a different cipher to interact with
+the backing store, SwitchBox functions identically to StrongBox in that it uses
 the primary cipher to encrypt and decrypt all nuggets during I/O.
 
-However, switching the active cipher dynamically allows \SYSTEM{} to achieve
+However, switching the active cipher dynamically allows SwitchBox to achieve
 optimal configuration points that are otherwise unachievable with prior work.
 The wider system determines if the primary or secondary cipher should be the
-active cipher at any given moment, and \SYSTEM{} responds immediately.
+active cipher at any given moment, and SwitchBox responds immediately.
 Unfortunately, it is entirely non-trivial to determine \emph{when} to re-encrypt
 a nugget with a different cipher and \emph{where} to direct the output of that
 cipher. \TODO{Don't just say it is difficult, make an argument about why it is
@@ -325,7 +325,7 @@ immediately convert the entire drive, but the cost of doing that conversion
 might consume more energy than would be saved in future accesses.  I do like
 using where and when to set up spatial and temporal switching.  }
 
-Hence, cipher switching \emph{strategies} are the mechanism by which \SYSTEM{}
+Hence, cipher switching \emph{strategies} are the mechanism by which SwitchBox
 can effectively transition nuggets between different encrypted states
 dynamically, thus providing a mechanism to navigate the tradeoff space presented
 in \figref{40mb-read-with-forward}. \TODO{Expound on this all more? Reword?
@@ -336,7 +336,7 @@ spatial switching and we propose two strategies to deal with that.}
 
 \subsubsection{Forward}
 
-\SYSTEM{} allows each individual nugget to exist encrypted using one cipher or
+SwitchBox allows each individual nugget to exist encrypted using one cipher or
 the other regardless of the currently active cipher. When a nugget is
 encountered during I/O that is encrypted using a cipher other than the active
 cipher, however, the forward strategy dictates that this nugget be re-encrypted
@@ -354,17 +354,17 @@ re-encryption, after which the nugget is accessed normally during I/O until the
 active cipher is switched again.
 
 There are several forms the forward strategy can take. The default and most
-intuitive is \emph{0-forward}, in which \SYSTEM{} immediately transitions
+intuitive is \emph{0-forward}, in which SwitchBox immediately transitions
 individual nuggets encountered during I/O to the active cipher is they are not
 using it. Over time, if various I/O operations end up touching every nugget in
 the backing store, the encrypted state of every nugget will eventually become
 consistent with the currently active cipher.
 
-The forward strategy can also take the form of \emph{N-forward}, where \SYSTEM{}
+The forward strategy can also take the form of \emph{N-forward}, where SwitchBox
 attempts to take advantage of spatial sequential locality to transition whole
 sets of nuggets into the active cipher. We can trivially expand the forward
 strategy to encompass the entire backing store by selecting N equal to the total
-number of nuggets managed by \SYSTEM{}. This would have the overhead of
+number of nuggets managed by SwitchBox. This would have the overhead of
 re-encrypting large swaths of the backing store upon every I/O operation where a
 nugget encrypted with the non-active cipher is encountered. Of course, this has
 the same effect as simply re-initializing the entire filesystem with the new
@@ -372,7 +372,7 @@ cipher.
 
 \subsubsection{Selective}
 
-When \SYSTEM{} is initialized with the selective strategy, the backing store is
+When SwitchBox is initialized with the selective strategy, the backing store is
 partitioned into two regions governed exclusively by the primary and secondary
 ciphers, respectively. All nuggets in the first partition are encrypted with the
 primary cipher while all nuggets in the second partition are encrypted with the
@@ -388,7 +388,7 @@ different pieces of data.
 
 \subsubsection{Mirrored}
 
-Similar to the selective strategy, when \SYSTEM{} is initialized with the
+Similar to the selective strategy, when SwitchBox is initialized with the
 mirrored strategy, the backing store is partitioned into two regions governed
 exclusively by the primary and secondary ciphers, respectively. All nuggets in
 the first partition are encrypted with the primary cipher while all nuggets in
@@ -406,12 +406,12 @@ cipher switching.
 
 \TODO{Always use present tense in technical writing.  It should be we develop
 instead of we developed.} We developed an API to allow any stream cipher or any
-cipher that can pose as a stream cipher to be used with \SYSTEM{} without
+cipher that can pose as a stream cipher to be used with SwitchBox without
 modification, including ciphers with residual output, \eg{Freestyle}. \TODO{I
 don't know what residual output is, so please expand on the differences between
 ciphers that causes problems. But before you do, see the note below on
-challenges.} \SYSTEM{} exposes a common encryption and decryption interface,
-including read and write handles, that allow \SYSTEM{} to transition nuggets
+challenges.} SwitchBox exposes a common encryption and decryption interface,
+including read and write handles, that allow SwitchBox to transition nuggets
 between arbitrary ciphers at the behest of the wider system. \TODO{This section
 is odd here.  Having a whole subsection seems to imply that it is as important
 as the switching strategies, but having a short paragraph implies it is more of
@@ -428,29 +428,29 @@ non-active cipher. However, such a naive implementation can have disastrous
 effects on performance depending on the workload.
 
 First, a nugget is considered "pristine" if it has not had any data written into
-it yet. \SYSTEM{} determines if a nugget is pristine by checking the state of
+it yet. SwitchBox determines if a nugget is pristine by checking the state of
 the transaction journal for that nugget. A pristine nugget will have a clean
 transaction journal.
 
 All nuggets start out as pristine. All nuggets start out with metadata
 indicating that they're to be encrypted and decrypted by the primary cipher
-(which is the initially active cipher when \SYSTEM{} is first initialized). This
+(which is the initially active cipher when SwitchBox is first initialized). This
 is true \emph{even if the nugget has not been written to yet}. This means, on
 read and write operations after the secondary cipher becomes the active cipher
 using a naively implemented forward switching strategy, every write operation
 will trigger a re-keying, which carries significant overhead.
 
 The solution is to divide forward switching into \emph{soft re-encryption} and
-\emph{hard re-encryption}. Fortunately, the \SYSTEM{} design lends itself nicely
+\emph{hard re-encryption}. Fortunately, the SwitchBox design lends itself nicely
 to such a distinction for free, as per-nugget metadata is managed separately
 from a nugget's actual data.
 
 During soft re-encryption, only the nugget's metadata is changed to indicate
 that the nugget can be encrypted and decrypted with the newly active cipher but
 \emph{without actually re-encrypting the nugget data itself}. This keeps the
-nugget in a "pristine" condition, preserving \SYSTEM{}'s ability to write data
+nugget in a "pristine" condition, preserving SwitchBox's ability to write data
 into it without triggering a costly rekeying operation every time, preserving
-the original StrongBox's performance advantage. At the same time, \SYSTEM{} can
+the original StrongBox's performance advantage. At the same time, SwitchBox can
 now use the newly active cipher to interact with the nugget as expected.
 
 On the other hand, during hard re-encryption, the nugget's metadata is changed
@@ -485,18 +485,18 @@ do we go from the conceptual design to a working system)}.
 
 \subsection{Implementation}
 
-Our \SYSTEM{} implementation consists of 9,491 lines of C code; our test suite
+Our SwitchBox implementation consists of 9,491 lines of C code; our test suite
 consists of 6,077 lines of C code. All together, our solution is comprised of
 15,568 lines of C code.
 
-\SYSTEM{} uses OpenSSL version 1.1.0h and LibSodium version 1.0.12 for its
+SwitchBox uses OpenSSL version 1.1.0h and LibSodium version 1.0.12 for its
 AES-XTS and AES-CTR implementations. Open source ARM NEON optimized
 implementations of ChaCha are provided by Floodyberry~\cite{Floodyberry}. The
 Freestyle cipher reference implementation is from the original Freestyle
 paper~\cite{Freestyle}. The eSTREAM Profile 1 cipher implementations are from
 the open source libestream cryptographic library~\cite{libestream} by Lucas
 Clemente Vella. As with the original StrongBox construction, the Merkle Tree
-implementation is from the Secure Block Device~\cite{SBD}. \SYSTEM{}
+implementation is from the Secure Block Device~\cite{SBD}. SwitchBox
 implementation is publicly available open-source\footnote{\SystemURI}.
 
 For a fair comparison with the original StrongBox implementation, we mirror
@@ -506,7 +506,7 @@ BUSE is a thin (200 LoC) wrapper around the standard Linux Network Block Device
 from virtual block devices exposed via domain socket.
 
 For the purposes of our implementation, we make the choice of ciphers binary:
-either the system wants \SYSTEM{} to access the backing store using the primary
+either the system wants SwitchBox to access the backing store using the primary
 cipher or the secondary cipher. However, there is no technical limitation
 preventing various different nuggets encrypted with three, four, or more unique
 ciphers from co-existing on the backing store. \TODO{Good detail.  In this case,
@@ -519,15 +519,15 @@ is some organizational problem in the document. Update: I wrote this before I
 merged with the new design section.  Now it is not relevant to this text, but I
 will leave it here as general advice.  Just comment it out after reading. }
 
-When \SYSTEM{} should be using the primary cipher or the secondary cipher to
+When SwitchBox should be using the primary cipher or the secondary cipher to
 interact with the backing store, this intent is communicated via POSIX message
-queue in our implementation. It is not a requirement of \SYSTEM{} that a POSIX
+queue in our implementation. It is not a requirement of SwitchBox that a POSIX
 message queue be used over any other method of inter-process communication (IPC)
-so long as \SYSTEM{} is notified asynchronously when the wider system desires
+so long as SwitchBox is notified asynchronously when the wider system desires
 one cipher be active over the other. \TODO{I am not sure why this section is
 here.  It is either too much detail, or more likely there is some important
 issue, but whatever that is needs to be stated much more explicitly.  Like maybe
-the problem is that the use needs to actually communicate with the \SYSTEM{}
+the problem is that the use needs to actually communicate with the SwitchBox
 implementation and we need a mechanism to do that?  Anyway, assuming you expand
 this a little so it is clear what problem is being addressed, then you can just
 make this another paragraph in implementation instead of splitting it out into a
@@ -542,7 +542,7 @@ this data needs to be handled in one way or another.}
 
 \subsubsection{Backing Store Initialization}
 
-To operate securely, \SYSTEM{} must be seeded with random data initially rather
+To operate securely, SwitchBox must be seeded with random data initially rather
 than have the backing store consist of all zeroes. This is a one-time cost paid
 during initialization and has no tangible effect on performance.
 
