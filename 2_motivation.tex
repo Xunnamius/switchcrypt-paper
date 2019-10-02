@@ -102,7 +102,39 @@ Leveraging these insights, we present SwitchBox. \TODO{A few short explanatory
 sentences that lead to: Our goal is to dynamically trade security for
 performance or energy.}
 
-\subsection{Motivating Example: Reacting to OS ``Power Saver'' Mode}
+\subsection{Motivating Example: Reacting to OS ``Power Saver'' Mode While Streaming}
+
+\TODO{Hank: I am surprised to see this works with reading a video. If the video
+is stored with a high security, don't you have to decrypt it before you read and
+pay that high-cost (in energy) no matter what? I had expected writing a new
+video where I could start with high-security and then switch to writing the
+second part with lower-security to save battery life. The first (reading) is
+even better, but it is not clear to me how we can do that while still obeying
+the laws of physics---I hope I missed something, but if I did, it needs to be
+added to the description.} \TODO{Bernard: You are correct, I will rephrase to
+explicitly indicate streaming multiple times instead of just once. That way, the
+example will make sense.} Suppose we were streaming a video stored our mobile
+device to a WiFi connected television or projector. We want to store video and
+other data on our device as securely as possible, so we chose to initialize the
+system at configuration point offering very strong security.
+\figref{energy-latency-linearity} correlates stronger security guarantees with
+greater total energy use, meaning our device is using a lot more energy to
+facilitate FDE at this configuration point.
+
+Eventually, our device determines its remaining battery life is too low and
+enters an energy saving mode. With a traditional filesystem, we are stuck with
+our static high-energy configuration chosen at system initialization.
+
+However, with the ability to operate at points along the pareto frontier (c.f.
+\figref{40mb-read-with-forward}), even at points between the discrete
+configurations available to prior work, a context-aware system can switch to a
+configuration that trades the security of the portions of storage that are being
+used to stream the video so that we stay within our curtailed energy budget.
+
+When we return to a non-curtailed energy budget, the system can return to its
+more secure configuration dynamically, allowing the cipher strength of the
+backing store to eventually recover without having to recreate the entire
+underlying filesystem.\\
 
 \TODO{Talk about the energy-budget case study here as motivation.}
 

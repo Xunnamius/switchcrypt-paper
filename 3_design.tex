@@ -1,11 +1,5 @@
 \section{SwitchBox Design}\label{sec:design}
 
-\begin{figure}[t]
- \centering
-  \includegraphics[width=\linewidth]{overview.png}
-   \caption{Overview of the SwitchBox construction.}\label{fig:overview}
-\end{figure}
-
 \subsection{Quantifying the Security Dimension}
 
 To reason about trading off the security guarantees provided by various ciphers,
@@ -70,34 +64,34 @@ right level of detail is explain it so that anyone who read the section would
 derive the same numbers that you have in this table.}
 
 \begin{table}[]
-   \begin{tabular}{@{}lllll@{}}
-   \toprule
-   \textbf{Cipher} & \textbf{OR} & \textbf{CR} & \textbf{RR/RK} & \textbf{Rank} \\ \midrule
-   ChaCha8         & 0           & 0.5         & 0              & 0.5           \\
-   ChaCha12        & 0           & 0.5         & 0.5            & 1             \\
-   ChaCha20        & 0           & 0.5         & 1              & 1.5           \\
-   Salsa8          & 0           & 0.4         & 0              & 0.4           \\
-   Salsa12         & 0           & 0.4         & 0.5            & 0.9           \\
-   Salsa20         & 0           & 0.4         & 1              & 1.4           \\
-   AES128-CTR      & 0           & 0.5         & 0              & 0.5           \\
-   AES256-CTR      & 0           & 0.5         & 1              & 1.5           \\
-   HC128           & 0           & 0.5         & 0              & 0.5           \\
-   HC256           & 0           & 0.5         & 1              & 1.5           \\
-   Rabbit          & 0           & 0.4         & 1              & 1.4           \\
-   Sosemanuk       & 0           & 0.4         & 1              & 1.4           \\
-   Freestyle (F)   & 1           & 1           & 0              & 2             \\
-   Freestyle (B)   & 1           & 1           & 0.5            & 2.5           \\
-   Freestyle (S)   & 1           & 1           & 1              & 3             \\
-   AES128-XTS      & 0.2         & 0.5         & 1              & 1.7
-   \end{tabular}
-   \caption{\TODO{Table caption goes here.}}
-   \label{tbl:security-quant}
+  \begin{tabular}{@{}lllll@{}}
+  \toprule
+  \textbf{Cipher} & \textbf{OR} & \textbf{CR} & \textbf{RR/RK} & \textbf{Rank} \\ \midrule
+  ChaCha8     & 0      & 0.5     & 0       & 0.5      \\
+  ChaCha12    & 0      & 0.5     & 0.5      & 1       \\
+  ChaCha20    & 0      & 0.5     & 1       & 1.5      \\
+  Salsa8     & 0      & 0.4     & 0       & 0.4      \\
+  Salsa12     & 0      & 0.4     & 0.5      & 0.9      \\
+  Salsa20     & 0      & 0.4     & 1       & 1.4      \\
+  AES128-CTR   & 0      & 0.5     & 0       & 0.5      \\
+  AES256-CTR   & 0      & 0.5     & 1       & 1.5      \\
+  HC128      & 0      & 0.5     & 0       & 0.5      \\
+  HC256      & 0      & 0.5     & 1       & 1.5      \\
+  Rabbit     & 0      & 0.4     & 1       & 1.4      \\
+  Sosemanuk    & 0      & 0.4     & 1       & 1.4      \\
+  Freestyle (F)  & 1      & 1      & 0       & 2       \\
+  Freestyle (B)  & 1      & 1      & 0.5      & 2.5      \\
+  Freestyle (S)  & 1      & 1      & 1       & 3       \\
+  AES128-XTS   & 0.2     & 0.5     & 1       & 1.7
+  \end{tabular}
+  \caption{\TODO{Table caption goes here.}}
+  \label{tbl:security-quant}
 \end{table}
 
-\begin{figure}[ht]
+\PUNT{\begin{figure}[ht]
  \centering
-  \includegraphics[width=\linewidth]{drawn/5.png}
-   \caption{\TODO{Caption goes here}}\label{fig:energy-latency-linearity}
+ \includegraphics[width=\linewidth]{drawn/5.png}
+  \caption{\TODO{Caption goes here}}\label{fig:energy-latency-linearity}
 \end{figure}
 
 \figref{energy-latency-linearity} shows that, for the stream ciphers included in
@@ -112,124 +106,19 @@ most general case and stick with it, even if a different configuration becomes
 more optimal at a later point. The only way to switch ciphers when a new
 configuration becomes more optimal is to recreate the entire underlying
 filesystem, which is rarely desirable. \TODO{This paragraph should be fleshed
-out more?} \TODO{Yes, please do flesh it out more.  Add the citations you
-suggested.  I think you should start with the good thing: different ciphers have
-a wide range of energy/latency vs security properties.  Then you can highlight
+out more?} \TODO{Yes, please do flesh it out more. Add the citations you
+suggested. I think you should start with the good thing: different ciphers have
+a wide range of energy/latency vs security properties. Then you can highlight
 the two key drawbacks (maybe even bullet-point them): (1) They don't actually
 form a continous tradeoff space, but represent discrete points, and what if you
 need to be in the middle? and (2) They are fixed by the time the system finishes
-booting (?) and if requirements change online the system requires a reboot.}
+booting (?) and if requirements change online the system requires a reboot.}}
 
-\subsection{Dynamically Trading off Energy/Latency for Security}
-
-\TODO{This is getting moved elsewhere:} But what if our system didn't have to
-sit at a static configuration point, even when another configuration became more
-optimal in context? This motivates the need for some dynamic mechanism to
-navigate this tradeoff space online at runtime. More than just switching between
-static configuration points, such a mechanism would allow the system to
-dynamically switch to otherwise unreachable configurations along the pareto
-frontier curve between and including the discrete points achievable with prior
-work depending on the needs of the system at that moment in time. In
-\figref{40mb-read-with-forward}, we see examples of such points.
-\TODO{\figref{40mb-read-with-forward} will show configuration points along
-pareto curve and differentiate between static points and dynamic points with
-shapes versus the other version of this chart (above) which shows none of this}
-
-% Or should this be a new section?
-Two examples motivating this mechanism follow. The first illustrates the need
-for \emph{temporal} switching, where the desired security and energy tradeoffs
-change over time.  The second motivates \emph{spatial} switching where the
-desired tradeoff is different for different parts of the same file.\\
-
-
-\noindent
-\textbf{Temporal switching: streaming video with a curtailed energy budget}
-
-\TODO{Are we stepping on the use case section with this?} \TODO{No, in fact it
-will be a nice symmetry: you pose these as problems at the beginning and then
-solve them at the end. }
-
-\TODO{Hank: I am surprised to see this works with reading a video. If the video
-is stored with a high security, don't you have to decrypt it before you read and
-pay that high-cost (in energy) no matter what?  I had expected writing a new
-video where I could start with high-security and then switch to writing the
-second part with lower-security to save battery life.  The first (reading) is
-even better, but it is not clear to me how we can do that while still obeying
-the laws of physics---I hope I missed something, but if I did, it needs to be
-added to the description.} \TODO{Bernard: You are correct, I will rephrase to
-explicitly indicate streaming multiple times instead of just once. That way, the
-example will make sense.} Suppose we were streaming a video stored our mobile
-device to a WiFi connected television or projector. We want to store video and
-other data on our device as securely as possible, so we chose to initialize the
-system at configuration point offering very strong security.
-\figref{energy-latency-linearity} correlates stronger security guarantees with
-greater total energy use, meaning our device is using a lot more energy to
-facilitate FDE at this configuration point.
-
-Eventually, our device determines its remaining battery life is too low and
-enters an energy saving mode. With a traditional filesystem, we are stuck with
-our static high-energy configuration chosen at system initialization.
-
-However, with the ability to operate at points along the pareto frontier (c.f.
-\figref{40mb-read-with-forward}), even at points between the discrete
-configurations available to prior work, a context-aware system can switch to a
-configuration that trades the security of the portions of storage that are being
-used to stream the video so that we stay within our curtailed energy budget.
-
-When we return to a non-curtailed energy budget, the system can return to its
-more secure configuration dynamically, allowing the cipher strength of the
-backing store to eventually recover without having to recreate the entire
-underlying filesystem.\\
-
-\noindent
-\textbf{Spatial switching: securing a massive multi-cipher document}
-
-\TODO{Are we stepping on the use case section with this?}
-
-Suppose a large organization that is working on a document with hundreds of
-gigabytes of data. The organization is decentralized, so this document must pass
-back and forth among several disparate parties who are constantly encrypting and
-decrypting certain sections of it to work on. Of course, this document is the
-target of frequent brute force, supply chain, and other confidentiality
-violating attacks by powerful adversaries with unknown and potentially unlimited
-means at their disposal. The confidentiality of the document must never be
-violated, so it must be encrypted. However, some tiny amount of the data
-dispersed throughout the document is \emph{highly} sensitive; and while a
-confidentiality violation of the wider document would be embarrassing, a
-confidentiality violation of this very sensitive data would very likely destroy
-the organization in its entirety.
-
-With prior work, this organization is limited to static configurations that
-generally fall within two camps: 1) encrypt the entire document with a cipher
-providing the strongest security guarantees possible to protect the small amount
-of highly sensitive data, which would add an unacceptable overhead to the
-frequent encryption and decryption operations of the organization during I/O or
-2) encrypt the entire document with a cipher providing the least amount of
-latency during I/O, which could potentially leave the organization vulnerable to
-its adversaries.
-
-However, with the ability to operate at points between the discrete
-configurations available to prior work, a dynamic system can encrypt highly
-sensitive portions of the backing store with the cipher with the strongest
-security guarantees while allowing the rest of the document to be encrypted with
-the standard cipher so as to not unduly burden the employees of this
-organization as they operate on the document.
-
-----
-
-\TODO{How much of the original StrongBox should be explained here? Is this too
-much? Too little?} \TODO{Hank: This is a good overview.  Right now, the level of
-detail feels right to me. There are two things missing, however.  First, we need
-a clear delineation between prior work and this paper.  One way to make that
-distinction is to point at the diagram and say this piece is new.  Another way
-would be if it is a conceptual difference.  I believe this case is a combination
-of both: (1) there is at least some new metadata to be added (to accomodate
-freestyle IIRC) plus I would assume that StrongBox does not include a field for
-cipher in the nugget and (2) there is the conceptual change that now each nugget
-can have a different scheme (not just key). Second thing that is missing: need
-to talk about what is coming in the section.  This second thing should relate to
-the first, as we should spend most of the time talking about what is new for
-this paper.}
+\begin{figure}[t]
+   \centering
+   \includegraphics[width=\linewidth]{overview.png}
+    \caption{Overview of the SwitchBox construction.}\label{fig:overview}
+  \end{figure}
 
 SwitchBox, like StrongBox and Adiantum, is a translation layer positioned
 between the block layer and the operating system's virtual file
@@ -245,9 +134,9 @@ arrays, \ie{the \emph{Keycount Store} and the \emph{Transaction Journal}}; a
 globally persistent cryptographically secure monotonic counter; and a flexible
 drive-backed store for per-nugget cipher-specific metadata. For our monotonic
 counter implementation, we used a \emph{Replay Protected Memory Block} (RPMB).
-\TODO{Citation would be good here.  But, it is a little strange to get so
-specific in this part of the text.  I would either save it for a later
-implementation section (or evaluation).  Or, if you think that the existence of
+\TODO{Citation would be good here. But, it is a little strange to get so
+specific in this part of the text. I would either save it for a later
+implementation section (or evaluation). Or, if you think that the existence of
 these counters might be controversial, then say we use RPMB, but we could have
 used many others such as...}
 
@@ -265,8 +154,8 @@ used.}
 
 \begin{figure}[t]
  \centering
-  \includegraphics[width=\linewidth]{backstore.png}
-   \caption{Layout of SwitchBox's backing storage.}\label{fig:backstore2}
+ \includegraphics[width=\linewidth]{backstore.png}
+  \caption{Layout of SwitchBox's backing storage.}\label{fig:backstore2}
 \end{figure}
 
 The backing store is the storage medium SwitchBox operates on. The layout of the
@@ -299,10 +188,10 @@ represent the static configuration points along the pareto frontier between
 which SwitchBox can navigate. \TODO{Do you really have to know these ahead of
 time? If I had a cipher API and managed the implementation as a DLL, could I
 switch to any cipher, by just building a new DLL? Is there any reason, you
-couldn't have three or four or N ciphers and switch between all of them?  I ask
+couldn't have three or four or N ciphers and switch between all of them? I ask
 all these questions because I want you to separate the conceptual idea, which
 should be as broad as possible, from the specific choices you had to make to
-demonstrate the idea (which may be much more restricted).  Here we want to
+demonstrate the idea (which may be much more restricted). Here we want to
 discuss the conceptual ideas and save details for the implementation.}
 
 At any moment, the currently active cipher is used to interact with the backing
@@ -318,12 +207,12 @@ active cipher at any given moment, and SwitchBox responds immediately.
 Unfortunately, it is entirely non-trivial to determine \emph{when} to re-encrypt
 a nugget with a different cipher and \emph{where} to direct the output of that
 cipher. \TODO{Don't just say it is difficult, make an argument about why it is
-difficult.  It is often very helpful to say things that are obvious to you
+difficult. It is often very helpful to say things that are obvious to you
 because they won't be obvious to the reader, but will help build intuition for
-what is coming.  For example, you can say that one simple approach would
+what is coming. For example, you can say that one simple approach would
 immediately convert the entire drive, but the cost of doing that conversion
-might consume more energy than would be saved in future accesses.  I do like
-using where and when to set up spatial and temporal switching.  }
+might consume more energy than would be saved in future accesses. I do like
+using where and when to set up spatial and temporal switching. }
 
 Hence, cipher switching \emph{strategies} are the mechanism by which SwitchBox
 can effectively transition nuggets between different encrypted states
@@ -331,10 +220,10 @@ dynamically, thus providing a mechanism to navigate the tradeoff space presented
 in \figref{40mb-read-with-forward}. \TODO{Expound on this all more? Reword?
 Delete? Different chart referenced here instead?} \TODO{Hank: expound! Go ahead
 and say that when to target the new encryption is temporal switching and we
-propose a specific strategy, \emph{Forward}, to handle it.  Where to switch is
+propose a specific strategy, \emph{Forward}, to handle it. Where to switch is
 spatial switching and we propose two strategies to deal with that.}
 
-\subsubsection{Forward}
+\subsubsection{Forward Switching Strategy}
 
 SwitchBox allows each individual nugget to exist encrypted using one cipher or
 the other regardless of the currently active cipher. When a nugget is
@@ -370,7 +259,7 @@ nugget encrypted with the non-active cipher is encountered. Of course, this has
 the same effect as simply re-initializing the entire filesystem with the new
 cipher.
 
-\subsubsection{Selective}
+\subsubsection{Selective Switching Strategy}
 
 When SwitchBox is initialized with the selective strategy, the backing store is
 partitioned into two regions governed exclusively by the primary and secondary
@@ -386,7 +275,7 @@ the other. In this way, the selective strategy represents a form of spatial
 cipher switching where different regions of the backing store can store
 different pieces of data.
 
-\subsubsection{Mirrored}
+\subsubsection{Mirrored Switching Strategy}
 
 Similar to the selective strategy, when SwitchBox is initialized with the
 mirrored strategy, the backing store is partitioned into two regions governed
@@ -404,7 +293,7 @@ cipher switching.
 
 \subsection{Pluggable Stream Cipher API}
 
-\TODO{Always use present tense in technical writing.  It should be we develop
+\TODO{Always use present tense in technical writing. It should be we develop
 instead of we developed.} We developed an API to allow any stream cipher or any
 cipher that can pose as a stream cipher to be used with SwitchBox without
 modification, including ciphers with residual output, \eg{Freestyle}. \TODO{I
@@ -413,14 +302,14 @@ ciphers that causes problems. But before you do, see the note below on
 challenges.} SwitchBox exposes a common encryption and decryption interface,
 including read and write handles, that allow SwitchBox to transition nuggets
 between arbitrary ciphers at the behest of the wider system. \TODO{This section
-is odd here.  Having a whole subsection seems to imply that it is as important
+is odd here. Having a whole subsection seems to imply that it is as important
 as the switching strategies, but having a short paragraph implies it is more of
-a side note.  In addition, it is not clear what purpose this discussion serves.
+a side note. In addition, it is not clear what purpose this discussion serves.
 I think you need more setup about how different stream ciphers might appear to
 all be interchangeable, but they are not, so we need a common interface---again,
 sometimes it is actually helpful to state what feels obvious to you.}
 
-\subsection{Challenge: Beware Naive Forward Switching}
+\subsection{Additional Challenge: Beware Naive Forward Switching}
 
 It is tempting to implement forward switching such that a nugget is re-encrypted
 during I/O if its metadata indicates that it was previously encrypted using the
@@ -470,106 +359,12 @@ behavior (where $N > 0$) to take advantage of spatial locality during read-heavy
 workloads to result in a further performance advantage (c.f.
 \secref{evaluation}).
 
-\TODO{Note: Hank wrote the followign before the Challenge section was updated,
-some of it is still relevant.  Earlier text: Are the challenges really just
-overhead?  I think there are a couple of other challenges, like: when to switch?
-Which blocks to switch?  How to make ChaCha type ciphers work with Freestyle
-type ciphers?  Basically, every piece of the system that you think is
-interesting is probably interesting because it addresses some challenge.  For
-that reason, I think this section should be moved earlier, as it should be a
-discussion of the challenges that need to be overcome by the design.  So, the
-flow would be overview (what we want to do), challenges (why it is hard),
-description of key components (with references to how they help us accomplish
-the overall goal and how they address the challenges), then implementation (how
-do we go from the conceptual design to a working system)}.
+\subsection{Threat Models}
 
-\subsection{Implementation}
-
-Our SwitchBox implementation consists of 9,491 lines of C code; our test suite
-consists of 6,077 lines of C code. All together, our solution is comprised of
-15,568 lines of C code.
-
-SwitchBox uses OpenSSL version 1.1.0h and LibSodium version 1.0.12 for its
-AES-XTS and AES-CTR implementations. Open source ARM NEON optimized
-implementations of ChaCha are provided by Floodyberry~\cite{Floodyberry}. The
-Freestyle cipher reference implementation is from the original Freestyle
-paper~\cite{Freestyle}. The eSTREAM Profile 1 cipher implementations are from
-the open source libestream cryptographic library~\cite{libestream} by Lucas
-Clemente Vella. As with the original StrongBox construction, the Merkle Tree
-implementation is from the Secure Block Device~\cite{SBD}. SwitchBox
-implementation is publicly available open-source\footnote{\SystemURI}.
-
-For a fair comparison with the original StrongBox implementation, we mirror
-their use of the BUSE~\cite{BUSE} virtual block device as our device controller.
-BUSE is a thin (200 LoC) wrapper around the standard Linux Network Block Device
-(NBD). BUSE allows an operating system to transact block I/O requests to and
-from virtual block devices exposed via domain socket.
-
-For the purposes of our implementation, we make the choice of ciphers binary:
-either the system wants SwitchBox to access the backing store using the primary
-cipher or the secondary cipher. However, there is no technical limitation
-preventing various different nuggets encrypted with three, four, or more unique
-ciphers from co-existing on the backing store. \TODO{Good detail.  In this case,
-remove the discussion above about how we just support two ciphers.}
-
-\subsubsection{Indicating a Cipher Switch Should Occur}
-\TODO{As a style thing, you should avoid a subsub (or any breakdown) if there is
-only one piece.  Usually a section with only one subsection indicates that there
-is some organizational problem in the document. Update: I wrote this before I
-merged with the new design section.  Now it is not relevant to this text, but I
-will leave it here as general advice.  Just comment it out after reading. }
-
-When SwitchBox should be using the primary cipher or the secondary cipher to
-interact with the backing store, this intent is communicated via POSIX message
-queue in our implementation. It is not a requirement of SwitchBox that a POSIX
-message queue be used over any other method of inter-process communication (IPC)
-so long as SwitchBox is notified asynchronously when the wider system desires
-one cipher be active over the other. \TODO{I am not sure why this section is
-here.  It is either too much detail, or more likely there is some important
-issue, but whatever that is needs to be stated much more explicitly.  Like maybe
-the problem is that the use needs to actually communicate with the SwitchBox
-implementation and we need a mechanism to do that?  Anyway, assuming you expand
-this a little so it is clear what problem is being addressed, then you can just
-make this another paragraph in implementation instead of splitting it out into a
-subsub.}
-
-\TODO{I think the discussion here only covers temporal switching.  I believe you
-should indicate that for this paragraph and then have a second paragraph that
-talks about how to indicate that a spatial switch should occur (and you might
-need a different method for mirrored and selective).  Correct me if I am wrong,
-but I believe that the selective switch will require the IOp to indicate that
-this data needs to be handled in one way or another.}
-
-\subsubsection{Backing Store Initialization}
-
-To operate securely, SwitchBox must be seeded with random data initially rather
-than have the backing store consist of all zeroes. This is a one-time cost paid
-during initialization and has no tangible effect on performance.
-
-If nuggets are not seeded with random data initially, any write operation into
-an "empty" nugget might leak information or constitute an overwrite where the
-predictable state of the backing store (\ie{initialized to all zeroes}) leads to
-an overwrite-style condition.
-
-%\subsection{Discussion}
-% Should this be saved for the evaluation section? Should some of the other
-% parts of this section be broken off into a discussion subsection?
-
-\subsection{Discussion}
-% Should this be saved for the evaluation section?
-\TODO{You should include a discussion here if it is a conceptual discussion, for
-example about the benefits and limitations of the proposed design.}
-
-\TODO{Hank: I have one major issue at this point in the document.  I don't think
-we should wait until discussion to address it, but I am writing about it here
-because it was not addressed anywhere else.  I feel like we need some discussion
-of threat model or something.  For example, I really like the mirroring
-strategy, but I think it breaks if an attacker has physical access to the drive,
-right?  Like if they have to request IO through the OS, I think it works becuase
-the os or hypervisor can hide the mirrored side, but you can't hide that if I
-can just read bytes off the drive itself, right?  Sort of similar for forward.
-We really do need to say something about when these are applicable and when they
-aren't.}\TODO{Bernard: Agreed (here and in your email)! We definitely need a
-threat model subsection somewhere. The way I've been conceptualizing it is: the
-OS can quickly kill half of the mirrored strategy with TRIM. But otherwise, yes,
-the data will exist in both forms.}
+\TODO{Hank: I feel like we need some discussion of threat model or something.
+For example, I really like the mirroring strategy, but I think it breaks if an
+attacker has physical access to the drive, right? Like if they have to request
+IO through the OS, I think it works becuase the os or hypervisor can hide the
+mirrored side, but you can't hide that if I can just read bytes off the drive
+itself, right? Sort of similar for forward. We really do need to say something
+about when these are applicable and when they aren't.}

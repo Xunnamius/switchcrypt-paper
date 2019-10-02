@@ -1,0 +1,64 @@
+\section{Implementation}
+
+\TODO{Mention StrongBox much less, ideally not at all}
+
+Our SwitchBox implementation consists of 9,491 lines of C code; our test suite
+consists of 6,077 lines of C code. All together, our solution is comprised of
+15,568 lines of C code.
+
+SwitchBox uses OpenSSL version 1.1.0h and LibSodium version 1.0.12 for its
+AES-XTS and AES-CTR implementations. Open source ARM NEON optimized
+implementations of ChaCha are provided by Floodyberry~\cite{Floodyberry}. The
+Freestyle cipher reference implementation is from the original Freestyle
+paper~\cite{Freestyle}. The eSTREAM Profile 1 cipher implementations are from
+the open source libestream cryptographic library~\cite{libestream} by Lucas
+Clemente Vella. As with the original StrongBox construction, the Merkle Tree
+implementation is from the Secure Block Device~\cite{SBD}. SwitchBox
+implementation is publicly available open-source\footnote{\SystemURI}.
+
+For a fair comparison with the original StrongBox implementation, we mirror
+their use of the BUSE~\cite{BUSE} virtual block device as our device controller.
+BUSE is a thin (200 LoC) wrapper around the standard Linux Network Block Device
+(NBD). BUSE allows an operating system to transact block I/O requests to and
+from virtual block devices exposed via domain socket.
+
+For the purposes of our implementation, we make the choice of ciphers binary:
+either the system wants SwitchBox to access the backing store using the primary
+cipher or the secondary cipher. However, there is no technical limitation
+preventing various different nuggets encrypted with three, four, or more unique
+ciphers from co-existing on the backing store. \TODO{Good detail. In this case,
+remove the discussion above about how we just support two ciphers.}
+
+\subsection{Indicating a Cipher Switch Should Occur}
+
+When SwitchBox should be using the primary cipher or the secondary cipher to
+interact with the backing store, this intent is communicated via POSIX message
+queue in our implementation. It is not a requirement of SwitchBox that a POSIX
+message queue be used over any other method of inter-process communication (IPC)
+so long as SwitchBox is notified asynchronously when the wider system desires
+one cipher be active over the other. \TODO{I am not sure why this section is
+here. It is either too much detail, or more likely there is some important
+issue, but whatever that is needs to be stated much more explicitly. Like maybe
+the problem is that the use needs to actually communicate with the SwitchBox
+implementation and we need a mechanism to do that? Anyway, assuming you expand
+this a little so it is clear what problem is being addressed, then you can just
+make this another paragraph in implementation instead of splitting it out into a
+subsub.}
+
+\TODO{I think the discussion here only covers temporal switching. I believe you
+should indicate that for this paragraph and then have a second paragraph that
+talks about how to indicate that a spatial switch should occur (and you might
+need a different method for mirrored and selective). Correct me if I am wrong,
+but I believe that the selective switch will require the IOp to indicate that
+this data needs to be handled in one way or another.}
+
+\subsection{Backing Store Initialization}
+
+To operate securely, SwitchBox must be seeded with random data initially rather
+than have the backing store consist of all zeroes. This is a one-time cost paid
+during initialization and has no tangible effect on performance.
+
+If nuggets are not seeded with random data initially, any write operation into
+an "empty" nugget might leak information or constitute an overwrite where the
+predictable state of the backing store (\ie{initialized to all zeroes}) leads to
+an overwrite-style condition.
