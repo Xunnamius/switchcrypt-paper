@@ -94,25 +94,6 @@ derive the same numbers that you have in this table.}
    \label{tbl:security-quant}
 \end{table}
 
-\subsection{Statically Trading off Energy/Latency for Security}
-
-\begin{figure}[ht]
- \centering
-  \includegraphics[width=\linewidth]{drawn/1.png}
-   \caption{\TODO{Caption goes here}\TODO{No curve in this version!}}\label{fig:40mb-read}
-\end{figure}
-
-\figref{40mb-read} shows the security versus I/O latency static
-tradeoff between different stream ciphers under StrongBox when completing a 40MB
-read of encrypted storage. The experiment was performed on an ARM big.LITTLE
-Exynos Octa processor, which is similar to the processors used in the Samsung
-Galaxy line of phones and other devices. \TODO{In the LaTeX figure, pareto
-frontier is X while other results are some other shape. Explain this here.}
-
-Ciphers with relatively stronger security guarantees result in higher latency
-for I/O operations while ciphers with relatively weaker security guarantees
-result in lower latency.
-
 \begin{figure}[ht]
  \centering
   \includegraphics[width=\linewidth]{drawn/5.png}
@@ -141,24 +122,18 @@ booting (?) and if requirements change online the system requires a reboot.}
 
 \subsection{Dynamically Trading off Energy/Latency for Security}
 
-\PUNT{\begin{figure}[ht]
- \centering
-  \includegraphics[width=\linewidth]{drawn/1.png}
-   \caption{\TODO{Caption goes here}\TODO{Include pareto curve in this version??}\TODO{Hank: No pareto curve here.  I don't think we need a figure in this one.}}\label{fig:40mb-read-with-forward}
-\end{figure}}
-
-But what if our system didn't have to sit at a static configuration point, even
-when another configuration became more optimal in context? This motivates the
-need for some dynamic mechanism to navigate this tradeoff space online at
-runtime. More than just switching between static configuration points, such a
-mechanism would allow the system to dynamically switch to otherwise unreachable
-configurations along the pareto frontier curve between and including the
-discrete points achievable with prior work depending on the needs of the system
-at that moment in time. In \figref{40mb-read-with-forward}, we see examples of
-such points. \TODO{\figref{40mb-read-with-forward} will show configuration
-points along pareto curve and differentiate between static points and dynamic
-points with shapes versus the other version of this chart (above) which shows
-none of this}
+\TODO{This is getting moved elsewhere:} But what if our system didn't have to
+sit at a static configuration point, even when another configuration became more
+optimal in context? This motivates the need for some dynamic mechanism to
+navigate this tradeoff space online at runtime. More than just switching between
+static configuration points, such a mechanism would allow the system to
+dynamically switch to otherwise unreachable configurations along the pareto
+frontier curve between and including the discrete points achievable with prior
+work depending on the needs of the system at that moment in time. In
+\figref{40mb-read-with-forward}, we see examples of such points.
+\TODO{\figref{40mb-read-with-forward} will show configuration points along
+pareto curve and differentiate between static points and dynamic points with
+shapes versus the other version of this chart (above) which shows none of this}
 
 % Or should this be a new section?
 Two examples motivating this mechanism follow. The first illustrates the need
@@ -291,11 +266,11 @@ used.}
 \begin{figure}[t]
  \centering
   \includegraphics[width=\linewidth]{backstore.png}
-   \caption{Layout of \SYSTEM{}'s backing storage.}\label{fig:backstore}
+   \caption{Layout of \SYSTEM{}'s backing storage.}\label{fig:backstore2}
 \end{figure}
 
 The backing store is the storage medium \SYSTEM{} operates on. The layout of the
-backing store is illustrated in \figref{backstore}. In the \textit{body} section
+backing store is illustrated in \figref{backstore2}. In the \textit{body} section
 of the backing store layout, end-user data is partitioned into a series of
 same-size \emph{logical blocks}---which are distinct from the concept of
 \emph{physical drive blocks}---we refer to these wider logical blocks as
