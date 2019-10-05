@@ -56,18 +56,17 @@ saver'' functionality.
 
 Hence, any static configuration will inevitably sacrifice one concern for
 another, even when it is not optimal. But what if our system did not have to sit
-at a static configuration point, even when another configuration became more
-optimal later on?
+at a static configuration point, especially when another configuration becomes
+more desirable later on?
 
 \subsection{Our Contributions}
 
-We introduce a simple scheme to quantify the security ``strength'' of
-arbitrary stream ciphers based on a subset of properties relevant to
-FDE.
+We introduce a simple scheme to quantify the relative security ``strength'' of a
+set of stream ciphers based on key security properties relevant to FDE.
 
 Using this scheme, we then define a novel tradeoff space of competing concerns:
-total energy use, our notion of cipher strength, and the performance
-characteristics of various stream ciphers in the context of FDE.
+total energy use, cipher strength, and the performance characteristics of
+various stream ciphers in the context of FDE.
 
 Finally, we present SwitchBox, a novel design substantively expanding on prior
 work by 1) decoupling the cipher implementation from the encryption mechanism,
