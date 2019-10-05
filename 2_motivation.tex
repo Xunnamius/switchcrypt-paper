@@ -2,6 +2,9 @@
 
 \subsection{Background}
 
+\TODO{Think about how to use the vocabulary of ``binary additive stream cipher''
+over something like ``CTR-like mode'' throughout this section and maybe intro}
+
 The standard approach to FDE, using the AES \emph{block cipher}, introduces
 significant overhead during filesystem operation. It is well known that
 authenticated encryption using \emph{stream ciphers} like
@@ -15,7 +18,7 @@ approaches have been explored:
    \item Use a non-deterministic CTR mode with specially designed cipher and
    filesystem (Freestyle~\cite{Freestyle}).
    \item Use a length-preserving ``tweakable super-pseudorandom permutation''
-   with nonce-accepting stream cipher (Adiantum~\cite{Adiantum}).
+   construction with nonce-accepting stream cipher (Adiantum~\cite{Adiantum}).
    \item Use any stream cipher in a CTR-like mode with metadata management to
    prevent overwrites (StrongBox~\cite{StrongBox}).
 \end{itemize}
@@ -74,14 +77,14 @@ lower latency.
 
 \subsubsection{Encryption And Re-Keying Of Nuggets Occur Entirely Independently}
 
-With StrongBox, nuggets are considered as individual distinct logical blocks,
-each with their own metadata and unique cryptographic key used to encrypt and
-decrypt their contents with the single cipher chosen at initialization. This
-layout naturally lends itself to encrypting different portions of the underlying
-drive with different ciphers instead; we can select any cipher to encrypt or
-decrypt any nugget at any point, rather than just a single cipher globally. This
-allows the filesystem to support mixed cipher configurations that can be
-encrypted, decrypted, swapped individually.
+With SwitchBox, nuggets are considered as distinct logical blocks, each with
+their own metadata and unique cryptographic key used to encrypt and decrypt
+their contents with the single cipher chosen at initialization. This layout
+naturally lends itself to encrypting different portions of the underlying drive
+with different ciphers instead; we can select any cipher to encrypt or decrypt
+any nugget at any point, rather than just a single cipher globally. This allows
+the filesystem to support mixed cipher configurations that can be encrypted,
+decrypted, swapped individually.
 
 \subsubsection{Navigate The Configuration Space With ``Cipher Switching''}
 
@@ -89,72 +92,87 @@ Given a space of possible cipher configurations and a drive layout of
 independent nuggets that lends itself to mixed cipher use, it is clear our
 system does not have to sit at a static configuration point. Hence, we require a
 mechanism to navigate the cipher configuration space, trading off concerns such
-that the system is always at the most optimal configuration in context. By
-abstracting the rekeying process out into a re-ciphering or \emph{cipher
-switching} process, whereby the key and the cipher used to encrypt/decrypt the
-nugget can both be switched at runtime, we can trade off between different
-ciphers and their characteristics dynamically. Comparatively, prior work can
-only accomplish a static tradeoff at compile time or at filesystem
-initialization.
-\\
+that the system is always at the most optimal configuration given the runtime
+environment. By abstracting the rekeying process out into a re-ciphering or
+\emph{cipher switching} process, whereby the key and the cipher used to
+encrypt/decrypt the nugget can both be switched at runtime, we can trade off
+between different ciphers and their characteristics dynamically. Comparatively,
+prior work can only accomplish a static tradeoff at compile time or at
+filesystem initialization. \\
 \\
 Leveraging these insights, we present SwitchBox. \TODO{A few short explanatory
 sentences that lead to: Our goal is to dynamically trade security for
 performance or energy.}
 
-\subsection{Motivating Example: Reacting to OS ``Power Saver'' Mode While Streaming}
+\subsection{Motivating Example: Filesystem Reacts to OS ``Power Saver'' Mode}
 
-\TODO{Hank: I am surprised to see this works with reading a video. If the video
-is stored with a high security, don't you have to decrypt it before you read and
-pay that high-cost (in energy) no matter what? I had expected writing a new
-video where I could start with high-security and then switch to writing the
-second part with lower-security to save battery life. The first (reading) is
-even better, but it is not clear to me how we can do that while still obeying
-the laws of physics---I hope I missed something, but if I did, it needs to be
-added to the description.} \TODO{Bernard: You are correct, I will rephrase to
-explicitly indicate streaming multiple times instead of just once. That way, the
-example will make sense.} Suppose we were streaming a video stored our mobile
-device to a WiFi connected television or projector. We want to store video and
-other data on our device as securely as possible, so we chose to initialize the
-system at configuration point offering very strong security.
-\figref{energy-latency-linearity} correlates stronger security guarantees with
-greater total energy use, meaning our device is using a lot more energy to
-facilitate FDE at this configuration point.
+\begin{figure}[ht]
+   \centering
+   \includegraphics[width=\linewidth]{drawn/5.png}
+   \caption{\TODO{Caption goes here}}\label{fig:energy-latency-linearity}
+\end{figure}
 
-Eventually, our device determines its remaining battery life is too low and
-enters an energy saving mode. With a traditional filesystem, we are stuck with
-our static high-energy configuration chosen at system initialization.
+Suppose we are continually streaming a high-resolution video stored on our
+mobile device to several WiFi connected devices, such as televisions or
+projectors. We stored the video and other data on our device drive as securely
+as possible, so we chose to initialize the system at a configuration point
+offering very strong security.
 
-However, with the ability to operate at points along the pareto frontier (c.f.
-\figref{40mb-read-with-forward}), even at points between the discrete
-configurations available to prior work, a context-aware system can switch to a
-configuration that trades the security of the portions of storage that are being
-used to stream the video so that we stay within our curtailed energy budget.
+For the ciphers examined in this paper, \figref{energy-latency-linearity} shows
+a correlation between stronger security guarantees and greater total energy
+use, meaning our device is using a lot more energy to facilitate FDE at this
+configuration point.
+
+Further suppose that, after a while of streaming, our device determines its
+remaining battery life is too low and enters a ``power saver'' mode with a
+curtailed energy budget. With a traditional filesystem, we are stuck with our
+high-energy configuration chosen at system initialization.
+
+However, with the ability to operate at points along the pareto frontier (see
+\figref{40mb-read}), even at points between the discrete configurations
+available to prior work, a context-aware system can switch to a configuration
+that trades the security of the portions of storage that are being used to
+stream the video so that we stay within our curtailed energy budget.
 
 When we return to a non-curtailed energy budget, the system can return to its
 more secure configuration dynamically, allowing the cipher strength of the
 backing store to eventually recover without having to recreate the entire
-underlying filesystem.\\
-
-\TODO{Talk about the energy-budget case study here as motivation.}
+underlying filesystem.
 
 \subsection{Challenges}
 
 \textbf{Comparing ciphers with disparate security guarantees.} To ensure that
-these tradeoffs are made optimally, it is desirable to quantify the security of
-various ciphers. This is challenging since different schemes are designed to
-mitigate entirely disparate and unrelated threats. To address this, we propose a
-method for quantitative cipher comparison in the FDE context, and then present
-some empirical results showing the wide range of security and energy tradeoffs
-that are available with state-of-the-art ciphers.
+these tradeoffs are made optimally, it is desirable to score the security
+properties of various ciphers. This is challenging since different ciphers have
+a wide range of energy/latency vs security properties, including ciphers that
+are and are not length-preserving. Hence, cipher configurations won't form a
+continuous tradeoff space in any scheme and so represent discrete points, yet
+the most optimal configuration state may lie between these points.
+
+To address this, we propose a method for quantitative cipher comparison in the
+FDE context, and then present some empirical results showing the wide range of
+security and energy tradeoffs that become available with various
+state-of-the-art ciphers as a result.\\
 \\
-\\
-\textbf{Maintaining I/O performance with a mixed-cipher drive layout.} SwitchBox
-requires a generic cipher API and novel IPC mechanism that can switch the
-ciphers of individual nuggets while maintaining low overhead and acceptable
-performance. This mechanism provides the ``how'' to switch a nugget's cipher,
-but does not provide the ``when'' or ``where'' to do so; to address this, we
-implement and demonstrate a series of cipher switching \textit{strategies} that
-facilitate navigating our space of possible configurations. These strategies
-allow SwitchBox to settle on points between the static configurations in
-\figref{40mb-read}.
+\textbf{Maintaining I/O performance with a mixed-cipher drive layout.} With
+prior work, cipher configurations are typically fixed at the time the system is
+booted or the filesystem is created~\cite{CiteAllTheFilesystems}; if
+requirements change online, at best the entire system requires a reboot which is
+not optimal. At worst, before the reboot, the filesystem or encrypted container
+has to be deleted and recreated. This is rarely desirable. Hence, SwitchBox
+requires a generic \emph{cipher API}, IPC, and a software mechanism that can
+re-cipher or \emph{switch} the cipher used to encrypt and decrypt individual
+nuggets while maintaining low overhead and acceptable performance. This
+mechanism should allow for a mixed-cipher drive layout and provides the ``how''
+to switch nuggets' ciphers, but does not provide the ``when'' or ``where''.
+
+To address this, we implement and demonstrate a series of novel cipher switching
+\textit{strategies} that, along with the ``pluggable'' cipher API and cipher
+switching mechanism, enable optimal navigation of the tradeoff space of
+configurations. For instance, these strategies allow SwitchBox to settle on
+points between the static cipher configurations in \figref{40mb-read}.
+
+\TODO{Might be able to piece this out into two challenges: common interface for
+stream ciphers and cipher switching strategies; that last one might be able to
+split into two on its own. Perhaps this challenge subsection should mirror the
+layout of the design section?}

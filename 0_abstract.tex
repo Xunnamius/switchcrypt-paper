@@ -1,25 +1,22 @@
 \begin{abstract}
 
-%Full-drive encryption (FDE) is a primary concern among several in modern systems
-%increasingly backed by solid-state storage. 
 Full-drive encryption (FDE) is essential for security in modern computing
 systems, especially mobile systems. Recent work with stream-cipher based FDE
-shows significantly improved I/O throughput over block cipher based FDE while
+shows significantly improved throughput over block cipher based FDE while
 offering stronger security guarantees. This approach is ideal when the only
-optimization target is throughput; however, high performance I/O often conflicts
-with other key concerns like the strength of the encryption and energy usage.
+optimization target is throughput; however, optimizing for high throughput often
+conflicts with other key concerns like the strength of the encryption and energy
+usage.
 
-In this paper, we show that drive management requires navigating a tradeoff
-space between energy, security, and performance. We further characterize this
-space and present SwitchBox, a software mechanism to navigate such a space
-dynamically and at runtime via \emph{cipher switching}, which can be done in
-space or time. The key insight in this approach is achieving low-overhead
-switching by leveraging the overwrite-averse, append-mostly behavior of the
-underlying solid-state storage to trade throughput or total energy use for
-desired security guarantees. We implement SwitchBox on an ARM big.LITTLE mobile
-processor and test its performance under the popular F2FS LFS. We find that
-SwitchBox's flexibility satisfies a wide range of performance and security
-constraints. \TODO{Perhaps a sentence-long general explanation of the use cases
-and the most interesting result(s) from them?}
+In this paper, we show that optimal FDE requires navigating a configuration
+space of different stream ciphers. We then present SwitchBox, a software
+mechanism to navigate this space dynamically via \emph{cipher switching}, which
+can be done in space or time. The key insight in this approach is achieving
+low-overhead switching by leveraging the overwrite-averse, append-mostly
+behavior of the underlying solid-state storage to trade throughput or total
+energy use for desired security guarantees. We implement SwitchBox on an ARM
+big.LITTLE mobile processor and test its performance under the popular F2FS LFS.
+We find that SwitchBox's flexibility satisfies a wide range of performance and
+security constraints.
 
 \end{abstract}

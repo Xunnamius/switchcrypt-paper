@@ -80,7 +80,7 @@ devices, as free space becomes constrained, performance drops off a cliff. This
 is a well-studied issue (see related work).
 
 If the filesystem is made aware when the backing store is in such a state, we
-can offset some of the (drastic) performance loss by swapping the ciphers of hot
+can offset some of the (drastic) performance loss by switching the ciphers of hot
 nuggets to the fastest cipher available until the disk space problem is
 remedied, after which the system can detect return the swapped nuggets to their
 former encrypted state.
