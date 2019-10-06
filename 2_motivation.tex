@@ -29,9 +29,10 @@ File Systems' (LFS) overwrite-averse behavior to achieve high-performance
 encryption using stream ciphers in a CTR-like mode to generate one-time
 pads~\cite{OTP}. Threats like two-time pad and rollback---caused by
 overwrites---are mitigated with \emph{re-keying}, where groups of contiguous
-sectors referred to as \emph{nuggets} are re-encrypted with a new key when an
-overwrite is detected. Overwrite-averse LFS behavior ensures costly re-keying
-operations are triggered as rarely as possible during I/O~\cite{StrongBox}.
+sectors referred to as \emph{nuggets} are decrypted with the old key and
+encrypted again with a new key when an overwrite is detected. Overwrite-averse
+LFS behavior ensures costly re-keying operations are triggered as rarely as
+possible during I/O~\cite{StrongBox}.
 
 \begin{figure}[ht]
    \centering
@@ -93,8 +94,8 @@ independent nuggets that lends itself to mixed cipher use, it is clear our
 system does not have to sit at a static configuration point. Hence, we require a
 mechanism to navigate the cipher configuration space, trading off concerns such
 that the system is always at the most optimal configuration given the runtime
-environment. By abstracting the rekeying process out into a re-ciphering or
-\emph{cipher switching} process, whereby the key and the cipher used to
+environment. By abstracting the re-keying process out into a \emph{re-ciphering}
+or \emph{cipher switching} process, whereby the key and the cipher used to
 encrypt/decrypt the nugget can both be switched at runtime, we can trade off
 between different ciphers and their characteristics dynamically. Comparatively,
 prior work can only accomplish a static tradeoff at compile time or at
@@ -164,13 +165,14 @@ requires a generic \emph{cipher API}, IPC, and a software mechanism that can
 re-cipher or \emph{switch} the cipher used to encrypt and decrypt individual
 nuggets while maintaining low overhead and acceptable performance. This
 mechanism should allow for a mixed-cipher drive layout and provides the ``how''
-to switch nuggets' ciphers, but does not provide the ``when'' or ``where''.
+to switch nuggets' ciphers.
 
-To address this, we implement and demonstrate a series of novel cipher switching
-\textit{strategies} that, along with the ``pluggable'' cipher API and cipher
-switching mechanism, enable optimal navigation of the tradeoff space of
-configurations. For instance, these strategies allow SwitchBox to settle on
-points between the static cipher configurations in \figref{40mb-read}.
+To provide the ``when'' or ``where'', we implement and demonstrate a series of
+novel cipher switching \textit{strategies} that, along with the ``pluggable''
+cipher API and cipher switching mechanism, enable optimal navigation of the
+tradeoff space of configurations. For instance, these strategies allow SwitchBox
+to settle on points between the static cipher configurations in
+\figref{40mb-read}.
 
 \TODO{Might be able to piece this out into two challenges: common interface for
 stream ciphers and cipher switching strategies; that last one might be able to
