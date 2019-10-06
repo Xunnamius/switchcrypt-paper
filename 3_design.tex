@@ -44,9 +44,9 @@ contents are re-ciphered, the cryptographic driver provides a mechanism to
 navigate the latency/energy/security tradeoff space of cipher configurations
 with low overhead.
 
-Since cipher switching is a cross-cutting concern (the desire to switch ciphers
-could come from user space, for instance), SwitchBox uses IPC to receive
-commands to toggle the active cipher.
+Since cipher switching is a cross-cutting concern---for instance, the desire to
+switch ciphers could come from an unrelated process in user space---SwitchBox
+uses IPC to receive commands to toggle the active cipher.
 
 \begin{figure}[t]
 \centering
@@ -243,29 +243,29 @@ performance advantage and 2) allowing more aggressive N-forward behavior (where
 $N > 0$) to take advantage of spatial locality during read-heavy workloads to
 result in a further performance advantage (c.f. \secref{evaluation}).
 
-\subsection{A Relative Scoring of Cipher Security For SwitchBox FDE}
+\subsection{A Relative Scoring of Cipher Security Properties}
 
-Any block cipher (in a proper mode) or stream cipher can be used with SwitchBox.
-With this research, we select five popular cipher algorithms and implement them
-under Switchbox in various configurations: ChaCha~\cite{ChaCha20} (ChaCha8,
-ChaCha12, ChaCha20), Salsa~\cite{SalsaX} (Salsa8, Salsa12, Salsa20),
-AES~\cite{AES} (AES-128, AES-256), HC128/HC256~\cite{HCX}, and
-Freestyle~\cite{Freestyle}. Each cipher has been proven formally secure in that
-there are no known efficient attacks against them. However, to simplify
-reasoning about trading off the ``security'' provided by the various stream
-cipher configurations in the FDE context, we must have a way to quantitatively
-compare the benefits of some relevant subset of otherwise disparate security
-properties and cipher configurations. Hence, we do not attempt to define a
-generally applicable ranking of cipher security for FDE. Instead, we consider
-three key features that when summed yield a relative score given a cipher's
-security properties when specifically compared to the other ciphers we selected
-(see: \tblref{security-quant}).\\
+\TODO{Stress that ciphers are scored given the usefulness of their cryptographic
+properties to SwitchBox FDE. We base this on three factors.}
+
+Any block cipher or stream cipher can be used with SwitchBox. With this
+research, we select five popular cipher algorithms and implement them under
+Switchbox in various configurations: ChaCha~\cite{ChaCha20} (ChaCha8, ChaCha12,
+ChaCha20), Salsa~\cite{SalsaX} (Salsa8, Salsa12, Salsa20), AES~\cite{AES}
+(AES-128, AES-256), HC128/HC256~\cite{HCX}, and Freestyle~\cite{Freestyle}. Each
+cipher has been proven formally secure in that there are no known efficient
+attacks against them. However, to simplify reasoning about trading off their
+various cryptographic properties in the FDE context, we must have a way to
+quantitatively compare them. Their properties are disparate security properties
+and cipher configurations. Hence, we do not attempt to define a generally
+applicable ranking of cipher security for FDE. Instead, we consider three key
+features that, when summed, give a rough estimate of the usefulness of their
+se properties to SwitchBox FDE. (see: \tblref{security-quant}).\\
 \\
 \textbf{1) Output randomization (OR).} A cipher with output randomization
-generates different ciphertexts non-deterministically given the same key,
-nonce, and message. This makes chosen-ciphertext (CCA) attacks, where the
-ciphertext is in full control of the adversary, much more difficult in the
-general FDE context, where key and nonce may be reused with the same message.
+generates different ciphertexts non-deterministically given the same key, nonce,
+and message. This makes chosen-ciphertext (CCA) and other attacks where the
+ciphertext is in full control of the adversary much more difficult.
 Additionally, the cipher need not be length-preserving.
 
 This is a binary feature in that a cipher either outputs deterministically or
@@ -281,10 +281,10 @@ offline/dictionary attacks with respect to the time taken to finish decrypting
 ciphertext given an incorrect key versus a correct key; a cipher with standard
 resistance to brute force and offline/dictionary attacks has no kind of
 \emph{key-guessing penalty}~\cite{Freestyle}---the ciphertext is decrypted no
-slower when given the incorrect key as it is when given the correct key.
-Similarly, we consider ciphers with so-called ``enhanced resistance,'' where
-they are expected to take longer to finish decrypting ciphertext given an
-incorrect key versus a correct key with high probability.
+slower when given the incorrect key versus the correct key. Similarly, we
+consider ciphers with so-called ``enhanced resistance,'' where they are expected
+to take longer to finish decrypting ciphertext given an incorrect key versus a
+correct key with high probability.
 
 Scores for this feature range from 0 to 1, where 0 represents no resistance,
 0.5 represents standard resistance to brute-force and offline/dictionary
