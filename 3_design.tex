@@ -245,9 +245,6 @@ result in a further performance advantage (c.f. \secref{evaluation}).
 
 \subsection{A Relative Scoring of Cipher Security Properties}
 
-\TODO{Stress that ciphers are scored given the usefulness of their cryptographic
-properties to SwitchBox FDE. We base this on three factors.}
-
 Any block cipher or stream cipher can be used with SwitchBox. With this
 research, we select five popular cipher algorithms and implement them under
 Switchbox in various configurations: ChaCha~\cite{ChaCha20} (ChaCha8, ChaCha12,
@@ -255,12 +252,12 @@ ChaCha20), Salsa~\cite{SalsaX} (Salsa8, Salsa12, Salsa20), AES~\cite{AES}
 (AES-128, AES-256), HC128/HC256~\cite{HCX}, and Freestyle~\cite{Freestyle}. Each
 cipher has been proven formally secure in that there are no known efficient
 attacks against them. However, to simplify reasoning about trading off their
-various cryptographic properties in the FDE context, we must have a way to
-quantitatively compare them. Their properties are disparate security properties
-and cipher configurations. Hence, we do not attempt to define a generally
-applicable ranking of cipher security for FDE. Instead, we consider three key
-features that, when summed, give a rough estimate of the usefulness of their
-se properties to SwitchBox FDE. (see: \tblref{security-quant}).\\
+disparate cryptographic ``security'' properties in the FDE context, we must have
+a way to quantitatively compare them. Their properties are disparate security
+properties and cipher configurations. Hence, we do not attempt to define a
+generally applicable ranking of cipher security for FDE. Instead, we score based
+on three key properties that, when summed, give a rough estimate of the
+usefulness of a cipher to SwitchBox FDE. (see: \tblref{security-quant}).\\
 \\
 \textbf{1) Output randomization (OR).} A cipher with output randomization
 generates different ciphertexts non-deterministically given the same key, nonce,
