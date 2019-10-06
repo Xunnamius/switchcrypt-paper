@@ -4,5 +4,6 @@ out/
 *.bbl
 *.blg
 *.log
+*.aex
 *.out
 _paper.pdf

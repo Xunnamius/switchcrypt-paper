@@ -279,12 +279,12 @@ dictionary attacks, which is paramount for the encryption of data at rest. We
 narrowly define ``standard resistance'' versus brute-force and
 offline/dictionary attacks with respect to the time taken to finish decrypting
 ciphertext given an incorrect key versus a correct key; a cipher with standard
-resistance to brute force and offline/dictionary attacks has no
+resistance to brute force and offline/dictionary attacks has no kind of
 \emph{key-guessing penalty}~\cite{Freestyle}---the ciphertext is decrypted no
-slower than when given the correct key. Similarly, we consider ciphers with
-so-called ``enhanced resistance,'' where they are expected to take longer to
-finish decrypting ciphertext given an incorrect key versus a correct key with
-high probability.
+slower when given the incorrect key as it is when given the correct key.
+Similarly, we consider ciphers with so-called ``enhanced resistance,'' where
+they are expected to take longer to finish decrypting ciphertext given an
+incorrect key versus a correct key with high probability.
 
 Scores for this feature range from 0 to 1, where 0 represents no resistance,
 0.5 represents standard resistance to brute-force and offline/dictionary
