@@ -3,9 +3,9 @@
 \TODO{Restate that we're addressing our primary challenges (from motivation) in
 three parts.}
 
-In this section, we describe our mechanism to navigate the cipher
-configuration space and cipher switching strategies. We also discuss the
-pluggable stream cipher API and other design challenges.
+In this section, we describe our mechanism to navigate the cipher configuration
+space and cipher switching strategies. We also discuss the pluggable stream
+cipher API and other design challenges.
 
 \subsection{Mechanism to Re-Cipher A Nugget}
 
@@ -15,14 +15,15 @@ pluggable stream cipher API and other design challenges.
    \caption{Overview of the SwitchBox construction.}\label{fig:overview}
 \end{figure}
 
-SwitchBox is a translation layer positioned between the block layer and the
-operating system's virtual file system. Unlike StrongBox, which focuses on
-optimizing performance despite re-keying due to overwrites, SwitchBox abstracts
-the idea of re-keying out into re-ciphering or \emph{cipher switching}, where a
-nugget's contents are decrypted using the old key and inactive cipher and
-encrypted using a new key and the active cipher before completing the I/O
-operation; instead of myopically pursuing a performance win, this allows us to
-trade off different ciphers and their characteristics online.
+Like StrongBox, SwitchBox is a translation layer ideally implemented in the
+Flash Translation Layer (FTL). Unlike StrongBox, which focuses on optimizing
+performance despite re-keying due to overwrites, SwitchBox maintains overwrite
+protections while abstracting the idea of re-keying out into re-ciphering or
+\emph{cipher switching}, where a nugget's contents are decrypted using the old
+key and inactive cipher and encrypted using a new key and the active cipher
+before completing the I/O operation; instead of myopically pursuing a
+performance win, this allows us to trade off different ciphers and their
+characteristics online.
 
 \figref{overview} illustrates the SwitchBox design. SwitchBox manages five
 metadata components: an in-memory \emph{Merkle Tree}; two drive-backed byte
@@ -32,21 +33,21 @@ drive-backed store for cipher-specific \emph{per-nugget metadata}.
 
 These five components are tightly integrated into the cryptographic driver,
 which handles data encryption, decryption, overwrite detection, integrity
-protection, communication with the wider system to determine the active cipher,
-and the application of cipher switching strategies with stream cipher
-implementations provided by the pluggable stream cipher API. The cryptographic
-driver interacts with 1) the overlying LFS through traditional I/O passed
-through the Linux Virtual Filesystem Switch (VFS) and 2) the underlying
-backing store through the device controller block I/O layer.
+protection, IPC with the wider system to determine the active cipher, and the
+application of cipher switching strategies with stream cipher implementations
+provided by a pluggable stream cipher API. The cryptographic driver interacts
+with 1) the overlying LFS through traditional I/O passed through the Linux
+Virtual Filesystem Switch (VFS) and 2) the underlying drive through the device
+controller block I/O layer or as part of the FTL, depending on implementation.
+
+Since cipher switching is a cross-cutting concern---for instance, the desire to
+switch ciphers could come from an unrelated process in user space---SwitchBox
+uses IPC to receive commands to toggle the active cipher.
 
 By applying cipher switching strategies to individual nuggets so that their
 contents are re-ciphered, the cryptographic driver provides a mechanism to
 navigate the latency/energy/security tradeoff space of cipher configurations
 with low overhead.
-
-Since cipher switching is a cross-cutting concern---for instance, the desire to
-switch ciphers could come from an unrelated process in user space---SwitchBox
-uses IPC to receive commands to toggle the active cipher.
 
 \begin{figure}[t]
 \centering
@@ -59,11 +60,13 @@ backing store is illustrated in \figref{backstore2}. In the \textit{body}
 section of the backing store layout, end-user data is partitioned into a series
 of same-size \emph{logical blocks} marked \textit{NUG} for \emph{nugget}. A
 nugget consists of one or more physical drive blocks and per-nugget metadata
-indicating which cipher was used to encrypt the nugget.
+indicating which cipher was used to encrypt the nugget. We introduce this new
+terminology to easily differentiate our logical blocks (nuggets) from physical
+drive and other blocks.
 
 \subsection{Pluggable Stream Cipher API}
 
-We develop an API to allow any stream cipher or any cipher that can pose as a
+We develop an API to allow any stream cipher or any cipher that can operate as a
 stream cipher to be used with SwitchBox without modification. In this way,
 different stream ciphers might appear to all be interchangeable, but they are
 not. Not all stream ciphers, let alone all ciphers, are length-preserving. A
@@ -81,24 +84,25 @@ ciphers.
 
 \subsection{Cipher Switching Strategies}
 
-At any moment, the currently active cipher is used to interact with the backing
-store. Until the wider system indicates that SwitchBox should use a different
-cipher to interact with the backing store, SwitchBox functions identically to
-StrongBox in that it uses the active cipher (ChaCha20 in StrongBox's case) to
-encrypt and decrypt all nuggets during I/O.
+At any moment, the currently active cipher is used to encrypt nugget contents.
+Until the wider system indicates that SwitchBox should use a different cipher to
+interact with the backing store, SwitchBox functions identically to StrongBox in
+that it uses the active cipher (ChaCha20 in StrongBox's case) to encrypt and
+decrypt all nuggets during I/O.
 
 However, switching the active cipher dynamically allows SwitchBox to achieve
 optimal configuration points that are otherwise unachievable with prior work.
 Through IPC, the wider system determines which cipher should be the active
-cipher at any given moment.
+cipher at any moment.
 
 Unfortunately, when the wider system determines a cipher switch should occur for
-whatever reason, it is entirely non-trivial to determine \emph{when} to
-encrypt a nugget with a different cipher and \emph{where} to direct the
-output of that cipher. A simple approach would immediately convert every nugget
-in the backing store, but the cost of doing that conversion would likely consume
-more energy than would be saved in future accesses; the egregious latency
-penalty incurred waiting for the entire drive to be re-ciphered would be
+whatever reason, it is entirely non-trivial to determine \emph{when} to encrypt
+a nugget with a different cipher and \emph{where} to direct the output of that
+cipher. Depending on the use case, it may make the most sense to re-cipher a
+nugget immediately, or it may not. A simple approach would immediately convert every
+nugget in the backing store, but the cost of doing that conversion would likely
+consume more energy than would be saved in future accesses; the egregious
+latency penalty incurred waiting for the entire drive to be re-ciphered would be
 similarly unacceptable. Hence, a more strategic approach is necessary. Cipher
 switching \emph{strategies} is an essential part of the mechanism by which
 SwitchBox can efficiently transition nuggets between different encrypted states
@@ -119,7 +123,7 @@ disadvantages of these strategies and each strategy.
    \begin{tabular}{@{}lll@{}}
    \toprule
    \textbf{Strategy} & \textbf{Advantages} & \textbf{Disadvantages} \\ \midrule
-   Forward       & X      & Y \\
+   Forward       & X     & Y \\
    Mirrored      & A     & B \\
    Selective     & C     & D \\
    \end{tabular}
@@ -243,7 +247,7 @@ performance advantage and 2) allowing more aggressive N-forward behavior (where
 $N > 0$) to take advantage of spatial locality during read-heavy workloads to
 result in a further performance advantage (c.f. \secref{evaluation}).
 
-\subsection{A Relative Scoring of Cipher Security Properties}
+\subsection{Threat Model for Cipher Strategies}
 
 Any block cipher or stream cipher can be used with SwitchBox. With this
 research, we select five popular cipher algorithms and implement them under
@@ -251,13 +255,19 @@ Switchbox in various configurations: ChaCha~\cite{ChaCha20} (ChaCha8, ChaCha12,
 ChaCha20), Salsa~\cite{SalsaX} (Salsa8, Salsa12, Salsa20), AES~\cite{AES}
 (AES-128, AES-256), HC128/HC256~\cite{HCX}, and Freestyle~\cite{Freestyle}. Each
 cipher has been proven formally secure in that there are no known efficient
-attacks against them. However, to simplify reasoning about trading off their
-disparate cryptographic ``security'' properties in the FDE context, we must have
-a way to quantitatively compare them. Their properties are disparate security
-properties and cipher configurations. Hence, we do not attempt to define a
-generally applicable ranking of cipher security for FDE. Instead, we score based
-on three key properties that, when summed, give a rough estimate of the
-usefulness of a cipher to SwitchBox FDE. (see: \tblref{security-quant}).\\
+attacks against them.
+
+\subsection{A Relative Scoring of Cipher Security Properties}
+
+While each cipher we selected for SwitchBox has been proven formally secure in
+that there are no known efficient attacks against them, to simplify
+reasoning about trading off their disparate cryptographic security
+properties in the FDE context, we must have a way to quantitatively compare
+them. Their properties are disparate security properties and cipher
+configurations. Hence, we do not attempt to define a generally applicable
+ranking of cipher security for FDE. Instead, we score based on three key
+properties that, when summed, give a rough estimate of the usefulness of a
+cipher to SwitchBox FDE. (see: \tblref{security-quant}).\\
 \\
 \textbf{1) Output randomization (OR).} A cipher with output randomization
 generates different ciphertexts non-deterministically given the same key, nonce,

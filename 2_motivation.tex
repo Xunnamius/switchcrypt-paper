@@ -2,37 +2,36 @@
 
 \subsection{Background}
 
-\TODO{Think about how to use the vocabulary of ``binary additive stream cipher''
-over something like ``CTR-like mode'' throughout this section and maybe intro}
-
 The standard approach to FDE, using the AES \emph{block cipher}, introduces
 significant overhead during filesystem operation. It is well known that
 authenticated encryption using \emph{stream ciphers} like
 ChaCha20~\cite{ChaCha20} is faster than using AES~\cite{StrongBox, AnotherPaper,
 AnotherPaper}. However, when used naively in drive encryption, stream ciphers
-are vulnerable to ``overwrite attacks'' like two-time pad and
-rollback~\cite{StrongBox}. To enable FDE using stream ciphers, several
-approaches have been explored:
+are widely known to be vulnerable to ``overwrite attacks'' like pad reuse and
+rollback~\cite{KatzLindell, StrongBox}. To enable FDE using stream ciphers,
+several approaches have been explored:
 
 \begin{itemize}
    \item Use a non-deterministic CTR mode with specially designed cipher and
    filesystem (Freestyle~\cite{Freestyle}).
    \item Use a length-preserving ``tweakable super-pseudorandom permutation''
    construction with nonce-accepting stream cipher (Adiantum~\cite{Adiantum}).
-   \item Use any stream cipher in a CTR-like mode with metadata management to
-   prevent overwrites (StrongBox~\cite{StrongBox}).
+   \item Use a stream cipher in a binary additive (XOR) mode with metadata
+   management to prevent overwrites (StrongBox~\cite{StrongBox}).
 \end{itemize}
 
 In this paper, we focus on the lattermost approach. StrongBox~\cite{StrongBox}
-is a stream cipher-based FDE and metadata layer that exploits Log-structured
-File Systems' (LFS) overwrite-averse behavior to achieve high-performance
-encryption using stream ciphers in a CTR-like mode to generate one-time
-pads~\cite{OTP}. Threats like two-time pad and rollback---caused by
-overwrites---are mitigated with \emph{re-keying}, where groups of contiguous
-sectors referred to as \emph{nuggets} are decrypted with the old key and
-encrypted again with a new key when an overwrite is detected. Overwrite-averse
-LFS behavior ensures costly re-keying operations are triggered as rarely as
-possible during I/O~\cite{StrongBox}.
+is a ChaCha20 stream cipher based FDE and metadata layer that exploits
+Log-structured File Systems' (LFS) overwrite-averse behavior to achieve
+high-performance encryption. StrongBox uses ChaCha20 in a secure binary additive
+mode (XOR) to encrypt and decrypt data at rest. Threats like pad
+reuse~\cite{KatzLindell} (\ie{two-time pad}) and rollback attacks---all caused
+by overwrites---are mitigated through \emph{re-keying}, where groups of
+contiguous storage blocks are decrypted with the old key and encrypted again
+with a new key when an overwrite is detected. Unfortunately, re-keying is an
+expensive operation. However, overwrite-averse LFS behavior ensures costly
+re-keying operations are triggered as rarely as possible during I/O, preserving
+or improving system performance~\cite{StrongBox}.
 
 \begin{figure}[ht]
    \centering
@@ -43,7 +42,7 @@ possible during I/O~\cite{StrongBox}.
 StrongBox divides the underlying drive into a series same-size logical blocks
 called \emph{nuggets}, illustrated in \figref{flknug}. A nugget consists of one
 or more physical drive blocks/sectors, depending on its configured size. Each
-nugget is subdivided into a constant number of blocks called \emph{flakes}.
+nugget is subdivided into a constant number of units called \emph{flakes}.
 
 This flake-nugget structure is used by StrongBox to 1) track, detect, and handle
 overwrites and 2) limit the maximum length of any plaintexts provided to
@@ -54,7 +53,7 @@ operations when overwrites do occur.
 
 \subsubsection{A Single Point In A Space Of Possible Cipher Configurations}
 
-What if we used StrongBox with a cipher other than ChaCha20? Redesigning
+What if we used StrongBox with \textit{ciphers} other than ChaCha20? Redesigning
 StrongBox with a generic cipher API allows for ciphers other than ChaCha20 to be
 used, yielding a space of cipher configuration points with various performance,
 battery life, security, drive space, and other tradeoffs. It follows then that

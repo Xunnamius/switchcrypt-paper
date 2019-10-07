@@ -14,10 +14,11 @@ Clemente Vella. As with the original StrongBox construction, the Merkle Tree
 implementation is from the Secure Block Device~\cite{SBD}. SwitchBox
 implementation is publicly available open-source\footnote{\SystemURI}.
 
-We use the BUSE~\cite{BUSE} virtual block device as our device controller.
-BUSE is a thin (200 LoC) wrapper around the standard Linux Network Block Device
-(NBD). BUSE allows an operating system to transact block I/O requests to and
-from virtual block devices exposed via domain socket.
+We implement SwitchBox on top of the BUSE~\cite{BUSE} virtual block device,
+using it as our mock device controller. BUSE is a thin (200 LoC) wrapper around
+the standard Linux Network Block Device (NBD). BUSE allows an operating system
+to transact block I/O requests to and from virtual block devices exposed via
+domain socket.
 
 For experimental purposes, our implementation makes the choice of ciphers
 binary: either the system wants SwitchBox to access the backing store using the
@@ -49,6 +50,6 @@ than have the backing store consist of all zeroes. This is a one-time cost paid
 during initialization and has no tangible effect on performance.
 
 If nuggets are not seeded with random data initially, any write operation into
-an "empty" nugget might leak information or constitute an overwrite when the
+an ``empty'' nugget might leak information or constitute an overwrite when the
 predictable state of the backing store (\ie{initialized to all zeroes}) leads to
 an overwrite-style condition.

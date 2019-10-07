@@ -3,7 +3,7 @@
 There are several important concerns modern filesystems must balance. Paramount
 among them are: security of data at rest; performance, \ie{I/O latency or
 throughput}; and overall energy budget. However, these concerns exist in
-contention with one another.
+stark contention.
 
 The state of the art for securing data at rest is Full-Drive Encryption
 (FDE)\footnote{The common term is full-\emph{disk} encryption, but this work
@@ -17,65 +17,70 @@ desirable. \TODO{Introduce two examples: 1) Android M FDE example from
 Google~\cite{AndroidM}. 2) Another example from someone
 else~\cite{AnotherExample}.}
 
-FDE's impact on performance and energy efficiency depends on choice of
-filesystem/mapper and the choice of cipher, as different ciphers express
-different performance and efficiency characteristics while offering contrasting
-security guarantees. In this way, cipher choice is perhaps the most important.
+Traditionally, FDE's impact on drive performance and energy efficiency depends
+on choice of filesystem/mapper and the choice of cipher, as different ciphers
+express different performance and efficiency characteristics while offering
+contrasting security guarantees. In this way, cipher choice is perhaps the most
+important.
 
 The standard choice for FDE is the relatively slow AES~\cite{AES} \emph{block
 cipher} in XTS mode (AES-XTS)~\cite{AES-XTS}. Prior work~\cite{StrongBox}
 introduced the motivation and method for using \emph{stream ciphers} like the
 high performance ChaCha20~\cite{ChaCha20} cipher for FDE in lieu of AES-XTS.
 More recent work achieves something similar, such as Google's HBSH~\cite{HBSH}
-(hash, block cipher, stream cipher, hash), Adiantum~\cite{Adiantum}, and others.
+(hash, block cipher, stream cipher, hash) and Adiantum~\cite{Adiantum}, among
+others.
 
 The benefits of choosing a more performant cipher include increased filesystem
 performance(\ie{overall reduced FDE overhead}), reduced energy use, and the
 ability to encrypt devices that would otherwise be too slow or
 energy-inefficient to support FDE, as was the case with many mid- and low-tier
-Android devices at the time FDE was considered for Android M.
+Android devices at the time FDE was considered as a default for Android M.
 
 And ChaCha20 is not the only stream cipher we can choose for FDE. Other stream
 ciphers exist with a variety of different performance characteristics and
 opposing security properties. Some of these include: ChaCha variants with
 different round counts (e.g., ChaCha8 \cite{ChaCha8} and ChaCha20
-\cite{ChaCha20}) or special modes (e.g., Freestyle~\cite{Freestyle}),
-SalsaX~\cite{SalsaX}, AES in counter mode (AES-CTR)~\cite{AES-CTR},
-Rabbit~\cite{Rabbit}, Sosemanuk~\cite{Sosemanuk},, et cetera.
+\cite{ChaCha20}) or exotic security properties (e.g.,
+Freestyle~\cite{Freestyle}) and others---SalsaX~\cite{SalsaX}, AES in counter
+mode (AES-CTR)~\cite{AES-CTR}, Rabbit~\cite{Rabbit}, Sosemanuk~\cite{Sosemanuk},
+et cetera.
 
 In this way, the choice of (stream) cipher can be viewed as a key
 \emph{configuration} parameter for systems supporting FDE; \ie{the configuration
 providing the fastest I/O throughput is almost always different than the
-configuration providing the strongest security guarantees, and both may differ
-from the configuration that uses the least amount of energy}. Further, while the
-cipher choice can be configured statically at compile- or boot-time given some
-generic case, in traditional FDE, these configurations cannot adapt to changes
-that might arise while the system is running. Examples include changes in
-resource availability, runtime environment, energy-budget and OS ``battery
+configuration providing the most useful security guarantees, and both may differ
+from the configuration that uses the least amount of energy or allows the most
+writable drive space}. Further, while the cipher choice can be configured
+statically at compile- or boot-time given some generic case, in traditional FDE,
+these configurations cannot adapt to changes that might arise while the system
+is running. Examples include changes in resource availability, runtime
+environment, desired security properties, and energy budget and OS ``battery
 saver'' functionality.
 
 Hence, any static configuration will inevitably sacrifice one concern for
-another, even when it is not optimal. But what if our system did not have to sit
-at a static configuration point, especially when another configuration becomes
-more desirable later on?
+another, even when it is not optimal to the end user. But what if our system did
+not have to sit at a static configuration point, especially when another
+configuration becomes more desirable later on?
 
 \subsection{Our Contributions}
 
-We introduce a simple scheme to quantify the usefulness or ``strength'' of ciphers based on key security properties
-relevant to SwitchBox FDE.
+We introduce a simple scheme to quantify the usefulness or relative ``strength''
+of ciphers based on key security properties relevant to SwitchBox FDE.
 
-Using this scheme, we then define a novel tradeoff space of competing concerns:
-total energy use, cipher strength, and the performance characteristics of
-various stream ciphers in the context of FDE.
+Using this scheme, we define a novel tradeoff space of cipher configurations
+over competing concerns: total energy use, useful security properties in the FDE
+context, read and write performance, total writable space on the drive, and how
+quickly the drive can converge to a single configuration.
 
 Finally, we present SwitchBox, a novel design substantively expanding on prior
 work by 1) decoupling the cipher implementation from the encryption mechanism,
 2) allowing ciphertext from different ciphers to coexist side-by-side on the
-same drive as independent units, 3) employing various \emph{switching
-strategies} to ``re-cipher'' those independent units dynamically at run-time.
-SwitchBox accomplishes these without significant overhead, allowing us to
-navigate our space of cipher configurations online, always ensuring that the
-system is sitting at the most optimal configuration.
+same drive as independent storage units, 3) employing various \emph{switching
+strategies} to ``re-cipher'' those units dynamically at run-time. SwitchBox
+accomplishes these without significant overhead, allowing us to navigate our
+tradeoff space of cipher configurations online to ensuring the system is near
+the most optimal configuration given the constraints at the moment.
 
 \TODO{We demonstrate SwitchBox's effectiveness on ...; we measure using ...; we
 further demonstrate with use cases ...}
