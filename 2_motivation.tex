@@ -68,22 +68,24 @@ space of cipher configurations.
 
 For instance, \figref{40mb-read} shows the security versus I/O latency tradeoff
 between different stream ciphers (including ChaCha20) when completing a 40MB
-read of encrypted storage. The experiment was performed on an ARM big.LITTLE
-Exynos Octa processor, which is similar to the processors used in the Samsung
-Galaxy line of phones and other devices. Of the ciphers we tested, those with
-relatively stronger security guarantees resulted in higher latency for I/O
-operations while ciphers with relatively weaker security guarantees resulted in
+read of encrypted storage. The experiment was performed on a Linux RAM disk on
+an ARM big.LITTLE Exynos Octa processor, which is similar to the processors used
+in the Samsung Galaxy line of phones and other devices. Of the ciphers we
+tested, those with more desirable but performance inhibitive security guarantees
+(see: \secref{design}) resulted in higher latency for I/O operations while
+ciphers with relatively weaker less desirable security guarantees resulted in
 lower latency.
 
-\subsubsection{Encryption And Re-Keying Of Nuggets Occur Entirely Independently}
+\subsubsection{Nugget Encryption/Decryption And Re-Keying Is Entirely Independent}
 
 With SwitchBox, nuggets are considered as distinct logical blocks, each with
 their own metadata and unique cryptographic key used to encrypt and decrypt
-their contents with the single cipher chosen at initialization. This layout
-naturally lends itself to encrypting different portions of the underlying drive
-with different ciphers instead; we can select any cipher to encrypt or decrypt
-any nugget at any point, rather than just a single cipher globally. This allows
-the filesystem to support mixed cipher configurations that can be encrypted,
+their contents independent of other nuggets using the cipher chosen at system
+initialization. This layout of distinct logical blocks naturally lends itself to
+encrypting different portions of the underlying drive with different ciphers
+instead; we can select any cipher to encrypt or decrypt any nugget at any point,
+rather than just a single cipher applied globally across the backing store. This
+allows the system to support mixed cipher configurations that can be encrypted,
 decrypted, swapped individually.
 
 \subsubsection{Navigate The Configuration Space With ``Cipher Switching''}
@@ -98,11 +100,11 @@ or \emph{cipher switching} process, whereby the key and the cipher used to
 encrypt/decrypt the nugget can both be switched at runtime, we can trade off
 between different ciphers and their characteristics dynamically. Comparatively,
 prior work can only accomplish a static tradeoff at compile time or at
-filesystem initialization. \\
+system initialization. \\
 \\
 Leveraging these insights, we present SwitchBox. \TODO{A few short explanatory
-sentences that lead to: Our goal is to dynamically trade security for
-performance or energy.}
+sentences that lead to: Our goal is to dynamically trade desirable security
+properties for performance or energy.}
 
 \subsection{Motivating Example: Filesystem Reacts to OS ``Power Saver'' Mode}
 
@@ -119,14 +121,15 @@ as possible, so we chose to initialize the system at a configuration point
 offering very strong security.
 
 For the ciphers examined in this paper, \figref{energy-latency-linearity} shows
-a correlation between stronger security guarantees and greater total energy
-use, meaning our device is using a lot more energy to facilitate FDE at this
-configuration point.
+a correlation between stronger security guarantees and greater total energy use,
+meaning our device is using a lot more energy to facilitate FDE at this
+configuration point. Though this correlation applies to the ciphers we examined,
+note that this correlation is certainly not true for all possible ciphers.
 
 Further suppose that, after a while of streaming, our device determines its
 remaining battery life is too low and enters a ``power saver'' mode with a
-curtailed energy budget. With a traditional filesystem, we are stuck with our
-high-energy configuration chosen at system initialization.
+curtailed energy budget. With a traditional filesystem or encrypted container, we
+are stuck with our high-energy configuration chosen at system initialization.
 
 However, with the ability to operate at points along the pareto frontier (see
 \figref{40mb-read}), even at points between the discrete configurations
@@ -137,7 +140,7 @@ stream the video so that we stay within our curtailed energy budget.
 When we return to a non-curtailed energy budget, the system can return to its
 more secure configuration dynamically, allowing the cipher strength of the
 backing store to eventually recover without having to recreate the entire
-underlying filesystem.
+underlying filesystem or encrypted container.
 
 \subsection{Challenges}
 
@@ -156,7 +159,7 @@ state-of-the-art ciphers as a result.\\
 \\
 \textbf{Maintaining I/O performance with a mixed-cipher drive layout.} With
 prior work, cipher configurations are typically fixed at the time the system is
-booted or the filesystem is created~\cite{CiteAllTheFilesystems}; if
+booted or the filesystem or container is created~\cite{CiteAllTheFilesystems}; if
 requirements change online, at best the entire system requires a reboot which is
 not optimal. At worst, before the reboot, the filesystem or encrypted container
 has to be deleted and recreated. This is rarely desirable. Hence, SwitchBox

@@ -49,9 +49,9 @@ et cetera.
 In this way, the choice of (stream) cipher can be viewed as a key
 \emph{configuration} parameter for systems supporting FDE; \ie{the configuration
 providing the fastest I/O throughput is almost always different than the
-configuration providing the most useful security guarantees, and both may differ
-from the configuration that uses the least amount of energy or allows the most
-writable drive space}. Further, while the cipher choice can be configured
+configuration providing the most desirable security guarantees, and both may
+differ from the configuration that uses the least amount of energy or allows the
+most writable drive space}. Further, while the cipher choice can be configured
 statically at compile- or boot-time given some generic case, in traditional FDE,
 these configurations cannot adapt to changes that might arise while the system
 is running. Examples include changes in resource availability, runtime
@@ -69,9 +69,9 @@ We introduce a simple scheme to quantify the usefulness or relative ``strength''
 of ciphers based on key security properties relevant to SwitchBox FDE.
 
 Using this scheme, we define a novel tradeoff space of cipher configurations
-over competing concerns: total energy use, useful security properties in the FDE
-context, read and write performance, total writable space on the drive, and how
-quickly the drive can converge to a single configuration.
+over competing concerns: total energy use, useful desirable security properties
+in the FDE context, read and write performance, total writable space on the
+drive, and how quickly the drive can converge to a single configuration.
 
 Finally, we present SwitchBox, a novel design substantively expanding on prior
 work by 1) decoupling the cipher implementation from the encryption mechanism,

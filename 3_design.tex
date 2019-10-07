@@ -162,8 +162,8 @@ strategy to encompass the entire backing store by selecting $N$ equal to the
 total number of nuggets managed by SwitchBox. This would have the overhead of
 re-ciphering large swaths of the backing store upon every I/O operation where a
 nugget encrypted with the non-active cipher is encountered. Of course, this has
-the same effect as simply re-initializing the entire filesystem with the new
-cipher.
+the same dire implications for performance as simply re-initializing the entire
+filesystem or encrypted container with the new cipher.
 
 \subsubsection{Selective Switching Strategy}
 
@@ -245,7 +245,7 @@ if $N > 0$.
 These considerations have the effect of 1) preserving the original StrongBox
 performance advantage and 2) allowing more aggressive N-forward behavior (where
 $N > 0$) to take advantage of spatial locality during read-heavy workloads to
-result in a further performance advantage (c.f. \secref{evaluation}).
+result in a further performance advantage (see: \secref{evaluation}).
 
 \subsection{Threat Model for Cipher Strategies}
 
@@ -257,17 +257,36 @@ ChaCha20), Salsa~\cite{SalsaX} (Salsa8, Salsa12, Salsa20), AES~\cite{AES}
 cipher has been proven formally secure in that there are no known efficient
 attacks against them.
 
+\TODO{Add text from notebook here.}
+
+\subsection{Online Cryptographic Agility For High Throughput Systems}
+
+Cryptographic agility means that we can replace primitives by new ones without
+having to redesign the entire application/protocol/scheme. Moreover, we'd want a
+plug-and-play way of putting things together. \TODO{Reword this entirely. Add
+supporting paragraphs. Useful for switching primitives if one is found to be
+insecure for whatever reason. This can be done online without taking the system
+down and reinitializing the entire drive or array, which could be extremely time
+consuming.}
+
 \subsection{A Relative Scoring of Cipher Security Properties}
 
-While each cipher we selected for SwitchBox has been proven formally secure in
-that there are no known efficient attacks against them, to simplify
-reasoning about trading off their disparate cryptographic security
-properties in the FDE context, we must have a way to quantitatively compare
-them. Their properties are disparate security properties and cipher
-configurations. Hence, we do not attempt to define a generally applicable
-ranking of cipher security for FDE. Instead, we score based on three key
-properties that, when summed, give a rough estimate of the usefulness of a
-cipher to SwitchBox FDE. (see: \tblref{security-quant}).\\
+Every cipher mentioned in this paper has been proven formally secure in that
+\emph{there are no known efficient attacks against any of them}~\cite{All,
+Ciphers, Again}. This implies these ciphers are secure versus an adversary with
+limited resources, however it is often desirable to secure data at rest
+considering future adversaries with less limited more abundant resources at
+their disposal. In this way, a cipher that is more resilient to cryptanalysis or
+brute-force than is currently required might be more desirable than a cipher
+with properties that meet current standards, \ie{future-proofing storage}.
+
+To simplify reasoning about trading off such disparate cryptographic properties
+in the FDE context, we must have a way to quantitatively compare a cipher's
+``desirability'' or usefulness to SwitchBox FDE. Hence, we do not attempt to
+define a generally applicable ranking of cipher security for FDE. Instead, we
+score ciphers based on three key security properties that, when summed, give an
+estimate of the usefulness of a cipher to SwitchBox FDE. (see:
+\tblref{security-quant}).\\
 \\
 \textbf{1) Output randomization (OR).} A cipher with output randomization
 generates different ciphertexts non-deterministically given the same key, nonce,
