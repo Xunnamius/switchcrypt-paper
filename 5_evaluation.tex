@@ -103,13 +103,13 @@ experiments, half the drive is lost to partitioning.
 \TODO{Word these paragraphs better. Include numbers from chart to be more
 specific.}
 
-Selective is usually preferable to mirrored due to mirrored strategy's egregious
+Selective is usually preferable to mirrored due to Mirrored strategy's egregious
 write overhead. However, forward and selective take a comparatively long time to
 transition the entire backing store from one cipher to the other while mirrored
 can achieve this virtually instantaneously. If it is not desirable to maintain
 both encrypted versions of data on the backing store, one partition or the other
 can be TRIM-ed and the data deleted relatively quickly. On the other hand, when
-using the selective strategy, it is not possible to transition the backing store
+using the Selective strategy, it is not possible to transition the backing store
 entirely to one cipher or another (hence no bar for TTCS). For the forward
 strategy, it takes a long time. \TODO{Specific numbers from chart need to go in
 here.}
