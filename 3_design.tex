@@ -241,13 +241,14 @@ partitions---where the filesystem size reported back to the OS is some function
 of partition size---there is a necessary reduction in usable space.
 
 The Selective and Mirrored strategies can read data from the backing store with
-low overhead, reaching performance parity with the StrongBox construction. This
-is because switching ciphers using these strategies amounts to offsetting the
-read index so it lands in the proper partition, which has little overhead. The
-Forward strategy also reads with low overhead except in the case where the
-current nugget was not encrypted with the active cipher configuration. This
-triggers re-ciphering, which can be costly if the workload touches unique
-nuggets while executing, \ie{long sequential writes vs write-once read-many}.
+low overhead, reaching performance parity with the original StrongBox
+construction. This is because switching ciphers using these strategies amounts
+to offsetting the read index so it lands in the proper partition, which has
+little overhead. The Forward strategy also reads with low overhead except in the
+case where the current nugget was not encrypted with the active cipher
+configuration. This triggers re-ciphering, which can be costly if the workload
+touches unique nuggets while executing, \ie{long sequential writes vs write-once
+read-many}.
 
 The Selective strategy also writes with low overhead because, like with reads,
 an offset is the only requirement. The Mirrored strategy, on the other hand, is
