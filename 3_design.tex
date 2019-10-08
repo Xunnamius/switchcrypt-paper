@@ -193,12 +193,6 @@ Selective strategy, represents a form of spatial cipher switching. All regions
 of the backing store will always be in a consistent state and share the same
 data.
 
-\TODO{Talk about some proposed configurations that allow for quick secure erase:
-FTL-level partitioning, two drives (like most smartphones), special secure erase
-implementation (not ideal). Also talk about how secure erase is very quick
-thanks to wear leveling protection being crypto and secure erase implementations
-just forgetting the key.}
-
 \subsection{Comparing Cipher Switching Strategies}
 
 \begin{table}[]
@@ -217,6 +211,9 @@ just forgetting the key.}
    strategy has on read and write throughput.}
    \label{tbl:strategies-advantages}
 \end{table}
+
+\TODO{If we don't go with the custody panic use case, we don't have to talk
+about secure erase here.}
 
 Depending on the use case, the ability to quickly converge the entire backing
 store to a single cipher configuration is very useful (see: \secref{usecases});
