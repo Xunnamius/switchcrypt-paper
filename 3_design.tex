@@ -96,16 +96,16 @@ to achieve optimal configuration points that are otherwise unachievable with
 prior work. Through IPC, the wider system determines which cipher should be the
 active cipher configuration at any moment.
 
-Unfortunately, when the wider system determines a cipher switch should occur for
-whatever reason, it is entirely non-trivial to determine \emph{when} to encrypt
-a nugget with a different cipher and \emph{where} to direct the output of that
-cipher. Depending on the complexity of the use case, it may make the most sense
-to re-cipher a nugget immediately, or eventually, or to encrypt a series of
-future nuggets differently than the others. A simple approach would immediately
-switch every nugget in the backing store to the desired cipher, but the cost of
-doing that conversion would likely consume more energy than would be saved in
-future accesses; the egregious latency penalty incurred waiting for the entire
-drive to be re-ciphered would be similarly unacceptable.
+When the wider system determines a cipher switch should occur for whatever
+reason, it is entirely non-trivial to determine \emph{when} to encrypt a nugget
+with a different cipher and \emph{where} to direct the output of that cipher.
+Depending on the complexity of the use case, it may make the most sense to
+re-cipher a nugget immediately, or eventually, or to re-cipher a series of
+nuggets. A simple approach would immediately switch every nugget in the backing
+store to the desired cipher, but the cost of doing that conversion would likely
+consume more energy than would be saved in future accesses; the egregious
+latency penalty incurred waiting for the entire drive to be re-ciphered would be
+similarly unacceptable.
 
 Hence, a more strategic approach and adaptable is necessary: cipher switching
 \emph{strategies}. These strategies are an essential part of the mechanism by
@@ -313,36 +313,48 @@ result in a further performance advantage (see: \secref{evaluation}).
 
 \subsection{Threat Model for Cipher Switching Strategies}
 
-Any block cipher or stream cipher can be used with SwitchBox. With this
-research, we select five popular cipher algorithms and implement them under
-Switchbox in various configurations: ChaCha~\cite{ChaCha20} (ChaCha8, ChaCha12,
-ChaCha20), Salsa~\cite{SalsaX} (Salsa8, Salsa12, Salsa20), AES~\cite{AES}
-(AES-128, AES-256), HC128/HC256~\cite{HCX}, and Freestyle~\cite{Freestyle}. Each
-cipher has been proven formally secure in that there are no known efficient
-attacks against them.
+The primary concern facing any FDE solution is that of confidentiality: an
+adversary should not be able to decrypt encrypted plaintext without the right
+key. With this research, we select five popular cipher algorithms and configure
+them under Switchbox: ChaCha~\cite{ChaCha20} (ChaCha8, ChaCha12, ChaCha20),
+Salsa~\cite{SalsaX} (Salsa8, Salsa12, Salsa20), AES~\cite{AES} (AES-128,
+AES-256), HC128/HC256~\cite{HCX}, and Freestyle~\cite{Freestyle}. Each cipher
+has been proven formally secure in that there are no known efficient attacks
+against them. Any such cipher can be used with SwitchBox.
 
-\TODO{Add text from notebook here.}
+As with the original StrongBox construction, encryption is achieved via a binary
+additive approach: cipher output (keystream) is combined with plaintext nugget
+contents using XOR, with metadata to track writes and ensure that pad reuse
+never occurs during overwrites and that the system can recover from crashes into
+a secure state~\cite{StrongBox}.
 
-\subsection{Achieving Cryptographic Agility Online}
+Another concern is data integrity: an adversary should not be able to tamper
+with ciphertext and it go unnoticed. As with the original StrongBox
+construction, we use an in-memory Merkle Tree to ensure nugget and system
+integrity~\cite{StrongBox}.
 
-Cryptographic agility means that we can replace primitives by new ones without
-having to redesign the entire application/protocol/scheme. Moreover, we'd want a
-plug-and-play way of putting things together. \TODO{Reword this entirely. Add
-supporting paragraphs. Useful for switching primitives if one is found to be
-insecure for whatever reason. This can be done online without taking the system
-down and reinitializing the entire drive or array, which could be extremely time
-consuming.}
+Switching strategies add an additional concern: even if we initiate a ``cipher
+switch,'' there may still be data on the drive that is encrypted with a
+non-active cipher configuration. Is this a problem? For the Forward strategy,
+this implies data may at any time be encrypted using the least desirable cipher.
+For the Mirrored and Selective strategies, the backing store is partitioned into
+regions where nuggets are guaranteed to be encrypted with each cipher. However,
+in terms of confidentiality, all the ciphers we configured under SwitchBox have
+been proven formally secure. Hence, nuggets encrypted with different secure
+ciphers can co-exist on the backing store securely, depending on the use case
+(see: \secref{usecases}).
 
 \subsection{A Relative Scoring of Cipher Security Properties}
 
 Every cipher mentioned in this paper has been proven formally secure in that
 \emph{there are no known efficient attacks against any of them}~\cite{All,
-Ciphers, Again}. This implies these ciphers are secure versus an adversary with
-limited resources, however it is often desirable to secure data at rest
-considering future adversaries with less limited more abundant resources at
-their disposal. In this way, a cipher that is more resilient to cryptanalysis or
-brute-force than is currently required might be more desirable than a cipher
-with properties that meet current standards, \ie{future-proofing storage}.
+Ciphers, Again}. This implies data is kept confidential versus an adversary with
+limited resources, however it is often desirable to secure data at rest in
+special contexts or considering future adversaries with less limited more
+abundant resources at their disposal. In this way, a cipher that is more
+resilient to cryptanalysis or brute-force than is currently required might be
+more desirable than a cipher with properties that meet current standards,
+\ie{future-proofing storage}.
 
 To simplify reasoning about trading off such disparate cryptographic properties
 in the FDE context, we must have a way to quantitatively compare a cipher's
