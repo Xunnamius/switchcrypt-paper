@@ -25,40 +25,39 @@ In this section we answer the following questions:
 
 \subsection{Reaching Between Static Configuration Points}
 
+\TODO{Add discussion of the different sizes and how they relate. Add exhaustive
+set of charts and then something that says these trends are similar across
+workloads, so from now on we just focus on 5MB}
+
 \subsection{Switching Strategies Under Various Workloads}
 
+\TODO{There should be a description of exactly how the experiments were setup to
+answer this question, a description of the chart (what are the axes, what are
+the points/lines/bars), a textual description of the results in the chart, and
+then the conclusion we can draw regarding the question for that subsection.}
+
 \subsection{Cipher Switching Overhead}
+
+\TODO{There should be a description of exactly how the experiments were setup to
+answer this question, a description of the chart (what are the axes, what are
+the points/lines/bars), a textual description of the results in the chart, and
+then the conclusion we can draw regarding the question for that subsection.}
 
 \subsection{Augmented Threat Analysis}
 
 \TODO{Reuse the table from the strongbox paper, but have a different column for
 forward, selective, and mirrored.}
 
-\TODO{As I read through what is in here now, I also realize there needs to be
-some discussion of the different sizes and how they relate. I would prefer one
-exhaustive set of charts and then something that says these trends are similar
-across workloads, so from now on we just focus on 40MB or something. Or if there
-is a really significant difference for different workloads, then we will have to
-show different sizes and you will need to justify that choice.}
-
-\TODO{This section still needs a lot of work. Right now, even the outline of the
-section is unclear. I expect a subsection for each of the questions above.
-Then for each subsection, there should be a description of exactly how the
-experiments were setup to answer this question, a description of the chart (what
-are the axes, what are the points/lines/bars), a textual description of the
-results in the chart, and then the conclusion we can draw regarding the question
-for that subsection. }
-
 \PUNT{\begin{figure}[ht]
  \centering
   \includegraphics[width=\linewidth]{drawn/2.png}
-   \caption{\TODO{Caption goes here}\TODO{Necessary chart? Or should we punt it to the dissertation and simply explain somewhere that the curves are congruent with the original?}}\label{fig:40mb-vs-1kb-read}
+   \caption{\TODO{Caption goes here}}\label{fig:40mb-vs-1kb-read}
 \end{figure}
 
 \begin{figure}[ht]
  \centering
   \includegraphics[width=\linewidth]{drawn/3.png}
-   \caption{\TODO{Caption goes here}\TODO{Necessary chart? Or should we punt it to the dissertation and we simply explain somewhere that the curves are congruent with the original?}}\label{fig:40mb-read-vs-write}
+   \caption{\TODO{Caption goes here}}\label{fig:40mb-read-vs-write}
 \end{figure}}
 
 \begin{figure}[ht]
@@ -66,6 +65,8 @@ for that subsection. }
   \includegraphics[width=\linewidth]{drawn/4.png}
    \caption{\TODO{Caption goes here}}\label{fig:navigating-the-space}
 \end{figure}
+
+\TODO{Move all the following analysis into their proper subsections above.}
 
 \figref{navigating-the-space} shows the 40MB read performance of three ciphers:
 ChaCha8, ChaCha20, and Freestyle in its ``fast'' configuration. This illustrates
