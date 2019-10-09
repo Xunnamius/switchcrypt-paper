@@ -7,28 +7,32 @@ Samsung Exynos 5422 A15/A7 heterogeneous multi-processing quad core CPUs at
 maximum clock speed, 2 gigabyte LPDDR3 RAM at 933 MHz, and an eMMC5.0 HS400
 backing store running Ubuntu Trusty 14.04.6 LTS, kernel version 3.10.106.
 
-The maximum theoretical memory bandwidth for this model is 14.9GB/s\@.
-Our observed maximum memory bandwidth is 4.5GB/s. \TODO{I think you
-  need to sy that you are using a ram drive, right? Probably before
-  you mention the memory bandwidth. Also, this setup section needs to
-  describe all of the different workloads you use and why; i.e., what
-  they are representative of.}
+We evaluate SwitchBox using a RAM disk. The maximum theoretical memory bandwidth
+for this Odroid model is 14.9GB/s\@. Our observed maximum memory bandwidth is
+4.5GB/s.
 
-\subsection{Experimental Methodology}
+We evaluate SwitchBox on four workloads: sequential I/O, random I/O, sequential
+``write once ready many'' (WORM), and random WORM.
+
 In this section we answer the following questions:
 \begin{enumerate}
- \item Does incorporation of cipher-switching change the threat analysis?
  \item Can SwitchBox reach security/energy tradeoffs that are not reachable with prior work?
  \item What switching strategy works best in which scenario? For which workload?
  \item What is the performance overhead of each cipher switching strategy?
  \item What is the storage overhead of each cipher switching strategy?
+ \item How does incorporation of cipher-switching change the threat analysis?
 \end{enumerate}
 
-\TODO{Each of these quetions should become a subsection (although you might just
-have a single overhead subsection, rather than two. Also, I really want a
-security analysis section in the evaluation, and I added a first question to
-cover that. I think you can basically reuse the table from the strongbox
-paper, but have a different column for forward, selective, and mirrored.}
+\subsection{Reaching Between Static Configuration Points}
+
+\subsection{Switching Strategies Under Various Workloads}
+
+\subsection{Cipher Switching Overhead}
+
+\subsection{Augmented Threat Analysis}
+
+\TODO{Reuse the table from the strongbox paper, but have a different column for
+forward, selective, and mirrored.}
 
 \TODO{As I read through what is in here now, I also realize there needs to be
 some discussion of the different sizes and how they relate. I would prefer one
