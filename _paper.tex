@@ -213,6 +213,29 @@
     },
 }
 
+\pgfplotsset{
+    nodes near coords greater only/.style={
+        small value/.style={
+            /tikz/coordinate,
+        },
+        every node near coord/.append style={
+            check for small values/.code={
+                \begingroup
+                \pgfkeys{/pgf/fpu}
+                \pgfmathparse{\pgfplotspointmeta<=#1}
+                \global\let\result=\pgfmathresult
+                \endgroup
+                \pgfmathfloatcreate{1}{1.0}{0}
+                \let\ONE=\pgfmathresult
+                \ifx\result\ONE
+                    \pgfkeysalso{/pgfplots/small value}
+                \fi
+            },
+            check for small values
+        },
+    },
+}
+
 %% Conference information
 %% Supplied to authors by publisher for camera-ready submission;
 %% use defaults for review submission.
