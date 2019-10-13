@@ -88,6 +88,33 @@
 \definecolor{orangeDark}{RGB}{230, 97, 1}
 \definecolor{orangeLight}{RGB}{253, 184, 99}
 
+%% Custom fill patterns
+\makeatletter
+\pgfdeclarepatternformonly[\LineSpace]{custom north east lines}{\pgfqpoint{-1pt}{-1pt}}{\pgfqpoint{\LineSpace}{\LineSpace}}{\pgfqpoint{\LineSpace}{\LineSpace}}%
+{
+    \pgfsetcolor{\tikz@pattern@color}
+    \pgfsetlinewidth{0.4pt}
+    \pgfpathmoveto{\pgfqpoint{0pt}{0pt}}
+    \pgfpathlineto{\pgfqpoint{\LineSpace + 0.1pt}{\LineSpace + 0.1pt}}
+    \pgfusepath{stroke}
+}
+
+\pgfdeclarepatternformonly[\LineSpace]{custom north west lines}{\pgfqpoint{-1pt}{-1pt}}{\pgfqpoint{\LineSpace}{\LineSpace}}{\pgfqpoint{\LineSpace}{\LineSpace}}%
+{
+    \pgfsetcolor{\tikz@pattern@color}
+    \pgfsetlinewidth{0.4pt}
+    \pgfpathmoveto{\pgfqpoint{0pt}{\LineSpace}}
+    \pgfpathlineto{\pgfqpoint{\LineSpace + 0.1pt}{-0.1pt}}
+    \pgfusepath{stroke}
+}
+\makeatother
+
+\newdimen\LineSpace
+\tikzset{
+    line space/.code={\LineSpace=#1},
+    line space=3pt
+}
+
 %% Other custom colors
 \definecolor{gray}{gray}{0.75}
 

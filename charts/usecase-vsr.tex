@@ -1,7 +1,7 @@
 \begin{tikzpicture}[baseline]
 
-    \pgfmathsetmacro{\ymax}{4} % set the maximum y value
-    \pgfmathsetmacro{\ymaxbreak}{4.1} % set the y value at which overflow is drawn
+    \pgfmathsetmacro{\ymax}{20} % set the maximum y value
+    \pgfmathsetmacro{\ymaxbreak}{20.1} % set the y value at which overflow is drawn
 
     \begin{axis}[
         %axis x line*=bottom,
@@ -28,25 +28,25 @@
         clip=false, % allow clip to protrude beyond ymax
         % Custom stuff to edit per template
         %
-        xlabel={\footnotesize Configuration},
+        xlabel={\footnotesize Cipher Configuration},
         xlabel near ticks,
-        xmin=C8, xmax=FB,
+        xmin=C8, xmax=FS,
         xtick=data,
-        symbolic x coords={C8,C8+FB,FB},
+        symbolic x coords={C8,C8+FS,FS},
         enlarge x limits=0.2, % add some breathing room along the x axis's sides
         major x tick style=transparent,
         %
-        ylabel={\footnotesize Latency (normalized to ChaCha8)},
+        ylabel={\footnotesize Latency (seconds)},
         ylabel near ticks,
-        ylabel shift={-3mm},
+        ylabel shift={-1mm},
         ymajorgrids=true,
         ymin=0, ymax=\ymax,
         ybar, % value will shift bars
-        ytick={ 0, ..., \ymax },
+        ytick={ 0, 5, ..., \ymax },
         %yticklabels={ 0, 0.5, 1.5, 2 },
-        extra y ticks={1},
-        extra y tick style={grid=major, grid style={dashed, black}},
-        extra y tick label={\empty},
+        % extra y ticks={1},
+        % extra y tick style={grid=major, grid style={dashed, black}},
+        % extra y tick label={\empty},
         %bar width=4.5pt, % change size of bars
         %
         legend cell align=center,
@@ -65,8 +65,12 @@
         },
     ]
         \addplot[fill=orangeDark, every node near coord/.append style={color=orangeDark}]
-        table[x=conf, y=latr, col sep=space] {charts/usecase-vsr.dat};
+        table[x=conf, y=latr-4k, col sep=space] {charts/usecase-vsr.dat};
         \addplot[fill=purpleDark, every node near coord/.append style={color=purpleDark}]
-        table[x=conf, y=latw, col sep=space] {charts/usecase-vsr.dat};
+        table[x=conf, y=latw-4k, col sep=space] {charts/usecase-vsr.dat};
+        \addplot[fill=orangeDark, postaction={pattern=north east lines}, every node near coord/.append style={color=orangeDark}]
+        table[x=conf, y=latr-5m, col sep=space] {charts/usecase-vsr.dat};
+        \addplot[fill=purpleDark, postaction={pattern=north east lines}, every node near coord/.append style={color=purpleDark}]
+        table[x=conf, y=latw-5m, col sep=space] {charts/usecase-vsr.dat};
     \end{axis}%
 \end{tikzpicture}%
