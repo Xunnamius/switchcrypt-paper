@@ -357,9 +357,9 @@ To simplify reasoning about trading off such disparate cryptographic properties
 in the FDE context, we must have a way to quantitatively compare a cipher's
 ``desirability'' or usefulness to SwitchBox FDE. Hence, we do not attempt to
 define a generally applicable ranking of cipher security for FDE. Instead, we
-score ciphers based on three key security properties that, when summed, give an
-estimate of the usefulness of a cipher to SwitchBox FDE. (see:
-\tblref{security-quant}).\\
+score ciphers (i.e. a so-called ``security score'') based on three key security
+properties that, when summed, give an estimate of the usefulness of a cipher to
+SwitchBox FDE (see: \tblref{security-quant}).\\
 \\
 \textbf{1) Output randomization (OR).} A cipher with output randomization
 generates different ciphertexts non-deterministically given the same key, nonce,
@@ -367,10 +367,10 @@ and message. This makes chosen-ciphertext (CCA) and other attacks where the
 ciphertext is in full control of the adversary much more difficult.
 Additionally, the cipher need not be length-preserving.
 
-This is a binary feature in that a cipher either outputs deterministically or
-it does not. A cipher with non-deterministic output given the same key, nonce,
-and message as inputs scores a 1 for this feature while a cipher with
-deterministic output given the same input scores a 0.\\
+This is a binary feature in that a cipher either outputs deterministically given
+the same input or it does not. A cipher with non-deterministic output given the
+same key, nonce, and message as inputs scores a 1 for this feature while a
+cipher with deterministic output given the same input scores a 0.\\
 \\
 \textbf{2) Resistance to brute force and offline/dictionary attacks (RBF).}
 All the ciphers we consider are resistant to ciphertext-only brute force and
@@ -402,19 +402,19 @@ instance, ChaCha8 scores 0, ChaCha12 scores 0.5, and ChaCha20 scores 1\@.
   \begin{tabular}{@{}lllll@{}}
   \toprule
   \textbf{Cipher} & \textbf{OR} & \textbf{RBF} & \textbf{RR/RK} & \textbf{score} \\ \midrule
-  ChaCha8     & 0      & 0.5     & 0       & 0.5      \\
-  ChaCha12    & 0      & 0.5     & 0.5      & 1       \\
-  ChaCha20    & 0      & 0.5     & 1       & 1.5      \\
-  Salsa8     & 0      & 0.5     & 0       & 0.4      \\
-  Salsa12     & 0      & 0.5     & 0.5      & 1      \\
-  Salsa20     & 0      & 0.5     & 1       & 1.5      \\
-  AES128-CTR   & 0      & 0.5     & 0       & 0.5      \\
-  AES256-CTR   & 0      & 0.5     & 1       & 1.5      \\
-  HC128      & 0      & 0.5     & 0       & 0.5      \\
-  HC256      & 0      & 0.5     & 1       & 1.5      \\
-  Freestyle (F)  & 1      & 1      & 0       & 2       \\
-  Freestyle (B)  & 1      & 1      & 0.5      & 2.5      \\
-  Freestyle (S)  & 1      & 1      & 1       & 3
+  ChaCha8         & 0           & 0.5          & 0              & 0.5            \\
+  ChaCha12        & 0           & 0.5          & 0.5            & 1              \\
+  ChaCha20        & 0           & 0.5          & 1              & 1.5            \\
+  Salsa8          & 0           & 0.5          & 0              & 0.5            \\
+  Salsa12         & 0           & 0.5          & 0.5            & 1              \\
+  Salsa20         & 0           & 0.5          & 1              & 1.5            \\
+  AES128-CTR      & 0           & 0.5          & 0              & 0.5            \\
+  AES256-CTR      & 0           & 0.5          & 1              & 1.5            \\
+  HC128           & 0           & 0.5          & 0              & 0.5            \\
+  HC256           & 0           & 0.5          & 1              & 1.5            \\
+  Freestyle (F)   & 1           & 1            & 0              & 2              \\
+  Freestyle (B)   & 1           & 1            & 0.5            & 2.5            \\
+  Freestyle (S)   & 1           & 1            & 1              & 3
   \end{tabular}
   \caption{\TODO{Table caption goes here.}}
   \label{tbl:security-quant}
