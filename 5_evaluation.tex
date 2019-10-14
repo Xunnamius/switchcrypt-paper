@@ -48,43 +48,41 @@ then the conclusion we can draw regarding the question for that subsection.}
 \TODO{Reuse the table from the strongbox paper, but have a different column for
 forward, selective, and mirrored.}
 
-\PUNT{\begin{figure}[ht]
- \centering
-  \includegraphics[width=\linewidth]{drawn/2.png}
-   \caption{\TODO{Caption goes here}}\label{fig:40mb-vs-1kb-read}
-\end{figure}
-
 \begin{figure}[ht]
- \centering
-  \includegraphics[width=\linewidth]{drawn/3.png}
-   \caption{\TODO{Caption goes here}}\label{fig:40mb-read-vs-write}
-\end{figure}}
-
-\begin{figure}[ht]
- \centering
-  \includegraphics[width=\linewidth]{drawn/4.png}
-   \caption{\TODO{Caption goes here}}\label{fig:navigating-the-space}
+   \textbf{Forward Switching I/O Ratio Performance}\par\medskip
+   \centering
+   {\input{charts/tradeoff-with-ratios.tex}} \caption{Median sequential and
+   random read and write latency per I/O operation size (4KB, 512KB, 5MB, 40MB)
+   using multiple cipher configurations ordered by security score. With Forward
+   switching, we achieve additional configurations unachievable with prior work
+   incapable of switching.}
+  \label{fig:tradeoff-with-ratios}
 \end{figure}
 
 \TODO{Move all the following analysis into their proper subsections above.}
 
-\figref{navigating-the-space} shows the 40MB read performance of three ciphers:
+\figref{tradeoff-with-ratios} shows the 40MB read performance of three ciphers:
 ChaCha8, ChaCha20, and Freestyle in its ``fast'' configuration. This illustrates
 the tradeoff space between latency/energy and security for these three static
 discrete pareto optimal configurations achievable offline via prior work.
 
-\figref{navigating-the-space} additionally illustrates the flexibility of
+\figref{tradeoff-with-ratios} additionally illustrates the flexibility of
 SwitchBox using the 0-forward switching strategy to reach pareto optimal dynamic
 configuration points \emph{between} traditional static configuration in the
 tradeoff space that are unachievable via prior work.
 
 \begin{figure}[ht]
- \centering
-  \includegraphics[width=\linewidth]{drawn/9.png}
-   \caption{\TODO{Caption goes here}}\label{fig:strategy-vs-strategy}
+   \textbf{Mirrored and Selective Switching I/O Ratio Performance}\par\medskip
+   \centering
+   {\input{charts/mirrored-selective-baseline.tex}} \caption{Median sequential
+   and random read and write latency per I/O operation size (4KB, 512KB, 5MB,
+   40MB) using multiple cipher configurations ordered by security score;
+   performance comparison of Mirrored and Selective switching strategies to
+   baseline.}
+  \label{fig:mirrored-selective-baseline}
 \end{figure}
 
-\figref{strategy-vs-strategy} show the the performance of forward, mirrored, and
+\figref{mirrored-selective-baseline} show the the performance of forward, mirrored, and
 selective strategies against two 40MB read and write workloads: Freerun and
 WORM. \TODO{Explain these two workloads.} Additionally, the time required to
 transition the entire backing store from one cipher to the other is included

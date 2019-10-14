@@ -1,15 +1,14 @@
 \section{SwitchBox Case Studies} \label{sec:usecases}
 
-\TODO{Another possible usecase: progressively retiring an old cipher by
+\TODO{Another possible use case: progressively retiring an old cipher by
 switching to a new one}
 
-\TODO{At a high-level, all of these are good, but the devil is always
-  in the details. I think it is important to get them as fully
-  fleshed-out as possible as soon as possible.  I really want to see
-  the real data and see the discussion about what happens if a user
-  was forced to reconfigure.  If you already have the data and just
-  haven't added the real charts yet, you could also spend some time
-  just writing the text that will go with them.}
+\TODO{At a high-level, all of these are good, but the devil is always in the
+  details. I think it is important to get them as fully fleshed-out as possible
+  as soon as possible.  I really want to see the real data and see the
+  discussion about what happens if a user was forced to reconfigure.  If you
+  already have the data and just haven't added the real charts yet, you could
+  also spend some time just writing the text that will go with them.}
 
 \subsection{Intra-file Variable Security Regions (VSR)}
 
@@ -30,19 +29,32 @@ data if the bulk of it is encrypted using a high performance cipher.
 Simultaneously, the more sensitive data regions are future-proofed and more
 resilient to attack using a high security cipher.
 
-A ``VSR'' is a region of a file that is crypted with the alternative
-rather than the primary cipher that encrypts the remaining majority of the file.
+A ``VSR'' is a region of a file that is crypted with the alternative rather than
+the primary cipher that encrypts the remaining majority of the file.
 
-Benefit: we can ``future-proof'' our encrypted highly sensitive data against more
-powerful future attacks/less trustworthy ciphers while preserving the
+Benefit: we can ``future-proof'' our encrypted highly sensitive data against
+more powerful future attacks/less trustworthy ciphers while preserving the
 performance win from using a faster less secure cipher.
 
-\TODO{Need to include which strategy to use here and why (already typed up!)}
+\begin{figure}[ht] \textbf{VSR Use Case: ChaCha8 vs Freestyle Secure Sequential
+4KB, 5MB Performance}\par\medskip
+   \centering
+   {\input{charts/usecase-vsr-bar.tex}} \caption{Median sequential read and
+   write latency per 40MB I/O operation size with 3-to-1 ratio of ChaCha8
+   nuggets to Freestyle Secure nuggets, respectively. This usecase employs
+   Selective switching to achieve an optimal configuration.}
+  \label{fig:usecase-vsr-bar}
+\end{figure}
 
-\begin{figure}[ht]
- \centering
-  \includegraphics[width=\linewidth]{drawn/8.png}
-   \caption{\TODO{Caption goes here}}\label{fig:mirrored-vs-selective}
+\begin{figure}[ht] \textbf{VSR Use Case: Security-Latency Tradeoff vs
+   Goals}\par\medskip
+   \centering
+   {\input{charts/usecase-vsr-tradeoff.tex}} \caption{Median sequential and
+   random read and write latency per I/O operation size (4KB, 512KB, 5MB, 40MB)
+   with 3-to-1 ratios of multiple cipher configuration pairs ordered by security
+   score. This usecase employs Selective switching to achieve configurations
+   within and around our latency and security goal region.}
+  \label{fig:usecase-vsr-tradeoff}
 \end{figure}
 
 \subsection{Balancing Security Goals with a Constrained Energy Budget}
@@ -66,14 +78,22 @@ security guarantees with respect to the energy spent crypting each bit. With
 cipher switching, the filesystem can react dynamically to the system's total
 energy budget while still aiming for the most performant (least latency)
 configuration.
-\TODO{See my earlier comment (in email or some other TODO) about reading vs. writing.  It seems fairly clear to me that you can make this work for writes, but I don't see hwo this works for reads. If the video is stored in a strong cipher, don't you have to decrypt it at that strength?  Where does the energy win come from on reads?}
 
-\TODO{Need to include which strategy to use here and why (already typed up!)}
+\TODO{See my earlier comment (in email or some other TODO) about reading vs.
+writing.  It seems fairly clear to me that you can make this work for writes,
+but I don't see hwo this works for reads. If the video is stored in a strong
+cipher, don't you have to decrypt it at that strength?  Where does the energy
+win come from on reads?}
 
-\begin{figure}[ht]
- \centering
-  \includegraphics[width=\linewidth]{drawn/7.png}
-   \caption{\TODO{Caption goes here}}\label{fig:energy-budget}
+\begin{figure}[ht] \textbf{Power Saver Use Case: Energy-Security Tradeoff vs
+   Strict Energy Budget}\par\medskip
+   \centering
+   {\input{charts/usecase-battery.tex}} \caption{Median sequential and random
+   read and write total energy use with respect to time and security score with
+   respect to time; 5MB sequential I/O operation size using a ChaCha8
+   configuration, Freestyle Balanced configuration, and a configuration that
+   switches between both ciphers (1-to-1 nugget ratio) with Forward switching.}
+  \label{fig:usecase-battery}
 \end{figure}
 
 \subsection{Responding to End-of-Life Slowdown in Solid State Drives}
@@ -83,18 +103,24 @@ devices, as free space becomes constrained, performance drops off a cliff. This
 is a well-studied issue (see related work).
 
 If the filesystem is made aware when the backing store is in such a state, we
-can offset some of the (drastic) performance loss by switching the ciphers of hot
-nuggets to the fastest cipher available until the disk space problem is
+can offset some of the (drastic) performance loss by switching the ciphers of
+hot nuggets to the fastest cipher available until the disk space problem is
 remedied, after which the system can detect return the switched nuggets to their
 former encrypted state.
 
 Benefit: we can mitigate the performance loss of a slowing SSD by using a faster
 but less secure cipher.
 
-\begin{figure}[ht]
- \centering
-  \includegraphics[width=\linewidth]{drawn/6.png}
-   \caption{\TODO{Caption goes here}}\label{fig:eol}
+\begin{figure}[ht] \textbf{SSD EoL Use Case: Latency-Security Tradeoff vs
+   Goals}\par\medskip
+   \centering
+   {\input{charts/usecase-eol-tradeoff.tex}} \caption{Median sequential and
+   random read and write latency per 40MB sequential I/O operation size using
+   multiple cipher configurations ordered by security score; performance
+   comparison of baseline versus simulated faulty block device (\ie{uniform
+   additional latency}). With Forward switching, the performance impact of
+   simulated performance degradation is successfully offset.}
+  \label{fig:usecase-eol-tradeoff}
 \end{figure}
 
 \subsection{Custody Panic: Securing Device Data Under Duress}
@@ -111,10 +137,17 @@ device could switch itself into a more secure state as quickly as possible.
 Benefit: greater security guarantee achieved using the highest security
 encryption available versus powerful adversaries with unknown means and motive.
 
-\TODO{Need to include which strategy to use here and why (already typed up!)}
-
-\TODO{Dumb question: this scenario assumes you are worried about the data, but
-can't wipe the drive, right?  Is that a plausible scenario? }
+\begin{figure}[ht] \textbf{Custody Panic Use Case: Security Goals vs Time
+Constraint}\par\medskip
+   \centering
+   {\input{charts/usecase-custody.tex}} \caption{Actual security score vs
+   security goal with respect to the time immediately before and after custody
+   is lost; this use case employs Mirrored switching to maintain data
+   consistency up until mirrored contents encrypted using the low scoring cipher
+   configurations are erased, enabling a relatively high speed low energy
+   drive-wide cipher switch.}
+  \label{fig:usecase-custody}
+\end{figure}
 
 \TODO{Talk about some proposed configurations that allow for quick secure erase:
 FTL-level partitioning, two drives (like most smartphones), special secure erase

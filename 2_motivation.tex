@@ -60,17 +60,20 @@ battery life, security, drive space, and other tradeoffs. It follows then that
 the original StrongBox construction using ChaCha20 exists as one point in this
 space of cipher configurations.
 
-\begin{figure}[ht]
+\begin{figure}[ht] \textbf{Baseline Cipher I/O Performance}\par\medskip
    \centering
-   \includegraphics[width=\linewidth]{drawn/1.png}
-   \caption{\TODO{Caption goes here}\TODO{No curve in this version!}}\label{fig:40mb-read}
+   {\input{charts/tradeoff-no-ratios.tex}} \caption{Median sequential and random
+   read and write latency per I/O operation size (4KB, 512KB, 5MB, 40MB) using
+   multiple cipher configurations achievable without switching and ordered by
+   security score.}
+  \label{fig:tradeoff-no-ratios}
 \end{figure}
 
-For instance, \figref{40mb-read} shows the security versus I/O latency tradeoff
-between different stream ciphers (including ChaCha20) when completing a 40MB
-read of encrypted storage. The experiment was performed on a Linux RAM disk on
-an ARM big.LITTLE Exynos Octa processor, which is similar to the processors used
-in the Samsung Galaxy line of phones and other devices. Of the ciphers we
+For instance, \figref{tradeoff-no-ratios} shows the security versus I/O latency
+tradeoff between different stream ciphers (including ChaCha20) when completing a
+40MB read of encrypted storage. The experiment was performed on a Linux RAM disk
+on an ARM big.LITTLE Exynos Octa processor, which is similar to the processors
+used in the Samsung Galaxy line of phones and other devices. Of the ciphers we
 tested, those with more desirable but performance inhibitive security guarantees
 (see: \secref{design}) resulted in higher latency for I/O operations while
 ciphers with relatively weaker less desirable security guarantees resulted in
@@ -99,8 +102,8 @@ environment. By abstracting the re-keying process out into a \emph{re-ciphering}
 or \emph{cipher switching} process, whereby the key and the cipher used to
 encrypt/decrypt the nugget can both be switched at runtime, we can trade off
 between different ciphers and their characteristics dynamically. Comparatively,
-prior work can only accomplish a static tradeoff at compile time or at
-system initialization. \\
+prior work can only accomplish a static tradeoff at compile time or at system
+initialization. \\
 \\
 Leveraging these insights, we present SwitchBox. \TODO{A few short explanatory
 sentences that lead to: Our goal is to dynamically trade desirable security
@@ -108,10 +111,15 @@ properties for performance or energy.}
 
 \subsection{Motivating Example: Filesystem Reacts to OS ``Power Saver'' Mode}
 
-\begin{figure}[ht]
+\begin{figure}[ht] \textbf{Linearity Between Baseline Cipher Latency and Energy
+Use}\par\medskip
    \centering
-   \includegraphics[width=\linewidth]{drawn/5.png}
-   \caption{\TODO{Caption goes here}}\label{fig:energy-latency-linearity}
+   {\input{charts/linearity-latency-energy.tex}} \caption{Comparison of cipher
+   configuration median sequential and random latency versus median total energy
+   use per I/O operation size (4KB, 512KB, 5MB, 40MB) without switching. The
+   relationship between latency and total energy use is linear for the cipher
+   configurations we examine in this paper.}
+  \label{fig:linearity-latency-energy}
 \end{figure}
 
 Suppose we are continually streaming a high-resolution video stored on our
@@ -120,7 +128,7 @@ projectors. We stored the video and other data on our device drive as securely
 as possible, so we chose to initialize the system at a configuration point
 offering very strong security.
 
-For the ciphers examined in this paper, \figref{energy-latency-linearity} shows
+For the ciphers examined in this paper, \figref{linearity-latency-energy} shows
 a correlation between stronger security guarantees and greater total energy use,
 meaning our device is using a lot more energy to facilitate FDE at this
 configuration point. Though this correlation applies to the ciphers we examined,
@@ -128,11 +136,11 @@ note that this correlation is certainly not true for all possible ciphers.
 
 Further suppose that, after a while of streaming, our device determines its
 remaining battery life is too low and enters a ``power saver'' mode with a
-curtailed energy budget. With a traditional filesystem or encrypted container, we
-are stuck with our high-energy configuration chosen at system initialization.
+curtailed energy budget. With a traditional filesystem or encrypted container,
+we are stuck with our high-energy configuration chosen at system initialization.
 
 However, with the ability to operate at points along the pareto frontier (see
-\figref{40mb-read}), even at points between the discrete configurations
+\figref{tradeoff-no-ratios}), even at points between the discrete configurations
 available to prior work, a context-aware system can switch to a configuration
 that trades the security of the portions of storage that are being used to
 stream the video so that we stay within our curtailed energy budget.
@@ -159,22 +167,22 @@ state-of-the-art ciphers as a result.\\
 \\
 \textbf{Maintaining I/O performance with a mixed-cipher drive layout.} With
 prior work, cipher configurations are typically fixed at the time the system is
-booted or the filesystem or container is created~\cite{CiteAllTheFilesystems}; if
-requirements change online, at best the entire system requires a reboot which is
-not optimal. At worst, before the reboot, the filesystem or encrypted container
-has to be deleted and recreated. This is rarely desirable. Hence, SwitchBox
-requires a generic \emph{cipher API}, IPC, and a software mechanism that can
-re-cipher or \emph{switch} the cipher used to encrypt and decrypt individual
-nuggets while maintaining low overhead and acceptable performance. This
-mechanism should allow for a mixed-cipher drive layout and provides the ``how''
-to switch nuggets' ciphers.
+booted or the filesystem or container is created~\cite{CiteAllTheFilesystems};
+if requirements change online, at best the entire system requires a reboot which
+is not optimal. At worst, before the reboot, the filesystem or encrypted
+container has to be deleted and recreated. This is rarely desirable. Hence,
+SwitchBox requires a generic \emph{cipher API}, IPC, and a software mechanism
+that can re-cipher or \emph{switch} the cipher used to encrypt and decrypt
+individual nuggets while maintaining low overhead and acceptable performance.
+This mechanism should allow for a mixed-cipher drive layout and provides the
+``how'' to switch nuggets' ciphers.
 
 To provide the ``when'' or ``where'', we implement and demonstrate a series of
 novel cipher switching \textit{strategies} that, along with the ``pluggable''
 cipher API and cipher switching mechanism, enable optimal navigation of the
 tradeoff space of configurations. For instance, these strategies allow SwitchBox
 to settle on points between the static cipher configurations in
-\figref{40mb-read}.
+\figref{tradeoff-no-ratios}.
 
 \TODO{Might be able to piece this out into two challenges: common interface for
 stream ciphers and cipher switching strategies; that last one might be able to
