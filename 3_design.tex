@@ -7,6 +7,8 @@ In this section, we describe our mechanism to navigate the cipher configuration
 space and cipher switching strategies. We also discuss the pluggable stream
 cipher API and other design challenges.
 
+\TODO{You need more of an overview here before the section starts in earnest.  It would be very good to have a picture where the components of the picture correspond to the subsections you write about here.  While the picture would help, whether you have it or not you need to say what are the key pieces of the design and how they inter-relate before you describe them in earnest.}
+
 \subsection{Mechanism to Re-Cipher A Nugget}
 
 \begin{figure}[t]
@@ -15,6 +17,7 @@ cipher API and other design challenges.
    \caption{Overview of the SwitchBox construction.}\label{fig:overview}
 \end{figure}
 
+\TODO{Again, we would like the language to be as general as possible so that this reads like it is more than just an extension of strongbox, but ideas that would be widely applicable.}
 Like StrongBox, SwitchBox is a translation layer ideally implemented in the
 Flash Translation Layer (FTL). Unlike StrongBox, which focuses on optimizing
 performance despite re-keying due to overwrites, SwitchBox maintains overwrite
@@ -25,6 +28,7 @@ active cipher configuration before completing the I/O operation; instead of
 myopically pursuing a performance win, this allows us to trade off different
 ciphers and their characteristics online.
 
+\TODO{This kind of high-level overview should not be in a subsection titled "Mechanism to Re-Cipher a Nugget."  If we are in such a subsection, the system design should already be known and we should just be focusing on nugget-level details.}
 \figref{overview} illustrates the SwitchBox design. SwitchBox manages five
 metadata components: an in-memory \emph{Merkle Tree}; two drive-backed byte
 arrays, \ie{the \emph{Keycount Store} and the \emph{Transaction Journal}}; a
@@ -43,8 +47,9 @@ depending on implementation.
 
 Since cipher switching is a cross-cutting concern---for instance, the desire to
 switch ciphers could come from an unrelated process in user space---SwitchBox
-uses IPC to receive commands to toggle the active cipher configuration.
+uses IPC to receive commands to toggle the active cipher configuration. \TODO{I believe this is an implementation detail and should be moved to an implementation section.  Also, it is a little weird to have it here.  We get an IPC for each nugget we want to recipher?  That seems really burdensome on the user.}
 
+\TODO{I still don't know what the mechanism is.}
 By applying cipher switching strategies to individual nuggets so that their
 contents are re-ciphered, the cryptographic driver provides a mechanism to
 navigate the latency/energy/security tradeoff space of cipher configurations
@@ -56,6 +61,7 @@ with low overhead.
  \caption{Layout of SwitchBox's backing storage.}\label{fig:backstore2}
 \end{figure}
 
+\TODO{It sure seems like this paragraph should have appeared earlier.}
 The backing store is the storage medium SwitchBox operates on. The layout of the
 backing store is illustrated in \figref{backstore2}. In the \textit{body}
 section of the backing store layout, end-user data is partitioned into a series
@@ -66,6 +72,8 @@ terminology to easily differentiate our logical blocks (nuggets) from physical
 drive and other blocks.
 
 \subsection{Pluggable Stream Cipher API}
+
+\TODO{All this section says is that an API should exist.  It doesn't say what the API is.  That is a problem.}
 
 We develop an API to allow any stream cipher or any cipher that can operate as a
 stream cipher to be used with SwitchBox without modification. In this way,
@@ -91,6 +99,7 @@ different cipher to interact with the backing store, SwitchBox functions
 identically to StrongBox in that it uses the active cipher configuration
 (ChaCha20 in StrongBox's case) to encrypt and decrypt all nuggets during I/O.
 
+\TODO{This paragraph is redundant and a good indication that the section needs a reorg and an overview paragraph or two.  If you find yourself needing to describe a mechanism (IPC in this case) in multiple places, you probably need a better overview paragraph.}
 However, switching the active cipher configuration dynamically allows SwitchBox
 to achieve optimal configuration points that are otherwise unachievable with
 prior work. Through IPC, the wider system determines which cipher should be the
@@ -121,7 +130,7 @@ across which nuggets--to output ciphertext we call \emph{spatial switching} for
 which we propose the \emph{Mirrored} and \emph{Selective} switching strategies.
 Each comes with various security, performance, and energy trade offs.
 \tblref{strategies-advantages} summarizes the various advantages and
-disadvantages of these strategies and each strategy.
+disadvantages of these strategies and each strategy.  \TODO{The table needs an explanation.  What are the columns, what are the meanings of the categories?  You probably need an overview of what the three strategies are as well.}
 
 \subsubsection{Forward Switching Strategy}
 
@@ -213,7 +222,7 @@ data.
 \end{table}
 
 \TODO{If we don't go with the custody panic use case, we don't have to talk
-about secure erase here.}
+about secure erase here.} \TODO{Hank: I think we should use that example, and I think we should talk about the secure erase.  I assume that is how you get Nearly Instant in the convergence category.}
 
 Depending on the use case, the ability to quickly converge the entire backing
 store to a single cipher configuration is very useful (see: \secref{usecases});
@@ -308,6 +317,8 @@ performance advantage and 2) allowing more aggressive N-forward behavior (where
 $N > 0$) to take advantage of spatial locality during read-heavy workloads to
 result in a further performance advantage (see: \secref{evaluation}).
 
+\TODO{It is a little concerning that this "additional challenge" has a longer section than some of the "main" contributions.}
+
 \subsection{Threat Model for Cipher Switching Strategies}
 
 The primary concern facing any FDE solution is that of confidentiality: an
@@ -353,6 +364,7 @@ resilient to cryptanalysis or brute-force than is currently required might be
 more desirable than a cipher with properties that meet current standards,
 \ie{future-proofing storage}.
 
+\TODO{You should mention (unless you don't agree) that the scores we use are a combination of two schemes that are already in use: ranking ciphers on resistance to different attacks and ranking ciphers on "rounds" or whatever.  So, we should say that all we are doing here is combining them.}
 To simplify reasoning about trading off such disparate cryptographic properties
 in the FDE context, we must have a way to quantitatively compare a cipher's
 ``desirability'' or usefulness to SwitchBox FDE. Hence, we do not attempt to

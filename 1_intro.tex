@@ -1,13 +1,12 @@
 \section{Introduction}\label{sec:introduction}
 
 There are several important concerns modern filesystems must balance. Paramount
-among them are: security of data at rest; performance, \ie{I/O latency or
-throughput}; and overall energy budget. However, these concerns exist in
-stark contention.
+among them are: security of data at rest and performance, \ie{I/O latency or
+throughput},  Increasingly, energy is an additional concern in both mobile devices \cite{mobile-motivation} and in enterprise storage \cite{enterprise-motivation}.  Of course these concerns exist in contention with one another: increased security can harm latency and energy, while reducing energy consumption will generally require increasing latency or lowering security.   
 
 The state of the art for securing data at rest is Full-Drive Encryption
-(FDE)\footnote{The common term is full-\emph{disk} encryption, but this work
-targets SSDs, so we use \emph{drive}.}. FDE employs a \emph{cryptographic
+(FDE).\footnote{The common term is full-\emph{disk} encryption, but this work
+targets SSDs, so we use \emph{drive}.} FDE employs a \emph{cryptographic
 cipher} to encrypt, decrypt, and authenticate backing store contents on the fly.
 Understandably, this process impacts system performance and energy use
 considerably. Yet, end users expect their device to be secure \emph{and}
@@ -35,8 +34,9 @@ The benefits of choosing a more performant cipher include increased filesystem
 performance(\ie{overall reduced FDE overhead}), reduced energy use, and the
 ability to encrypt devices that would otherwise be too slow or
 energy-inefficient to support FDE, as was the case with many mid- and low-tier
-Android devices at the time FDE was considered as a default for Android M.
+Android devices at the time FDE was considered as a default for Android M. \TODO{Need a citation to backup the previous sentence.}
 
+\TODO{This is a weird transition because you have a paragraph in between this one and the last mention of ChaCha20.}
 And ChaCha20 is not the only stream cipher we can choose for FDE. Other stream
 ciphers exist with a variety of different performance characteristics and
 opposing security properties. Some of these include: ChaCha variants with
@@ -74,7 +74,7 @@ in the FDE context, read and write performance, total writable space on the
 drive, and how quickly the drive can converge to a single configuration.
 
 Finally, we present SwitchBox, a novel design substantively expanding on prior
-work by 1) decoupling the cipher implementation from the encryption mechanism,
+FDE work by 1) decoupling the cipher implementation from the encryption mechanism,
 2) allowing ciphertext from different ciphers to coexist side-by-side on the
 same drive as independent storage units, 3) employing various \emph{switching
 strategies} to ``re-cipher'' those units dynamically at run-time. SwitchBox
