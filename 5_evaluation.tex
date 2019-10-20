@@ -82,12 +82,12 @@ tradeoff space that are unachievable via prior work.
   \label{fig:mirrored-selective-baseline}
 \end{figure}
 
-\figref{mirrored-selective-baseline} show the the performance of forward, mirrored, and
-selective strategies against two 40MB read and write workloads: Freerun and
-WORM. \TODO{Explain these two workloads.} Additionally, the time required to
-transition the entire backing store from one cipher to the other is included
-\TODO{This is ``time to cipher switch'' or TTCS, but this is renamed in the actual
-figure.}
+\figref{mirrored-selective-baseline} show the the performance of forward,
+mirrored, and selective strategies against two 40MB read and write workloads:
+Freerun and WORM. \TODO{Explain these two workloads.} Additionally, the time
+required to transition the entire backing store from one cipher to the other is
+included \TODO{This is ``time to cipher switch'' or TTCS, but this is renamed in
+the actual figure.}
 
 1-forward and 2-forward have overhead that makes them slower than forward 0 for
 sequential and random freerun. However, WORM workload shows 1-forward

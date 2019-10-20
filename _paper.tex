@@ -118,6 +118,53 @@
 %% Other custom colors
 \definecolor{gray}{gray}{0.75}
 
+% Ability to filter the values plotted from tables via `discard if not` key
+\pgfplotsset{
+    discard if symbol/.style 2 args={
+        x filter/.append code={
+            \edef\tempa{\thisrow{#1}}
+            \edef\tempb{#2}
+            \ifx\tempa\tempb
+                \def\pgfmathresult{inf}
+            \fi
+        }
+    }
+}
+
+\pgfplotsset{
+    discard if symbol not/.style 2 args={
+        x filter/.append code={
+            \edef\tempa{\thisrow{#1}}
+            \edef\tempb{#2}
+            \ifx\tempa\tempb
+            \else
+                \def\pgfmathresult{inf}
+            \fi
+        }
+    }
+}
+
+\pgfplotsset{
+    discard if number/.style 2 args={
+        x filter/.append code={
+            \ifdim\thisrow{#1} pt=#2pt
+                \def\pgfmathresult{inf}
+            \fi
+        }
+    }
+}
+
+\pgfplotsset{
+    discard if number not/.style 2 args={
+        x filter/.append code={
+            \ifdim\thisrow{#1} pt=#2pt
+            \else
+                \def\pgfmathresult{inf}
+            \fi
+        }
+    }
+}
+
 %% Shortcuts
 \newcommand{\ie}{\textit{i.e., }}
 \newcommand{\eg}{\textit{e.g., }}

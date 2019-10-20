@@ -46,7 +46,7 @@ performance win from using a faster less secure cipher.
   \label{fig:usecase-vsr-bar}
 \end{figure}
 
-\begin{figure}[ht] \textbf{VSR Use Case: Security-Latency Tradeoff vs
+\PUNT{\begin{figure}[ht] \textbf{VSR Use Case: Security-Latency Tradeoff vs
    Goals}\par\medskip
    \centering
    {\input{charts/usecase-vsr-tradeoff.tex}} \caption{Median sequential and
@@ -55,13 +55,13 @@ performance win from using a faster less secure cipher.
    score. This usecase employs Selective switching to achieve configurations
    within and around our latency and security goal region.}
   \label{fig:usecase-vsr-tradeoff}
-\end{figure}
+\end{figure}}
 
 \subsection{Balancing Security Goals with a Constrained Energy Budget}
 
-When our mobile devices enter power saving mode, it is usually because the total
-energy/power budget for the device has become constrained for one reason or
-another.
+When our mobile devices enter battery saving mode, it is usually because the
+total energy/power budget for the device has become constrained for one reason
+or another.
 
 When a device enters this mode, all software and components are configured by
 the OS to use as little of the available energy as possible. The filesystem
@@ -85,7 +85,7 @@ but I don't see hwo this works for reads. If the video is stored in a strong
 cipher, don't you have to decrypt it at that strength?  Where does the energy
 win come from on reads?}
 
-\begin{figure}[ht] \textbf{Power Saver Use Case: Energy-Security Tradeoff vs
+\begin{figure}[ht] \textbf{Batter Saver Use Case: Energy-Security Tradeoff vs
    Strict Energy Budget}\par\medskip
    \centering
    {\input{charts/usecase-battery.tex}} \caption{Median sequential and random
@@ -118,8 +118,8 @@ but less secure cipher.
    random read and write latency per 40MB sequential I/O operation size using
    multiple cipher configurations ordered by security score; performance
    comparison of baseline versus simulated faulty block device (\ie{uniform
-   additional latency}). With Forward switching, the performance impact of
-   simulated performance degradation is successfully offset.}
+   additional latency}). With Forward switching, the performance impact is
+   offset given our latency and security goals.}
   \label{fig:usecase-eol-tradeoff}
 \end{figure}
 
