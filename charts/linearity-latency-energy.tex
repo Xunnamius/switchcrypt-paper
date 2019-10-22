@@ -5,7 +5,7 @@
 
     \begin{axis}[
         %axis x line*=bottom,
-        scatter,
+        only marks,
         height=6cm,
         width=\linewidth,
         tick align=outside,
@@ -13,26 +13,26 @@
         tick style={ black },
         y tick label style={ /pgf/number format/fixed, /pgf/number format/precision=0 },
         grid style={ dotted, gray },
-        every node near coord/.append style={font=\tiny},
+        %every node near coord/.append style={font=\tiny},
         %
         % magic to make the numbers appear above the overly long bars:
-        visualization depends on={rawy \as \rawy}, % save original y values
-        restrict y to domain*={ % now clip/restrict any y value to ymax
-            \pgfkeysvalueof{/pgfplots/ymin}:\ymaxbreak
-        },
-        after end axis/.code={ % draw squiggly line indicating break
-            \draw [semithick, white, decoration={snake,amplitude=0.1mm,segment length=0.75mm,post length=0.375mm}, decorate] (rel axis cs:0,1.01) -- (rel axis cs:1,1.01);
-        },
-        nodes near coords={\color{.!75!black}\pgfmathprintnumber\rawy}, % print the original y values (darkened in case they're too light)...
-        nodes near coords greater equal only=\ymax, % ... but ONLY if they're >= ymax
-        clip=false, % allow clip to protrude beyond ymax
+        % visualization depends on={rawy \as \rawy}, % save original y values
+        % restrict y to domain*={ % now clip/restrict any y value to ymax
+        %     \pgfkeysvalueof{/pgfplots/ymin}:\ymaxbreak
+        % },
+        % after end axis/.code={ % draw squiggly line indicating break
+        %     \draw [semithick, white, decoration={snake,amplitude=0.1mm,segment length=0.75mm,post length=0.375mm}, decorate] (rel axis cs:0,1.01) -- (rel axis cs:1,1.01);
+        % },
+        % nodes near coords={\color{.!75!black}\pgfmathprintnumber\rawy}, % print the original y values (darkened in case they're too light)...
+        % nodes near coords greater equal only=\ymax, % ... but ONLY if they're >= ymax
+        % clip=false, % allow clip to protrude beyond ymax
         % Custom stuff to edit per template
         %
-        xlabel={\footnotesize Security Score},
+        xlabel={\footnotesize Energy (normalized)},
         xlabel near ticks,
-        xmin=0, xmax=4,
-        xtick={ 0, 0.5, ..., 4 },
-        enlarge x limits=0.2, % add some breathing room along the x axis's sides
+        xmin=0, xmax=1,
+        xtick={ 0, 1 },
+        %enlarge x limits=0.2, % add some breathing room along the x axis's sides
         major x tick style=transparent,
         %
         ylabel={\footnotesize Latency (normalized)},
@@ -41,6 +41,7 @@
         ymajorgrids=true,
         ymin=0, ymax=\ymax,
         ytick={ 0, 1 },
+        restrict x to domain=0:1,
         %yticklabels={ 0, 0.5, 1.5, 2 },
         % extra y ticks={1},
         % extra y tick style={grid=major, grid style={dashed, black}},
@@ -62,6 +63,69 @@
         %     anchor=south,
         % },
     ]
-        %\addplot [] table [x=score, y=latency, col sep=space] {charts/tradeoff-with-ratios.dat};
+        \addplot table [
+            only marks,
+            x=energy,
+            y=latency,
+            discard if symbol not={iop}{4k-r},
+            discard if symbol not={order}{seq},
+            col sep=space,
+        ] {charts/tradeoff-baseline.dat};
+        \addplot table [
+            only marks,
+            x=energy,
+            y=latency,
+            discard if symbol not={iop}{512k-r},
+            discard if symbol not={order}{seq},
+            col sep=space
+        ] {charts/tradeoff-baseline.dat};
+        \addplot table [
+            only marks,
+            x=energy,
+            y=latency,
+            discard if symbol not={iop}{5m-r},
+            discard if symbol not={order}{seq},
+            col sep=space
+        ] {charts/tradeoff-baseline.dat};
+        \addplot table [
+            only marks,
+            x=energy,
+            y=latency,
+            discard if symbol not={iop}{40m-r},
+            discard if symbol not={order}{seq},
+            col sep=space
+        ] {charts/tradeoff-baseline.dat};
+        \addplot table [
+            only marks,
+            x=energy,
+            y=latency,
+            discard if symbol not={iop}{4k-w},
+            discard if symbol not={order}{rnd},
+            col sep=space,
+        ] {charts/tradeoff-baseline.dat};
+        \addplot table [
+            only marks,
+            x=energy,
+            y=latency,
+            discard if symbol not={iop}{512k-w},
+            discard if symbol not={order}{rnd},
+            col sep=space
+        ] {charts/tradeoff-baseline.dat};
+        \addplot table [
+            only marks,
+            x=energy,
+            y=latency,
+            discard if symbol not={iop}{5m-w},
+            discard if symbol not={order}{rnd},
+            col sep=space
+        ] {charts/tradeoff-baseline.dat};
+        \addplot table [
+            only marks,
+            x=energy,
+            y=latency,
+            discard if symbol not={iop}{40m-w},
+            discard if symbol not={order}{rnd},
+            col sep=space
+        ] {charts/tradeoff-baseline.dat};
     \end{axis}%
 \end{tikzpicture}%

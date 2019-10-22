@@ -31,8 +31,9 @@ contiguous storage blocks are decrypted with the old key and encrypted again
 with a new key when an overwrite is detected. Unfortunately, re-keying is an
 expensive operation. However, overwrite-averse LFS behavior ensures costly
 re-keying operations are triggered as rarely as possible during I/O, preserving
-or improving system performance~\cite{StrongBox}.
-\TODO{We should say something, if possible, about whether the observations and ideas in the rest of the paper would apply to the other uses of stream ciphers in FDE.}
+or improving system performance~\cite{StrongBox}. \TODO{We should say something,
+if possible, about whether the observations and ideas in the rest of the paper
+would apply to the other uses of stream ciphers in FDE.}
 
 \begin{figure}[ht]
    \centering
@@ -53,33 +54,37 @@ operations when overwrites do occur.
 \subsection{Key Insights}
 
 \subsubsection{A Single Point In A Space Of Possible Cipher Configurations}
-\TODO{This is an example of why we need to make sure that our claims are stronger than just making strongbox better.  It would be great to ask what if the above schemes used a range of ciphers?  And then make the text of this paragraph more general for all types of stream-cipher based fde.}
-What if we used StrongBox with ciphers \textit{other} than ChaCha20? Redesigning
-StrongBox with a generic cipher API allows for ciphers other than ChaCha20 to be
-used, yielding a space of cipher configuration points with various performance,
+\TODO{This is an example of why we need to make sure that our claims are
+stronger than just making strongbox better.  It would be great to ask what if
+the above schemes used a range of ciphers?  And then make the text of this
+paragraph more general for all types of stream-cipher based fde.} What if we
+used StrongBox with ciphers \textit{other} than ChaCha20? Redesigning StrongBox
+with a generic cipher API allows for ciphers other than ChaCha20 to be used,
+yielding a space of cipher configuration points with various performance,
 battery life, security, drive space, and other tradeoffs. It follows then that
 the original StrongBox construction using ChaCha20 exists as one point in this
 space of cipher configurations.
 
-\begin{figure}[ht] \textbf{Baseline Cipher I/O Performance}\par\medskip
+\begin{figure*}[ht] \textbf{Baseline Cipher I/O Performance}\par\medskip
    \centering
    {\input{charts/tradeoff-no-ratios.tex}} \caption{Median sequential and random
    read and write latency per I/O operation size (4KB, 512KB, 5MB, 40MB) using
    multiple cipher configurations achievable without switching and ordered by
    security score.}
   \label{fig:tradeoff-no-ratios}
-\end{figure}
+\end{figure*}
 
-\TODO{You have to introduce the scoring before you get here.  Or at least introduce the notion of scoring with citations. or that the community agrees on the relative strength with citations.}
-For instance, \figref{tradeoff-no-ratios} shows the security versus I/O latency
-tradeoff between different stream ciphers (including ChaCha20) when completing a
-40MB read of encrypted storage. The experiment was performed on a Linux RAM disk
-on an ARM big.LITTLE Exynos Octa processor, which is similar to the processors
-used in the Samsung Galaxy line of phones and other devices. Of the ciphers we
-tested, those with more desirable but performance inhibitive security guarantees
-(see: \secref{design}) resulted in higher latency for I/O operations while
-ciphers with relatively weaker less desirable security guarantees resulted in
-lower latency.
+\TODO{You have to introduce the scoring before you get here.  Or at least
+introduce the notion of scoring with citations. or that the community agrees on
+the relative strength with citations.} For instance, \figref{tradeoff-no-ratios}
+shows the security versus I/O latency tradeoff between different stream ciphers
+(including ChaCha20) when completing a 40MB read of encrypted storage. The
+experiment was performed on a Linux RAM disk on an ARM big.LITTLE Exynos Octa
+processor, which is similar to the processors used in the Samsung Galaxy line of
+phones and other devices. Of the ciphers we tested, those with more desirable
+but performance inhibitive security guarantees (see: \secref{design}) resulted
+in higher latency for I/O operations while ciphers with relatively weaker less
+desirable security guarantees resulted in lower latency.
 
 \subsubsection{Nugget Encryption/Decryption And Re-Keying Is Entirely Independent}
 
@@ -100,12 +105,12 @@ independent nuggets that lends itself to mixed cipher use, it is clear our
 system does not have to sit at a static configuration point. Hence, we require a
 mechanism to navigate the cipher configuration space, trading off concerns such
 that the system is always at the most optimal configuration given the runtime
-environment and user requirements. By abstracting the re-keying process out into a \emph{re-ciphering}
-or \emph{cipher switching} process, whereby the key and the cipher used to
-encrypt/decrypt the nugget can both be switched at runtime, we can trade off
-between different ciphers and their characteristics dynamically. Comparatively,
-prior work can only accomplish a static tradeoff at compile time or at system
-initialization. \\
+environment and user requirements. By abstracting the re-keying process out into
+a \emph{re-ciphering} or \emph{cipher switching} process, whereby the key and
+the cipher used to encrypt/decrypt the nugget can both be switched at runtime,
+we can trade off between different ciphers and their characteristics
+dynamically. Comparatively, prior work can only accomplish a static tradeoff at
+compile time or at system initialization. \\
 \\
 Leveraging these insights, we present SwitchBox. \TODO{A few short explanatory
 sentences that lead to: Our goal is to dynamically trade desirable security
@@ -172,14 +177,14 @@ state-of-the-art ciphers as a result.\\
 \textbf{Maintaining I/O performance with a mixed-cipher drive layout.} With
 prior work, cipher configurations are typically fixed at the time the system is
 booted or the filesystem or container is created~\cite{CiteAllTheFilesystems};
-if requirements change online, at best the entire system requires a reboot leading to down time and user dissatisfaction. 
-At worst, before the reboot, the filesystem or encrypted
-container has to be deleted and recreated. This is rarely desirable. Hence,
-SwitchBox requires a generic \emph{cipher API}, IPC, and a software mechanism
-that can re-cipher or \emph{switch} the cipher used to encrypt and decrypt
-individual nuggets while maintaining low overhead and acceptable performance.
-This mechanism should allow for a mixed-cipher drive layout and provides the
-``how'' to switch nuggets' ciphers.
+if requirements change online, at best the entire system requires a reboot
+leading to down time and user dissatisfaction. At worst, before the reboot, the
+filesystem or encrypted container has to be deleted and recreated. This is
+rarely desirable. Hence, SwitchBox requires a generic \emph{cipher API}, IPC,
+and a software mechanism that can re-cipher or \emph{switch} the cipher used to
+encrypt and decrypt individual nuggets while maintaining low overhead and
+acceptable performance. This mechanism should allow for a mixed-cipher drive
+layout and provides the ``how'' to switch nuggets' ciphers.
 
 To provide the ``when'' or ``where'', we implement and demonstrate a series of
 novel cipher switching \textit{strategies} that, along with the ``pluggable''
