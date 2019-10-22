@@ -93,147 +93,131 @@
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{4k-r},
-                discard if number not={ratio}{4},
                 discard if symbol not={order}{seq},
                 col sep=space,
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
             \addplot [thick, dashed, green] table [
                 meta=cipher,
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{512k-r},
-                discard if number not={ratio}{0},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
             \addplot [thick, dashdotted, blue] table [
                 meta=cipher,
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{5m-r},
-                discard if number not={ratio}{0},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
             \addplot [thick, densely dotted, orange] table [
                 meta=cipher,
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{40m-r},
-                discard if number not={ratio}{0},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
         \nextgroupplot[legend to name={throwaway1}, title={Random Reads}]
             \addplot [thick, red] table [
                 meta=cipher,
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{4k-r},
-                discard if number not={ratio}{4},
                 discard if symbol not={order}{rnd},
                 col sep=space,
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
             \addplot [thick, dashed, green] table [
                 meta=cipher,
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{512k-r},
-                discard if number not={ratio}{0},
                 discard if symbol not={order}{rnd},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
             \addplot [thick, dashdotted, blue] table [
                 meta=cipher,
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{5m-r},
-                discard if number not={ratio}{0},
                 discard if symbol not={order}{rnd},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
             \addplot [thick, densely dotted, orange] table [
                 meta=cipher,
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{40m-r},
-                discard if number not={ratio}{0},
                 discard if symbol not={order}{rnd},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
         \nextgroupplot[legend to name={throwaway2}, title={Sequential Writes}]
             \addplot [thick, red] table [
                 meta=cipher,
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{4k-w},
-                discard if number not={ratio}{4},
                 discard if symbol not={order}{seq},
                 col sep=space,
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
             \addplot [thick, dashed, green] table [
                 meta=cipher,
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{512k-w},
-                discard if number not={ratio}{0},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
             \addplot [thick, dashdotted, blue] table [
                 meta=cipher,
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{5m-w},
-                discard if number not={ratio}{0},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
             \addplot [thick, densely dotted, orange] table [
                 meta=cipher,
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{40m-w},
-                discard if number not={ratio}{0},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
         \nextgroupplot[legend to name={throwaway3}, title={Random Writes}]
             \addplot [thick, red] table [
                 meta=cipher,
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{4k-w},
-                discard if number not={ratio}{4},
                 discard if symbol not={order}{rnd},
                 col sep=space,
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
             \addplot [thick, dashed, green] table [
                 meta=cipher,
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{512k-w},
-                discard if number not={ratio}{0},
                 discard if symbol not={order}{rnd},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
             \addplot [thick, dashdotted, blue] table [
                 meta=cipher,
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{5m-w},
-                discard if number not={ratio}{0},
                 discard if symbol not={order}{rnd},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
             \addplot [thick, densely dotted, orange] table [
                 meta=cipher,
                 x=score,
                 y=latency,
                 discard if symbol not={iop}{40m-w},
-                discard if number not={ratio}{0},
                 discard if symbol not={order}{rnd},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {charts/tradeoff-baseline.dat};
     \end{groupplot}%
 \end{tikzpicture}%
