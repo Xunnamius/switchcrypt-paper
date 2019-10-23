@@ -1,16 +1,14 @@
 \begin{tikzpicture}[baseline]
-
-    \pgfmathsetmacro{\ymax}{1.1} % set the maximum y value
-    \pgfmathsetmacro{\ymaxbreak}{1.2} % set the y value at which overflow is drawn
-
     \begin{groupplot}[
+        % 6 seconds (0.3) + 3 seconds (0.15) + 11 seconds (0.55) = 1.0
+        no marks,
         group style={
             group size=1 by 2,
             xlabels at=edge bottom,
             ylabels at=edge left,
-            xticklabels at=edge bottom,
+            %xticklabels at=edge bottom,
             yticklabels at=edge left,
-            vertical sep=25pt,
+            vertical sep=35pt,
             horizontal sep=15pt,
         },
         %axis x line*=bottom,
@@ -23,6 +21,14 @@
         tick style={ black },
         y tick label style={ /pgf/number format/fixed, /pgf/number format/precision=0 },
         grid style={ dotted, gray },
+        point meta=explicit symbolic,
+        scatter/classes={
+            c8={mark=square*},
+            c20={mark=triangle*, red},
+            ff={mark=diamond*},
+            fb={mark=pentagon*},
+            fs={mark=otimes, red}
+        },
         %every node near coord/.append style={font=\tiny},
         %
         % magic to make the numbers appear above the overly long bars:
@@ -39,19 +45,17 @@
         % Custom stuff to edit per template
         %
         xlabel near ticks,
-        %xlabel shift={-1.5mm},
-        xmin=0, xmax=4,
-        xtick={ 0, 1, 2, 3, 4 },
-        xticklabels={ 0,,, 3, \empty },
-        major x tick style=transparent,
+        xlabel shift={-0.5mm},
+        xmin=0, xmax=1,
         %enlarge x limits=0.2, % add some breathing room along the x axis's sides
         %
         ylabel near ticks,
-        ylabel shift={-1.5mm},
-        ymajorgrids=true,
-        ymin=0, ymax=\ymax,
-        ytick={ 0, 1, \ymax },
-        yticklabels={ 0, 1, \empty },
+        %ylabel shift={-1.5mm},
+        ymajorgrids=false,
+        ymin=0, ymax=4,
+        ytick={ 0, 1, 1.5, 2, 3, 4 },
+        yticklabels={ 0,,1.5,, 3, \empty },
+        major y tick style=transparent,
         %yticklabels={ 0, 0.5, 1.5, 2 },
         % extra y ticks={1},
         % extra y tick style={grid=major, grid style={dashed, black}},
@@ -61,119 +65,73 @@
         legend cell align=center,
         legend style={ column sep=1ex },
         legend entries={%
-            {\scriptsize Normal},
-            {\scriptsize Delayed},
-            {\scriptsize Choice Config (Normal)},
-            {\scriptsize Bad Config (Delayed)},
-            {\scriptsize Choice Config (Delayed)}
+            {\scriptsize Static Score},
+            {\scriptsize Desired Score (end user)},
+            {\scriptsize Actual Score (SwitchBox)}
         },
         legend style={
             draw=none,
             legend columns=3,
-            at={(1.0,1.2)},
+            at={(0.5,1.02)},
             anchor=south,
         },
     ]
         \nextgroupplot[
-            title={Sequential Reads},
-            xlabel={\footnotesize Security Score},
-            ylabel={\footnotesize Latency (normalized)}
+            xlabel={\footnotesize Time (s)},
+            ylabel={\footnotesize Security Score},
+            xtick={ 0, 0.3, 0.45, 1 },
+            xticklabels={ 0, 6, 9, \ldots },
         ]
-            \addplot [thick] table [
-                meta=label,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{r},
-                discard if symbol not={delayed}{no},
-                discard if symbol not={order}{seq},
+            \addplot [thick, red] table [
+                x=time,
+                y=score,
+                discard if number not={line}{1},
+                col sep=space
+            ] {charts/usecase-custody.dat};
+            \addplot [thick, red, forget plot] table [
+                x=time,
+                y=score,
+                discard if number not={line}{3},
+                col sep=space
+                ] {charts/usecase-custody.dat};
+            \addplot [thick, densely dotted, blue] table [
+                x=time,
+                y=score,
+                discard if number not={line}{2},
+                col sep=space
+                ] {charts/usecase-custody.dat};
+            \addplot [thick, dashed, blue] table [
+                x=time,
+                y=score,
+                discard if number not={line}{4},
                 col sep=space,
-            ] {charts/usecase-eol-tradeoff.dat};
-            \addplot [thick, dashed] table [
-                meta=label,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{r},
-                discard if symbol not={delayed}{yes},
-                discard if symbol not={order}{seq},
-                col sep=space
-            ] {charts/usecase-eol-tradeoff.dat};
-            \coordinate (c1) at (205, 85);
-            \coordinate (c2) at (60, 9);
-            \draw [dotted] (190, 0) -- (190, 110) node [left of=c1] {\tiny (security floor)};
-            \draw [dotted] (0, 30) -- (400, 30) node [above of=c2] {\tiny (latency ceiling)};
-        \nextgroupplot[legend to name={throwaway1}, title={Random Reads}]
-            \addplot [thick] table [
-                meta=label,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{r},
-                discard if symbol not={delayed}{no},
-                discard if symbol not={order}{rnd},
-                col sep=space
-            ] {charts/usecase-eol-tradeoff.dat};
-            \addplot [thick, dashed] table [
-                meta=label,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{r},
-                discard if symbol not={delayed}{yes},
-                discard if symbol not={order}{rnd},
-                col sep=space
-            ] {charts/usecase-eol-tradeoff.dat};
-            \coordinate (c3) at (205, 85);
-            \coordinate (c4) at (60, 9);
-            \draw [dotted] (190, 0) -- (190, 110) node [left of=c3] {\tiny (security floor)};
-            \draw [dotted] (0, 30) -- (400, 30) node [above of=c4] {\tiny (latency ceiling)};
+                ] {charts/usecase-custody.dat};
+            % \coordinate (c1) at (0, 0);
+            % \draw [dotted, black] (0.2, 0) -- (0.2, 4) node [left of=c1] {\tiny (device lockdown)};
         \nextgroupplot[
-            legend to name={throwaway2},
-            title={Sequential Reads},
-            xlabel={\footnotesize Security Score},
-            ylabel={\footnotesize Latency (normalized)}
+            legend to name={throwaway8},
+            xlabel={\footnotesize Latency (normalized)},
+            ylabel={\footnotesize Security Score},
+            xtick={ 0, 1 },
+            xticklabels={ 0, 1 },
         ]
             \addplot [thick] table [
-                meta=label,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{w},
-                discard if symbol not={delayed}{no},
+                meta=cipher,
+                x=latency,
+                y=score,
+                discard if symbol not={iop}{40m-r},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/usecase-eol-tradeoff.dat};
-            \addplot [thick, dashed] table [
-                meta=label,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{w},
-                discard if symbol not={delayed}{yes},
-                discard if symbol not={order}{seq},
-                col sep=space
-            ] {charts/usecase-eol-tradeoff.dat};
-            \coordinate (c5) at (205, 85);
-            \coordinate (c6) at (60, 9);
-            \draw [dotted] (190, 0) -- (190, 110) node [left of=c5] {\tiny (security floor)};
-            \draw [dotted] (0, 30) -- (400, 30) node [above of=c6] {\tiny (latency ceiling)};
-        \nextgroupplot[legend to name={throwaway3}, title={Random Writes}]
-            \addplot [thick] table [
-                meta=label,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{w},
-                discard if symbol not={delayed}{no},
-                discard if symbol not={order}{rnd},
-                col sep=space
-            ] {charts/usecase-eol-tradeoff.dat};
-            \addplot [thick, dashed] table [
-                meta=label,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{w},
-                discard if symbol not={delayed}{yes},
-                discard if symbol not={order}{rnd},
-                col sep=space
-            ] {charts/usecase-eol-tradeoff.dat};
-            \coordinate (c7) at (205, 85);
-            \coordinate (c8) at (60, 9);
-            \draw [dotted] (190, 0) -- (190, 110) node [left of=c7] {\tiny (security floor)};
-            \draw [dotted] (0, 30) -- (400, 30) node [above of=c8] {\tiny (latency ceiling)};
+            ] {charts/tradeoff-baseline.dat};
+            % \addplot [thick, dashed] table [
+            %     x=score,
+            %     y=latency,
+            %     discard if symbol not={iop}{40m-r},
+            %     discard if symbol not={strategy}{mirrored},
+            %     discard if symbol not={order}{seq},
+            %     col sep=space
+            % ] {charts/mirrored-selective-baseline.dat};
+            % \coordinate (c3) at (205, 85);
+            % \draw [dotted] (190, 0) -- (190, 110) node [left of=c3] {\tiny (security floor)};
     \end{groupplot}%
 \end{tikzpicture}%

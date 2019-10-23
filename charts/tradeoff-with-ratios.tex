@@ -29,7 +29,7 @@
             c20={mark=triangle*},
             ff={mark=diamond*},
             fb={mark=pentagon*},
-            fs={mark=otimes*}
+            fs={mark=otimes}
         },
         %every node near coord/.append style={font=\tiny},
         %
@@ -117,7 +117,7 @@
                 discard if symbol not={order}{seq},
                 col sep=space
             ] {charts/tradeoff-ratios.dat};
-        \nextgroupplot[legend to name={throwaway1}, title={Sequential 4K Reads}]
+        \nextgroupplot[legend to name={throwaway4}, title={Sequential 4K Reads}]
             \addplot [thick, red] table [
                 meta=cipher,
                 x=score,
@@ -151,7 +151,7 @@
                 discard if symbol not={order}{seq},
                 col sep=space
             ] {charts/tradeoff-ratios.dat};
-        \nextgroupplot[legend to name={throwaway2}, title={Sequential 40M Writes}]
+        \nextgroupplot[legend to name={throwaway5}, title={Sequential 40M Writes}]
             \addplot [thick, red] table [
                 meta=cipher,
                 x=score,
@@ -185,7 +185,7 @@
                 discard if symbol not={order}{seq},
                 col sep=space
             ] {charts/tradeoff-ratios.dat};
-        \nextgroupplot[legend to name={throwaway3}, title={Sequential 4K Writes}]
+        \nextgroupplot[legend to name={throwaway6}, title={Sequential 4K Writes}]
             \addplot [thick, red] table [
                 meta=cipher,
                 x=score,

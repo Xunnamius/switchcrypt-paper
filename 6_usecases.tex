@@ -36,6 +36,18 @@ Benefit: we can ``future-proof'' our encrypted highly sensitive data against
 more powerful future attacks/less trustworthy ciphers while preserving the
 performance win from using a faster less secure cipher.
 
+\begin{figure}[ht] \textbf{Custody Panic Use Case: Security Goals vs Time
+  Constraint}\par\medskip
+     \centering
+     {\input{charts/usecase-custody.tex}} \caption{Actual security score vs
+     security goal with respect to the time immediately before and after custody
+     is lost; this use case employs Mirrored switching to maintain data
+     consistency up until mirrored contents encrypted using the low scoring cipher
+     configurations are erased, enabling a relatively high speed low energy
+     drive-wide cipher switch.}
+    \label{fig:usecase-custody}
+  \end{figure}
+
 \begin{figure}[ht] \textbf{VSR Use Case: ChaCha8 vs Freestyle Secure Sequential
 4KB, 5MB Performance}\par\medskip
    \centering
@@ -111,17 +123,17 @@ former encrypted state.
 Benefit: we can mitigate the performance loss of a slowing SSD by using a faster
 but less secure cipher.
 
-\begin{figure*}[ht] \textbf{SSD EoL Use Case: Latency-Security Tradeoff vs
-   Goals}\par\medskip
-   \centering
-   {\input{charts/usecase-eol-tradeoff.tex}} \caption{Median sequential and
-   random read and write latency per 40MB sequential I/O operation size using
-   multiple cipher configurations ordered by security score; performance
-   comparison of baseline versus simulated faulty block device (\ie{uniform
-   additional latency}). With Forward switching, the performance impact is
-   offset given our latency and security goals.}
-  \label{fig:usecase-eol-tradeoff}
-\end{figure*}
+% \begin{figure*}[ht] \textbf{SSD EoL Use Case: Latency-Security Tradeoff vs
+%    Goals}\par\medskip
+%    \centering
+%    {\input{charts/usecase-eol-tradeoff.tex}} \caption{Median sequential and
+%    random read and write latency per 40MB sequential I/O operation size using
+%    multiple cipher configurations ordered by security score; performance
+%    comparison of baseline versus simulated faulty block device (\ie{uniform
+%    additional latency}). With Forward switching, the performance impact is
+%    offset given our latency and security goals.}
+%   \label{fig:usecase-eol-tradeoff}
+% \end{figure*}
 
 \subsection{Custody Panic: Securing Device Data Under Duress}
 
@@ -137,17 +149,7 @@ device could switch itself into a more secure state as quickly as possible.
 Benefit: greater security guarantee achieved using the highest security
 encryption available versus powerful adversaries with unknown means and motive.
 
-\begin{figure}[ht] \textbf{Custody Panic Use Case: Security Goals vs Time
-Constraint}\par\medskip
-   \centering
-   {\input{charts/usecase-custody.tex}} \caption{Actual security score vs
-   security goal with respect to the time immediately before and after custody
-   is lost; this use case employs Mirrored switching to maintain data
-   consistency up until mirrored contents encrypted using the low scoring cipher
-   configurations are erased, enabling a relatively high speed low energy
-   drive-wide cipher switch.}
-  \label{fig:usecase-custody}
-\end{figure}
+
 
 \TODO{Talk about some proposed configurations that allow for quick secure erase:
 FTL-level partitioning, two drives (like most smartphones), special secure erase

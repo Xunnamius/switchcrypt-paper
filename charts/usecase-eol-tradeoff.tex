@@ -26,7 +26,7 @@
         height=6cm,
         width=\textwidth/2,
         tick align=outside,
-        tick pos=bottom, % make sure ticks only appear at the bottom and left axes
+        %tick pos=bottom, % make sure ticks only appear at the bottom and left axes
         title style={yshift=-1.5ex},
         tick style={ black },
         y tick label style={ /pgf/number format/fixed, /pgf/number format/precision=0 },
@@ -107,7 +107,7 @@
             \coordinate (c2) at (60, 9);
             \draw [dotted] (190, 0) -- (190, 110) node [left of=c1] {\tiny (security floor)};
             \draw [dotted] (0, 30) -- (400, 30) node [above of=c2] {\tiny (latency ceiling)};
-        \nextgroupplot[legend to name={throwaway1}, title={Random Reads}]
+        \nextgroupplot[legend to name={throwaway9}, title={Random Reads}]
             \addplot [thick] table [
                 meta=label,
                 x=score,
@@ -130,7 +130,7 @@
             \coordinate (c4) at (60, 9);
             \draw [dotted] (190, 0) -- (190, 110) node [left of=c3] {\tiny (security floor)};
             \draw [dotted] (0, 30) -- (400, 30) node [above of=c4] {\tiny (latency ceiling)};
-        \nextgroupplot[legend to name={throwaway2}, title={Sequential Writes}]
+        \nextgroupplot[legend to name={throwaway10}, title={Sequential Writes}]
             \addplot [thick] table [
                 meta=label,
                 x=score,
@@ -153,7 +153,7 @@
             \coordinate (c6) at (60, 9);
             \draw [dotted] (190, 0) -- (190, 110) node [left of=c5] {\tiny (security floor)};
             \draw [dotted] (0, 30) -- (400, 30) node [above of=c6] {\tiny (latency ceiling)};
-        \nextgroupplot[legend to name={throwaway3}, title={Random Writes}]
+        \nextgroupplot[legend to name={throwaway11}, title={Random Writes}]
             \addplot [thick] table [
                 meta=label,
                 x=score,
