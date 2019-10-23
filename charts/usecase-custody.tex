@@ -106,8 +106,8 @@
                 discard if number not={line}{4},
                 col sep=space,
                 ] {charts/usecase-custody.dat};
-            % \coordinate (c1) at (0, 0);
-            % \draw [dotted, black] (0.2, 0) -- (0.2, 4) node [left of=c1] {\tiny (device lockdown)};
+            \coordinate (c1) at (0, 0);
+            \draw [dotted, black] (0.2, 0) -- (0.2, 4) node [left of=c1] {\tiny (device lockdown)};
         \nextgroupplot[
             legend to name={throwaway8},
             xlabel={\footnotesize Latency (normalized)},
@@ -131,7 +131,7 @@
             %     discard if symbol not={order}{seq},
             %     col sep=space
             % ] {charts/mirrored-selective-baseline.dat};
-            % \coordinate (c3) at (205, 85);
-            % \draw [dotted] (190, 0) -- (190, 110) node [left of=c3] {\tiny (security floor)};
+            \coordinate (c3) at (205, 85);
+            \draw [dotted] (190, 0) -- (190, 110) node [left of=c3] {\tiny (security floor)};
     \end{groupplot}%
 \end{tikzpicture}%
