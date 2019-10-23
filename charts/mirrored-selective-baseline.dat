@@ -1,0 +1,11 @@
+cipher strategy  score iop    latency    energy
+c8     mirrored  0.5   4k-r   0.408402   1.0
+c20    mirrored  1.5   4k-r   0.361319   0.914112
+ff     mirrored  2.0   4k-r   0.0        0.0
+fb     mirrored  2.5   4k-r   0.253189   0.800367
+fs     mirrored  3.0   4k-r   1.0        0.403702
+c8     selective 0.5   4k-r   0.408402   1.0
+c20    selective 1.5   4k-r   0.361319   0.914112
+ff     selective 2.0   4k-r   0.0        0.0
+fb     selective 2.5   4k-r   0.253189   0.800367
+fs     selective 3.0   4k-r   1.0        0.403702
