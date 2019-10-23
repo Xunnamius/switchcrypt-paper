@@ -64,13 +64,13 @@
         legend cell align=center,
         legend style={ column sep=1ex },
         legend entries={%
-            {\scriptsize Static Score},
-            {\scriptsize Desired Score (end user)},
-            {\scriptsize Actual Score (SwitchBox)}
+            {\scriptsize Mirrored Scores (Without SwitchBox)},
+            {\scriptsize Desired Minimum Score (Exclusive)},
+            {\scriptsize Actual Minimum Score (SwitchBox)}
         },
         legend style={
             draw=none,
-            legend columns=3,
+            legend columns=2,
             at={(0.5,1.02)},
             anchor=south,
         },
@@ -125,14 +125,6 @@
                 discard if symbol not={order}{seq},
                 col sep=space
             ] {charts/tradeoff-baseline.dat};
-            \addplot [thick, dashed] table [
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{40m-r},
-                discard if symbol not={strategy}{mirrored},
-                discard if symbol not={order}{seq},
-                col sep=space
-            ] {charts/mirrored-selective-baseline.dat};
             \coordinate (c3) at (0.21, 2.5);
             \coordinate (c4) at (0.825, 2.5);
             \draw [dotted] (0.035, 0) -- (0.035, 4) node [above of=c3] {\tiny (pre-panic latency ceiling)};
