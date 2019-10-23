@@ -106,8 +106,10 @@
                 discard if number not={line}{4},
                 col sep=space,
                 ] {charts/usecase-custody.dat};
-            \coordinate (c1) at (0, 0);
-            \draw [dotted, black] (0.2, 0) -- (0.2, 4) node [left of=c1] {\tiny (device lockdown)};
+            \coordinate (c1) at (0.35, 3.5);
+            \coordinate (c2) at (0.415, 3.5);
+            \draw [dotted, black] (0.2945, 0) -- (0.2945, 4) node [left of=c1] {\tiny (panic; ISE)};
+            \draw [dotted, black] (0.455, 0) -- (0.455, 4) node [right of=c2] {\tiny (ISE completes)};
         \nextgroupplot[
             legend to name={throwaway8},
             xlabel={\footnotesize Latency (normalized)},
@@ -123,15 +125,17 @@
                 discard if symbol not={order}{seq},
                 col sep=space
             ] {charts/tradeoff-baseline.dat};
-            % \addplot [thick, dashed] table [
-            %     x=score,
-            %     y=latency,
-            %     discard if symbol not={iop}{40m-r},
-            %     discard if symbol not={strategy}{mirrored},
-            %     discard if symbol not={order}{seq},
-            %     col sep=space
-            % ] {charts/mirrored-selective-baseline.dat};
-            \coordinate (c3) at (205, 85);
-            \draw [dotted] (190, 0) -- (190, 110) node [left of=c3] {\tiny (security floor)};
+            \addplot [thick, dashed] table [
+                x=score,
+                y=latency,
+                discard if symbol not={iop}{40m-r},
+                discard if symbol not={strategy}{mirrored},
+                discard if symbol not={order}{seq},
+                col sep=space
+            ] {charts/mirrored-selective-baseline.dat};
+            \coordinate (c3) at (0.21, 2.5);
+            \coordinate (c4) at (0.825, 2.5);
+            \draw [dotted] (0.035, 0) -- (0.035, 4) node [above of=c3] {\tiny (pre-panic latency ceiling)};
+            \draw [dotted] (0.999, 0) -- (0.999, 4) node [above of=c4] {\tiny (post-panic latency ceiling)};
     \end{groupplot}%
 \end{tikzpicture}%

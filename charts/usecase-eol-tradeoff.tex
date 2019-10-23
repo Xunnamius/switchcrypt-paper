@@ -103,10 +103,10 @@
                 discard if symbol not={order}{seq},
                 col sep=space
             ] {charts/usecase-eol-tradeoff.dat};
-            \coordinate (c1) at (205, 85);
-            \coordinate (c2) at (60, 9);
-            \draw [dotted] (190, 0) -- (190, 110) node [left of=c1] {\tiny (security floor)};
-            \draw [dotted] (0, 30) -- (400, 30) node [above of=c2] {\tiny (latency ceiling)};
+            \coordinate (c1) at (2.075, 0.8);
+            \coordinate (c2) at (0.5, 0.08);
+            \draw [dotted] (1.9, 0) -- (1.9, 1.1) node [left of=c1] {\tiny (security floor)};
+            \draw [dotted] (0, 0.3) -- (4, 0.3) node [above of=c2] {\tiny (latency ceiling)};
         \nextgroupplot[legend to name={throwaway9}, title={Random Reads}]
             \addplot [thick] table [
                 meta=label,
@@ -126,10 +126,10 @@
                 discard if symbol not={order}{rnd},
                 col sep=space
             ] {charts/usecase-eol-tradeoff.dat};
-            \coordinate (c3) at (205, 85);
-            \coordinate (c4) at (60, 9);
-            \draw [dotted] (190, 0) -- (190, 110) node [left of=c3] {\tiny (security floor)};
-            \draw [dotted] (0, 30) -- (400, 30) node [above of=c4] {\tiny (latency ceiling)};
+            \coordinate (c3) at (2.075, 0.8);
+            \coordinate (c4) at (0.5, 0.08);
+            \draw [dotted] (1.9, 0) -- (1.9, 1.1) node [left of=c3] {\tiny (security floor)};
+            \draw [dotted] (0, 0.3) -- (4, 0.3) node [above of=c4] {\tiny (latency ceiling)};
         \nextgroupplot[legend to name={throwaway10}, title={Sequential Writes}]
             \addplot [thick] table [
                 meta=label,
@@ -149,10 +149,10 @@
                 discard if symbol not={order}{seq},
                 col sep=space
             ] {charts/usecase-eol-tradeoff.dat};
-            \coordinate (c5) at (205, 85);
-            \coordinate (c6) at (60, 9);
-            \draw [dotted] (190, 0) -- (190, 110) node [left of=c5] {\tiny (security floor)};
-            \draw [dotted] (0, 30) -- (400, 30) node [above of=c6] {\tiny (latency ceiling)};
+            \coordinate (c5) at (2.075, 0.8);
+            \coordinate (c6) at (0.5, 0.08);
+            \draw [dotted] (1.9, 0) -- (1.9, 1.1) node [left of=c5] {\tiny (security floor)};
+            \draw [dotted] (0, 0.3) -- (4, 0.3) node [above of=c6] {\tiny (latency ceiling)};
         \nextgroupplot[legend to name={throwaway11}, title={Random Writes}]
             \addplot [thick] table [
                 meta=label,
@@ -172,9 +172,9 @@
                 discard if symbol not={order}{rnd},
                 col sep=space
             ] {charts/usecase-eol-tradeoff.dat};
-            \coordinate (c7) at (205, 85);
-            \coordinate (c8) at (60, 9);
-            \draw [dotted] (190, 0) -- (190, 110) node [left of=c7] {\tiny (security floor)};
-            \draw [dotted] (0, 30) -- (400, 30) node [above of=c8] {\tiny (latency ceiling)};
+            \coordinate (c7) at (2.075, 0.8);
+            \coordinate (c8) at (0.5, 0.08);
+            \draw [dotted] (1.9, 0) -- (1.9, 1.1) node [left of=c7] {\tiny (security floor)};
+            \draw [dotted] (0, 0.3) -- (4, 0.3) node [above of=c8] {\tiny (latency ceiling)};
     \end{groupplot}%
 \end{tikzpicture}%
