@@ -12,7 +12,6 @@
             horizontal sep=15pt,
         },
         %axis x line*=bottom,
-        scatter,
         height=6cm,
         width=\linewidth,
         tick align=outside,
@@ -111,6 +110,7 @@
             \draw [dotted, black] (0.2945, 0) -- (0.2945, 4) node [left of=c1] {\tiny (panic; ISE)};
             \draw [dotted, black] (0.455, 0) -- (0.455, 4) node [right of=c2] {\tiny (ISE completes)};
         \nextgroupplot[
+            scatter,
             legend to name={throwaway8},
             xlabel={\footnotesize Latency (normalized)},
             ylabel={\footnotesize Security Score},
