@@ -72,7 +72,7 @@
         legend style={ column sep=1ex },
         legend entries={
             {\scriptsize Baseline I/O},
-            {\scriptsize Ratio I/O}
+            {\scriptsize SwitchBox Ratio Configuration I/O}
         },
         legend style={
             draw=none,
@@ -83,7 +83,7 @@
     ]
         \nextgroupplot[title={Sequential 40M Reads}]
             \addlegendimage{no markers,red}
-            \addlegendimage{mark=circle*,black}
+            \addlegendimage{mark=otimes*,only marks,black}
             \addplot [thick, red] table [
                 meta=cipher,
                 x=score,
