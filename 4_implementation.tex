@@ -1,4 +1,4 @@
-\section{Implementation}
+\section{Implementation}\label{sec:implementation}
 
 Our SwitchBox implementation consists of 9,491 lines of C code; our test suite
 consists of 6,077 lines of C code. All together, our solution is comprised of
@@ -58,3 +58,19 @@ If nuggets are not seeded with random data initially, any write operation into
 an ``empty'' nugget might leak information or constitute an overwrite when the
 predictable state of the backing store (\ie{initialized to all zeroes}) leads to
 an overwrite-style condition.
+
+\subsection{Freestyle Configurations}
+
+As Freestyle is highly configurable, we implement it in three different
+configurations: a ``fast'' mode with parameters
+\\\texttt{FreestyleFast($R_{min}$=$8$, $R_{max}$=$20$, $H_I$=$4$, $I_C$=$8$)}, a
+``balanced'' mode with parameters \texttt{FreestyleBalanced($R_{min}$=$12$,
+$R_{max}$=$28$, $H_I$=$2$, $I_C$=$10$)}, and a ``secure'' mode with parameters
+\texttt{FreestyleSecure($R_{min}$=$20$, $R_{max}$=$36$, $H_I$=$1$,
+$I_C$=$12$)} per the recommendations of the Freestyle authors~\cite{Freestyle}.
+
+Thanks to output randomization and the ability for Freestyle to accept the same
+parameters but deliver different ciphertexts, we can forgo some of the more
+expensive metadata management requirements of prior work, which has some
+implications when comparing Freestyle performance versus metadata-managed stream
+ciphers like ChaCha20.

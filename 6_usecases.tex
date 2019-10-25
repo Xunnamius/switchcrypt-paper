@@ -1,14 +1,4 @@
-\section{SwitchBox Case Studies} \label{sec:usecases}
-
-\TODO{Another possible use case: progressively retiring an old cipher by
-switching to a new one}
-
-\TODO{At a high-level, all of these are good, but the devil is always in the
-  details. I think it is important to get them as fully fleshed-out as possible
-  as soon as possible.  I really want to see the real data and see the
-  discussion about what happens if a user was forced to reconfigure.  If you
-  already have the data and just haven't added the real charts yet, you could
-  also spend some time just writing the text that will go with them.}
+\section{SwitchBox Case Studies}\label{sec:usecases}
 
 \subsection{Intra-file Variable Security Regions (VSR)}
 
@@ -40,9 +30,8 @@ performance win from using a faster less secure cipher.
 4KB, 5MB Performance}\par\medskip
    \centering
    {\input{charts/usecase-vsr-bar.tex}} \caption{Median sequential read and
-   write latency per 40MB I/O operation size with 3-to-1 ratio of ChaCha8
-   nuggets to Freestyle Secure nuggets, respectively. This usecase employs
-   Selective switching to achieve an optimal configuration.}
+   write performance comparison of 5MB I/O with 3-to-1 ratio of ChaCha8 nuggets
+   to Freestyle Secure nuggets, respectively.}
   \label{fig:usecase-vsr-bar}
 \end{figure}
 
@@ -50,10 +39,7 @@ performance win from using a faster less secure cipher.
    Goals}\par\medskip
    \centering
    {\input{charts/usecase-vsr-tradeoff.tex}} \caption{Median sequential and
-   random read and write latency per I/O operation size (4KB, 512KB, 5MB, 40MB)
-   with 3-to-1 ratios of multiple cipher configuration pairs ordered by security
-   score. This usecase employs Selective switching to achieve configurations
-   within and around our latency and security goal region.}
+   random read and write ...}
   \label{fig:usecase-vsr-tradeoff}
 \end{figure}}
 
@@ -90,11 +76,13 @@ win come from on reads?}
    \centering
    {\input{charts/usecase-battery.tex}} \caption{Median sequential and random
    read and write total energy use with respect to time and security score with
-   respect to time; 5MB sequential I/O operation size using a ChaCha8
-   configuration, Freestyle Balanced configuration, and a configuration that
-   switches between both ciphers (1-to-1 nugget ratio) with Forward switching.}
+   respect to time.}
   \label{fig:usecase-battery}
 \end{figure}
+
+40MB sequential I/O operation size using a ChaCha8 configuration, Freestyle
+Balanced configuration, and a configuration that switches between both ciphers
+(1-to-1 nugget ratio) with Forward switching.
 
 \subsection{Responding to End-of-Life Slowdown in Solid State Drives}
 
@@ -111,17 +99,17 @@ former encrypted state.
 Benefit: we can mitigate the performance loss of a slowing SSD by using a faster
 but less secure cipher.
 
-\begin{figure*}[ht] \textbf{SSD EoL Use Case: Latency-Security Tradeoff vs
+\begin{figure}[ht] \textbf{SSD EoL Use Case: Latency-Security Tradeoff vs
    Goals}\par\medskip
-   \centering
+   \hspace*{-1.25cm}
    {\input{charts/usecase-eol-tradeoff.tex}} \caption{Median sequential and
-   random read and write latency per 40MB sequential I/O operation size using
-   multiple cipher configurations ordered by security score; performance
-   comparison of baseline versus simulated faulty block device (\ie{uniform
-   additional latency}). With Forward switching, the performance impact is
-   offset given our latency and security goals.}
+   random 40MB read and write performance comparison: baseline versus simulated
+   faulty block device.}
   \label{fig:usecase-eol-tradeoff}
-\end{figure*}
+\end{figure}
+
+With Forward switching, the performance impact is offset given our latency and
+security goals.
 
 \subsection{Custody Panic: Securing Device Data Under Duress}
 
@@ -141,13 +129,13 @@ encryption available versus powerful adversaries with unknown means and motive.
 Constraint}\par\medskip
    \centering
    {\input{charts/usecase-custody.tex}} \caption{Actual security score vs
-   security goal with respect to the time immediately before and after custody
-   is lost; this use case employs Mirrored switching to maintain data
-   consistency up until mirrored contents encrypted using the low scoring cipher
-   configurations are erased, enabling a relatively high speed low energy
-   drive-wide cipher switch.}
+   security goal with respect to the time and ISE.}
   \label{fig:usecase-custody}
 \end{figure}
+
+this use case employs Mirrored switching to maintain data consistency up until
+mirrored contents encrypted using the low scoring cipher configurations are
+erased, enabling a relatively high speed low energy drive-wide cipher switch.
 
 \TODO{Of course it’s reasonable to ask whether it’s having keys in RAM is that
 big of concern in the first place. Can these keys actually be accessed?

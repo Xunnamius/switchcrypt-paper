@@ -70,7 +70,7 @@ them off with one another.
 
 SwitchBox exposes hooks for wrapper functions at three levels:
 
-\begin{itemize}
+\begin{enumerate}
    \item \textbf{\texttt{sc\_fn\_crypt\_data}}\\\texttt{sc\_fn\_crypt\_data}
    expects a cipher to accept intra- and inter- nugget offset data and return
    crypted the specified region and so operates at a fine-grain level compared
@@ -85,13 +85,15 @@ SwitchBox exposes hooks for wrapper functions at three levels:
    returning a convenient xor buffer to read crypted data into. As such, it
    provides a slightly higher level of interaction with the backing store's data
    making things easier for simpler ciphers.
+
    \item \textbf{\texttt{sc\_fn\_crypt\_data\_custom}}\\Unlike
    \texttt{sc\_fn\_crypt\_data}, \\\texttt{sc\_fn\_crypt\_data\_custom} does not
    perform the final XORing automatically, nor does it provide the convenient
    xor buffer to deal with crypted data automatically, for ciphers that require
    this functionality. As such, it provides a slightly lower level of
    abstraction when accessing to the backing store.
-   \item \texttt{sc\_fn\_read\_handle} and \texttt{sc\_fn\_write\_handle}\\
+
+   \item \textbf{\texttt{sc\_fn\_read\_handle}} and \textbf{\texttt{sc\_fn\_write\_handle}}\\
    Unlike the other two levels, both hooks must be provided by a cipher or
    functionality is undefined. At this level, control over encryption is
    coarse-grain, where cipher wrappers have access to all relevant SwitchBox
@@ -106,15 +108,15 @@ SwitchBox exposes hooks for wrapper functions at three levels:
    This is a good choice if a cipher with randomized output needs to work below
    the overwrite protection code (\ie{Freestyle}) and/or a cipher doesn't
    function like a stream cipher (\ie{AES-XTS}). If
-   \texttt{sc\_fn\_read\_handle} is defined, \\\texttt{sc\_fn\_write\_handle}
+   \\\texttt{sc\_fn\_read\_handle} is defined, \\\texttt{sc\_fn\_write\_handle}
    must also be defined. Hooks at this level should only ever operate on a
    single nugget or SwitchBox behavior is undefined. Further, due to cipher
-   swapping, this function must not read in any nugget/flake data from the
+   switching, this function must not read in any nugget/flake data from the
    backstore if a perfectly aligned nugget-sized chunk is requested. This is
    because this API hook may be called when cipher switching and the underlying
    data in the nugget might be crypted with a different algorithm when
    attempting to read it, corrupting the plaintext.
-\end{itemize}
+\end{enumerate}
 
 \subsection{Cipher Switching Strategies}
 
@@ -163,7 +165,7 @@ this way, the Forward strategy represents a form of temporal cipher switching.
 
 Rather than re-cipher the entire backing store every time the active cipher
 configuration changes, this strategy limits the performance impact of cipher
-switching to individual nuggets. Similar to ``re-keying'' in prior
+switching to individual nuggets. Similar to ``re-keying'' introduced in prior
 work~\cite{StrongBox}, the heavy price of re-ciphering is paid only once, after
 which the nugget is accessed normally during I/O until the active cipher
 configuration is switched again.
@@ -294,12 +296,7 @@ advantage (see: \secref{evaluation}).}
       Selective & Impossible     & High & Fast read and write   \\
       \hline
    \end{tabular}
-   \caption{A summary comparison between the three cipher switching strategies.
-   \emph{Convergence} represents the amount of time it takes to switch the
-   entire backing store to a single cipher configuration using one strategy.
-   \emph{Waste} represents a strategy's impact on the amount of free space
-   reported to the OS. \emph{Performance} represents the performance impact a
-   strategy has on read and write throughput.}
+   \caption{A summary comparison between the three cipher switching strategies.}
    \label{tbl:strategies-advantages}
 \end{table}
 
@@ -401,11 +398,11 @@ do not attempt to define a generally applicable \textit{ranking} of
 that, when summed, give an estimate of the usefulness of a cipher to SwitchBox
 FDE (see: \tblref{security-quant}).
 
-The scores we use are a combination of schemes that are already well understood:
-scoring ciphers on their confusion and diffusion of plaintext bits during
-encryption~\cite{MicrosoftCryptanalysisAES,SchneiersOnRounds} (\ie{round
-count}), scoring ciphers on how they behave when given the same input
-parameters~\cite{random-output1,Freestyle,random-output2} (normally an
+Our scoring scheme is a combination of well understood schemes: scoring ciphers
+on their confusion and diffusion of plaintext bits during
+encryption~\cite{MicrosoftCryptanalysisAES,SchneiersOnRounds} (commonly known as
+\emph{round count}), scoring ciphers on how they behave when given the same
+input parameters~\cite{random-output1,Freestyle,random-output2} (normally an
 unacceptable confidentiality-breaking overwrite condition), and asymmetric
 penalties for supplying the wrong key when attempting to decrypt nugget
 ciphertext (\ie{an attacker should have to do more work than the
@@ -465,6 +462,7 @@ ChaCha20. Variants are distributed evenly from 0-1. For instance, ChaCha8 scores
   Freestyle (B)   & 1           & 1            & 0.5            & 2.5            \\
   Freestyle (S)   & 1           & 1            & 1              & 3
   \end{tabular}
-  \caption{\TODO{Table caption goes here.}}
+  \caption{These ``scores'' represent a cipher's desirability or usefulness to
+  SwitchBox and to FDE more generally.}
   \label{tbl:security-quant}
 \end{table}

@@ -14,8 +14,8 @@
             horizontal sep=15pt,
         },
         %axis x line*=bottom,
-        height=6cm,
-        width=\textwidth/2,
+        height=3.5cm,
+        width=\linewidth/1.5,
         tick align=outside,
         tick pos=bottom, % make sure ticks only appear at the bottom and left axes
         title style={yshift=-1.5ex},
@@ -79,7 +79,7 @@
         legend style={
             draw=none,
             legend columns=4,
-            at={(1.0,1.15)},
+            at={(1.0,1.35)},
             anchor=south,
         },
     ]
@@ -96,6 +96,11 @@
                 discard if symbol not={order}{seq},
                 col sep=space,
             ] {charts/tradeoff-baseline.dat};
+            % \label[c8]{fig:tnr:c8}
+            % \label[c20]{fig:tnr:c20}
+            % \label[ff]{fig:tnr:ff}
+            % \label[fb]{fig:tnr:fb}
+            % \label[fs]{fig:tnr:fs}
             \addplot [thick, dashed, green] table [
                 meta=cipher,
                 x=score,
