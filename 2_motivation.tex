@@ -60,39 +60,37 @@ What if, rather than restricting the system to a single cipher, we wanted to
 \textit{flexibly} encrypt data at rest with a range of ciphers and cryptographic
 keys at the block device level? Implementing a generic cipher API and
 low-overhead switching mechanism allows for more than a single cipher to be used
-on the same device, yielding a space of cipher configuration points with various
-performance, battery life, security, writable space, and other tradeoffs where
-prior work merely exists as a single point in this space.
+on the same device, yielding a space of possible cipher configuration points
+with various performance, battery life, security, writable space, and other
+tradeoffs where prior work merely exists as a single point in this space.
 
-\subsubsection{Nugget Encryption/Decryption And Re-Keying Is Entirely Independent}
+\subsubsection{Nugget Encryption/Decryption And Re-Keying Are Entirely Independent}
 
 With SwitchBox, nuggets are considered as distinct logical blocks, each with
 their own metadata and unique cryptographic key used to encrypt and decrypt
-their contents independent of other nuggets using the cipher chosen at system
-initialization. This layout of distinct logical blocks naturally lends itself to
-encrypting different portions of the underlying drive with different ciphers
-instead; we can select any cipher to encrypt or decrypt any nugget at any point,
-rather than just a single cipher applied globally across the backing store. This
-design supports mixed cipher configurations such that each nugget can be encrypted,
-decrypted, and switched independently from all other nuggets.
+their contents independent of other nuggets. This layout of distinct logical
+blocks naturally lends itself to encrypting different portions of the underlying
+drive with different ciphers; we can select any cipher to encrypt or decrypt any
+nugget at any point, rather than just a single cipher applied globally across
+the backing store, filesystem, device mapper, or secure container. The SwitchBox
+design supports mixed cipher configurations such that each nugget can be
+encrypted, decrypted, and switched to using another cipher independently from
+all other nuggets.
 
-\subsubsection{Navigate The Configuration Space With \emph{Cipher Switching}}
+\subsubsection{Navigating The Configuration Space With \emph{Cipher Switching}}
 
 Given a space of possible cipher configurations and a drive layout of
 independent nuggets that lends itself to mixed cipher use, it is clear our
 system does not have to sit at a static configuration point. Hence, we require a
 mechanism to navigate the cipher configuration space, trading off concerns such
-that the system is always at the most optimal configuration given the runtime
-environment and user requirements. By abstracting the re-keying process out into
-a \emph{re-ciphering} or \emph{cipher switching} process, whereby the key and
-the cipher used to encrypt/decrypt the nugget can both be switched at runtime,
-we can trade off between different ciphers and their characteristics
+that the system is always at the most optimal configuration possible given the
+runtime environment and user requirements. By abstracting the re-keying process
+out into a \emph{re-ciphering} or \emph{cipher switching} process, whereby the
+key and the cipher used to encrypt/decrypt a nugget can both be switched at
+runtime, we can trade off between different ciphers and their characteristics
 dynamically. Comparatively, prior work can only accomplish a static tradeoff at
-compile time or at system initialization. \\
-\\
-Leveraging these insights, we present SwitchBox. \TODO{A few short explanatory
-sentences that lead to: Our goal is to dynamically trade desirable security
-properties for performance or energy.}
+compile time or at system initialization. Our goal is to dynamically trade
+desirable security properties for performance or energy.
 
 \subsection{Motivating Example: Filesystem Reacts to OS ``Battery Saver'' Mode}
 
@@ -107,35 +105,40 @@ Use}\par\medskip
   \label{fig:linearity-latency-energy}
 \end{figure}}
 
-Suppose we are continually streaming a high-resolution video stored on our
-mobile device to several WiFi connected devices, such as televisions or
-projectors. We stored the video and other data on our device drive as securely
-as possible, so we chose to initialize the system at a configuration point
-offering very strong security.
+Suppose we are downloading a particularly large high-resolution movie file to
+our mobile work device from a network. As this is an enterprise device, our
+employer requires all data to be encrypted as securely as possible by default,
+so we chose to initialize our backing store at a configuration point using a
+high-security high-latency cipher.
 
-For the ciphers examined in this paper, \figref{linearity-latency-energy} shows
-a correlation between stronger security properties and greater total energy use,
-meaning our device is using a lot more energy to facilitate FDE at this
-configuration point. Though this correlation applies to the ciphers we examined,
-note that this correlation is certainly not true for all possible ciphers.
+For the ciphers we examine in this paper, we find a correlation between high
+latency and greater total energy use, meaning our device is using a lot more
+energy to facilitate FDE at this configuration point. Though this correlation
+applies to the ciphers we examined, note that this is certainly not true for all
+possible ciphers across all hardware.
 
-Further suppose that, after a while of streaming, our device determines its
-remaining battery life is too low and enters a ``battery saver'' mode with a
-curtailed energy budget. With a traditional filesystem or encrypted container,
-we are stuck with our high-energy configuration chosen at system initialization.
+Further suppose that, after some amount of time downloading this movie, our
+device determines its remaining battery life is too low and enters a ``battery
+saver'' mode with a curtailed energy budget and reduced processor frequency.
+With a traditional filesystem or encrypted container, we are stuck with the
+high-latency \emph{high-energy} cipher configuration chosen at initialization
+when what we really need is our storage layer to react dynamically to the needs
+of the overarching system.
 
-However, with the ability to operate at points along the pareto frontier (see
-\figref{tradeoff-no-ratios}), even at points between the discrete configurations
-available to prior work, a context-aware system can switch to a configuration
-that trades the security of the portions of storage that are being used to
-stream the video so that we stay within our curtailed energy budget.
+With the ability to re-cipher individual nuggets, we can transition to a cipher
+configuration that trades the security properties of active nuggets (\ie{to
+where the downloaded movie's bytes and filesystem metadata updates are being
+written}) so that we stay within our curtailed energy budget and successfully
+retrieve the entire file. Had we remained at the high-latency high-energy cipher
+configuration, we would have blown past our budget in the middle of downloading
+the file.
 
-When we return to a non-curtailed energy budget, the system can return to its
-more secure configuration dynamically, allowing the cipher strength of the
-backing store to eventually recover without having to recreate the entire
-underlying filesystem or encrypted container.
-
-\TODO{How does this example work?  If the video is originally stored with high security, then don't we have to decrypt it first and then re-encrypt at a different level?  Isn't the cost the read from high-security state?  I think we talked about this a while ago, but I don't remember the details.  My forgetfulness is actually good, because I can tell you that this example isn't going to do it without a lot more detail about why switching actually helps here.}
+And thanks to the ``battery saver'' mode, our device remains alive long enough
+for us to reach a charger, allowing the system to return to a non-curtailed
+energy budget, our system can return those nuggets to their more secure cipher
+configuration dynamically, allowing the security of the backing store to recover
+without having to recreate the entire underlying filesystem or encrypted
+container or restart the device.
 
 \subsection{Challenges}
 
@@ -144,8 +147,8 @@ these tradeoffs are made optimally, it is desirable to score the security
 properties of various ciphers. This is challenging since different ciphers have
 a wide range of energy/latency vs security properties, including ciphers that
 are and are not length-preserving. Hence, cipher configurations will not form a
-continuous tradeoff space in any scheme and so represent discrete points, yet
-the desired energy, latency, or security state may lie between these points.
+continuous space and are represented with discrete points, yet the ideal energy,
+latency, or security state may lie between these points.
 
 To address this, we propose a method for quantitative cipher comparison in the
 FDE context, and then present some empirical results showing the wide range of
@@ -158,20 +161,18 @@ booted or the filesystem or container is created~\cite{CiteAllTheFilesystems};
 if requirements change online, at best the entire system requires a reboot
 leading to down time and user dissatisfaction. At worst, before the reboot, the
 filesystem or encrypted container has to be deleted and recreated. This is
-rarely desirable. Hence, SwitchBox requires a generic \emph{cipher API}, IPC,
-and a software mechanism that can re-cipher or \emph{switch} the cipher used to
-encrypt and decrypt individual nuggets while maintaining low overhead and
-acceptable performance. This mechanism should allow for a mixed-cipher drive
-layout and provides the ``how'' to switch nuggets' ciphers.
-
-To provide the ``when'' or ``where'', we implement and demonstrate a series of
-novel cipher switching \textit{strategies} that, along with the ``pluggable''
-cipher API and cipher switching mechanism, enable optimal navigation of the
-tradeoff space of configurations. For instance, these strategies allow SwitchBox
-to settle on points between the static cipher configurations in
-\figref{tradeoff-no-ratios}.
-
-\TODO{Might be able to piece this out into two challenges: common interface for
-stream ciphers and cipher switching strategies; that last one might be able to
-split into two on its own. Perhaps this challenge subsection should mirror the
-layout of the design section?}
+rarely desirable. Hence, SwitchBox requires 1) a generic \emph{``pluggable''
+cipher API} that allows the system to freely interchange disparate ciphers
+without worrying about their various parameters and other implementation
+concerns and 2) a software mechanism that can \emph{re-cipher} or switch the
+cipher used to encrypt and decrypt individual nuggets while maintaining low
+overhead and acceptable performance. This mechanism allows for a mixed-cipher
+drive layout and provides the ``how'' to switch a nugget's cipher online.\\
+\\
+\textbf{Determining when to switch a nugget's cipher and where to store the
+contents.} To provide the ``when'' and ``where'' to switching a nugget's cipher,
+we implement a series of \textit{cipher switching strategies} that, along with
+the pluggable cipher API and cipher switching mechanism, enable navigation of
+our aforementioned tradeoff space of cipher configurations. These strategies
+allow SwitchBox to settle on points on and \emph{between} the single-cipher
+configurations that limit prior work.
