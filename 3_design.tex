@@ -1,59 +1,24 @@
 \section{SwitchBox Design}\label{sec:design}
 
-\TODO{Restate that we're addressing our primary challenges (from motivation) in
-three parts.}
-
-In this section, we describe our mechanism to navigate the cipher configuration
-space and cipher switching strategies. We also discuss the pluggable stream
-cipher API and other design challenges.
-
-\TODO{You need more of an overview here before the section starts in earnest.  It would be very good to have a picture where the components of the picture correspond to the subsections you write about here.  While the picture would help, whether you have it or not you need to say what are the key pieces of the design and how they inter-relate before you describe them in earnest.}
-
-\subsection{Cipher Switching: Mechanism To Re-Cipher A Nugget}
-
 \begin{figure}[t]
    \centering
    \includegraphics[width=\linewidth]{overview.png}
    \caption{Overview of the SwitchBox construction.}\label{fig:overview}
 \end{figure}
 
-\TODO{Again, we would like the language to be as general as possible so that this reads like it is more than just an extension of strongbox, but ideas that would be widely applicable.}
-Like StrongBox, SwitchBox is a translation layer ideally implemented in the
-Flash Translation Layer (FTL). Unlike StrongBox, which focuses on optimizing
-performance despite re-keying due to overwrites, SwitchBox maintains overwrite
-protections while abstracting the idea of re-keying out into re-ciphering or
-\emph{cipher switching}, where a nugget's contents are decrypted using the old
-key and inactive cipher configuration and encrypted using a new key and the
-active cipher configuration before completing the I/O operation; instead of
-myopically pursuing a performance win, this allows us to trade off different
-ciphers and their characteristics online.
+In this section, we describe our mechanism to navigate the cipher configuration
+space and cipher switching strategies. We also discuss the pluggable stream
+cipher API and other design challenges.
 
-\TODO{This kind of high-level overview should not be in a subsection titled "Mechanism to Re-Cipher a Nugget."  If we are in such a subsection, the system design should already be known and we should just be focusing on nugget-level details.}
-\figref{overview} illustrates the SwitchBox design. SwitchBox manages five
-metadata components: an in-memory \emph{Merkle Tree}; two drive-backed byte
-arrays, \ie{the \emph{Keycount Store} and the \emph{Transaction Journal}}; a
-globally persistent cryptographically secure monotonic counter; and a flexible
-drive-backed store for cipher-specific \emph{per-nugget metadata}.
-
-These five components are tightly integrated into the cryptographic driver,
-which handles data encryption, decryption, overwrite detection, integrity
-protection, IPC with the wider system to determine the active cipher
-configuration, and the application of cipher switching strategies with stream
-cipher implementations provided by a pluggable stream cipher API. The
-cryptographic driver interacts with 1) the overlying LFS through traditional I/O
-passed through the Linux Virtual Filesystem Switch (VFS) and 2) the underlying
-drive through the device controller block I/O layer or as part of the FTL,
-depending on implementation.
-
-Since cipher switching is a cross-cutting concern---for instance, the desire to
-switch ciphers could come from an unrelated process in user space---SwitchBox
-uses IPC to receive commands to toggle the active cipher configuration. \TODO{I believe this is an implementation detail and should be moved to an implementation section.  Also, it is a little weird to have it here.  We get an IPC for each nugget we want to recipher?  That seems really burdensome on the user.}
-
-\TODO{I still don't know what the mechanism is.}
-By applying cipher switching strategies to individual nuggets so that their
-contents are re-ciphered, the cryptographic driver provides a mechanism to
-navigate the latency/energy/security tradeoff space of cipher configurations
-with low overhead.
+SwitchBox is a translation layer ideally implemented in the Flash Translation
+Layer (FTL). Unlike prior work, which focuses on optimizing performance despite
+re-keying due to overwrites, SwitchBox maintains overwrite protections while
+abstracting the idea of re-keying out into re-ciphering or \emph{cipher
+switching}, where a nugget's contents are decrypted using the old key and
+inactive cipher configuration and encrypted using a new key and the active
+cipher configuration before completing the I/O operation; instead of myopically
+pursuing a performance win, this allows us to trade off different ciphers and
+their characteristics online.
 
 \begin{figure}[t]
 \centering
@@ -61,49 +26,102 @@ with low overhead.
  \caption{Layout of SwitchBox's backing storage.}\label{fig:backstore2}
 \end{figure}
 
-\TODO{It sure seems like this paragraph should have appeared earlier.}
 The backing store is the storage medium SwitchBox operates on. The layout of the
 backing store is illustrated in \figref{backstore2}. In the \textit{body}
 section of the backing store layout, end-user data is partitioned into a series
 of same-size \emph{logical blocks} marked \textit{NUG} for \emph{nugget}. A
 nugget consists of one or more physical drive blocks and per-nugget metadata
-indicating which cipher was used to encrypt the nugget. We introduce this new
-terminology to easily differentiate our logical blocks (nuggets) from physical
-drive and other blocks.
+indicating which cipher was used to encrypt the nugget. We borrow this
+terminology from prior work to easily differentiate our logical blocks (nuggets)
+from physical drive and other storage blocks.
+
+\figref{overview} provides an overview of the SwitchBox design. SwitchBox
+manages five metadata components: an in-memory \emph{Merkle Tree}; two
+drive-backed byte arrays, \ie{the \emph{Keycount Store} and the
+\emph{Transaction Journal}}; a globally persistent cryptographically secure
+monotonic counter; and a flexible drive-backed store for cipher-specific
+\emph{per-nugget metadata}.
+
+These five components are tightly integrated into the cryptographic driver,
+which handles data encryption, decryption, overwrite detection, integrity
+protection, IPC with the wider system to determine the active cipher
+configuration, and the execution of cipher switching strategies with stream
+cipher implementations provided by a pluggable stream cipher API. The
+cryptographic driver interacts with 1) the overlying LFS through traditional I/O
+passed through the Linux Virtual Filesystem Switch (VFS) and 2) the underlying
+drive through the device controller block I/O layer or as part of the FTL,
+depending on implementation.
 
 \subsection{Pluggable Stream Cipher API}
 
-\TODO{All this section says is that an API should exist.  It doesn't say what the API is.  That is a problem.}
-
 We develop an API to allow any stream cipher or any cipher that can operate as a
-stream cipher to be used with SwitchBox without modification. In this way,
-different stream ciphers might appear to all be interchangeable, but they are
-not. Not all stream ciphers, let alone all ciphers, are length-preserving. A
-length-preserving cipher generates ciphertext output of the same length as its
-plaintext input, \eg{ChaCha20}. A cipher like Freestyle, on the other hand, is
-not length-preserving and has the overhead of additional cryptographic material
-that must be stored and indexed alongside any generated ciphertext. Hence, we
-require a novel common interface that allows ciphers with different output
-characteristics that would normally be entirely incompatible to co-exist on the
-same drive.
+stream cipher to be used with SwitchBox without modification or special
+considerations. In this way, different stream ciphers might appear to all be
+interchangeable, but they are not. For instance: not all stream ciphers, let
+alone all ciphers, are length-preserving. A length-preserving cipher generates
+ciphertext output of the same length as its plaintext input, \eg{ChaCha20}. A
+cipher like Freestyle, on the other hand, is not length-preserving and has the
+overhead of additional cryptographic material that must be stored and indexed
+alongside any generated ciphertext. Hence, we built SwitchBox as a novel common
+cipher interface that allows ciphers with entirely disparate output
+characteristics to co-exist on the same drive; typically, such characteristics
+would render these ciphers entirely incompatible, preventing us from trading
+them off with one another.
 
-SwitchBox exposes such a common encryption and decryption interface, including
-read and write handles, that allow it to transition nuggets between arbitrary
-ciphers.
+SwitchBox exposes hooks for wrapper functions at three levels:
+
+\begin{itemize}
+   \item \textbf{\texttt{sc\_fn\_crypt\_data}}\\\texttt{sc\_fn\_crypt\_data}
+   expects a cipher to accept intra- and inter- nugget offset data and return
+   crypted the specified region and so operates at a fine-grain level compared
+   to using the read and write handles described below. There is no distinction
+   made between encryption and decryption as they're considered the same
+   operation in this context. Further, this interface does not allow any access
+   to the SwitchBox internals and is expected to execute independently of
+   SwitchBox.
+
+   Unlike \texttt{sc\_fn\_crypt\_data\_custom},
+   \\\texttt{sc\_fn\_crypt\_data} performs the final XORing automatically,
+   returning a convenient xor buffer to read crypted data into. As such, it
+   provides a slightly higher level of interaction with the backing store's data
+   making things easier for simpler ciphers.
+   \item \textbf{\texttt{sc\_fn\_crypt\_data\_custom}}\\Unlike
+   \texttt{sc\_fn\_crypt\_data}, \\\texttt{sc\_fn\_crypt\_data\_custom} does not
+   perform the final XORing automatically, nor does it provide the convenient
+   xor buffer to deal with crypted data automatically, for ciphers that require
+   this functionality. As such, it provides a slightly lower level of
+   abstraction when accessing to the backing store.
+   \item \texttt{sc\_fn\_read\_handle} and \texttt{sc\_fn\_write\_handle}\\
+   Unlike the other two levels, both hooks must be provided by a cipher or
+   functionality is undefined. At this level, control over encryption is
+   coarse-grain, where cipher wrappers have access to all relevant SwitchBox
+   internals and must implement cipher switching manually.
+   \texttt{sc\_fn\_read\_handle} expects a cipher to accept a buffer and read
+   into it a decrypted subset of a nugget's ciphertext.
+
+   \texttt{sc\_fn\_write\_handle} expects a cipher to accept
+   some plaintext buffer and commit some encrypted subset of the current nugget
+   to the backing store.
+
+   This is a good choice if a cipher with randomized output needs to work below
+   the overwrite protection code (\ie{Freestyle}) and/or a cipher doesn't
+   function like a stream cipher (\ie{AES-XTS}). If
+   \texttt{sc\_fn\_read\_handle} is defined, \\\texttt{sc\_fn\_write\_handle}
+   must also be defined. Hooks at this level should only ever operate on a
+   single nugget or SwitchBox behavior is undefined. Further, due to cipher
+   swapping, this function must not read in any nugget/flake data from the
+   backstore if a perfectly aligned nugget-sized chunk is requested. This is
+   because this API hook may be called when cipher switching and the underlying
+   data in the nugget might be crypted with a different algorithm when
+   attempting to read it, corrupting the plaintext.
+\end{itemize}
 
 \subsection{Cipher Switching Strategies}
 
 At any moment, the currently active cipher configuration is used to encrypt
 nugget contents. Until the wider system indicates that SwitchBox should use a
-different cipher to interact with the backing store, SwitchBox functions
-identically to StrongBox in that it uses the active cipher configuration
-(ChaCha20 in StrongBox's case) to encrypt and decrypt all nuggets during I/O.
-
-\TODO{This paragraph is redundant and a good indication that the section needs a reorg and an overview paragraph or two.  If you find yourself needing to describe a mechanism (IPC in this case) in multiple places, you probably need a better overview paragraph.}
-However, switching the active cipher configuration dynamically allows SwitchBox
-to achieve optimal configuration points that are otherwise unachievable with
-prior work. Through IPC, the wider system determines which cipher should be the
-active cipher configuration at any moment.
+different cipher to interact with the backing store, the active cipher
+configuration is used to encrypt and decrypt all nuggets during I/O.
 
 When the wider system determines a cipher switch should occur for whatever
 reason, it is entirely non-trivial to determine \emph{when} to encrypt a nugget
@@ -120,8 +138,7 @@ Hence, a more strategic approach and adaptable is necessary: cipher switching
 \emph{strategies}. These strategies are an essential part of the mechanism by
 which SwitchBox can efficiently transition nuggets between different encrypted
 states without egregious penalties to latency or battery life, thus providing a
-realistic mechanism to navigate the tradeoff space presented in
-\figref{tradeoff-no-ratios}.
+realistic mechanism to navigate our cipher configuration tradeoff space.
 
 Determining \emph{when} to target a nugget for re-ciphering we call
 \emph{temporal switching}, for which we propose the \emph{Forward} switching
@@ -129,35 +146,36 @@ strategy and its variants. Determining \emph{where}---in which partition and
 across which nuggets--to output ciphertext we call \emph{spatial switching} for
 which we propose the \emph{Mirrored} and \emph{Selective} switching strategies.
 Each comes with various security, performance, and energy trade offs.
+
 \tblref{strategies-advantages} summarizes the various advantages and
-disadvantages of these strategies and each strategy.  \TODO{The table needs an explanation.  What are the columns, what are the meanings of the categories?  You probably need an overview of what the three strategies are as well.}
+disadvantages of these strategies and each strategy and is explained more below.
 
 \subsubsection{Forward Switching Strategy}
 
 SwitchBox allows each individual nugget to exist encrypted with any cipher the
 pluggable cipher API makes available regardless of the currently active cipher
 configuration. When a nugget is encountered during I/O that is encrypted using a
-cipher other than the active cipher configuration, however, the Forward strategy
-dictates that this nugget be re-ciphered. If a particular nugget encrypted with
-a non-active cipher configuration is never encountered during I/O, it is never
-re-ciphered and remains on the backing store in its original state. In this way,
-the Forward strategy represents a form of temporal cipher switching.
+cipher other than the active cipher configuration, the Forward strategy dictates
+that this nugget be re-ciphered immediately. If a particular nugget encrypted
+with a non-active cipher configuration is never encountered during I/O, it is
+never re-ciphered and remains on the backing store in its original state. In
+this way, the Forward strategy represents a form of temporal cipher switching.
 
 Rather than re-cipher the entire backing store every time the active cipher
 configuration changes, this strategy limits the performance impact of cipher
-switching to individual nuggets. Similar to re-keying in the original StrongBox
-construction, the heavy price of re-ciphering is paid only once, after which the
-nugget is accessed normally during I/O until the active cipher configuration is
-switched again.
+switching to individual nuggets. Similar to ``re-keying'' in prior
+work~\cite{StrongBox}, the heavy price of re-ciphering is paid only once, after
+which the nugget is accessed normally during I/O until the active cipher
+configuration is switched again.
 
-There are several forms the Forward strategy can take. The default and most
+\PUNT{There are several forms the Forward strategy might take. The default and most
 intuitive is \emph{0-forward}, in which SwitchBox immediately transitions
 individual nuggets encountered during I/O to the active cipher configuration if
 they are not using it. Over time, if various I/O operations end up touching
 every nugget in the backing store, the encrypted contents of every nugget will
 become decryptable with the currently active cipher configuration.
 
-The Forward strategy can also take the form of \emph{N-forward}, where SwitchBox
+The Forward strategy might also take the form of \emph{N-forward}, where SwitchBox
 attempts to take advantage of spatial sequential locality to transition whole
 sets of nuggets into the active cipher configuration. We can trivially expand
 the forward strategy to encompass the entire backing store by selecting $N$
@@ -166,7 +184,7 @@ overhead of re-ciphering large swaths of the backing store upon every I/O
 operation where a nugget encrypted with the non-active cipher configuration is
 encountered. Of course, this has the same dire implications for performance as
 simply re-initializing the entire filesystem or encrypted container with the new
-cipher.
+cipher.}
 
 \subsubsection{Selective Switching Strategy}
 
@@ -202,77 +220,25 @@ Selective strategy, represents a form of spatial cipher switching. All regions
 of the backing store will always be in a consistent state and share the same
 data.
 
-\subsection{Comparing Cipher Switching Strategies}
+\subsection{Cipher Switching: A Mechanism To Re-Cipher A Nugget}
 
-\begin{table}[]
-   \begin{tabular}{@{}llll@{}}
-   \toprule
-   \textbf{Strategy} & \textbf{Convergence} & \textbf{Waste} & \textbf{Performance} \\ \midrule
-   Forward   & Slow           & Low  & Workload dependent    \\
-   Mirrored  & Nearly instant & High & Fast read; slow write \\
-   Selective & Impossible     & High & Fast read and write   \\
-   \end{tabular}
-   \caption{A summary comparison between the three cipher switching strategies.
-   \emph{Convergence} represents the amount of time it takes to switch the
-   entire backing store to a single cipher configuration using a strategy.
-   \emph{Waste} represents a strategy's impact on the amount of free space
-   reported to the OS. \emph{Performance} represents the performance impact a
-   strategy has on read and write throughput.}
-   \label{tbl:strategies-advantages}
-\end{table}
+Having cipher switching strategies by themselves is not enough to facilitate
+cipher switching. We require some mechanism to navigate the
+latency/energy/security tradeoff space of cipher configurations through applying
+these strategies. Where a naive implementation is trivial (\eg{execute the
+chosen strategy on every I/O operation}), this navigation must occur with
+acceptable overhead by preserving performance wherever possible. The
+cryptographic driver provides such a mechanism, tying together cipher switching
+strategies and the pluggable stream cipher API.
 
-\TODO{If we don't go with the custody panic use case, we don't have to talk
-about secure erase here.} \TODO{Hank: I think we should use that example, and I think we should talk about the secure erase.  I assume that is how you get Nearly Instant in the convergence category.}
+In the cases of Mirrored and Selective switching, we use offset to determine in
+which area of the backing store receives I/O.
 
-Depending on the use case, the ability to quickly converge the entire backing
-store to a single cipher configuration is very useful (see: \secref{usecases});
-\eg{switching to a cipher low energy configuration optimized when battery state
-becomes critical or when certain other security properties become more
-desirable}. The near-instantaneous nature of SSD secure erase implementations on
-modern SSDs with wear-leveling makes this a very fast process for the Mirrored
-strategy. Since the Forward strategy is unlikely to switch every nugget in the
-backing store after a cipher switch, depending on the workload, it may not
-require cipher switching on every nugget. In the best case, only a small handful
-of high traffic nuggets will require re-ciphering. In the worse case, every
-nugget on the drive will require re-ciphering, which would be slow. This makes
-the strategy slow to converge compared to Mirrored, but the nugget cipher
-configurations can be made consistent eventually. Unlike the other strategies,
-the Selective strategy is structurally required to maintain multiple encrypted
-partitions, which makes converging the entire drive's nuggets to one cipher
-configuration impossible.
-
-Unlike the other two strategies, using the Forward strategy does not reduce the
-total usable space on the drive by the end-user. This is because the Forward
-strategy allows nuggets with various cipher configurations to co-exist
-contiguously side-by-side on the backing store. Since the Mirrored and Selective
-strategies require partitioning the backing store into some number of
-partitions---where the filesystem size reported back to the OS is some function
-of partition size---there is a necessary reduction in usable space.
-
-The Selective and Mirrored strategies can read data from the backing store with
-low overhead, reaching performance parity with StrongBox. This is because
-switching ciphers using these strategies amounts to offsetting the read index so
-it lands in the proper partition, which has little overhead. The Forward
-strategy also reads with low overhead except in the case where the current
-nugget was not encrypted with the active cipher configuration. This triggers
-re-ciphering, which can be costly if the workload touches unique nuggets while
-executing, \ie{long sequential writes vs write-once read-many}.
-
-The Selective strategy also writes with low overhead because, like with reads,
-an offset is the only requirement. The Mirrored strategy, on the other hand, is
-at least two times slower for writes (when $C = 2$) compared to the original
-StrongBox construction. Each additional partition ($C > 2$) compounds the write
-penalty. This is because each writes is ``mirrored'' across all partitions. As
-with reads, the Forward strategy writes with low overhead except in the case
-where the current nugget was not encrypted with the active cipher configuration.
-This triggers costly re-ciphering, which can compound depending on workload.
-
-\subsection{Additional Challenge: Beware Naive Forward Switching}
-
-It is tempting to implement forward switching such that a nugget is completely
-re-ciphered during I/O every time its metadata indicates that it was previously
-encrypted using a non-active cipher. However, such a naive implementation can
-have disastrous effects on performance depending on the workload.
+In the case of Forward switching, it is tempting to implement it such that a
+nugget is completely re-ciphered during I/O every time its metadata indicates
+that it was previously encrypted using a non-active cipher. However, such a
+naive implementation can have disastrous effects on performance depending on the
+workload.
 
 First, a nugget is considered \emph{pristine} if it has not had any data written
 into it yet. SwitchBox determines if a nugget is pristine by checking the state
@@ -297,49 +263,112 @@ the nugget can be encrypted and decrypted with the newly active cipher
 configuration but \emph{without actually re-ciphering the nugget data itself}.
 This keeps the nugget in its pristine condition, preserving SwitchBox's ability
 to write data into it without triggering a costly re-keying operation every
-time, preserving the original StrongBox's performance advantage. At the same
-time, SwitchBox can now use the newly active cipher configuration to interact
-with the nugget as expected.
+time, preserving our performance advantage. At the same time, SwitchBox can now
+use the newly active cipher configuration to interact with the nugget as
+expected. On the other hand, during hard re-cipher, the nugget's metadata is
+changed to match the active cipher configuration \emph{and} the nugget data is
+encrypted using the new cipher.
 
-On the other hand, during hard re-cipher, the nugget's metadata is changed to
-match the active cipher configuration \emph{and} the nugget data is encrypted
-using the new cipher. When using forward switching other that 0-forward,
-\ie{N-forward} where $N > 0$, only read operations are allowed to trigger hard
-re-ciphering for nuggets other than the currently active nugget. This is still
-not enough to preserve StrongBox's performance advantage, however, as I/O
-operations can span multiple nuggets, and attempting to take advantage of
-spatial locality after interacting with every nugget is counterproductive.
-Hence, only the last nugget touched by a read operation will trigger the more
-aggressive N-forward behavior if $N > 0$.
+\PUNT{When using forward switching other that 0-forward, \ie{N-forward} where $N
+> 0$, only read operations are allowed to trigger hard re-ciphering for nuggets
+other than the currently active nugget. This is still not enough to preserve our
+performance advantage, however, as I/O operations can span multiple nuggets, and
+attempting to take advantage of spatial locality after interacting with every
+nugget is counterproductive. Hence, only the last nugget touched by a read
+operation will trigger the more aggressive N-forward behavior if $N > 0$. These
+considerations have the effect of 1) preserving our performance advantage and 2)
+allowing more aggressive N-forward behavior (where $N > 0$) to take advantage of
+spatial locality during read-heavy workloads to result in a further performance
+advantage (see: \secref{evaluation}).}
 
-These considerations have the effect of 1) preserving the original StrongBox
-performance advantage and 2) allowing more aggressive N-forward behavior (where
-$N > 0$) to take advantage of spatial locality during read-heavy workloads to
-result in a further performance advantage (see: \secref{evaluation}).
+\subsection{Comparing Cipher Switching Strategies}
 
-\TODO{It is a little concerning that this "additional challenge" has a longer section than some of the "main" contributions.}
+\begin{table}[]
+   \begin{tabular}{@{}|l|l|l|l|@{}}
+      \toprule
+      \textbf{Strategy} & \textbf{Convergence} & \textbf{Waste} & \textbf{Performance} \\ \midrule
+      Forward   & Slow           & Low  & Workload dependent    \\
+      \hline
+      Mirrored  & Nearly instant & High & Fast read; slow write \\
+      \hline
+      Selective & Impossible     & High & Fast read and write   \\
+      \hline
+   \end{tabular}
+   \caption{A summary comparison between the three cipher switching strategies.
+   \emph{Convergence} represents the amount of time it takes to switch the
+   entire backing store to a single cipher configuration using one strategy.
+   \emph{Waste} represents a strategy's impact on the amount of free space
+   reported to the OS. \emph{Performance} represents the performance impact a
+   strategy has on read and write throughput.}
+   \label{tbl:strategies-advantages}
+\end{table}
+
+\tblref{strategies-advantages} summarizes the tradeoffs between the three cipher
+switching strategies. In order:
+
+\textbf{Convergence:} Depending on the use case, the ability to quickly
+converge the entire backing store to a single cipher configuration is very
+useful (see: \secref{usecases}); \eg{switching to a cipher low energy
+configuration optimized when battery state becomes critical or when certain
+other security properties become more desirable}. The near-instantaneous nature
+of SSD Instant Secure Erase (ISE) implementations on modern
+SSDs~\cite{ISE1,ISE2,ISE3} makes this a very fast process for the Mirrored
+strategy. Since the Forward strategy is unlikely to switch every nugget in the
+backing store after a cipher switch, depending on the workload, it may not
+require cipher switching on every nugget. In the best case, only a small handful
+of high traffic nuggets will require re-ciphering. In the worse case, every
+nugget on the drive will require re-ciphering, which would be slow. This makes
+the Forward strategy slow to converge compared to Mirrored, but the nugget
+cipher configurations can be made consistent eventually. Unlike the other
+strategies, the Selective strategy is structurally required to maintain multiple
+encrypted partitions, which makes converging the entire drive's nuggets to one
+cipher configuration impossible.
+
+\textbf{``Waste'':} Unlike the other two strategies, using
+the Forward strategy does not dramatically reduce the total usable space on the
+drive by the end-user. This is because the Forward strategy allows nuggets with
+various cipher configurations to co-exist contiguously on the backing store.
+Since the Mirrored and Selective strategies require partitioning the backing
+store into some number of partitions---where the filesystem size reported back
+to the OS is some function of partition size---there is a necessary reduction in
+usable space.
+
+\textbf{Performance:} The Selective and Mirrored strategies can read data
+from the backing store with low overhead, reaching performance parity with prior
+work. This is because switching ciphers using these strategies amounts to
+offsetting the read index so it lands in the proper partition, which has little
+overhead. The Forward strategy also reads with low overhead except in the case
+where the current nugget was not encrypted with the active cipher configuration.
+This triggers re-ciphering, which can be costly if the workload touches unique
+nuggets while executing, \ie{long sequential writes vs write-once read-many}.
+
+The Selective strategy also writes with low overhead because, like with reads,
+an offset is the only requirement. The Mirrored strategy, on the other hand, can
+be two or more times slower for writes (when $C = 2$) compared to baseline. Each
+additional partition ($C > 2$) compounds the write penalty. This is because each
+writes is ``mirrored'' across all partitions. As with reads, the Forward
+strategy writes with low overhead except in the case where the current nugget is
+not pristine and was not encrypted with the active cipher configuration. This
+triggers costly re-ciphering, which can compound depending on workload.
 
 \subsection{Threat Model for Cipher Switching Strategies}
 
 The primary concern facing any FDE solution is that of confidentiality: an
 adversary should not be able to decrypt encrypted plaintext without the right
-key. With this research, we select five popular cipher algorithms and configure
-them under Switchbox: ChaCha~\cite{ChaCha20} (ChaCha8, ChaCha12, ChaCha20),
-Salsa~\cite{SalsaX} (Salsa8, Salsa12, Salsa20), AES~\cite{AES} (AES-128,
-AES-256), HC128/HC256~\cite{HCX}, and Freestyle~\cite{Freestyle}. Each cipher
-has been proven formally secure in that there are no known efficient attacks
-against them. Any such cipher can be used with SwitchBox.
+key. With this research, we select five cipher implementations and configure
+them under Switchbox: ChaCha~\cite{ChaCha20} (ChaCha8 and ChaCha20), and
+Freestyle~\cite{Freestyle}. Each cipher has been proven formally secure in that
+there are no known efficient attacks against them. Any such cipher can be used
+with SwitchBox.
 
-As with the original StrongBox construction, encryption is achieved via a binary
-additive approach: cipher output (keystream) is combined with plaintext nugget
-contents using XOR, with metadata to track writes and ensure that pad reuse
-never occurs during overwrites and that the system can recover from crashes into
-a secure state~\cite{StrongBox}.
+Encryption is achieved via a binary additive approach: cipher output (keystream)
+is combined with plaintext nugget contents using XOR, with metadata to track
+writes and ensure that pad reuse never occurs during overwrites and that the
+system can recover from crashes into a secure state~\cite{StrongBox}.
 
 Another concern is data integrity: an adversary should not be able to tamper
-with ciphertext and it go unnoticed. As with the original StrongBox
-construction, we use an in-memory Merkle Tree to ensure nugget and system
-integrity~\cite{StrongBox}.
+with ciphertext and it go unnoticed. As with prior work, we use an in-memory
+Merkle Tree to ensure nugget and system integrity~\cite{StrongBox}.
 
 Switching strategies add an additional concern: even if we initiate a ``cipher
 switch,'' there may still be data on the drive that is encrypted with a
@@ -358,26 +387,34 @@ Every cipher mentioned in this paper has been proven formally secure in that
 \emph{there are no known efficient attacks against any of them}~\cite{All,
 Ciphers, Again}. This implies data is kept confidential versus an adversary with
 limited resources, however it is often desirable to secure data at rest in
-special contexts or considering future adversaries with less limited more
-abundant resources at their disposal. In this way, a cipher that is more
-resilient to cryptanalysis or brute-force than is currently required might be
-more desirable than a cipher with properties that meet current standards,
-\ie{future-proofing storage}.
+special contexts or considering future adversaries with abundant resources at
+their disposal. In this way, a cipher that is more resilient to cryptanalysis or
+brute-force than is currently required might be more desirable than a cipher
+with properties that meet current standards, \eg{future-proofing storage}.
 
-\TODO{You should mention (unless you don't agree) that the scores we use are a combination of two schemes that are already in use: ranking ciphers on resistance to different attacks and ranking ciphers on "rounds" or whatever.  So, we should say that all we are doing here is combining them.}
 To simplify reasoning about trading off such disparate cryptographic properties
 in the FDE context, we must have a way to quantitatively compare a cipher's
-``desirability'' or usefulness to SwitchBox FDE. Hence, we do not attempt to
-define a generally applicable ranking of cipher security for FDE. Instead, we
-score ciphers (i.e. a so-called ``security score'') based on three key security
-properties that, when summed, give an estimate of the usefulness of a cipher to
-SwitchBox FDE (see: \tblref{security-quant}).\\
+``desirability'' or usefulness to SwitchBox and to FDE more generally. Hence, we
+do not attempt to define a generally applicable \textit{ranking} of
+\emph{security strength} as that doesn't make sense. Instead, we score ciphers
+(\ie{a so-called ``security score''}) based on three key security properties
+that, when summed, give an estimate of the usefulness of a cipher to SwitchBox
+FDE (see: \tblref{security-quant}).
+
+The scores we use are a combination of schemes that are already well understood:
+scoring ciphers on their confusion and diffusion of plaintext bits during
+encryption~\cite{MicrosoftCryptanalysisAES,SchneiersOnRounds} (\ie{round
+count}), scoring ciphers on how they behave when given the same input
+parameters~\cite{random-output1,Freestyle,random-output2} (normally an
+unacceptable confidentiality-breaking overwrite condition), and asymmetric
+penalties for supplying the wrong key when attempting to decrypt nugget
+ciphertext (\ie{an attacker should have to do more work than the
+defender})~\cite{scrypt,Freestyle,others2}.\\
 \\
 \textbf{1) Output randomization (OR).} A cipher with output randomization
 generates different ciphertexts non-deterministically given the same key, nonce,
 and message. This makes chosen-ciphertext (CCA) and other attacks where the
 ciphertext is in full control of the adversary much more difficult.
-Additionally, the cipher need not be length-preserving.
 
 This is a binary feature in that a cipher either outputs deterministically given
 the same input or it does not. A cipher with non-deterministic output given the
@@ -397,33 +434,33 @@ consider ciphers with so-called ``enhanced resistance,'' where they are expected
 to take longer to finish decrypting ciphertext given an incorrect key versus a
 correct key with high probability.
 
-Scores for this feature range from 0 to 1, where 0 represents no resistance,
-0.5 represents standard resistance to brute-force and offline/dictionary
-attacks, and 1 represents enhanced resistance.\\
+Scores for this feature range from 0 to 1, where 0 represents no resistance, 0.5
+represents standard resistance to brute-force and offline/dictionary attacks,
+and 1 represents enhanced resistance.\\
 \\
 \textbf{3) Relative round count and key length (RR/RK).} The ciphers we examine
 in this research are all constructed around the notion of \emph{rounds}, where a
-higher number of rounds implies a stronger confidentiality guarantee. This
-feature represents how many rounds the cipher executes compared to the accepted
-``standard'' round count for that cipher. For instance, ChaCha8 is a reduced round
-version of the standard ChaCha20. Variants are distributed evenly from 0-1. For
-instance, ChaCha8 scores 0, ChaCha12 scores 0.5, and ChaCha20 scores 1\@.
-\TODO{Tweak this language a bit.}
+higher number of rounds typically implies a stronger confidentiality guarantee
+given there are no fatal related-key attacks. This feature represents how many
+rounds the cipher executes compared to the accepted ``standard'' round count for
+that cipher. For instance, ChaCha8 is a reduced round version of the standard
+ChaCha20. Variants are distributed evenly from 0-1. For instance, ChaCha8 scores
+0 and ChaCha20 scores 1\@.
 
 \begin{table}[]
   \begin{tabular}{@{}lllll@{}}
   \toprule
   \textbf{Cipher} & \textbf{OR} & \textbf{RBF} & \textbf{RR/RK} & \textbf{score} \\ \midrule
   ChaCha8         & 0           & 0.5          & 0              & 0.5            \\
-  ChaCha12        & 0           & 0.5          & 0.5            & 1              \\
+  %ChaCha12        & 0           & 0.5          & 0.5            & 1              \\
   ChaCha20        & 0           & 0.5          & 1              & 1.5            \\
-  Salsa8          & 0           & 0.5          & 0              & 0.5            \\
-  Salsa12         & 0           & 0.5          & 0.5            & 1              \\
-  Salsa20         & 0           & 0.5          & 1              & 1.5            \\
-  AES128-CTR      & 0           & 0.5          & 0              & 0.5            \\
-  AES256-CTR      & 0           & 0.5          & 1              & 1.5            \\
-  HC128           & 0           & 0.5          & 0              & 0.5            \\
-  HC256           & 0           & 0.5          & 1              & 1.5            \\
+  %Salsa8          & 0           & 0.5          & 0              & 0.5            \\
+  %Salsa12         & 0           & 0.5          & 0.5            & 1              \\
+  %Salsa20         & 0           & 0.5          & 1              & 1.5            \\
+  %AES128-CTR      & 0           & 0.5          & 0              & 0.5            \\
+  %AES256-CTR      & 0           & 0.5          & 1              & 1.5            \\
+  %HC128           & 0           & 0.5          & 0              & 0.5            \\
+  %HC256           & 0           & 0.5          & 1              & 1.5            \\
   Freestyle (F)   & 1           & 1            & 0              & 2              \\
   Freestyle (B)   & 1           & 1            & 0.5            & 2.5            \\
   Freestyle (S)   & 1           & 1            & 1              & 3
