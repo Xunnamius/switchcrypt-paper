@@ -4,87 +4,65 @@
 
 The standard approach to FDE, using the AES \emph{block cipher}, introduces
 significant overhead during filesystem operation. It is well known that
-authenticated encryption using \emph{stream ciphers} like
-ChaCha20~\cite{ChaCha20} is faster than using AES~\cite{StrongBox, AnotherPaper,
-AnotherPaper}. However, when used naively in drive encryption, stream ciphers
-are widely known to be vulnerable to ``overwrite attacks'' like pad reuse and
-rollback~\cite{KatzLindell, StrongBox}. To enable FDE using stream ciphers,
-several approaches have been explored:
+authenticated encryption using \emph{stream ciphers} is faster than using
+AES~\cite{StrongBox, AnotherPaper1, AnotherPaper2}. However, when used naively
+in drive encryption, stream ciphers are widely known to be vulnerable to
+``overwrite attacks'' like pad reuse and rollback~\cite{KatzLindell, StrongBox}.
+To enable FDE using stream ciphers, prior work explores several approaches:
 
 \begin{itemize}
    \item Use a non-deterministic CTR mode with specially designed cipher and
    filesystem (Freestyle~\cite{Freestyle}).
    \item Use a length-preserving ``tweakable super-pseudorandom permutation''
    construction with nonce-accepting stream cipher (Adiantum~\cite{Adiantum}).
-   \item Use a stream cipher in a binary additive (XOR) mode with metadata
-   management to prevent overwrites (StrongBox~\cite{StrongBox}).
+   \item Use a stream cipher in a binary additive (XOR) mode leveraging metadata
+   management and Log-structured File Systems' (LFS) overwrite-averse behavior
+   to prevent overwrites (StrongBox~\cite{StrongBox}).
 \end{itemize}
 
-In this paper, we focus on the lattermost approach. StrongBox~\cite{StrongBox}
-is a ChaCha20 stream cipher based FDE and metadata layer that exploits
-Log-structured File Systems' (LFS) overwrite-averse behavior to achieve
-high-performance encryption. StrongBox uses ChaCha20 in a secure binary additive
-mode (XOR) to encrypt and decrypt data at rest. Threats like pad
-reuse~\cite{KatzLindell} (\ie{two-time pad}) and rollback attacks---all caused
-by overwrites---are mitigated through \emph{re-keying}, where groups of
-contiguous storage blocks are decrypted with the old key and encrypted again
-with a new key when an overwrite is detected. Unfortunately, re-keying is an
-expensive operation. However, overwrite-averse LFS behavior ensures costly
-re-keying operations are triggered as rarely as possible during I/O, preserving
-or improving system performance~\cite{StrongBox}. \TODO{We should say something,
-if possible, about whether the observations and ideas in the rest of the paper
-would apply to the other uses of stream ciphers in FDE.}
+Though the tradeoffs and ideas explored in this paper can apply to any use of
+stream ciphers in FDE using some binary additive operation, we focus on the
+lattermost prior approach: stream cipher based (inflexible) FDE and metadata
+layers that exploit LFS overwrite-averse behavior to achieve high-performance
+encryption. Prior work in this area uses a single stream cipher exclusively in a
+secure binary additive mode (XOR) to encrypt and decrypt data at rest. Threats
+like pad reuse~\cite{KatzLindell} (\ie{two-time pad}) and rollback attacks---all
+caused by overwrites---are mitigated through some form of \emph{re-keying},
+where groups of contiguous storage blocks are decrypted with the old key and
+encrypted again with a new key when an overwrite is detected. Unfortunately,
+re-keying is an expensive operation. However, overwrite-averse LFS behavior
+ensures costly re-keying operations are triggered as rarely as possible during
+I/O, preserving or even improving system performance over other
+approaches~\cite{StrongBox}.
 
 \begin{figure}[ht]
    \centering
    \includegraphics[width=\linewidth]{flknug.png}
-   \caption{Anatomy of a StrongBox nugget.}\label{fig:flknug}
+   \caption{Anatomy of a SwitchBox nugget.}\label{fig:flknug}
 \end{figure}
 
-StrongBox divides the underlying drive into a series same-size logical blocks
-called \emph{nuggets}, illustrated in \figref{flknug}. A nugget consists of one
-or more physical drive blocks/sectors, depending on its configured size. Each
-nugget is subdivided into a constant number of units called \emph{flakes}.
+As with prior work, SwitchBox divides the underlying drive into a series
+same-size logical blocks called \emph{nuggets}, illustrated in \figref{flknug}.
+A nugget consists of one or more physical drive blocks/sectors depending on its
+configured size. Each nugget is subdivided into a constant number of units
+called \emph{flakes}.
 
-StrongBox uses this flake-nugget structure to 1) track, detect, and handle
+SwitchBox uses this flake-nugget structure to 1) track, detect, and handle
 overwrites and 2) limit the maximum length of any plaintexts provided to
-ciphers, thus capping the overhead incurred during expensive re-keying
-operations when overwrites do occur.
+ciphers, thus amortizing the overhead incurred during expensive re-keying and
+other operations when overwrites do occur~\cite{StrongBox}.
 
 \subsection{Key Insights}
 
 \subsubsection{A Single Point In A Space Of Possible Cipher Configurations}
-\TODO{This is an example of why we need to make sure that our claims are
-stronger than just making strongbox better.  It would be great to ask what if
-the above schemes used a range of ciphers?  And then make the text of this
-paragraph more general for all types of stream-cipher based fde.} What if we
-used StrongBox with ciphers \textit{other} than ChaCha20? Redesigning StrongBox
-with a generic cipher API allows for ciphers other than ChaCha20 to be used,
-yielding a space of cipher configuration points with various performance,
-battery life, security, drive space, and other tradeoffs. It follows then that
-the original StrongBox construction using ChaCha20 exists as one point in this
-space of cipher configurations.
 
-\begin{figure*}[ht] \textbf{Baseline Cipher I/O Performance}\par\medskip
-   \centering
-   {\input{charts/tradeoff-no-ratios.tex}} \caption{Median sequential and random
-   read and write latency per I/O operation size (4KB, 512KB, 5MB, 40MB) using
-   multiple cipher configurations achievable without switching and ordered by
-   security score.}
-  \label{fig:tradeoff-no-ratios}
-\end{figure*}
-
-\TODO{You have to introduce the scoring before you get here.  Or at least
-introduce the notion of scoring with citations. or that the community agrees on
-the relative strength with citations.} For instance, \figref{tradeoff-no-ratios}
-shows the security versus I/O latency tradeoff between different stream ciphers
-(including ChaCha20) when completing a 40MB read of encrypted storage. The
-experiment was performed on a Linux RAM disk on an ARM big.LITTLE Exynos Octa
-processor, which is similar to the processors used in the Samsung Galaxy line of
-phones and other devices. Of the ciphers we tested, those with more desirable
-but performance inhibitive security guarantees (see: \secref{design}) resulted
-in higher latency for I/O operations while ciphers with relatively weaker less
-desirable security guarantees resulted in lower latency.
+What if, rather than restricting the system to a single cipher, we wanted to
+\textit{flexibly} encrypt data at rest with a range of ciphers and cryptographic
+keys at the block device level? Implementing a generic cipher API and
+low-overhead switching mechanism allows for more than a single cipher to be used
+on the same device, yielding a space of cipher configuration points with various
+performance, battery life, security, writable space, and other tradeoffs where
+prior work merely exists as a single point in this space.
 
 \subsubsection{Nugget Encryption/Decryption And Re-Keying Is Entirely Independent}
 
@@ -118,7 +96,7 @@ properties for performance or energy.}
 
 \subsection{Motivating Example: Filesystem Reacts to OS ``Battery Saver'' Mode}
 
-\begin{figure}[ht] \textbf{Linearity Between Baseline Cipher Latency and Energy
+\PUNT{\begin{figure}[ht] \textbf{Linearity Between Baseline Cipher Latency and Energy
 Use}\par\medskip
    \centering
    {\input{charts/linearity-latency-energy.tex}} \caption{Comparison of cipher
@@ -127,7 +105,7 @@ Use}\par\medskip
    relationship between latency and total energy use is linear for the cipher
    configurations we examine in this paper.}
   \label{fig:linearity-latency-energy}
-\end{figure}
+\end{figure}}
 
 Suppose we are continually streaming a high-resolution video stored on our
 mobile device to several WiFi connected devices, such as televisions or
@@ -136,7 +114,7 @@ as possible, so we chose to initialize the system at a configuration point
 offering very strong security.
 
 For the ciphers examined in this paper, \figref{linearity-latency-energy} shows
-a correlation between stronger security guarantees and greater total energy use,
+a correlation between stronger security properties and greater total energy use,
 meaning our device is using a lot more energy to facilitate FDE at this
 configuration point. Though this correlation applies to the ciphers we examined,
 note that this correlation is certainly not true for all possible ciphers.
@@ -161,7 +139,7 @@ underlying filesystem or encrypted container.
 
 \subsection{Challenges}
 
-\textbf{Comparing ciphers with disparate security guarantees.} To ensure that
+\textbf{Comparing ciphers with disparate security properties.} To ensure that
 these tradeoffs are made optimally, it is desirable to score the security
 properties of various ciphers. This is challenging since different ciphers have
 a wide range of energy/latency vs security properties, including ciphers that

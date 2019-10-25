@@ -3,22 +3,27 @@
 Full Drive Encryption (FDE) is essential for security in modern computing
 systems, especially mobile systems. Recent work with stream-cipher based FDE
 shows significantly improved throughput over block cipher based FDE while
-offering stronger security guarantees. This approach is ideal when the only
+offering stronger security properties. This approach is ideal when the only
 optimization target is throughput; however, optimizing for high throughput often
-conflicts with other key concerns like energy usage and the
-cipher's security properties.
+conflicts with other key concerns like energy usage and the cipher's security
+properties.
 
-In this paper, we show that using stream ciphers for FDE creates a large tradeoff space that could be used to balance competing security and latency 
-requirements.  We then present SwitchBox, a software
-mechanism that enables dynamic navigation of these tradeoffs via \emph{cipher switching}, which
-can be done in space or time. The key insight in this approach is achieving
+In this paper, we show that using stream ciphers for FDE creates a large
+tradeoff space that could be used to balance competing security and latency
+requirements.  We then present SwitchBox, a software mechanism that enables
+dynamic navigation of these tradeoffs via \emph{cipher switching}, which can be
+done in space or time. The key insight in this approach is achieving
 low-overhead switching by leveraging the overwrite-averse, append-mostly
 behavior of the underlying solid-state storage to trade throughput or total
-energy use for desired security guarantees. We implement SwitchBox on an ARM
+energy use for desired security properties. We implement SwitchBox on an ARM
 big.LITTLE mobile processor and test its performance under the popular F2FS LFS.
-We provide empirical results that demonstrate the conditions under which different switching strategies would be optimal.
-We then study SwitchBox's dynamic flexibility through XXX case studies where latency, energy, and security requirements change dynamically. In all cases, we find that SwicthBox achieves at least XXX improvement compared to static approaches that must pick only a single operating point. \TODO{We need a much stronger statement about the results, 
-	but let's wait until all the case studies are in before we construct that 
-	sentence.}
+We provide empirical results that demonstrate the conditions under which
+different switching strategies would be optimal. We then study SwitchBox's
+dynamic flexibility through \TODO{XXX} case studies where latency, energy, and
+desired security properties change dynamically. In all cases, we find that
+SwitchBox achieves at least \TODO{XXX} improvement compared to static approaches
+that must pick only a single operating point. \TODO{We need a much stronger
+statement about the results, but let's wait until all the case studies are in
+before we construct that sentence.}
 
 \end{abstract}

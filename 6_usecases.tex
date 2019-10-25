@@ -74,7 +74,7 @@ Benefit: When constantly streaming data, e.g. using DLNA to stream a high
 resolution video wirelessly to a TV on the same network, the ability to adapt to
 time-varying data rates and QoS requirements while maintaining confidentiality
 and integrity guarantees is paramount. This can be done by trading off a set of
-security guarantees with respect to the energy spent crypting each bit. With
+security properties with respect to the energy spent crypting each bit. With
 cipher switching, the filesystem can react dynamically to the system's total
 energy budget while still aiming for the most performant (least latency)
 configuration.
@@ -148,6 +148,15 @@ Constraint}\par\medskip
    drive-wide cipher switch.}
   \label{fig:usecase-custody}
 \end{figure}
+
+\TODO{Of course it’s reasonable to ask whether it’s having keys in RAM is that
+big of concern in the first place. Can these keys actually be accessed?
+%
+The answer to that question is a bit complicated. First, if you’re up against
+somebody with a hardware lab and forensic expertise, the answer is almost
+certainly “yes”. Once you’ve entered your passcode and derived the keys, they
+aren’t stored in some magically secure part of the phone. People with the
+ability to access RAM or the bus lines of the device can potentially nick them.}
 
 \TODO{Talk about some proposed configurations that allow for quick secure erase:
 FTL-level partitioning, two drives (like most smartphones), special secure erase

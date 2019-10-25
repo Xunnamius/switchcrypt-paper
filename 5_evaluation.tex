@@ -11,19 +11,61 @@ We evaluate SwitchBox using a RAM disk. The maximum theoretical memory bandwidth
 for this Odroid model is 14.9GB/s\@. Our observed maximum memory bandwidth is
 4.5GB/s.
 
-We evaluate SwitchBox on four workloads: sequential I/O, random I/O, sequential
-``write once ready many'' (WORM), and random WORM.
+We evaluate SwitchBox on two high level workloads: sequential and random I/O. In
+both workloads, a number of bytes are written and then read (either 4KB, 512KB,
+5MB, 40MB) 10 times. This experiment is repeated three times. When evaluating
+switching strategies, a finer breakdown in workloads is made using a
+pre-selected pair of ciphers, yielding a ``cipher configuration'' point given a
+switching strategy: a specific ratio of those 10 write-read pairs is performed
+using one cipher and the remainder with the other. There are three ratios we use
+to evaluate SwitchBox's performance: 1:3, 1:1, and 3:1. Respectively, that's 1
+whole file write-read operation in the secondary cipher for every 3 whole file
+write-read operations in the primary cipher (1:3), 1 whole file write-read
+operation in the secondary cipher for every other whole file write-read
+operation in the primary cipher (1:1), and 3 whole file write-read operations in
+the secondary cipher for every 1 whole file write-read operation in the primary
+cipher (3:1).
 
 In this section we answer the following questions:
 \begin{enumerate}
  \item Can SwitchBox reach security/energy tradeoffs that are not reachable with prior work?
- \item What switching strategy works best in which scenario? For which workload?
+ \item What switching strategy works best in which scenario?
  \item What is the performance overhead of each cipher switching strategy?
  \item What is the storage overhead of each cipher switching strategy?
  \item How does incorporation of cipher-switching change the threat analysis?
 \end{enumerate}
 
 \subsection{Reaching Between Static Configuration Points}
+
+\begin{figure*}[ht] \textbf{Baseline Cipher I/O Performance}\par\medskip
+  \centering
+  {\input{charts/tradeoff-no-ratios.tex}} \caption{Median sequential and random
+  read and write latency per I/O operation size (4KB, 512KB, 5MB, 40MB) using
+  multiple cipher configurations achievable without switching and ordered by
+  security score.}
+ \label{fig:tradeoff-no-ratios}
+\end{figure*}
+
+\figref{tradeoff-no-ratios} shows the security score versus I/O latency tradeoff
+between our different stream ciphers when completing a 40MB read of encrypted
+storage. The experiment was performed on a Linux RAM disk on an ARM big.LITTLE
+Exynos Octa processor, which is similar to the processors used in the Samsung
+Galaxy line of phones and other devices. Of the ciphers we tested, those with
+more desirable but performance inhibitive security properties (see:
+\secref{design}) resulted in higher latency for I/O operations while ciphers
+with relatively weaker less desirable security properties resulted in lower
+latency.
+
+\begin{figure*}[ht]
+  \textbf{Forward Switching I/O Ratio Performance}\par\medskip
+  \centering
+  {\input{charts/tradeoff-with-ratios.tex}} \caption{Median sequential and
+  random read and write latency per I/O operation size (4KB, 512KB, 5MB, 40MB)
+  using multiple cipher configurations ordered by security score. With Forward
+  switching, we achieve additional configurations unachievable with prior work
+  incapable of switching.}
+ \label{fig:tradeoff-with-ratios}
+\end{figure*}
 
 \TODO{Add discussion of the different sizes and how they relate. Add exhaustive
 set of charts and then something that says these trends are similar across
@@ -48,16 +90,7 @@ then the conclusion we can draw regarding the question for that subsection.}
 \TODO{Reuse the table from the strongbox paper, but have a different column for
 forward, selective, and mirrored.}
 
-\begin{figure*}[ht]
-   \textbf{Forward Switching I/O Ratio Performance}\par\medskip
-   \centering
-   {\input{charts/tradeoff-with-ratios.tex}} \caption{Median sequential and
-   random read and write latency per I/O operation size (4KB, 512KB, 5MB, 40MB)
-   using multiple cipher configurations ordered by security score. With Forward
-   switching, we achieve additional configurations unachievable with prior work
-   incapable of switching.}
-  \label{fig:tradeoff-with-ratios}
-\end{figure*}
+
 
 \TODO{Move all the following analysis into their proper subsections above.}
 
