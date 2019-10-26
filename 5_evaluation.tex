@@ -25,7 +25,7 @@ ratio workloads test SwitchBox's ability to reach configuration points not
 accessible to prior work.
 
 There are three ratios we use to evaluate SwitchBox's performance in this
-regard: 1:3, 1:1, and 3:1. Respectively, that's 1 whole file write-read
+regard: 1:3, 1:1, and 3:1. Respectively, that is 1 whole file write-read
 operation in the primary cipher for every 3 whole file write-read operations in
 the secondary cipher (1:3), 1 whole file write-read operation in the primary
 cipher for every other whole file write-read operation in the secondary cipher
@@ -56,7 +56,6 @@ In this section we answer the following questions:
 
 \begin{figure}[ht]
   \textbf{Baseline Cipher I/O Performance}\par\medskip
-  \hspace*{-1.5cm}
   {\input{charts/tradeoff-no-ratios.tex}} \caption{Median sequential and random
   read and write performance baseline.}
  \label{fig:tradeoff-no-ratios}
@@ -90,7 +89,6 @@ ChaCha20 for normalized 4K workloads. ChaCha8 is not slower than ChaCha20.
 
 \begin{figure}[ht]
   \textbf{Forward Switching I/O Ratio Performance}\par\medskip
-  \hspace*{-1cm}
   {\input{charts/tradeoff-with-ratios.tex}} \caption{Median sequential and
   random read and write performance comparison of Forward switching to
   baseline.}

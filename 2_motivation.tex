@@ -122,16 +122,16 @@ device determines its remaining battery life is too low and enters a ``battery
 saver'' mode with a curtailed energy budget and reduced processor frequency.
 With a traditional filesystem or encrypted container, we are stuck with the
 high-latency \emph{high-energy} cipher configuration chosen at initialization
-when what we really need is our storage layer to react dynamically to the needs
-of the overarching system.
+when what we really need is a novel storage layer that reacts dynamically to the
+energy budget of the overarching system.
 
-With the ability to re-cipher individual nuggets, we can transition to a cipher
-configuration that trades the security properties of active nuggets (\ie{to
-where the downloaded movie's bytes and filesystem metadata updates are being
-written}) so that we stay within our curtailed energy budget and successfully
-retrieve the entire file. Had we remained at the high-latency high-energy cipher
-configuration, we would have blown past our budget in the middle of downloading
-the file.
+With the ability to re-cipher individual nuggets, we can achieve this
+functionality by transitioning to a cipher configuration that trades the
+security properties of active nuggets (\ie{to where the downloaded movie's bytes
+and filesystem metadata updates are being committed}) so that we stay within our
+curtailed energy budget and successfully retrieve the entire file. Had we
+remained at the high-latency high-energy cipher configuration, we would have
+blown past our budget in the middle of downloading the file.
 
 And thanks to the ``battery saver'' mode, our device remains alive long enough
 for us to reach a charger, allowing the system to return to a non-curtailed

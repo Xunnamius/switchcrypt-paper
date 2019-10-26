@@ -75,7 +75,7 @@ SwitchBox exposes hooks for wrapper functions at three levels:
    expects a cipher to accept intra- and inter- nugget offset data and return
    crypted the specified region and so operates at a fine-grain level compared
    to using the read and write handles described below. There is no distinction
-   made between encryption and decryption as they're considered the same
+   made between encryption and decryption as they are considered the same
    operation in this context. Further, this interface does not allow any access
    to the SwitchBox internals and is expected to execute independently of
    SwitchBox.
@@ -106,7 +106,7 @@ SwitchBox exposes hooks for wrapper functions at three levels:
    to the backing store.
 
    This is a good choice if a cipher with randomized output needs to work below
-   the overwrite protection code (\ie{Freestyle}) and/or a cipher doesn't
+   the overwrite protection code (\ie{Freestyle}) and/or a cipher does not
    function like a stream cipher (\ie{AES-XTS}). If
    \\\texttt{sc\_fn\_read\_handle} is defined, \\\texttt{sc\_fn\_write\_handle}
    must also be defined. Hooks at this level should only ever operate on a
@@ -248,7 +248,7 @@ of the transaction journal for that nugget. A pristine nugget will have a clean
 transaction journal.
 
 All nuggets start out as pristine. All nuggets start out with metadata
-indicating that they're to be encrypted and decrypted by the initially active
+indicating that they are to be encrypted and decrypted by the initially active
 cipher. This is true \emph{even if the nugget has not been written to yet}. This
 means, on read and write operations after a different cipher becomes the active
 cipher configuration using a naively implemented forward switching strategy,
@@ -393,7 +393,7 @@ To simplify reasoning about trading off such disparate cryptographic properties
 in the FDE context, we must have a way to quantitatively compare a cipher's
 ``desirability'' or usefulness to SwitchBox and to FDE more generally. Hence, we
 do not attempt to define a generally applicable \textit{ranking} of
-\emph{security strength} as that doesn't make sense. Instead, we score ciphers
+\emph{security strength} as that does not make sense. Instead, we score ciphers
 (\ie{a so-called ``security score''}) based on three key security properties
 that, when summed, give an estimate of the usefulness of a cipher to SwitchBox
 FDE (see: \tblref{security-quant}).

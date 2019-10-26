@@ -1,30 +1,71 @@
 \section{SwitchBox Case Studies}\label{sec:usecases}
 
-\subsection{Intra-file Variable Security Regions (VSR)}
+\subsection{Balancing Security Goals with a Constrained Energy Budget}
 
-Communicating classified materials, grand jury testimony, corporate secrets,
-etc. require the highest level of discretion when handled, yet sensitive
-information like this often appears within a (much) larger amount of data that
-we care less about in context.
+This usecase illustrates that, because latency and energy are correlated among
+the ciphers we examined, we can exploit that property using temporal Forward
+switching. We revisit the motivating example from \secref{motivation},
+demonstrating that the ability to re-cipher individual nuggets allows us to
+complete our task while staying within our energy budget.
 
-In this scenario, a user wants to indicate one or more regions of a file are
+We begin sequentially writing 10 40MB files using the Freestyle Balanced cipher
+configuration. After 5 seconds, the devices enters ``battery saver'' mode. We
+simulate this event by 1) underclocking the cores to their lowest
+frequencies and 2) using \texttt{taskset} to transition the SwitchBox processes
+to the energy-efficient LITTLE cores. Afterwards, we complete the remaining
+workload using the ChaCha8 cipher. We repeat this experiment three times.
+
+\begin{figure}[ht] \textbf{Batter Saver Use Case: Energy-Security Tradeoff vs
+   Strict Energy Budget}\par\medskip
+   \centering
+   {\input{charts/usecase-battery.tex}} \caption{Median sequential write total
+   energy use with respect to time and security score with respect to time.}
+  \label{fig:usecase-battery}
+\end{figure}
+
+In \figref{usecase-battery}, we see time versus energy used and average security
+score of the backing store. At 0 seconds, we begin writing. At 5 seconds, the
+``battery critical'' event occurs, causing the system to be underclocked. At 120
+seconds, the system will die. If we blow past our energy ceiling, the system
+will die.
+
+Our goal is to finish downloading the file before the device dies. We have three
+cipher configuration choices. 1) Favor security and use Freestyle Balanced
+exclusively. Our results show that the device will die before completing the
+download. 2) Favor low energy use with ChaCha8 exclusively. Our results show
+that the device will finish writing early, but we fall below our minimum
+security score constraint. Finally, we have 3) favor security and use Freestyle
+Balanced except when the system enters a low power state, after which the
+storage layer switches to favoring optimal energy use using ChaCha20 via the
+Forward switching strategy. Our results show that, while the system uses
+slightly more power in the short term, we stay within our energy budget and
+finish before the devices dies.
+
+On average, using Forward cipher switching results in a \TODO{XXX} total energy
+use reduction.
+
+\subsection{Variable Security Regions}
+
+This usecase illustrates utility of spatial Selective switching to achieve a
+performance win over prior work, where the entire drive is encrypted with a
+single cipher. We demonstrate \emph{Variable Security Regions} (VSR), where we
+can choose to encrypt select files or portions of files with different keys and
+ciphers below the filesystem level. Similar ``energy-security scalable
+encryption'' has been explored in related work~\cite{ScalableEncryption}.
+
+Communicating classified materials, corporate secrets, etc. require the highest
+level of discretion when handled, yet sensitive information like this can
+appears within a (much) larger amount of data that we value less. In this
+scenario, a user wants to indicate one or more regions of a file or files are
 more sensitive than the others. For example, perhaps banking transaction
 information is littered throughout a document; perhaps passwords and other
-sensitive or compromising information exists within a much larger data file.
-This sensitive information would be encrypted using a less performant (sometimes
-dramatically so) cipher in exchange for a stronger security guarantee.
+sensitive information exists within several much larger files.
 
-The user will not experience a significant performance hit when perusing the
-data if the bulk of it is encrypted using a high performance cipher.
-Simultaneously, the more sensitive data regions are future-proofed and more
-resilient to attack using a high security cipher.
-
-A ``VSR'' is a region of a file that is crypted with the alternative rather than
-the primary cipher that encrypts the remaining majority of the file.
-
-Benefit: we can ``future-proof'' our encrypted highly sensitive data against
-more powerful future attacks/less trustworthy ciphers while preserving the
-performance win from using a faster less secure cipher.
+We begin by writing 10 5MB and 4KB files to unique SwitchBox instances using
+ChaCha8 and again on instances using Freestyle Balanced. We repeat this on a
+SwitchBox instance using Selective switching with a 3:1 ratio of ChaCha8 nugget
+I/O operations versus Freestyle Balanced operations. We repeat this experiment
+three times.
 
 \begin{figure}[ht] \textbf{VSR Use Case: ChaCha8 vs Freestyle Secure Sequential
 4KB, 5MB Performance}\par\medskip
@@ -35,95 +76,70 @@ performance win from using a faster less secure cipher.
   \label{fig:usecase-vsr-bar}
 \end{figure}
 
-\PUNT{\begin{figure}[ht] \textbf{VSR Use Case: Security-Latency Tradeoff vs
-   Goals}\par\medskip
-   \centering
-   {\input{charts/usecase-vsr-tradeoff.tex}} \caption{Median sequential and
-   random read and write ...}
-  \label{fig:usecase-vsr-tradeoff}
-\end{figure}}
+In \figref{usecase-vsr-bar}, we see the sequential read and write performance of
+4K and 5M workloads when nuggets are encrypted exclusively with ChaCha8 or
+Freestyle Balanced. Between them, we see SwitchBox Selective switching 3:1 ratio
+I/O results.
 
-\subsection{Balancing Security Goals with a Constrained Energy Budget}
-
-When our mobile devices enter battery saving mode, it is usually because the
-total energy/power budget for the device has become constrained for one reason
-or another.
-
-When a device enters this mode, all software and components are configured by
-the OS to use as little of the available energy as possible. The filesystem
-should be made to behave in a manner that is energy-aware as well.
-
-Our goal is to use as little energy as possible (while reasonably preserving
-filesystem performance) until the energy budget changes or the device dies.
-
-Benefit: When constantly streaming data, e.g. using DLNA to stream a high
-resolution video wirelessly to a TV on the same network, the ability to adapt to
-time-varying data rates and QoS requirements while maintaining confidentiality
-and integrity guarantees is paramount. This can be done by trading off a set of
-security properties with respect to the energy spent crypting each bit. With
-cipher switching, the filesystem can react dynamically to the system's total
-energy budget while still aiming for the most performant (least latency)
-configuration.
-
-\TODO{See my earlier comment (in email or some other TODO) about reading vs.
-writing.  It seems fairly clear to me that you can make this work for writes,
-but I don't see hwo this works for reads. If the video is stored in a strong
-cipher, don't you have to decrypt it at that strength?  Where does the energy
-win come from on reads?}
-
-\begin{figure}[ht] \textbf{Batter Saver Use Case: Energy-Security Tradeoff vs
-   Strict Energy Budget}\par\medskip
-   \centering
-   {\input{charts/usecase-battery.tex}} \caption{Median sequential and random
-   read and write total energy use with respect to time and security score with
-   respect to time.}
-  \label{fig:usecase-battery}
-\end{figure}
-
-40MB sequential I/O operation size using a ChaCha8 configuration, Freestyle
-Balanced configuration, and a configuration that switches between both ciphers
-(1-to-1 nugget ratio) with Forward switching.
+Our goal is to use VSRs to keep our sensitive data secure while keeping the
+performance and energy use benefits of using a fast cipher for the majority of
+I/O operations. On average, using SwitchBox Selective switching versus prior
+work results in a \TODO{XXX} reduction in latency.
 
 \subsection{Responding to End-of-Life Slowdown in Solid State Drives}
 
-Due to garbage collection and the append-mostly nature of SSDs and other NAND
-devices, as free space becomes constrained, performance drops off a cliff. This
-is a well-studied issue (see related work).
+This usecase illustrates using temporal Forward switching to offset the
+debilitating decline in performance when SSDs reach end-of-life
+(EoL)~\cite{SSDEOL1, SSDEOL2, SSDEOL3}. We demonstrate the utility of such a
+system to dynamically stay within a strict latency budget while meeting minimum
+security requirements, which is not possible using prior work.
 
-If the filesystem is made aware when the backing store is in such a state, we
-can offset some of the (drastic) performance loss by switching the ciphers of
-hot nuggets to the fastest cipher available until the disk space problem is
-remedied, after which the system can detect return the switched nuggets to their
-former encrypted state.
+Due to garbage collection and wear-leveling requirements of SSDs, as free space
+becomes constrained, I/O performance drops precipitously~\cite{SSDEOL1, SSDEOL2,
+SSDEOL3}. With prior work, our strict latency ceiling is violated. However, if
+SwitchBox is made aware when the backing store is in such a state, we can offset
+some of the performance loss by switching the ciphers of high traffic nuggets to
+the fastest cipher available using Forward switching.
 
-Benefit: we can mitigate the performance loss of a slowing SSD by using a faster
-but less secure cipher.
+We begin by writing 10 40MB files to SwitchBox per each cipher as a baseline. We
+then introduce a delay into SwitchBox I/O of $20ms$ and repeat the experiment
+three times.
 
 \begin{figure}[ht] \textbf{SSD EoL Use Case: Latency-Security Tradeoff vs
    Goals}\par\medskip
-   \hspace*{-1.25cm}
    {\input{charts/usecase-eol-tradeoff.tex}} \caption{Median sequential and
    random 40MB read and write performance comparison: baseline versus simulated
    faulty block device.}
   \label{fig:usecase-eol-tradeoff}
 \end{figure}
 
-With Forward switching, the performance impact is offset given our latency and
-security goals.
+In \figref{usecase-eol-tradeoff}, we see the sequential and random read and
+write performance of a 40MB workload when nuggets are encrypted exclusively with
+our choice ciphers. While the latency ceiling and security floor have not
+changed, we see increased latency in the delayed workloads.
+
+Our goal is to remain under the latency ceiling while remaining above the
+security floor. Thanks to Forward switching, accesses to highly trafficked areas
+of the drive can remain performant even during EoL.
 
 \subsection{Custody Panic: Securing Device Data Under Duress}
 
-Nation-state and other adversaries have truly extensive compute resources at
-their disposal, as well as knowledge of side-channels and access to technology
-like q-bit computers.
+This usecase illustrates the utility of spatial Mirrored switching to take
+advantage of more energy-efficient high-performance ciphers while retaining the
+ability to quickly converge the entire backing store to a single high-security
+cipher leveraging SSD Instant Secure Erase (ISE).
 
-Suppose one were attempting to re-enter a country through a border checkpoint
-after visiting family when one is stopped. Your mobile device is confiscated and
-placed in custody of the State. In such a scenario, it would be useful if the
-device could switch itself into a more secure state as quickly as possible.
-
-Benefit: greater security guarantee achieved using the highest security
-encryption available versus powerful adversaries with unknown means and motive.
+Nation-state and other ``adversaries'' have extensive compute resources,
+knowledge of side-channels, and access to technology like q-bit computers.
+Suppose a scientist were attempting to re-enter her country through a border
+entry point when she is stopped. Further suppose her laptop containing sensitive
+priceless research data is confiscated from her custody. Being a security
+researcher, she has a chance to trigger a remote wipe, where the laptop uses
+Instant Secure Erase to reset its internal storage, permanently destroying all
+her data. While she certainly doesn't want her data falling into the wrong
+hands, she can't afford to lose that data either. In such a scenario, it would
+be useful if, instead of destroying the data, the storage layer could switch
+itself to a more secure state as quickly as possible.
 
 \begin{figure}[ht] \textbf{Custody Panic Use Case: Security Goals vs Time
 Constraint}\par\medskip
@@ -133,21 +149,23 @@ Constraint}\par\medskip
   \label{fig:usecase-custody}
 \end{figure}
 
-this use case employs Mirrored switching to maintain data consistency up until
-mirrored contents encrypted using the low scoring cipher configurations are
-erased, enabling a relatively high speed low energy drive-wide cipher switch.
+In \figref{usecase-eol-tradeoff}, we see the system begins at 0 seconds, where
+all data is mirrored across the backing store (perhaps consisting of multiple
+physical drives). Both the desired and minimum security score of the drive is
+1.5, a balance between performance and security. At 6 seconds, custody panic is
+triggered--desired minimum security score reaches maximum--at which point the
+system executes ISE and completely erases the drive containing the minimally
+scored data. ISE is known to be much faster than TRIM and completes in as little
+as 3 seconds~\cite{SeaGate,Samsung,ThatOtherOEM}. Once complete, the most secure
+form of the data is all that remains. The backing store has been ``locked
+down''.
 
-\TODO{Of course it’s reasonable to ask whether it’s having keys in RAM is that
-big of concern in the first place. Can these keys actually be accessed?
-%
-The answer to that question is a bit complicated. First, if you’re up against
-somebody with a hardware lab and forensic expertise, the answer is almost
-certainly “yes”. Once you’ve entered your passcode and derived the keys, they
-aren’t stored in some magically secure part of the phone. People with the
-ability to access RAM or the bus lines of the device can potentially nick them.}
-
-\TODO{Talk about some proposed configurations that allow for quick secure erase:
-FTL-level partitioning, two drives (like most smartphones), special secure erase
-implementation (not ideal). Also talk about how secure erase is very quick
-thanks to wear leveling protection being crypto and secure erase implementations
-just forgetting the key.}
+Our goal is to ``lock down'' the backing store, slowing down any attacker as
+much as possible such that, even if they copy and permanently store her data
+off-site for later attempts at decryption with more advanced compute resources
+and new technologies, our researcher's data is some degree more likely to remain
+irrecoverable. We show that, given a device that support SSD ISE, SwitchBox, and
+the Mirrored strategy, we can quickly and practically converge the backing store
+to this locked down state. With prior work, data is either too weakly encrypted
+or the device becomes too slow for daily use (latency ceiling). In exchange, we
+trade off half of our drive's writeable space.
