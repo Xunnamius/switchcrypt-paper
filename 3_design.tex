@@ -68,10 +68,11 @@ characteristics to co-exist on the same drive; typically, such characteristics
 would render these ciphers entirely incompatible, preventing us from trading
 them off with one another.
 
-SwitchBox exposes hooks for wrapper functions at three levels:
+SwitchBox exposes API hooks for wrapper function cipher implementations at three
+levels:
 
 \begin{enumerate}
-   \item \textbf{\texttt{sc\_fn\_crypt\_data}}\\\texttt{sc\_fn\_crypt\_data}
+   \item \textbf{\texttt{crypt\_data}}\\\texttt{crypt\_data}
    expects a cipher to accept intra- and inter- nugget offset data and return
    crypted the specified region and so operates at a fine-grain level compared
    to using the read and write handles described below. There is no distinction
@@ -80,42 +81,34 @@ SwitchBox exposes hooks for wrapper functions at three levels:
    to the SwitchBox internals and is expected to execute independently of
    SwitchBox.
 
-   Unlike \texttt{sc\_fn\_crypt\_data\_custom},
-   \\\texttt{sc\_fn\_crypt\_data} performs the final XORing automatically,
-   returning a convenient xor buffer to read crypted data into. As such, it
-   provides a slightly higher level of interaction with the backing store's data
-   making things easier for simpler ciphers.
+   Unlike \texttt{crypt\_data\_low}, \texttt{crypt\_data} performs the final
+   XORing automatically. It provides a slightly higher level of interaction with
+   the backing store's data making things easier for simpler ciphers.
 
-   \item \textbf{\texttt{sc\_fn\_crypt\_data\_custom}}\\Unlike
-   \texttt{sc\_fn\_crypt\_data}, \\\texttt{sc\_fn\_crypt\_data\_custom} does not
-   perform the final XORing automatically, nor does it provide the convenient
-   xor buffer to deal with crypted data automatically, for ciphers that require
-   this functionality. As such, it provides a slightly lower level of
-   abstraction when accessing to the backing store.
+   \item \textbf{\texttt{crypt\_data\_low}}\\Unlike \texttt{crypt\_data},
+   \texttt{crypt\_data\_low} does not perform the final XORing automatically. It
+   provides a slightly lower level of abstraction when accessing to the backing
+   store for some ciphers.
 
-   \item \textbf{\texttt{sc\_fn\_read\_handle}} and \textbf{\texttt{sc\_fn\_write\_handle}}\\
+   \item \textbf{\texttt{read\_handle}} and \textbf{\texttt{write\_handle}}\\
    Unlike the other two levels, both hooks must be provided by a cipher or
    functionality is undefined. At this level, control over encryption is
    coarse-grain, where cipher wrappers have access to all relevant SwitchBox
-   internals and must implement cipher switching manually.
-   \texttt{sc\_fn\_read\_handle} expects a cipher to accept a buffer and read
-   into it a decrypted subset of a nugget's ciphertext.
+   internals and must implement cipher switching manually. \texttt{read\_handle}
+   expects a cipher to accept a buffer and read into it a decrypted subset of a
+   nugget's ciphertext.
 
-   \texttt{sc\_fn\_write\_handle} expects a cipher to accept
-   some plaintext buffer and commit some encrypted subset of the current nugget
-   to the backing store.
+   \texttt{write\_handle} expects a cipher to accept some plaintext buffer and
+   commit some encrypted subset of the current nugget to the backing store.
 
-   This is a good choice if a cipher with randomized output needs to work below
-   the overwrite protection code (\ie{Freestyle}) and/or a cipher does not
-   function like a stream cipher (\ie{AES-XTS}). If
-   \\\texttt{sc\_fn\_read\_handle} is defined, \\\texttt{sc\_fn\_write\_handle}
-   must also be defined. Hooks at this level should only ever operate on a
-   single nugget or SwitchBox behavior is undefined. Further, due to cipher
-   switching, this function must not read in any nugget/flake data from the
-   backstore if a perfectly aligned nugget-sized chunk is requested. This is
-   because this API hook may be called when cipher switching and the underlying
-   data in the nugget might be crypted with a different algorithm when
-   attempting to read it, corrupting the plaintext.
+   This is a necessary to handle ciphers with special output that must work
+   below the overwrite protection code (\ie{Freestyle}) and/or a cipher doesn't
+   operate like a stream cipher (\ie{AES-XTS}). Hooks at this level should only
+   ever operate on a single nugget or API behavior is undefined. Further, due to
+   cipher switching, implementations must not read in any nugget/flake data from
+   the backstore if a perfectly aligned nugget-sized chunk is requested. This is
+   because the nugget data might be crypted with a different algorithm when
+   attempting to read it, corrupting the plaintext during cipher switching.
 \end{enumerate}
 
 \subsection{Cipher Switching Strategies}
@@ -393,7 +386,7 @@ To simplify reasoning about trading off such disparate cryptographic properties
 in the FDE context, we must have a way to quantitatively compare a cipher's
 ``desirability'' or usefulness to SwitchBox and to FDE more generally. Hence, we
 do not attempt to define a generally applicable \textit{ranking} of
-\emph{security strength} as that does not make sense. Instead, we score ciphers
+\emph{security strength} as that doesn't make sense. Instead, we score ciphers
 (\ie{a so-called ``security score''}) based on three key security properties
 that, when summed, give an estimate of the usefulness of a cipher to SwitchBox
 FDE (see: \tblref{security-quant}).

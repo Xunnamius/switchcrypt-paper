@@ -92,10 +92,10 @@
                 col sep=space,
                 mark=none
             ] {charts/usecase-battery.dat};
-            \coordinate (c1) at (35, 24);
+            \coordinate (c1) at (35, 16.5);
             \coordinate (c2) at (89, 45);
-            \coordinate (c3) at (0, 45);
-            \draw [dotted] (0, 34) -- (130, 34) node [above of=c1] {\tiny (energy max)};
+            \coordinate (c3) at (1, 45);
+            \draw [dotted] (0, 34) -- (130, 34) node [above of=c1] {\tiny (energy ceiling)};
             \draw [dotted] (120, 0) -- (120, 50) node [right of=c2] {\tiny (battery dies)};
             \draw [dotted] (5, 0) -- (5, 50) node [right of=c3] {\tiny (battery critical)};
         \nextgroupplot[legend to name={throwaway7}, ylabel={Security Score}, ymin=0, ymax=3, ytick={ 0, 3 }]
@@ -120,7 +120,7 @@
                 discard if symbol not={iop}{w},
                 col sep=space
             ] {charts/usecase-battery.dat};
-            \coordinate (c4) at (35, 1.32);
+            \coordinate (c4) at (35, 2.0);
             \draw [dotted] (120, 0) -- (120, 3);
             \draw [dotted] (5, 0) -- (5, 3);
             \draw [dotted] (0, 0.55) -- (130, 0.55) node [below of=c4] {\tiny (security floor)};
