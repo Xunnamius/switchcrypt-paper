@@ -17,12 +17,12 @@ contents on the fly. Understandably, this process impacts system performance and
 energy use considerably. Yet, end users expect their device to be secure
 \emph{and} performant \emph{and} energy efficient. The obvious solution is to
 balance these concerns with respect to the most general use case and ship the
-product, but this is does not always deliver an optimal outcome. An example is
+product, but this common-case approach often fails to deliver an optimal outcome. An example is
 Google's Android mobile operating system. Android supported FDE with the release
-of Android 3.0 Honeycomb yet was not enabled by default until Android 6.0
+of Android 3.0 Honeycomb, yet it was not enabled by default until Android 6.0
 Marshmallow, four years after the release of Android 3.0 and two years after the
 release of Android 5.0 Lollipop, where Google first attempted enabling FDE by
-default~\cite{android-M-mobile-motivation}.
+default~\cite{android-M-mobile-motivation}. \TODO{I would end the previous sentence after the "four years after the release of..." and in place of the rest of that sentence add a new, one-sentence explanation of why they didn't enable it by default. Especially useful if you could pull a quote relating to the performance impact.}
 
 Traditionally, FDE's impact on drive performance and energy efficiency depends
 on choice of filesystem/mapper and the choice of cipher, as different ciphers
@@ -32,9 +32,9 @@ important.
 
 The de facto standard choice for FDE is the relatively slow AES~\cite{AES}
 \emph{block cipher} in XTS mode (AES-XTS)~\cite{AES-XTS}. Prior
-work~\cite{StrongBox} introduced the motivation and method for using
+research~\cite{StrongBox} introduced the motivation and method for using
 \emph{stream ciphers} like the high performance ChaCha20~\cite{ChaCha20} cipher
-for FDE in lieu of AES-XTS. More recent work achieves something similar, such as
+for FDE in lieu of AES-XTS. More recent work achieves something similar in practice, such as
 Google's HBSH~\cite{HBSH} (hash, block cipher, stream cipher, hash) and
 Adiantum~\cite{Adiantum}, among others.
 
@@ -45,7 +45,7 @@ energy-inefficient to support FDE. This was the case with many mid- and low-tier
 Android devices at the time FDE was considered as a default for Android 5.0
 Lollipop, with a ``staggering'' 80.7\% drop in sequential read performance, a
 62.9\% drop in random read performance, and a 50.5\% drop in random write
-performance~\cite{android-M-mobile-motivation-2}.
+performance~\cite{android-M-mobile-motivation-2}. \TODO{Hmmm.  This is great and the kind of thing I was looking for earlier.  Maybe move it up.  Also, I am hoping that the staggering is a real quote and not just scare quotes.  If it is real, maybe you could pull more context?}
 
 Many ciphers exist with a variety of different performance characteristics and
 opposing security properties. Some of these include: ChaCha variants with
@@ -53,10 +53,10 @@ different round counts (e.g., ChaCha8 \cite{ChaCha8} and ChaCha20
 \cite{ChaCha20}) or exotic security properties (e.g.,
 Freestyle~\cite{Freestyle}) and others---SalsaX~\cite{SalsaX}, AES in counter
 mode (AES-CTR)~\cite{AES-CTR}, Rabbit~\cite{Rabbit}, Sosemanuk~\cite{Sosemanuk},
-et cetera.
+et cetera. \TODO{I like "exotic security properties" as a turn of phrase, but you will need to add another sentence that clarifies what those properties are.}
 
 In this way, the choice of (stream) cipher can be viewed as a key
-\emph{configuration} parameter for systems supporting FDE; the configuration
+\emph{configuration} parameter for FDE systems; the configuration
 providing the fastest I/O throughput is almost always different than the
 configuration providing the most desirable security properties, and both may
 differ from the configuration that uses the least amount of energy or allows the
@@ -74,12 +74,12 @@ another configuration becomes more desirable later on?
 
 \subsection{Our Contributions}
 
-We introduce a simple scheme to quantify the usefulness or relative ``strength''
-of ciphers based on key security properties relevant to FDE. We call these
+We introduce a simple scheme to quantify the usefulness---or relative ``strength''---of 
+ciphers based on key security properties relevant to FDE. We call these
 \emph{security scores}. We additionally stress that \textit{every} cipher
 explored in this work is considered cryptanalytically secure. The security score
 represents the desirability of additional security properties these ciphers
-offer versus each other.
+offer versus each other. \TODO{One more sentence to give more intuition of what those properties might be.}
 
 Using this scoring scheme, we define a novel tradeoff space of cipher
 configurations over competing concerns: total energy use, desirable security
@@ -93,7 +93,7 @@ on the same drive as independent storage units \textit{below the
 filesystem-level}, and 3) employing various \emph{switching strategies} to
 ``re-cipher'' those units dynamically at run-time. SwitchBox accomplishes these
 without significant overhead, allowing us to navigate our tradeoff space of
-cipher configurations online to ensuring the system is near the most optimal
+cipher configurations online, ensuring the system is near the most optimal
 configuration given the constraints at the moment.
 
 With the remainder of this paper, we explore the motivations underpinning our
