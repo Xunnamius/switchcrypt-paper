@@ -10,7 +10,7 @@ eMMC5.0 HS400 backing store running Ubuntu Trusty 14.04.6 LTS, kernel version
 
 We evaluate SwitchBox using a Linux RAM disk (tmpfs). The maximum theoretical
 memory bandwidth for this Odroid model is 14.9GB/s\@. Our observed maximum
-memory bandwidth is 4.5GB/s.
+memory bandwidth is 4.5GB/s. 
 
 In each experiment below, we evaluate SwitchBox on two high level workloads:
 sequential and random I/O. In both workloads, a number of bytes are written and
@@ -51,6 +51,8 @@ In this section we answer the following questions:
  \item How does incorporation of cipher-switching change the threat analysis
  versus prior work?
 \end{enumerate}
+
+\TODO{ISn't there one for does the best cipher switching strategy vary with different workloads/requirements?  Or did you decide that data is not very interesting?}
 
 \subsection{Switching Strategies Under Various Workloads}
 
