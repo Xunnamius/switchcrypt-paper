@@ -2,7 +2,7 @@
 
 Our SwitchBox implementation consists of 9,491 lines of C code; our test suite
 consists of 6,077 lines of C code. All together, our solution is comprised of
-15,568 lines of C code.
+15,568 lines of C code. \TODO{Can you put it on an anonymous github site?  Or just mention that it will be released after the anonymous review period?}
 
 SwitchBox uses OpenSSL version 1.1.0h and LibSodium version 1.0.12 for its
 AES-XTS and AES-CTR implementations. Open source ARM NEON optimized
@@ -41,7 +41,7 @@ system desires one cipher be active over the other.
 A production-ready implementation would be greatly simplified by adding an
 ``intent'' parameter to the POSIX \textit{read()} and \textit{write()} system
 calls, allowing SwitchBox to more exactly map individual I/O operations to
-specific areas of the backing store when spatially switching. \PUNT{This is
+specific areas of the backing store when spatially switching. \TODO{Did you implement this for one case study?  If so, you should say so.  Also, don't you just need the write to change?  Read should read whatever, right?} \PUNT{This is
 especially important when considering the selective switching strategy; a
 production-ready implementation supporting selective switching would need to
 differentiate between metadata operations belonging to the filesystem (should be
