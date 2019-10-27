@@ -11,13 +11,14 @@ space and cipher switching strategies. We also discuss the pluggable stream
 cipher API and other design challenges.
 
 SwitchBox is a translation layer ideally implemented in the Flash Translation
-Layer (FTL). Unlike prior work, which focuses on optimizing performance despite
+Layer (FTL). \TODO{Why is that ideal? And where else could it be implemented? Remember that you want all the ideas to have as much impact as possible.  Don't give lazy reviewers and easy lever against the paper.} 
+Unlike prior work, which focuses on optimizing performance despite
 re-keying due to overwrites, SwitchBox maintains overwrite protections while
 abstracting the idea of re-keying out into re-ciphering or \emph{cipher
 switching}, where a nugget's contents are decrypted using the old key and
 inactive cipher configuration and encrypted using a new key and the active
 cipher configuration before completing the I/O operation; instead of myopically
-pursuing a performance win, this allows us to trade off different ciphers and
+pursuing a performance win, this allows users (or the operating system) to trade off different ciphers and
 their characteristics online.
 
 \begin{figure}[t]
@@ -60,10 +61,10 @@ considerations. In this way, different stream ciphers might appear to all be
 interchangeable, but they are not. For instance: not all stream ciphers, let
 alone all ciphers, are length-preserving. A length-preserving cipher generates
 ciphertext output of the same length as its plaintext input, \eg{ChaCha20}. A
-cipher like Freestyle, on the other hand, is not length-preserving and has the
+stream cipher like Freestyle, on the other hand, is not length-preserving and has the
 overhead of additional cryptographic material that must be stored and indexed
-alongside any generated ciphertext. Hence, we built SwitchBox as a novel common
-cipher interface that allows ciphers with entirely disparate output
+alongside any generated ciphertext. Hence, we build SwitchBox as a novel common
+cipher interface that allows ciphers with disparate output
 characteristics to co-exist on the same drive; typically, such characteristics
 would render these ciphers entirely incompatible, preventing us from trading
 them off with one another.
@@ -101,8 +102,8 @@ levels:
    \texttt{write\_handle} expects a cipher to accept some plaintext buffer and
    commit some encrypted subset of the current nugget to the backing store.
 
-   This is a necessary to handle ciphers with special output that must work
-   below the overwrite protection code (\ie{Freestyle}) and/or a cipher doesn't
+   This is necessary to handle ciphers with special output that must work
+   below the overwrite protection code (\ie{Freestyle}) and/or a cipher does not
    operate like a stream cipher (\ie{AES-XTS}). Hooks at this level should only
    ever operate on a single nugget or API behavior is undefined. Further, due to
    cipher switching, implementations must not read in any nugget/flake data from
@@ -119,7 +120,7 @@ different cipher to interact with the backing store, the active cipher
 configuration is used to encrypt and decrypt all nuggets during I/O.
 
 When the wider system determines a cipher switch should occur for whatever
-reason, it is entirely non-trivial to determine \emph{when} to encrypt a nugget
+reason, there are choices to determine \emph{when} to encrypt a nugget
 with a different cipher and \emph{where} to direct the output of that cipher.
 Depending on the complexity of the use case, it may make the most sense to
 re-cipher a nugget immediately, or eventually, or to re-cipher a series of
@@ -129,7 +130,7 @@ consume more energy than would be saved in future accesses; the egregious
 latency penalty incurred waiting for the entire drive to be re-ciphered would be
 similarly unacceptable.
 
-Hence, a more strategic approach and adaptable is necessary: cipher switching
+Hence, a more adaptable approach is necessary: cipher switching
 \emph{strategies}. These strategies are an essential part of the mechanism by
 which SwitchBox can efficiently transition nuggets between different encrypted
 states without egregious penalties to latency or battery life, thus providing a
@@ -347,7 +348,7 @@ The primary concern facing any FDE solution is that of confidentiality: an
 adversary should not be able to decrypt encrypted plaintext without the right
 key. With this research, we select five cipher implementations and configure
 them under Switchbox: ChaCha~\cite{ChaCha20} (ChaCha8 and ChaCha20), and
-Freestyle~\cite{Freestyle}. Each cipher has been proven formally secure in that
+Freestyle~\cite{Freestyle}. \TODO{It is not obvious how that adds up to five.  Maybe add a parenthetical for Freestyle about how three variants are used.} Each cipher has been proven formally secure in that
 there are no known efficient attacks against them. Any such cipher can be used
 with SwitchBox.
 
@@ -377,8 +378,8 @@ Every cipher mentioned in this paper has been proven formally secure in that
 \emph{there are no known efficient attacks against any of them}~\cite{All,
 Ciphers, Again}. This implies data is kept confidential versus an adversary with
 limited resources, however it is often desirable to secure data at rest in
-special contexts or considering future adversaries with abundant resources at
-their disposal. In this way, a cipher that is more resilient to cryptanalysis or
+special contexts or considering future adversaries with abundant resources. 
+In this way, a cipher that is more resilient to cryptanalysis or
 brute-force than is currently required might be more desirable than a cipher
 with properties that meet current standards, \eg{future-proofing storage}.
 
@@ -386,7 +387,7 @@ To simplify reasoning about trading off such disparate cryptographic properties
 in the FDE context, we must have a way to quantitatively compare a cipher's
 ``desirability'' or usefulness to SwitchBox and to FDE more generally. Hence, we
 do not attempt to define a generally applicable \textit{ranking} of
-\emph{security strength} as that doesn't make sense. Instead, we score ciphers
+\emph{security strength}. Instead, we score ciphers
 (\ie{a so-called ``security score''}) based on three key security properties
 that, when summed, give an estimate of the usefulness of a cipher to SwitchBox
 FDE (see: \tblref{security-quant}).
@@ -425,8 +426,8 @@ to take longer to finish decrypting ciphertext given an incorrect key versus a
 correct key with high probability.
 
 Scores for this feature range from 0 to 1, where 0 represents no resistance, 0.5
-represents standard resistance to brute-force and offline/dictionary attacks,
-and 1 represents enhanced resistance.\\
+is standard resistance to brute-force and offline/dictionary attacks,
+and 1 is enhanced resistance. \TODO{Enhanced how?}\\
 \\
 \textbf{3) Relative round count and key length (RR/RK).} The ciphers we examine
 in this research are all constructed around the notion of \emph{rounds}, where a
