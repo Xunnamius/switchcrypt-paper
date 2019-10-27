@@ -63,6 +63,7 @@ low-overhead switching mechanism allows for more than a single cipher to be used
 on the same device, yielding a space of possible cipher configuration points
 with various performance, battery life, security, writable space, and other
 tradeoffs where prior work merely exists as a single point in this space.
+\TODO{Can you say anything about why this insight is enabled by stream ciphers or StrongBox and would be worse (harder) if you only had old AES systems to work with?  Even if it is something like AES based approaches just assume there is no metadata, etc.}
 
 \subsubsection{Nugget Encryption/Decryption And Re-Keying Are Entirely Independent}
 
@@ -112,7 +113,7 @@ so we chose to initialize our backing store at a configuration point using a
 high-security high-latency cipher.
 
 For the ciphers we examine in this paper, we find a correlation between high
-latency and greater total energy use, meaning our device is using a lot more
+latency and greater total energy use, meaning our device is using more
 energy to facilitate FDE at this configuration point. Though this correlation
 applies to the ciphers we examined, note that this is certainly not true for all
 possible ciphers across all hardware.
@@ -135,7 +136,7 @@ blown past our budget in the middle of downloading the file.
 
 And thanks to the ``battery saver'' mode, our device remains alive long enough
 for us to reach a charger, allowing the system to return to a non-curtailed
-energy budget, our system can return those nuggets to their more secure cipher
+energy budget, our system can return those nuggets to their even more secure cipher
 configuration dynamically, allowing the security of the backing store to recover
 without having to recreate the entire underlying filesystem or encrypted
 container or restart the device.
@@ -150,7 +151,7 @@ are and are not length-preserving. Hence, cipher configurations will not form a
 continuous space and are represented with discrete points, yet the ideal energy,
 latency, or security state may lie between these points.
 
-To address this, we propose a method for quantitative cipher comparison in the
+To address this challenge, we propose a method for quantitative cipher comparison in the
 FDE context, and then present some empirical results showing the wide range of
 security and energy tradeoffs that become available with various
 state-of-the-art ciphers as a result.\\
