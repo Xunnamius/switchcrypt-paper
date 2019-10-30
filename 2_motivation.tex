@@ -1,102 +1,9 @@
 \section{Motivation}\label{sec:motivation}
 
-\subsection{Background}
+\subsection{Example: Filesystem Reacts to ``Battery Saver''}
 
-The standard approach to FDE, using the AES \emph{block cipher}, introduces
-significant overhead during filesystem operation. It is well known that
-authenticated encryption using \emph{stream ciphers} is faster than using
-AES~\cite{StrongBox, AnotherPaper1, AnotherPaper2}. However, when used naively
-in drive encryption, stream ciphers are widely known to be vulnerable to
-``overwrite attacks'' like pad reuse and rollback~\cite{KatzLindell, StrongBox}.
-To enable FDE using stream ciphers, prior work explores several approaches:
-
-\begin{itemize}
-   \item Use a non-deterministic CTR mode with specially designed cipher and
-   filesystem (Freestyle~\cite{Freestyle}).
-   \item Use a length-preserving ``tweakable super-pseudorandom permutation''
-   construction with nonce-accepting stream cipher (Adiantum~\cite{Adiantum}).
-   \item Use a stream cipher in a binary additive (XOR) mode leveraging metadata
-   management and Log-structured File Systems' (LFS) overwrite-averse behavior
-   to prevent overwrites (StrongBox~\cite{StrongBox}).
-\end{itemize}
-
-Though the tradeoffs and ideas explored in this paper can apply to any use of
-stream ciphers in FDE using some binary additive operation, we focus on the
-lattermost prior approach: stream cipher based (inflexible) FDE and metadata
-layers that exploit LFS overwrite-averse behavior to achieve high-performance
-encryption. Prior work in this area uses a single stream cipher exclusively in a
-secure binary additive mode (XOR) to encrypt and decrypt data at rest. Threats
-like pad reuse~\cite{KatzLindell} (\ie{two-time pad}) and rollback attacks---all
-caused by overwrites---are mitigated through some form of \emph{re-keying},
-where groups of contiguous storage blocks are decrypted with the old key and
-encrypted again with a new key when an overwrite is detected. Unfortunately,
-re-keying is an expensive operation. However, overwrite-averse LFS behavior
-ensures costly re-keying operations are triggered as rarely as possible during
-I/O, preserving or even improving system performance over other
-approaches~\cite{StrongBox}.
-
-\begin{figure}[ht]
-   \centering
-   \includegraphics[width=\linewidth]{flknug.png}
-   \caption{Anatomy of a SwitchBox nugget.}\label{fig:flknug}
-\end{figure}
-
-As with prior work, SwitchBox divides the underlying drive into a series
-same-size logical blocks called \emph{nuggets}, illustrated in \figref{flknug}.
-A nugget consists of one or more physical drive blocks/sectors depending on its
-configured size. Each nugget is subdivided into a constant number of units
-called \emph{flakes}.
-
-SwitchBox uses this flake-nugget structure to 1) track, detect, and handle
-overwrites and 2) limit the maximum length of any plaintexts provided to
-ciphers, thus amortizing the overhead incurred during expensive re-keying and
-other operations when overwrites do occur~\cite{StrongBox}.
-
-\subsection{Key Insights}
-
-\subsubsection{A Single Point In A Space Of Possible Cipher Configurations}
-
-What if, rather than restricting the system to a single cipher, we wanted to
-\textit{flexibly} encrypt data at rest with a range of ciphers and cryptographic
-keys at the block device level? Implementing a generic cipher API and
-low-overhead switching mechanism allows for more than a single cipher to be used
-on the same device, yielding a space of possible cipher configuration points
-with various performance, battery life, security, writable space, and other
-tradeoffs where prior work merely exists as a single point in this space.
-\TODO{Can you say anything about why this insight is enabled by stream ciphers or StrongBox and would be worse (harder) if you only had old AES systems to work with?  Even if it is something like AES based approaches just assume there is no metadata, etc.}
-
-\subsubsection{Nugget Encryption/Decryption And Re-Keying Are Entirely Independent}
-
-With SwitchBox, nuggets are considered as distinct logical blocks, each with
-their own metadata and unique cryptographic key used to encrypt and decrypt
-their contents independent of other nuggets. This layout of distinct logical
-blocks naturally lends itself to encrypting different portions of the underlying
-drive with different ciphers; we can select any cipher to encrypt or decrypt any
-nugget at any point, rather than just a single cipher applied globally across
-the backing store, filesystem, device mapper, or secure container. The SwitchBox
-design supports mixed cipher configurations such that each nugget can be
-encrypted, decrypted, and switched to using another cipher independently from
-all other nuggets.
-
-\subsubsection{Navigating The Configuration Space With \emph{Cipher Switching}}
-
-Given a space of possible cipher configurations and a drive layout of
-independent nuggets that lends itself to mixed cipher use, it is clear our
-system does not have to sit at a static configuration point. Hence, we require a
-mechanism to navigate the cipher configuration space, trading off concerns such
-that the system is always at the most optimal configuration possible given the
-runtime environment and user requirements. By abstracting the re-keying process
-out into a \emph{re-ciphering} or \emph{cipher switching} process, whereby the
-key and the cipher used to encrypt/decrypt a nugget can both be switched at
-runtime, we can trade off between different ciphers and their characteristics
-dynamically. Comparatively, prior work can only accomplish a static tradeoff at
-compile time or at system initialization. Our goal is to dynamically trade
-desirable security properties for performance or energy.
-
-\subsection{Motivating Example: Filesystem Reacts to OS ``Battery Saver'' Mode}
-
-\PUNT{\begin{figure}[ht] \textbf{Linearity Between Baseline Cipher Latency and Energy
-Use}\par\medskip
+\PUNT{\begin{figure}[ht] \textbf{Linearity Between Baseline Cipher Latency and
+Energy Use}\par\medskip
    \centering
    {\input{charts/linearity-latency-energy.tex}} \caption{Comparison of cipher
    configuration median sequential and random latency versus median total energy
@@ -126,9 +33,9 @@ high-latency \emph{high-energy} cipher configuration chosen at initialization
 when what we really need is a novel storage layer that reacts dynamically to the
 energy budget of the overarching system.
 
-With the ability to re-cipher individual nuggets, we can achieve this
-functionality by transitioning to a cipher configuration that trades the
-security properties of active nuggets (\ie{to where the downloaded movie's bytes
+With the ability to re-cipher individual storage units, we can achieve this
+functionality by switching to a cipher configuration that trades the security
+properties of active areas of storage (\ie{to where the downloaded movie's bytes
 and filesystem metadata updates are being committed}) so that we stay within our
 curtailed energy budget and successfully retrieve the entire file. Had we
 remained at the high-latency high-energy cipher configuration, we would have
@@ -136,44 +43,43 @@ blown past our budget in the middle of downloading the file.
 
 And thanks to the ``battery saver'' mode, our device remains alive long enough
 for us to reach a charger, allowing the system to return to a non-curtailed
-energy budget, our system can return those nuggets to their even more secure cipher
-configuration dynamically, allowing the security of the backing store to recover
-without having to recreate the entire underlying filesystem or encrypted
-container or restart the device.
+energy budget, our system can return those storage areas to their even more
+secure cipher configuration dynamically, allowing the security of the backing
+store to recover without having to recreate the entire underlying filesystem or
+encrypted container or restart the device.
 
 \subsection{Challenges}
 
-\textbf{Comparing ciphers with disparate security properties.} To ensure that
-these tradeoffs are made optimally, it is desirable to score the security
-properties of various ciphers. This is challenging since different ciphers have
-a wide range of energy/latency vs security properties, including ciphers that
-are and are not length-preserving. Hence, cipher configurations will not form a
-continuous space and are represented with discrete points, yet the ideal energy,
-latency, or security state may lie between these points.
+What if, rather than restricting the system to a single cipher, we could
+flexibly encrypt data at rest with a range of ciphers and cryptographic keys at
+the block level? To achieve this, we must address the following three
+challenges: 1) \emph{quantify} the desirable security properties of different
+ciphers, 2) \emph{decouple} cipher implementations from the encryption of
+independent storage units, and 3) employ \emph{switching strategies} to
+dynamically ``re-cipher'' those units with acceptable overhead.
 
-To address this challenge, we propose a method for quantitative cipher comparison in the
-FDE context, and then present some empirical results showing the wide range of
-security and energy tradeoffs that become available with various
-state-of-the-art ciphers as a result.\\
-\\
-\textbf{Maintaining I/O performance with a mixed-cipher drive layout.} With
-prior work, cipher configurations are typically fixed at the time the system is
-booted or the filesystem or container is created~\cite{CiteAllTheFilesystems};
-if requirements change online, at best the entire system requires a reboot
-leading to down time and user dissatisfaction. At worst, before the reboot, the
-filesystem or encrypted container has to be deleted and recreated. This is
-rarely desirable. Hence, SwitchBox requires 1) a generic \emph{``pluggable''
-cipher API} that allows the system to freely interchange disparate ciphers
-without worrying about their various parameters and other implementation
-concerns and 2) a software mechanism that can \emph{re-cipher} or switch the
-cipher used to encrypt and decrypt individual nuggets while maintaining low
-overhead and acceptable performance. This mechanism allows for a mixed-cipher
-drive layout and provides the ``how'' to switch a nugget's cipher online.\\
-\\
-\textbf{Determining when to switch a nugget's cipher and where to store the
-contents.} To provide the ``when'' and ``where'' to switching a nugget's cipher,
-we implement a series of \textit{cipher switching strategies} that, along with
-the pluggable cipher API and cipher switching mechanism, enable navigation of
-our aforementioned tradeoff space of cipher configurations. These strategies
-allow SwitchBox to settle on points on and \emph{between} the single-cipher
-configurations that limit prior work.
+\textbf{Quantifying ciphers with disparate security properties.} To obtain a
+configuration space that we might reason about, it is necessary to score certain
+security properties of stream ciphers. This is challenging since different
+ciphers have a wide range of disparate security properties, including ciphers
+that are configurable or not length-preserving in their output. To address this
+challenge, we propose a method for quantitative cipher comparison in the FDE
+context and use it to define our configuration space.
+
+\textbf{Decoupling ciphers from encryption for mixed-cipher layouts.}
+To address the challenge of decoupling cipher implementations from the
+encryption process, we require a \emph{generic cipher API} and drive layout that
+allows the system to apply ciphers without worrying about their various
+parameters and other implementation concerns. The generic layout is enabled by
+independent storage units called \emph{nuggets}. Since they are independent, we
+can select any cipher to encrypt or decrypt any nugget at any point, answering
+``how'' to switch ciphers.
+
+\textbf{Strategies to switch nugget ciphers with acceptable overhead.} To answer
+``when'' to switch a nugget's cipher and to ``where'' we commit the output, we
+implement a series of policies we call \textit{cipher switching strategies} that
+leverage the generic cipher API and drive layout to selectively ``re-cipher''
+groups of nuggets, whereby the key and the cipher used to encrypt/decrypt a
+nugget are switched at runtime. These strategies applied to individual nuggets
+allow us to navigate our cipher configuration tradeoff space and settle on
+points unreachable with prior work.

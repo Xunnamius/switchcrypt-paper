@@ -1,19 +1,62 @@
-\section{SwitchBox Design}\label{sec:design}
+\section{SwitchCrypt Design}\label{sec:design}
 
 \begin{figure}[t]
    \centering
    \includegraphics[width=\linewidth]{overview.png}
-   \caption{Overview of the SwitchBox construction.}\label{fig:overview}
+   \caption{Overview of the SwitchCrypt construction.}\label{fig:overview}
 \end{figure}
 
 In this section, we describe our mechanism to navigate the cipher configuration
-space and cipher switching strategies. We also discuss the pluggable stream
+space and cipher switching strategies. We also discuss the generic stream
 cipher API and other design challenges.
 
-SwitchBox is a translation layer ideally implemented in the Flash Translation
+--
+The standard approach to FDE, using the AES \emph{block cipher}, introduces
+significant overhead during filesystem operation. It is well known that
+authenticated encryption using \emph{stream ciphers} is faster than using
+AES~\cite{StrongBox, AnotherPaper1, AnotherPaper2}. However, when used naively
+in drive encryption, stream ciphers are widely known to be vulnerable to
+``overwrite attacks'' like pad reuse and rollback~\cite{KatzLindell, StrongBox}.
+To enable FDE using stream ciphers, prior work explores several approaches:
+
+\begin{itemize}
+   \item Use a non-deterministic CTR mode with specially designed cipher and
+   filesystem (Freestyle~\cite{Freestyle}).
+   \item Use a length-preserving ``tweakable super-pseudorandom permutation''
+   construction with nonce-accepting stream cipher (Adiantum~\cite{Adiantum}).
+   \item Use a stream cipher in a binary additive (XOR) mode leveraging metadata
+   management and Log-structured File Systems' (LFS) overwrite-averse behavior
+   to prevent overwrites (StrongBox~\cite{StrongBox}).
+\end{itemize}
+
+Though the tradeoffs and ideas explored in this paper can apply to any use of
+stream ciphers in FDE using some binary additive operation, we focus on the
+lattermost prior approach: stream cipher based FDE and metadata
+layers that exploit LFS overwrite-averse behavior to achieve high-performance
+encryption.
+
+\PUNT{\begin{figure}[ht]
+   \centering
+   \includegraphics[width=\linewidth]{flknug.png}
+   \caption{Anatomy of a SwitchCrypt nugget.}\label{fig:flknug}
+\end{figure}}
+
+As with prior work, SwitchCrypt divides the underlying drive into a series
+same-size logical blocks called \emph{nuggets}, illustrated in \figref{flknug}.
+A nugget consists of one or more physical drive blocks/sectors depending on its
+configured size. Each nugget is subdivided into a constant number of units
+called \emph{flakes}.
+
+SwitchCrypt uses this flake-nugget structure to 1) track, detect, and handle
+overwrites and 2) limit the maximum length of any plaintexts provided to
+ciphers, thus amortizing the overhead incurred during expensive re-keying and
+other operations when overwrites do occur~\cite{StrongBox}.
+--
+
+SwitchCrypt is a translation layer ideally implemented in the Flash Translation
 Layer (FTL). \TODO{Why is that ideal? And where else could it be implemented? Remember that you want all the ideas to have as much impact as possible.  Don't give lazy reviewers and easy lever against the paper.} 
 Unlike prior work, which focuses on optimizing performance despite
-re-keying due to overwrites, SwitchBox maintains overwrite protections while
+re-keying due to overwrites, SwitchCrypt maintains overwrite protections while
 abstracting the idea of re-keying out into re-ciphering or \emph{cipher
 switching}, where a nugget's contents are decrypted using the old key and
 inactive cipher configuration and encrypted using a new key and the active
@@ -24,10 +67,10 @@ their characteristics online.
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{backstore.png}
- \caption{Layout of SwitchBox's backing storage.}\label{fig:backstore2}
+ \caption{Layout of SwitchCrypt's backing storage.}\label{fig:backstore2}
 \end{figure}
 
-The backing store is the storage medium SwitchBox operates on. The layout of the
+The backing store is the storage medium SwitchCrypt operates on. The layout of the
 backing store is illustrated in \figref{backstore2}. In the \textit{body}
 section of the backing store layout, end-user data is partitioned into a series
 of same-size \emph{logical blocks} marked \textit{NUG} for \emph{nugget}. A
@@ -36,7 +79,7 @@ indicating which cipher was used to encrypt the nugget. We borrow this
 terminology from prior work to easily differentiate our logical blocks (nuggets)
 from physical drive and other storage blocks.
 
-\figref{overview} provides an overview of the SwitchBox design. SwitchBox
+\figref{overview} provides an overview of the SwitchCrypt design. SwitchCrypt
 manages five metadata components: an in-memory \emph{Merkle Tree}; two
 drive-backed byte arrays, \ie{the \emph{Keycount Store} and the
 \emph{Transaction Journal}}; a globally persistent cryptographically secure
@@ -47,29 +90,29 @@ These five components are tightly integrated into the cryptographic driver,
 which handles data encryption, decryption, overwrite detection, integrity
 protection, IPC with the wider system to determine the active cipher
 configuration, and the execution of cipher switching strategies with stream
-cipher implementations provided by a pluggable stream cipher API. The
+cipher implementations provided by a generic stream cipher API. The
 cryptographic driver interacts with 1) the overlying LFS through traditional I/O
 passed through the Linux Virtual Filesystem Switch (VFS) and 2) the underlying
 drive through the device controller block I/O layer or as part of the FTL,
 depending on implementation.
 
-\subsection{Pluggable Stream Cipher API}
+\subsection{Generic Stream Cipher API}
 
 We develop an API to allow any stream cipher or any cipher that can operate as a
-stream cipher to be used with SwitchBox without modification or special
+stream cipher to be used with SwitchCrypt without modification or special
 considerations. In this way, different stream ciphers might appear to all be
 interchangeable, but they are not. For instance: not all stream ciphers, let
 alone all ciphers, are length-preserving. A length-preserving cipher generates
 ciphertext output of the same length as its plaintext input, \eg{ChaCha20}. A
 stream cipher like Freestyle, on the other hand, is not length-preserving and has the
 overhead of additional cryptographic material that must be stored and indexed
-alongside any generated ciphertext. Hence, we build SwitchBox as a novel common
+alongside any generated ciphertext. Hence, we build SwitchCrypt as a novel common
 cipher interface that allows ciphers with disparate output
 characteristics to co-exist on the same drive; typically, such characteristics
 would render these ciphers entirely incompatible, preventing us from trading
 them off with one another.
 
-SwitchBox exposes API hooks for wrapper function cipher implementations at three
+SwitchCrypt exposes API hooks for wrapper function cipher implementations at three
 levels:
 
 \begin{enumerate}
@@ -79,8 +122,8 @@ levels:
    to using the read and write handles described below. There is no distinction
    made between encryption and decryption as they are considered the same
    operation in this context. Further, this interface does not allow any access
-   to the SwitchBox internals and is expected to execute independently of
-   SwitchBox.
+   to the SwitchCrypt internals and is expected to execute independently of
+   SwitchCrypt.
 
    Unlike \texttt{crypt\_data\_low}, \texttt{crypt\_data} performs the final
    XORing automatically. It provides a slightly higher level of interaction with
@@ -94,7 +137,7 @@ levels:
    \item \textbf{\texttt{read\_handle}} and \textbf{\texttt{write\_handle}}\\
    Unlike the other two levels, both hooks must be provided by a cipher or
    functionality is undefined. At this level, control over encryption is
-   coarse-grain, where cipher wrappers have access to all relevant SwitchBox
+   coarse-grain, where cipher wrappers have access to all relevant SwitchCrypt
    internals and must implement cipher switching manually. \texttt{read\_handle}
    expects a cipher to accept a buffer and read into it a decrypted subset of a
    nugget's ciphertext.
@@ -115,7 +158,7 @@ levels:
 \subsection{Cipher Switching Strategies}
 
 At any moment, the currently active cipher configuration is used to encrypt
-nugget contents. Until the wider system indicates that SwitchBox should use a
+nugget contents. Until the wider system indicates that SwitchCrypt should use a
 different cipher to interact with the backing store, the active cipher
 configuration is used to encrypt and decrypt all nuggets during I/O.
 
@@ -132,7 +175,7 @@ similarly unacceptable.
 
 Hence, a more adaptable approach is necessary: cipher switching
 \emph{strategies}. These strategies are an essential part of the mechanism by
-which SwitchBox can efficiently transition nuggets between different encrypted
+which SwitchCrypt can efficiently transition nuggets between different encrypted
 states without egregious penalties to latency or battery life, thus providing a
 realistic mechanism to navigate our cipher configuration tradeoff space.
 
@@ -148,8 +191,8 @@ disadvantages of these strategies and each strategy and is explained more below.
 
 \subsubsection{Forward Switching Strategy}
 
-SwitchBox allows each individual nugget to exist encrypted with any cipher the
-pluggable cipher API makes available regardless of the currently active cipher
+SwitchCrypt allows each individual nugget to exist encrypted with any cipher the
+generic cipher API makes available regardless of the currently active cipher
 configuration. When a nugget is encountered during I/O that is encrypted using a
 cipher other than the active cipher configuration, the Forward strategy dictates
 that this nugget be re-ciphered immediately. If a particular nugget encrypted
@@ -165,17 +208,17 @@ which the nugget is accessed normally during I/O until the active cipher
 configuration is switched again.
 
 \PUNT{There are several forms the Forward strategy might take. The default and most
-intuitive is \emph{0-forward}, in which SwitchBox immediately transitions
+intuitive is \emph{0-forward}, in which SwitchCrypt immediately transitions
 individual nuggets encountered during I/O to the active cipher configuration if
 they are not using it. Over time, if various I/O operations end up touching
 every nugget in the backing store, the encrypted contents of every nugget will
 become decryptable with the currently active cipher configuration.
 
-The Forward strategy might also take the form of \emph{N-forward}, where SwitchBox
+The Forward strategy might also take the form of \emph{N-forward}, where SwitchCrypt
 attempts to take advantage of spatial sequential locality to transition whole
 sets of nuggets into the active cipher configuration. We can trivially expand
 the forward strategy to encompass the entire backing store by selecting $N$
-equal to the total number of nuggets managed by SwitchBox. This would have the
+equal to the total number of nuggets managed by SwitchCrypt. This would have the
 overhead of re-ciphering large swaths of the backing store upon every I/O
 operation where a nugget encrypted with the non-active cipher configuration is
 encountered. Of course, this has the same dire implications for performance as
@@ -184,10 +227,10 @@ cipher.}
 
 \subsubsection{Selective Switching Strategy}
 
-When SwitchBox is initialized with the Selective strategy, the backing store is
+When SwitchCrypt is initialized with the Selective strategy, the backing store is
 partitioned into $C$ regions where $C$ represents the number of ciphers in use;
 each region's nuggets are encrypted by each of the $C$ ciphers respectively. For
-instance, were SwitchBox initialized using two ciphers ($C = 2$), the backing
+instance, were SwitchCrypt initialized using two ciphers ($C = 2$), the backing
 store would be partitioned in half; all nuggets in the first partition would be
 encrypted with the first cipher while all nuggets in the second partition would
 be encrypted with the second.
@@ -202,7 +245,7 @@ encrypted with different ciphers.
 
 \subsubsection{Mirrored Switching Strategy}
 
-Similar to the Selective strategy, when SwitchBox is initialized with the
+Similar to the Selective strategy, when SwitchCrypt is initialized with the
 Mirrored strategy, the backing store is partitioned into $C$ regions where $C$
 represents the number of ciphers in use; each region's nuggets are encrypted by
 each of the $C$ ciphers respectively. The nuggets in each partition are
@@ -225,7 +268,7 @@ these strategies. Where a naive implementation is trivial (\eg{execute the
 chosen strategy on every I/O operation}), this navigation must occur with
 acceptable overhead by preserving performance wherever possible. The
 cryptographic driver provides such a mechanism, tying together cipher switching
-strategies and the pluggable stream cipher API.
+strategies and the generic stream cipher API.
 
 In the cases of Mirrored and Selective switching, we use offset to determine in
 which area of the backing store receives I/O.
@@ -237,7 +280,7 @@ naive implementation can have disastrous effects on performance depending on the
 workload.
 
 First, a nugget is considered \emph{pristine} if it has not had any data written
-into it yet. SwitchBox determines if a nugget is pristine by checking the state
+into it yet. SwitchCrypt determines if a nugget is pristine by checking the state
 of the transaction journal for that nugget. A pristine nugget will have a clean
 transaction journal.
 
@@ -250,16 +293,16 @@ every write operation will trigger a re-keying, which carries significant
 overhead.
 
 The solution is to divide forward switching into \emph{soft re-ciphering} and
-\emph{hard re-ciphering}. Fortunately, the SwitchBox design lends itself nicely
+\emph{hard re-ciphering}. Fortunately, the SwitchCrypt design lends itself nicely
 to such a distinction for free, as per-nugget metadata is managed separately
 from a nugget's actual data.
 
 During soft re-ciphering, only the nugget's metadata is changed to indicate that
 the nugget can be encrypted and decrypted with the newly active cipher
 configuration but \emph{without actually re-ciphering the nugget data itself}.
-This keeps the nugget in its pristine condition, preserving SwitchBox's ability
+This keeps the nugget in its pristine condition, preserving SwitchCrypt's ability
 to write data into it without triggering a costly re-keying operation every
-time, preserving our performance advantage. At the same time, SwitchBox can now
+time, preserving our performance advantage. At the same time, SwitchCrypt can now
 use the newly active cipher configuration to interact with the nugget as
 expected. On the other hand, during hard re-cipher, the nugget's metadata is
 changed to match the active cipher configuration \emph{and} the nugget data is
@@ -347,10 +390,10 @@ triggers costly re-ciphering, which can compound depending on workload.
 The primary concern facing any FDE solution is that of confidentiality: an
 adversary should not be able to decrypt encrypted plaintext without the right
 key. With this research, we select five cipher implementations and configure
-them under Switchbox: ChaCha~\cite{ChaCha20} (ChaCha8 and ChaCha20), and
+them under SwitchCrypt: ChaCha~\cite{ChaCha20} (ChaCha8 and ChaCha20), and
 Freestyle~\cite{Freestyle}. \TODO{It is not obvious how that adds up to five.  Maybe add a parenthetical for Freestyle about how three variants are used.} Each cipher has been proven formally secure in that
 there are no known efficient attacks against them. Any such cipher can be used
-with SwitchBox.
+with SwitchCrypt.
 
 Encryption is achieved via a binary additive approach: cipher output (keystream)
 is combined with plaintext nugget contents using XOR, with metadata to track
@@ -367,12 +410,18 @@ non-active cipher configuration. Is this a problem? For the Forward strategy,
 this implies data may at any time be encrypted using the least desirable cipher.
 For the Mirrored and Selective strategies, the backing store is partitioned into
 regions where nuggets are guaranteed to be encrypted with each cipher. However,
-in terms of confidentiality, all the ciphers we configured under SwitchBox have
+in terms of confidentiality, all the ciphers we configured under SwitchCrypt have
 been proven formally secure. Hence, nuggets encrypted with different secure
 ciphers can co-exist on the backing store securely, depending on the use case
 (see: \secref{usecases}).
 
 \subsection{A Relative Scoring of Cipher Security Properties}
+
+\TODO{We additionally stress that \textit{every} cipher explored in this work is
+considered cryptanalytically secure. The security score represents the
+desirability of additional security properties these ciphers offer versus each
+other.} \TODO{One more sentence to give more intuition of what those properties
+might be.}
 
 Every cipher mentioned in this paper has been proven formally secure in that
 \emph{there are no known efficient attacks against any of them}~\cite{All,
@@ -385,11 +434,11 @@ with properties that meet current standards, \eg{future-proofing storage}.
 
 To simplify reasoning about trading off such disparate cryptographic properties
 in the FDE context, we must have a way to quantitatively compare a cipher's
-``desirability'' or usefulness to SwitchBox and to FDE more generally. Hence, we
+``desirability'' or usefulness to SwitchCrypt and to FDE more generally. Hence, we
 do not attempt to define a generally applicable \textit{ranking} of
 \emph{security strength}. Instead, we score ciphers
 (\ie{a so-called ``security score''}) based on three key security properties
-that, when summed, give an estimate of the usefulness of a cipher to SwitchBox
+that, when summed, give an estimate of the usefulness of a cipher to SwitchCrypt
 FDE (see: \tblref{security-quant}).
 
 Our scoring scheme is a combination of well understood schemes: scoring ciphers
@@ -457,6 +506,6 @@ ChaCha20. Variants are distributed evenly from 0-1. For instance, ChaCha8 scores
   Freestyle (S)   & 1           & 1            & 1              & 3
   \end{tabular}
   \caption{These ``scores'' represent a cipher's desirability or usefulness to
-  SwitchBox and to FDE more generally.}
+  SwitchCrypt and to FDE more generally.}
   \label{tbl:security-quant}
 \end{table}

@@ -1,104 +1,87 @@
 \section{Introduction}\label{sec:introduction}
 
 There are several important concerns modern filesystems must balance. Paramount
-among them are security of data at rest and performance, \ie{I/O latency or
-throughput}. Increasingly, energy is an additional concern in both mobile
-devices \cite{android-M-mobile-motivation} and in enterprise storage
-\cite{enterprise-motivation}. Of course, all of these concerns exist in
-contention with one another: stronger security properties can harm latency and
-require increased energy use, while reducing energy consumption will generally
-require increasing latency or accepting weaker security properties.
+among them are data security and performance. Increasingly important is energy
+consumption in both mobile devices \cite{android-M-mobile-motivation} and in
+enterprise storage \cite{enterprise-motivation}. However, all of these concerns
+exist in contention with one another: stronger security properties can harm
+latency and require increased energy use, while reducing energy consumption will
+generally require increasing latency or accepting weaker security properties.
 
-The state of the art for securing data at rest is Full-Drive Encryption
-(FDE).\footnote{The common term is full-\emph{disk} encryption, but this work
-targets SSDs, so we use \emph{drive}.} Traditional FDE employs a single
-\emph{cryptographic cipher} to encrypt, decrypt, and authenticate backing store
-contents on the fly. Understandably, this process impacts system performance and
-energy use considerably. Yet, end users expect their device to be secure
-\emph{and} performant \emph{and} energy efficient. The obvious solution is to
-balance these concerns with respect to the most general use case and ship the
-product, but this common-case approach often fails to deliver an optimal outcome. An example is
-Google's Android mobile operating system. Android supported FDE with the release
-of Android 3.0 Honeycomb, yet it was not enabled by default until Android 6.0
-Marshmallow, four years after the release of Android 3.0 and two years after the
-release of Android 5.0 Lollipop, where Google first attempted enabling FDE by
-default~\cite{android-M-mobile-motivation}. \TODO{I would end the previous sentence after the "four years after the release of..." and in place of the rest of that sentence add a new, one-sentence explanation of why they didn't enable it by default. Especially useful if you could pull a quote relating to the performance impact.}
+The state of the art for securing data is Full-Drive Encryption (FDE).
+Traditional FDE employs a single \emph{cryptographic cipher} to encrypt,
+decrypt, and authenticate backing store contents on the fly. Understandably,
+this process impacts system performance and energy use considerably. Yet, end
+users expect their device to be secure \emph{and} performant \emph{and} energy
+efficient. The obvious solution is to balance these concerns with respect to the
+most general use case and ship the product, but this common-case approach often
+fails to deliver an optimal outcome.
+
+An example is Google's Android OS. Android supported FDE with the release of
+Android 3.0, yet it was not enabled by default until Android
+6.0~\cite{android-M-mobile-motivation}. Two years prior, Google attempted to
+roll out FDE by default on Android 5.0 but had to backtrack. In a statement to
+Engadget, Google blamed ``"performance issues on some partner devices" ... for
+the backtracking''~\cite{google-engadget}. AnandTech reported a ``62.9\% drop in
+random read performance, a 50.5\% drop in random write performance, and a
+staggering 80.7\% drop in sequential read
+performance''~\cite{android-M-mobile-motivation-2}.
 
 Traditionally, FDE's impact on drive performance and energy efficiency depends
 on choice of filesystem/mapper and the choice of cipher, as different ciphers
 express different performance and efficiency characteristics while offering
-contrasting security properties. In this way, cipher choice is perhaps the most
-important.
+contrasting security properties. In this way, cipher choice can be viewed as a
+key \emph{configuration} parameter for FDE systems. The benefits of choosing
+cipher include: 1) increased filesystem performance (\ie{overall reduced FDE
+overhead}), 2) reduced energy use, and 3) the ability to encrypt devices that
+would otherwise be too slow or energy-inefficient to support FDE.
 
-The de facto standard choice for FDE is the relatively slow AES~\cite{AES}
-\emph{block cipher} in XTS mode (AES-XTS)~\cite{AES-XTS}. Prior
-research~\cite{StrongBox} introduced the motivation and method for using
-\emph{stream ciphers} like the high performance ChaCha20~\cite{ChaCha20} cipher
-for FDE in lieu of AES-XTS. More recent work achieves something similar in practice, such as
-Google's HBSH~\cite{HBSH} (hash, block cipher, stream cipher, hash) and
-Adiantum~\cite{Adiantum}, among others.
+However, the de facto standard choice for FDE is the slow AES \emph{block
+cipher} (AES-XTS)~\cite{AES, AES-XTS}. Prior research~\cite{StrongBox}
+introduced the motivation and method for using \emph{stream ciphers} like the
+high performance ChaCha20~\cite{ChaCha20} cipher for FDE in lieu of AES-XTS.
+More recent work achieves something similar in practice, such as Google's HBSH
+(hash, block cipher, stream cipher, hash) and Adiantum, among others~\cite{HBSH,
+Adiantum}.
 
-The benefits of choosing a more performant cipher include: 1) increased
-filesystem performance (\ie{overall reduced FDE overhead}), 2) reduced energy
-use, and 3) the ability to encrypt devices that would otherwise be too slow or
-energy-inefficient to support FDE. This was the case with many mid- and low-tier
-Android devices at the time FDE was considered as a default for Android 5.0
-Lollipop, with a ``staggering'' 80.7\% drop in sequential read performance, a
-62.9\% drop in random read performance, and a 50.5\% drop in random write
-performance~\cite{android-M-mobile-motivation-2}. \TODO{Hmmm.  This is great and the kind of thing I was looking for earlier.  Maybe move it up.  Also, I am hoping that the staggering is a real quote and not just scare quotes.  If it is real, maybe you could pull more context?}
-
-Many ciphers exist with a variety of different performance characteristics and
-opposing security properties. Some of these include: ChaCha variants with
+But many ciphers exist with a variety of different performance characteristics
+and opposing security properties. Some of these include: ChaCha variants with
 different round counts (e.g., ChaCha8 \cite{ChaCha8} and ChaCha20
-\cite{ChaCha20}) or exotic security properties (e.g.,
+\cite{ChaCha20}) or stronger security properties (e.g.,
 Freestyle~\cite{Freestyle}) and others---SalsaX~\cite{SalsaX}, AES in counter
 mode (AES-CTR)~\cite{AES-CTR}, Rabbit~\cite{Rabbit}, Sosemanuk~\cite{Sosemanuk},
-et cetera. \TODO{I like "exotic security properties" as a turn of phrase, but you will need to add another sentence that clarifies what those properties are.}
+etc. This implies the cipher configuration providing the fastest I/O throughput
+is almost always different than the configuration providing the most desirable
+security properties, and both may differ from the configuration that uses the
+least amount of energy or allows the most writable drive space.
 
-In this way, the choice of (stream) cipher can be viewed as a key
-\emph{configuration} parameter for FDE systems; the configuration
-providing the fastest I/O throughput is almost always different than the
-configuration providing the most desirable security properties, and both may
-differ from the configuration that uses the least amount of energy or allows the
-most writable drive space. Further, while the cipher choice can be configured
-statically at compile- or boot-time given some generic case, in traditional FDE,
-these configurations cannot adapt to changes that might arise while the system
-is running. Examples include changes in resource availability, runtime
-environment, desired security properties, and adhering to changing OS energy
-budgets (\eg{``battery saver'' functionality in mobile devices}).
+Further, while the cipher choice can be configured statically at compile- or
+boot-time with respect to some common-case, in traditional FDE, these
+configurations cannot adapt to changes that might arise while the system is
+running. Examples include changes in resource availability, runtime environment,
+desired security properties, and adhering to changing OS energy budgets.
 
-Hence, any generic configuration will inevitably sacrifice one concern for
-another, even when it is not optimal to the end user. But what if our system did
-not have to sit at some generic static configuration point, especially when
-another configuration becomes more desirable later on?
+Hence, any common-case configuration will inevitably sacrifice one concern for
+another, even when it is not optimal to the end user. \emph{But what if our
+system did not have to sit at some generic configuration point, especially when
+another configuration becomes more desirable later on?}
 
 \subsection{Our Contributions}
 
-We introduce a simple scheme to quantify the usefulness---or relative ``strength''---of 
-ciphers based on key security properties relevant to FDE. We call these
-\emph{security scores}. We additionally stress that \textit{every} cipher
-explored in this work is considered cryptanalytically secure. The security score
-represents the desirability of additional security properties these ciphers
-offer versus each other. \TODO{One more sentence to give more intuition of what those properties might be.}
+First, we introduce a simple scheme to \emph{quantify} the usefulness or
+relative ``strength'' of ciphers based on key security properties relevant to
+FDE. We call these ``security scores''. Using these security scores, we then
+define a novel tradeoff space of cipher configurations over competing concerns:
+total energy use, desirable security properties in the FDE context, read and
+write performance, total writable space on the drive, and how quickly the drive
+can converge to a single configuration. Finally, we present SwitchCrypt, a novel
+design substantively expanding prior FDE work by \emph{decoupling} cipher
+implementations from encryption and employing various \emph{switching
+strategies} to ``re-cipher'' those units dynamically with acceptable overhead.
 
-Using this scoring scheme, we define a novel tradeoff space of cipher
-configurations over competing concerns: total energy use, desirable security
-properties in the FDE context, read and write performance, total writable space
-on the drive, and how quickly the drive can converge to a single configuration.
-
-Finally, we present SwitchBox, a novel design substantively expanding on prior
-FDE work by 1) decoupling the cipher implementation from the encryption
-mechanism, 2) allowing ciphertext from different ciphers to coexist side-by-side
-on the same drive as independent storage units \textit{below the
-filesystem-level}, and 3) employing various \emph{switching strategies} to
-``re-cipher'' those units dynamically at run-time. SwitchBox accomplishes these
-without significant overhead, allowing us to navigate our tradeoff space of
-cipher configurations online, ensuring the system is near the most optimal
-configuration given the constraints at the moment.
-
-With the remainder of this paper, we explore the motivations underpinning our
-solution, SwitchBox's design, and the specifics of our experimental
-implementation. This is followed by an evaluation of SwitchBox's performance
-under various workloads and a series of case studies where latency, energy, and
-desired security properties change dynamically, demonstrating several conditions
-under which SwitchBox is more optimal than prior work.
+\TODO{Overhead summary of empirical paragraph here that expounds a bit on the
+final sentence of the abstract. We support up to X security configurations, etc.
+And then present some empirical results showing the wide range of security and
+energy tradeoffs that become available with various state-of-the-art ciphers as
+a result.} We find that SwitchCrypt achieves at least \TODO{XXX} improvement
+compared to static approaches that must pick only a single operating point.

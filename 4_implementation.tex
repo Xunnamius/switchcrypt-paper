@@ -1,10 +1,10 @@
 \section{Implementation}\label{sec:implementation}
 
-Our SwitchBox implementation consists of 9,491 lines of C code; our test suite
+Our SwitchCrypt implementation consists of 9,491 lines of C code; our test suite
 consists of 6,077 lines of C code. All together, our solution is comprised of
 15,568 lines of C code. \TODO{Can you put it on an anonymous github site?  Or just mention that it will be released after the anonymous review period?}
 
-SwitchBox uses OpenSSL version 1.1.0h and LibSodium version 1.0.12 for its
+SwitchCrypt uses OpenSSL version 1.1.0h and LibSodium version 1.0.12 for its
 AES-XTS and AES-CTR implementations. Open source ARM NEON optimized
 implementations of ChaCha are provided by Floodyberry~\cite{Floodyberry}. The
 Freestyle cipher reference implementation is from the original Freestyle
@@ -14,33 +14,33 @@ overhead (\ie{transaction journal updates, re-keying on overwrites}) as ciphers
 without these desirable security properties. The eSTREAM Profile 1 cipher
 implementations are from the open source libestream cryptographic
 library~\cite{libestream} by Lucas Clemente Vella. The Merkle Tree
-implementation is from the Secure Block Device~\cite{SBD}. SwitchBox
+implementation is from the Secure Block Device~\cite{SBD}. SwitchCrypt
 implementation is publicly available open-source\footnote{\SystemURI}.
 
-We implement SwitchBox on top of the BUSE~\cite{BUSE} virtual block device,
+We implement SwitchCrypt on top of the BUSE~\cite{BUSE} virtual block device,
 using it as our mock device controller. BUSE is a thin (200 LoC) wrapper around
 the standard Linux Network Block Device (NBD). BUSE allows an operating system
 to transact block I/O requests to and from virtual block devices exposed via
 domain socket.
 
 For experimental purposes, our implementation makes the choice of ciphers
-binary: either the system wants SwitchBox to access the backing store using the
+binary: either the system wants SwitchCrypt to access the backing store using the
 primary cipher or the secondary cipher. However, there is no technical
 limitation preventing various different nuggets encrypted with three, four, or
 more unique ciphers from co-existing on the backing store.
 
 Cipher switching is a cross-cutting concern---for instance, the desire to switch
 ciphers could come from an unrelated process in user space. For both spatial and
-temporal cipher switching, when SwitchBox should be using the primary cipher or
+temporal cipher switching, when SwitchCrypt should be using the primary cipher or
 the secondary cipher to interact with the backing store, this intent is
 communicated via POSIX message queue in our implementation. It is not a
-requirement of SwitchBox that a POSIX message queue be used over any other
-method of IPC so long as SwitchBox can be notified asynchronously when the wider
+requirement of SwitchCrypt that a POSIX message queue be used over any other
+method of IPC so long as SwitchCrypt can be notified asynchronously when the wider
 system desires one cipher be active over the other.
 
 A production-ready implementation would be greatly simplified by adding an
 ``intent'' parameter to the POSIX \textit{read()} and \textit{write()} system
-calls, allowing SwitchBox to more exactly map individual I/O operations to
+calls, allowing SwitchCrypt to more exactly map individual I/O operations to
 specific areas of the backing store when spatially switching. \TODO{Did you implement this for one case study?  If so, you should say so.  Also, don't you just need the write to change?  Read should read whatever, right?} \PUNT{This is
 especially important when considering the selective switching strategy; a
 production-ready implementation supporting selective switching would need to
@@ -50,7 +50,7 @@ read from and written to nuggets in specific partitions).}
 
 \subsection{Backing Store Initialization}
 
-To operate securely, SwitchBox must be seeded with random data initially rather
+To operate securely, SwitchCrypt must be seeded with random data initially rather
 than have the backing store consist of all zeroes. This is a one-time cost paid
 during initialization and has no tangible effect on performance.
 

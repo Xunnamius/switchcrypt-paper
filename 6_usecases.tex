@@ -1,4 +1,4 @@
-\section{SwitchBox Case Studies}\label{sec:usecases}
+\section{SwitchCrypt Case Studies}\label{sec:usecases}
 
 \TODO{You need some sort of overview paragraph that tells people what is to come in this section and why they should care about it.
 For example, you want to say something about these case studies cover a wide range of situations including... They also demonstrate uses of both temporal and spatial switching... Basically, make the argument that these case studies provide good coverage of all the things that you discussed earlier in the paper.}
@@ -14,7 +14,7 @@ complete our task while staying within our energy budget.
 We begin sequentially writing 10 40MB files using the Freestyle Balanced cipher
 configuration. After 5 seconds, the device enters ``battery saver'' mode. We
 simulate this event by 1) underclocking the cores to their lowest
-frequencies and 2) using \texttt{taskset} to transition the SwitchBox processes
+frequencies and 2) using \texttt{taskset} to transition the SwitchCrypt processes
 to the energy-efficient LITTLE cores. Afterwards, we complete the remaining
 workload using the ChaCha8 cipher. We repeat this experiment three times.
 
@@ -42,7 +42,7 @@ Balanced except when the system enters a low power state, after which the
 storage layer switches to favoring optimal energy use using ChaCha20 via the
 Forward switching strategy. Our results show that, while the system uses
 slightly more power in the short term, we stay within our energy budget and
-finish before the devices dies. \TODO{Add that when we get back to a charger, SwitchBox can easily recrypt the parts in ChaCha8 back to Freestyle Balanced?}
+finish before the devices dies. \TODO{Add that when we get back to a charger, SwitchCrypt can easily recrypt the parts in ChaCha8 back to Freestyle Balanced?}
 
 On average, using Forward cipher switching results in a \TODO{XXX} total energy
 use reduction.
@@ -64,9 +64,9 @@ more sensitive than the others. For example, perhaps banking transaction
 information is littered throughout a document; perhaps passwords and other
 sensitive information exists within several much larger files. \TODO{The "file or files" language detracts from this section a bit.  It would be stronger if you just stuck with one.  Can you actually support different regions within a file?  If so, that is much stronger in my mind.  Even saying you simulate it would be better to me.}
 
-We begin by writing 10 5MB and 4KB files to unique SwitchBox instances using
+We begin by writing 10 5MB and 4KB files to unique SwitchCrypt instances using
 ChaCha8 and again on instances using Freestyle Balanced. We repeat this on a
-SwitchBox instance using Selective switching with a 3:1 ratio of ChaCha8 nugget
+SwitchCrypt instance using Selective switching with a 3:1 ratio of ChaCha8 nugget
 I/O operations versus Freestyle Balanced operations. We repeat this experiment
 three times.
 
@@ -81,12 +81,12 @@ three times.
 
 In \figref{usecase-vsr-bar}, we see the sequential read and write performance of
 4K and 5M workloads when nuggets are encrypted exclusively with ChaCha8 or
-Freestyle Balanced. Between them, we see SwitchBox Selective switching 3:1 ratio
+Freestyle Balanced. Between them, we see SwitchCrypt Selective switching 3:1 ratio
 I/O results.
 
 Our goal is to use VSRs to keep our sensitive data secure while keeping the
 performance and energy use benefits of using a fast cipher for the majority of
-I/O operations. On average, using SwitchBox Selective switching versus prior
+I/O operations. On average, using SwitchCrypt Selective switching versus prior
 work results in a \TODO{XXX} reduction in latency.
 
 \subsection{Responding to End-of-Life Slowdown in Solid State Drives}
@@ -100,12 +100,12 @@ security requirements, which is not possible using prior work.
 Due to garbage collection and wear-leveling requirements of SSDs, as free space
 becomes constrained, I/O performance drops precipitously~\cite{SSDEOL1, SSDEOL2,
 SSDEOL3}. With prior work, our strict latency ceiling is violated. However, if
-SwitchBox is made aware when the backing store is in such a state, we can offset
+SwitchCrypt is made aware when the backing store is in such a state, we can offset
 some of the performance loss by switching the ciphers of high traffic nuggets to
 the fastest cipher available using Forward switching.
 
-We begin by writing 10 40MB files to SwitchBox per each cipher as a baseline. We
-then introduce a delay into SwitchBox I/O of $20ms$ and repeat the experiment
+We begin by writing 10 40MB files to SwitchCrypt per each cipher as a baseline. We
+then introduce a delay into SwitchCrypt I/O of $20ms$ and repeat the experiment
 three times.
 
 \begin{figure}[ht] \textbf{SSD EoL Use Case: Latency-Security Tradeoff vs
@@ -167,7 +167,7 @@ Our goal is to ``lock down'' the backing store, slowing down any attacker as
 much as possible such that, even if they copy and permanently store her data
 off-site for later attempts at decryption with more advanced compute resources
 and new technologies, our researcher's data is some degree more likely to remain
-irrecoverable. We show that, given a device that support SSD ISE, SwitchBox, and
+irrecoverable. We show that, given a device that support SSD ISE, SwitchCrypt, and
 the Mirrored strategy, we can quickly and practically converge the backing store
 to this locked down state. With prior work, data is either too weakly encrypted
 or the device becomes too slow for daily use (latency ceiling). In exchange, we
