@@ -1,5 +1,37 @@
 \section{Related Work}\label{sec:related}
 
+The standard approach to FDE, using AES-XTS, introduces significant overhead. It
+is well known that encryption using \emph{stream ciphers} is faster than using
+AES~\cite{StrongBox, AnotherPaper1, AnotherPaper2}. However, when used naively
+in drive encryption, stream ciphers are widely known to be vulnerable to
+``overwrite attacks'' like pad reuse and rollback~\cite{KatzLindell, StrongBox}.
+To enable FDE using stream ciphers, prior work explores several approaches:
+
+\begin{itemize}
+   \item Use a non-deterministic CTR mode with specially designed cipher and
+   filesystem (Freestyle~\cite{Freestyle}).
+   \item Use a length-preserving ``tweakable super-pseudorandom permutation''
+   construction with nonce-accepting stream cipher (Adiantum~\cite{Adiantum}).
+   \item Use a stream cipher in a binary additive (XOR) mode leveraging metadata
+   management and Log-structured File Systems' (LFS) overwrite-averse behavior
+   to prevent overwrites (StrongBox~\cite{StrongBox}).
+\end{itemize}
+
+Though the tradeoffs and ideas explored in this paper can apply to any use of
+stream ciphers in FDE using some binary additive operation, we focus on the
+lattermost prior approach with SwitchCrypt: a stream cipher based FDE and
+metadata layer that exploits LFS overwrite-averse behavior to achieve
+high-performance encryption.
+
+Unlike prior work, which focuses on optimizing performance despite re-encrypting
+due to overwrites, SwitchCrypt maintains overwrite protections while abstracting
+the idea of re-encrypting nuggets out into re-ciphering or \emph{cipher
+switching}, where a nugget's contents are decrypted using the old key and
+inactive cipher configuration and encrypted using a new key and the active
+cipher configuration before completing the I/O operation; instead of myopically
+pursuing a performance win, this allows users (or the operating system) to trade
+off different ciphers and their characteristics dynamically.
+
 \TODO{A paragraph on FDE prior work; include StrongBox, Google Adiantum using a
 reduced round version of ChaCha for real life crypto, dm-crypt?, Secure Block
 Device; include other ciphers in the same vein as Freestyle}

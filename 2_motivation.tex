@@ -29,9 +29,7 @@ Further suppose that, after some amount of time downloading this movie, our
 device determines its remaining battery life is too low and enters a ``battery
 saver'' mode with a curtailed energy budget and reduced processor frequency.
 With a traditional filesystem or encrypted container, we are stuck with the
-high-latency \emph{high-energy} cipher configuration chosen at initialization
-when what we really need is a novel storage layer that reacts dynamically to the
-energy budget of the overarching system.
+high-latency \emph{high-energy} cipher configuration chosen at initialization.
 
 With the ability to re-cipher individual storage units, we can achieve this
 functionality by switching to a cipher configuration that trades the security
@@ -48,15 +46,15 @@ secure cipher configuration dynamically, allowing the security of the backing
 store to recover without having to recreate the entire underlying filesystem or
 encrypted container or restart the device.
 
-\subsection{Challenges}
+\subsection{Key Challenges}
 
 What if, rather than restricting the system to a single cipher, we could
 flexibly encrypt data at rest with a range of ciphers and cryptographic keys at
 the block level? To achieve this, we must address the following three
 challenges: 1) \emph{quantify} the desirable security properties of different
-ciphers, 2) \emph{decouple} cipher implementations from the encryption of
-independent storage units, and 3) employ \emph{switching strategies} to
-dynamically ``re-cipher'' those units with acceptable overhead.
+ciphers, 2) \emph{decouple} cipher implementations from the encryption, and 3)
+employ \emph{switching strategies} to dynamically ``re-cipher'' those units with
+acceptable overhead.
 
 \textbf{Quantifying ciphers with disparate security properties.} To obtain a
 configuration space that we might reason about, it is necessary to score certain
@@ -67,19 +65,23 @@ challenge, we propose a method for quantitative cipher comparison in the FDE
 context and use it to define our configuration space.
 
 \textbf{Decoupling ciphers from encryption for mixed-cipher layouts.}
-To address the challenge of decoupling cipher implementations from the
-encryption process, we require a \emph{generic cipher API} and drive layout that
-allows the system to apply ciphers without worrying about their various
-parameters and other implementation concerns. The generic layout is enabled by
-independent storage units called \emph{nuggets}. Since they are independent, we
-can select any cipher to encrypt or decrypt any nugget at any point, answering
-``how'' to switch ciphers.
+Next, to address the challenge of decoupling cipher implementations from the
+encryption process, we require a \emph{generic cipher API} and flexible drive
+layout. This is challenging because abstracting over ciphers with vastly
+different input requirements, output formats, and other implementation concerns
+to present a single unified interface that can work with our flexible drive
+layout is entirely non-trivial. This generic layout is enabled by independent
+storage units we call \emph{nuggets}. We borrow this terminology from prior work
+to easily differentiate our logical blocks (nuggets) from physical drive and
+other storage blocks. And since they are independent, we can use our cipher API
+to select any cipher to encrypt or decrypt any nugget at any point, answering
+the ``how'' of switching ciphers.
 
-\textbf{Strategies to switch nugget ciphers with acceptable overhead.} To answer
-``when'' to switch a nugget's cipher and to ``where'' we commit the output, we
-implement a series of policies we call \textit{cipher switching strategies} that
-leverage the generic cipher API and drive layout to selectively ``re-cipher''
-groups of nuggets, whereby the key and the cipher used to encrypt/decrypt a
-nugget are switched at runtime. These strategies applied to individual nuggets
-allow us to navigate our cipher configuration tradeoff space and settle on
-points unreachable with prior work.
+\textbf{Strategies to switch nugget ciphers with acceptable overhead.} Finally,
+to answer ``when'' to switch a nugget's cipher and to ``where'' we commit the
+output, we implement a series of policies we call \textit{cipher switching
+strategies} that leverage the generic cipher API and drive layout to selectively
+``re-cipher'' groups of nuggets, whereby the key and the cipher used to
+encrypt/decrypt a nugget are switched at runtime. These strategies allow us to
+navigate our cipher configuration tradeoff space and settle on optimal points
+unreachable with prior work.

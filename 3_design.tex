@@ -1,100 +1,53 @@
 \section{SwitchCrypt Design}\label{sec:design}
 
-\begin{figure}[t]
+In this section, we first give a brief overview of SwitchCrypt's design. We then
+1) detail our scheme to \emph{quantify} cipher strength and the tradeoff of
+configurations that yields, 2) discuss \emph{decoupling} the cipher
+implementations from the encryption/decryption process via generic API, and
+finally 3) describe and contrast three cipher \emph{switching strategies}.
+
+\subsection{SwitchCrypt Overview}
+
+SwitchCrypt divides the underlying drive(s) or ``backing store'' into a series
+same-size logical blocks called \emph{nuggets}. A nugget consists of one or more
+physical drive blocks/sectors depending on its configured size and per-nugget
+metadata indicating which cipher was used to encrypt the nugget. Each nugget is
+subdivided into a constant number of units called \emph{flakes}.
+
+SwitchCrypt uses this flake-nugget structure to 1) track, detect, and handle
+overwrites, 2) limit the maximum length of any plaintexts provided to ciphers,
+thus amortizing the overhead incurred during expensive re-encryption
+operations~\cite{StrongBox}, 3) independently switch the cipher used to crypt
+individual nuggets.
+
+\PUNT{\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{backstore.png}
+ \caption{Layout of SwitchCrypt's backing storage.}\label{fig:backstore2}
+\end{figure}}
+
+\begin{figure}[ht]
    \centering
    \includegraphics[width=\linewidth]{overview.png}
    \caption{Overview of the SwitchCrypt construction.}\label{fig:overview}
 \end{figure}
 
-In this section, we describe our mechanism to navigate the cipher configuration
-space and cipher switching strategies. We also discuss the generic stream
-cipher API and other design challenges.
-
---
-The standard approach to FDE, using the AES \emph{block cipher}, introduces
-significant overhead during filesystem operation. It is well known that
-authenticated encryption using \emph{stream ciphers} is faster than using
-AES~\cite{StrongBox, AnotherPaper1, AnotherPaper2}. However, when used naively
-in drive encryption, stream ciphers are widely known to be vulnerable to
-``overwrite attacks'' like pad reuse and rollback~\cite{KatzLindell, StrongBox}.
-To enable FDE using stream ciphers, prior work explores several approaches:
-
-\begin{itemize}
-   \item Use a non-deterministic CTR mode with specially designed cipher and
-   filesystem (Freestyle~\cite{Freestyle}).
-   \item Use a length-preserving ``tweakable super-pseudorandom permutation''
-   construction with nonce-accepting stream cipher (Adiantum~\cite{Adiantum}).
-   \item Use a stream cipher in a binary additive (XOR) mode leveraging metadata
-   management and Log-structured File Systems' (LFS) overwrite-averse behavior
-   to prevent overwrites (StrongBox~\cite{StrongBox}).
-\end{itemize}
-
-Though the tradeoffs and ideas explored in this paper can apply to any use of
-stream ciphers in FDE using some binary additive operation, we focus on the
-lattermost prior approach: stream cipher based FDE and metadata
-layers that exploit LFS overwrite-averse behavior to achieve high-performance
-encryption.
-
-\PUNT{\begin{figure}[ht]
-   \centering
-   \includegraphics[width=\linewidth]{flknug.png}
-   \caption{Anatomy of a SwitchCrypt nugget.}\label{fig:flknug}
-\end{figure}}
-
-As with prior work, SwitchCrypt divides the underlying drive into a series
-same-size logical blocks called \emph{nuggets}, illustrated in \figref{flknug}.
-A nugget consists of one or more physical drive blocks/sectors depending on its
-configured size. Each nugget is subdivided into a constant number of units
-called \emph{flakes}.
-
-SwitchCrypt uses this flake-nugget structure to 1) track, detect, and handle
-overwrites and 2) limit the maximum length of any plaintexts provided to
-ciphers, thus amortizing the overhead incurred during expensive re-keying and
-other operations when overwrites do occur~\cite{StrongBox}.
---
-
-SwitchCrypt is a translation layer ideally implemented in the Flash Translation
-Layer (FTL). \TODO{Why is that ideal? And where else could it be implemented? Remember that you want all the ideas to have as much impact as possible.  Don't give lazy reviewers and easy lever against the paper.} 
-Unlike prior work, which focuses on optimizing performance despite
-re-keying due to overwrites, SwitchCrypt maintains overwrite protections while
-abstracting the idea of re-keying out into re-ciphering or \emph{cipher
-switching}, where a nugget's contents are decrypted using the old key and
-inactive cipher configuration and encrypted using a new key and the active
-cipher configuration before completing the I/O operation; instead of myopically
-pursuing a performance win, this allows users (or the operating system) to trade off different ciphers and
-their characteristics online.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{backstore.png}
- \caption{Layout of SwitchCrypt's backing storage.}\label{fig:backstore2}
-\end{figure}
-
-The backing store is the storage medium SwitchCrypt operates on. The layout of the
-backing store is illustrated in \figref{backstore2}. In the \textit{body}
-section of the backing store layout, end-user data is partitioned into a series
-of same-size \emph{logical blocks} marked \textit{NUG} for \emph{nugget}. A
-nugget consists of one or more physical drive blocks and per-nugget metadata
-indicating which cipher was used to encrypt the nugget. We borrow this
-terminology from prior work to easily differentiate our logical blocks (nuggets)
-from physical drive and other storage blocks.
-
-\figref{overview} provides an overview of the SwitchCrypt design. SwitchCrypt
-manages five metadata components: an in-memory \emph{Merkle Tree}; two
+\figref{overview} provides an overview of the SwitchCrypt software design.
+SwitchCrypt is composed of five components: an in-memory \emph{Merkle Tree}; two
 drive-backed byte arrays, \ie{the \emph{Keycount Store} and the
 \emph{Transaction Journal}}; a globally persistent cryptographically secure
 monotonic counter; and a flexible drive-backed store for cipher-specific
 \emph{per-nugget metadata}.
 
 These five components are tightly integrated into the cryptographic driver,
-which handles data encryption, decryption, overwrite detection, integrity
-protection, IPC with the wider system to determine the active cipher
-configuration, and the execution of cipher switching strategies with stream
-cipher implementations provided by a generic stream cipher API. The
-cryptographic driver interacts with 1) the overlying LFS through traditional I/O
-passed through the Linux Virtual Filesystem Switch (VFS) and 2) the underlying
-drive through the device controller block I/O layer or as part of the FTL,
-depending on implementation.
+which allow for overwrite detection and data integrity protection. determining
+the active cipher configuration, and the execution of cipher switching
+strategies when the active configuration changes. with stream cipher
+implementations provided by a generic stream cipher API. The cryptographic
+driver interacts with 1) the overlying LFS through traditional I/O passed
+through the Linux Virtual Filesystem Switch (VFS) and 2) the underlying drive
+through the device controller block I/O layer or as part of the FTL, depending
+on implementation.
 
 \subsection{Generic Stream Cipher API}
 

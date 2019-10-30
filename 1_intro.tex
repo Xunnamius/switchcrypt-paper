@@ -68,13 +68,13 @@ another configuration becomes more desirable later on?}
 
 \subsection{Our Contributions}
 
-First, we introduce a simple scheme to \emph{quantify} the usefulness or
-relative ``strength'' of ciphers based on key security properties relevant to
+To enable this, we first, introduce a scheme to \emph{quantify} the usefulness
+or relative ``strength'' of ciphers based on key security properties relevant to
 FDE. We call these ``security scores''. Using these security scores, we then
-define a novel tradeoff space of cipher configurations over competing concerns:
-total energy use, desirable security properties in the FDE context, read and
-write performance, total writable space on the drive, and how quickly the drive
-can converge to a single configuration. Finally, we present SwitchCrypt, a novel
+define a tradeoff space of cipher configurations over competing concerns: total
+energy use, desirable security properties in the FDE context, read and write
+performance, total writable space on the drive, and how quickly the drive can
+converge to a single configuration. Finally, we present SwitchCrypt, a novel
 design substantively expanding prior FDE work by \emph{decoupling} cipher
 implementations from encryption and employing various \emph{switching
 strategies} to ``re-cipher'' those units dynamically with acceptable overhead.
