@@ -1,24 +1,24 @@
 \section{SwitchCrypt Design}\label{sec:design}
 
 In this section, we first give a brief overview of SwitchCrypt's design. We then
-1) detail our scheme to \emph{quantify} cipher strength and the tradeoff of
-configurations that yields, 2) discuss \emph{decoupling} the cipher
-implementations from the encryption/decryption process via generic API, and
-finally 3) describe and contrast three cipher \emph{switching strategies}.
+1) discuss \emph{decoupling} the cipher implementations from the
+encryption/decryption process via generic API, 2) describe and contrast three
+cipher \emph{switching strategies}, and finally 3) detail our scheme to
+\emph{quantify} cipher strength and the tradeoff of configurations that yields.
 
 \subsection{SwitchCrypt Overview}
 
 SwitchCrypt divides the underlying drive(s) or ``backing store'' into a series
-same-size logical blocks called \emph{nuggets}. A nugget consists of one or more
-physical drive blocks/sectors depending on its configured size and per-nugget
-metadata indicating which cipher was used to encrypt the nugget. Each nugget is
-subdivided into a constant number of units called \emph{flakes}.
+independent same-size logical blocks called \emph{nuggets}. A nugget consists of
+one or more physical drive blocks/sectors depending on its configured size and
+per-nugget metadata indicating which cipher was used to encrypt the nugget. Each
+nugget is subdivided into a constant number of units called \emph{flakes}.
 
 SwitchCrypt uses this flake-nugget structure to 1) track, detect, and handle
 overwrites, 2) limit the maximum length of any plaintexts provided to ciphers,
 thus amortizing the overhead incurred during expensive re-encryption
-operations~\cite{StrongBox}, 3) independently switch the cipher used to crypt
-individual nuggets.
+operations~\cite{StrongBox}, and 3) independently switch the cipher used to
+crypt individual nuggets.
 
 \PUNT{\begin{figure}[t]
 \centering
@@ -33,80 +33,65 @@ individual nuggets.
 \end{figure}
 
 \figref{overview} provides an overview of the SwitchCrypt software design.
-SwitchCrypt is composed of five components: an in-memory \emph{Merkle Tree}; two
-drive-backed byte arrays, \ie{the \emph{Keycount Store} and the
+SwitchCrypt is composed of the cryptographic driver---responsible for executing
+our \emph{switching strategies}---and six components: an in-memory \emph{Merkle
+Tree}; two drive-backed byte arrays, \ie{the \emph{Keycount Store} and the
 \emph{Transaction Journal}}; a globally persistent cryptographically secure
-monotonic counter; and a flexible drive-backed store for cipher-specific
-\emph{per-nugget metadata}.
+monotonic counter; a flexible drive-backed store for cipher-specific
+\emph{per-nugget metadata}; and the \emph{generic stream cipher API}.
 
-These five components are tightly integrated into the cryptographic driver,
-which allow for overwrite detection and data integrity protection. determining
-the active cipher configuration, and the execution of cipher switching
-strategies when the active configuration changes. with stream cipher
-implementations provided by a generic stream cipher API. The cryptographic
-driver interacts with 1) the overlying LFS through traditional I/O passed
-through the Linux Virtual Filesystem Switch (VFS) and 2) the underlying drive
-through the device controller block I/O layer or as part of the FTL, depending
-on implementation.
+The \emph{merkle tree} ensures the integrity of all data on a per-flake level.
+The \emph{keycount store} keeps track of each nugget's 64-bit cryptographic key.
+The \emph{transaction journal} keeps track of writes to flakes, allowing
+SwitchCrypt to detect and respond to overwrites. The \emph{monotonic counter} is
+used to prevent the system state from being rolled back. Together, these first
+four components track, detect, and handle overwrites~\cite{StrongBox}.
+
+The \emph{per-nugget metadata} is a drive-backed per-nugget array where extra
+cryptographic material is stored depending on the cipher used to encrypt the
+nugget. The size of the array is determined by the \emph{generic stream cipher
+API}.
 
 \subsection{Generic Stream Cipher API}
 
-We develop an API to allow any stream cipher or any cipher that can operate as a
-stream cipher to be used with SwitchCrypt without modification or special
-considerations. In this way, different stream ciphers might appear to all be
-interchangeable, but they are not. For instance: not all stream ciphers, let
-alone all ciphers, are length-preserving. A length-preserving cipher generates
-ciphertext output of the same length as its plaintext input, \eg{ChaCha20}. A
-stream cipher like Freestyle, on the other hand, is not length-preserving and has the
-overhead of additional cryptographic material that must be stored and indexed
-alongside any generated ciphertext. Hence, we build SwitchCrypt as a novel common
-cipher interface that allows ciphers with disparate output
-characteristics to co-exist on the same drive; typically, such characteristics
-would render these ciphers entirely incompatible, preventing us from trading
-them off with one another.
+We \emph{decouple} the cipher implementations from the encryption/decryption
+process through the generic stream cipher API, which allows any cipher to work
+with SwitchCrypt without modification or special considerations. In this way,
+different stream ciphers can be used interchangeably when they would otherwise
+be incompatible, preventing us from trading them off with one another.
 
-SwitchCrypt exposes API hooks for wrapper function cipher implementations at three
-levels:
+SwitchCrypt exposes API hooks at three levels:
 
 \begin{enumerate}
    \item \textbf{\texttt{crypt\_data}}\\\texttt{crypt\_data}
-   expects a cipher to accept intra- and inter- nugget offset data and return
-   crypted the specified region and so operates at a fine-grain level compared
-   to using the read and write handles described below. There is no distinction
-   made between encryption and decryption as they are considered the same
-   operation in this context. Further, this interface does not allow any access
-   to the SwitchCrypt internals and is expected to execute independently of
-   SwitchCrypt.
+   operates at a fine-grain level, provides intra- and inter- nugget offset as
+    inputs, and returns crypted the specified region. There is no distinction
+    made between encryption and decryption. Further, this interface does not
+    allow any access to the SwitchCrypt internals and is expected to execute
+    independently of SwitchCrypt.
 
-   Unlike \texttt{crypt\_data\_low}, \texttt{crypt\_data} performs the final
-   XORing automatically. It provides a slightly higher level of interaction with
-   the backing store's data making things easier for simpler ciphers.
-
-   \item \textbf{\texttt{crypt\_data\_low}}\\Unlike \texttt{crypt\_data},
-   \texttt{crypt\_data\_low} does not perform the final XORing automatically. It
-   provides a slightly lower level of abstraction when accessing to the backing
-   store for some ciphers.
+   \item \textbf{\texttt{crypt\_data\_low}}\\\texttt{crypt\_data\_low}
+   is identical to \texttt{crypt\_data} but provides a slightly lower level of
+   abstraction when accessing the backing store. This is useful for less
+   flexible cipher implementations.
 
    \item \textbf{\texttt{read\_handle}} and \textbf{\texttt{write\_handle}}\\
-   Unlike the other two levels, both hooks must be provided by a cipher or
-   functionality is undefined. At this level, control over encryption is
-   coarse-grain, where cipher wrappers have access to all relevant SwitchCrypt
-   internals and must implement cipher switching manually. \texttt{read\_handle}
-   expects a cipher to accept a buffer and read into it a decrypted subset of a
-   nugget's ciphertext.
-
-   \texttt{write\_handle} expects a cipher to accept some plaintext buffer and
-   commit some encrypted subset of the current nugget to the backing store.
-
-   This is necessary to handle ciphers with special output that must work
-   below the overwrite protection code (\ie{Freestyle}) and/or a cipher does not
-   operate like a stream cipher (\ie{AES-XTS}). Hooks at this level should only
-   ever operate on a single nugget or API behavior is undefined. Further, due to
-   cipher switching, implementations must not read in any nugget/flake data from
-   the backstore if a perfectly aligned nugget-sized chunk is requested. This is
-   because the nugget data might be crypted with a different algorithm when
-   attempting to read it, corrupting the plaintext during cipher switching.
+   operate at a coarse-grain level, where implementors have access to all
+   relevant SwitchCrypt internals and must implement cipher switching manually.
+   \texttt{read\_handle} expects a buffer and reads into it a decrypted subset
+   of a nugget's ciphertext. \texttt{write\_handle} expects a buffer
+   and commits some encrypted subset of the current nugget to the backing store.
 \end{enumerate}
+
+The distinction between fine-grain and coarse-grain hooks are necessary to
+handle ciphers with special output (\eg{not length-preserving or have extra
+cryptographic material}) or other considerations. Coarse-grain cipher
+implementations must only ever operate on a single nugget or API
+behavior is undefined. Further, due to cipher switching, implementations must
+not read in any nugget/flake data from the backstore if a perfectly aligned
+nugget-sized chunk is requested. This is because the nugget data might be
+crypted with a different algorithm when attempting to read it, corrupting the
+plaintext during cipher switching.
 
 \subsection{Cipher Switching Strategies}
 
@@ -116,15 +101,15 @@ different cipher to interact with the backing store, the active cipher
 configuration is used to encrypt and decrypt all nuggets during I/O.
 
 When the wider system determines a cipher switch should occur for whatever
-reason, there are choices to determine \emph{when} to encrypt a nugget
-with a different cipher and \emph{where} to direct the output of that cipher.
-Depending on the complexity of the use case, it may make the most sense to
-re-cipher a nugget immediately, or eventually, or to re-cipher a series of
-nuggets. A simple approach would immediately switch every nugget in the backing
+reason, there are choices to determine \emph{when} to encrypt a nugget with a
+different cipher and \emph{where} to direct the output. Depending on the
+complexity of the use case, it may make the most sense to re-cipher a nugget
+immediately, or eventually, or to maintain several differently-ciphered nuggets.
+\PUNT{A simple approach would immediately switch every nugget in the backing
 store to the desired cipher, but the cost of doing that conversion would likely
 consume more energy than would be saved in future accesses; the egregious
 latency penalty incurred waiting for the entire drive to be re-ciphered would be
-similarly unacceptable.
+similarly unacceptable.}
 
 Hence, a more adaptable approach is necessary: cipher switching
 \emph{strategies}. These strategies are an essential part of the mechanism by
@@ -144,9 +129,7 @@ disadvantages of these strategies and each strategy and is explained more below.
 
 \subsubsection{Forward Switching Strategy}
 
-SwitchCrypt allows each individual nugget to exist encrypted with any cipher the
-generic cipher API makes available regardless of the currently active cipher
-configuration. When a nugget is encountered during I/O that is encrypted using a
+When a nugget is encountered during I/O that is encrypted using a
 cipher other than the active cipher configuration, the Forward strategy dictates
 that this nugget be re-ciphered immediately. If a particular nugget encrypted
 with a non-active cipher configuration is never encountered during I/O, it is
@@ -160,33 +143,33 @@ work~\cite{StrongBox}, the heavy price of re-ciphering is paid only once, after
 which the nugget is accessed normally during I/O until the active cipher
 configuration is switched again.
 
-\PUNT{There are several forms the Forward strategy might take. The default and most
-intuitive is \emph{0-forward}, in which SwitchCrypt immediately transitions
+\PUNT{There are several forms the Forward strategy might take. The default and
+most intuitive is \emph{0-forward}, in which SwitchCrypt immediately transitions
 individual nuggets encountered during I/O to the active cipher configuration if
 they are not using it. Over time, if various I/O operations end up touching
 every nugget in the backing store, the encrypted contents of every nugget will
 become decryptable with the currently active cipher configuration.
 
-The Forward strategy might also take the form of \emph{N-forward}, where SwitchCrypt
-attempts to take advantage of spatial sequential locality to transition whole
-sets of nuggets into the active cipher configuration. We can trivially expand
-the forward strategy to encompass the entire backing store by selecting $N$
-equal to the total number of nuggets managed by SwitchCrypt. This would have the
-overhead of re-ciphering large swaths of the backing store upon every I/O
-operation where a nugget encrypted with the non-active cipher configuration is
-encountered. Of course, this has the same dire implications for performance as
-simply re-initializing the entire filesystem or encrypted container with the new
-cipher.}
+The Forward strategy might also take the form of \emph{N-forward}, where
+SwitchCrypt attempts to take advantage of spatial sequential locality to
+transition whole sets of nuggets into the active cipher configuration. We can
+trivially expand the forward strategy to encompass the entire backing store by
+selecting $N$ equal to the total number of nuggets managed by SwitchCrypt. This
+would have the overhead of re-ciphering large swaths of the backing store upon
+every I/O operation where a nugget encrypted with the non-active cipher
+configuration is encountered. Of course, this has the same dire implications for
+performance as simply re-initializing the entire filesystem or encrypted
+container with the new cipher.}
 
 \subsubsection{Selective Switching Strategy}
 
-When SwitchCrypt is initialized with the Selective strategy, the backing store is
-partitioned into $C$ regions where $C$ represents the number of ciphers in use;
-each region's nuggets are encrypted by each of the $C$ ciphers respectively. For
-instance, were SwitchCrypt initialized using two ciphers ($C = 2$), the backing
-store would be partitioned in half; all nuggets in the first partition would be
-encrypted with the first cipher while all nuggets in the second partition would
-be encrypted with the second.
+When SwitchCrypt is initialized with the Selective strategy, the backing store
+is partitioned into $C$ regions where $C$ represents the number of ciphers in
+use; each region's nuggets are encrypted by each of the $C$ ciphers
+respectively. For instance, were SwitchCrypt initialized using two ciphers ($C =
+2$), the backing store would be partitioned in half; all nuggets in the first
+partition would be encrypted with the first cipher while all nuggets in the
+second partition would be encrypted with the second.
 
 Hence, unlike the Forward strategy, which schedules individual nuggets to be
 re-ciphered at some point in time \emph{after} the active cipher configuration
@@ -212,68 +195,7 @@ Selective strategy, represents a form of spatial cipher switching. All regions
 of the backing store will always be in a consistent state and share the same
 data.
 
-\subsection{Cipher Switching: A Mechanism To Re-Cipher A Nugget}
-
-Having cipher switching strategies by themselves is not enough to facilitate
-cipher switching. We require some mechanism to navigate the
-latency/energy/security tradeoff space of cipher configurations through applying
-these strategies. Where a naive implementation is trivial (\eg{execute the
-chosen strategy on every I/O operation}), this navigation must occur with
-acceptable overhead by preserving performance wherever possible. The
-cryptographic driver provides such a mechanism, tying together cipher switching
-strategies and the generic stream cipher API.
-
-In the cases of Mirrored and Selective switching, we use offset to determine in
-which area of the backing store receives I/O.
-
-In the case of Forward switching, it is tempting to implement it such that a
-nugget is completely re-ciphered during I/O every time its metadata indicates
-that it was previously encrypted using a non-active cipher. However, such a
-naive implementation can have disastrous effects on performance depending on the
-workload.
-
-First, a nugget is considered \emph{pristine} if it has not had any data written
-into it yet. SwitchCrypt determines if a nugget is pristine by checking the state
-of the transaction journal for that nugget. A pristine nugget will have a clean
-transaction journal.
-
-All nuggets start out as pristine. All nuggets start out with metadata
-indicating that they are to be encrypted and decrypted by the initially active
-cipher. This is true \emph{even if the nugget has not been written to yet}. This
-means, on read and write operations after a different cipher becomes the active
-cipher configuration using a naively implemented forward switching strategy,
-every write operation will trigger a re-keying, which carries significant
-overhead.
-
-The solution is to divide forward switching into \emph{soft re-ciphering} and
-\emph{hard re-ciphering}. Fortunately, the SwitchCrypt design lends itself nicely
-to such a distinction for free, as per-nugget metadata is managed separately
-from a nugget's actual data.
-
-During soft re-ciphering, only the nugget's metadata is changed to indicate that
-the nugget can be encrypted and decrypted with the newly active cipher
-configuration but \emph{without actually re-ciphering the nugget data itself}.
-This keeps the nugget in its pristine condition, preserving SwitchCrypt's ability
-to write data into it without triggering a costly re-keying operation every
-time, preserving our performance advantage. At the same time, SwitchCrypt can now
-use the newly active cipher configuration to interact with the nugget as
-expected. On the other hand, during hard re-cipher, the nugget's metadata is
-changed to match the active cipher configuration \emph{and} the nugget data is
-encrypted using the new cipher.
-
-\PUNT{When using forward switching other that 0-forward, \ie{N-forward} where $N
-> 0$, only read operations are allowed to trigger hard re-ciphering for nuggets
-other than the currently active nugget. This is still not enough to preserve our
-performance advantage, however, as I/O operations can span multiple nuggets, and
-attempting to take advantage of spatial locality after interacting with every
-nugget is counterproductive. Hence, only the last nugget touched by a read
-operation will trigger the more aggressive N-forward behavior if $N > 0$. These
-considerations have the effect of 1) preserving our performance advantage and 2)
-allowing more aggressive N-forward behavior (where $N > 0$) to take advantage of
-spatial locality during read-heavy workloads to result in a further performance
-advantage (see: \secref{evaluation}).}
-
-\subsection{Comparing Cipher Switching Strategies}
+\subsubsection{Comparing Cipher Switching Strategies}
 
 \begin{table}[]
    \begin{tabular}{@{}|l|l|l|l|@{}}
@@ -338,7 +260,7 @@ strategy writes with low overhead except in the case where the current nugget is
 not pristine and was not encrypted with the active cipher configuration. This
 triggers costly re-ciphering, which can compound depending on workload.
 
-\subsection{Threat Model for Cipher Switching Strategies}
+\subsubsection{Threat Model for Cipher Switching Strategies}
 
 The primary concern facing any FDE solution is that of confidentiality: an
 adversary should not be able to decrypt encrypted plaintext without the right
@@ -363,12 +285,73 @@ non-active cipher configuration. Is this a problem? For the Forward strategy,
 this implies data may at any time be encrypted using the least desirable cipher.
 For the Mirrored and Selective strategies, the backing store is partitioned into
 regions where nuggets are guaranteed to be encrypted with each cipher. However,
-in terms of confidentiality, all the ciphers we configured under SwitchCrypt have
-been proven formally secure. Hence, nuggets encrypted with different secure
+in terms of confidentiality, all the ciphers we configured under SwitchCrypt
+have been proven formally secure. Hence, nuggets encrypted with different secure
 ciphers can co-exist on the backing store securely, depending on the use case
 (see: \secref{usecases}).
 
-\subsection{A Relative Scoring of Cipher Security Properties}
+\subsubsection{Additional Considerations}
+
+Having cipher switching strategies by themselves is not enough to facilitate
+cipher switching. We require some mechanism to navigate the
+latency/energy/security tradeoff space of cipher configurations through applying
+these strategies. Where a naive implementation is trivial (\eg{execute the
+chosen strategy on every I/O operation}), this navigation must occur with
+acceptable overhead by preserving performance wherever possible. The
+cryptographic driver provides such a mechanism, tying together cipher switching
+strategies and the generic stream cipher API.
+
+In the cases of Mirrored and Selective switching, we use offset to determine in
+which area of the backing store receives I/O.
+
+In the case of Forward switching, it is tempting to implement it such that a
+nugget is completely re-ciphered during I/O every time its metadata indicates
+that it was previously encrypted using a non-active cipher. However, such a
+naive implementation can have disastrous effects on performance depending on the
+workload.
+
+First, a nugget is considered \emph{pristine} if it has not had any data written
+into it yet. SwitchCrypt determines if a nugget is pristine by checking the
+state of the transaction journal for that nugget. A pristine nugget will have a
+clean transaction journal.
+
+All nuggets start out as pristine. All nuggets start out with metadata
+indicating that they are to be encrypted and decrypted by the initially active
+cipher. This is true \emph{even if the nugget has not been written to yet}. This
+means, on read and write operations after a different cipher becomes the active
+cipher configuration using a naively implemented forward switching strategy,
+every write operation will trigger a re-keying, which carries significant
+overhead.
+
+The solution is to divide forward switching into \emph{soft re-ciphering} and
+\emph{hard re-ciphering}. Fortunately, the SwitchCrypt design lends itself
+nicely to such a distinction for free, as per-nugget metadata is managed
+separately from a nugget's actual data.
+
+During soft re-ciphering, only the nugget's metadata is changed to indicate that
+the nugget can be encrypted and decrypted with the newly active cipher
+configuration but \emph{without actually re-ciphering the nugget data itself}.
+This keeps the nugget in its pristine condition, preserving SwitchCrypt's
+ability to write data into it without triggering a costly re-keying operation
+every time, preserving our performance advantage. At the same time, SwitchCrypt
+can now use the newly active cipher configuration to interact with the nugget as
+expected. On the other hand, during hard re-cipher, the nugget's metadata is
+changed to match the active cipher configuration \emph{and} the nugget data is
+encrypted using the new cipher.
+
+\PUNT{When using forward switching other that 0-forward, \ie{N-forward} where $N
+> 0$, only read operations are allowed to trigger hard re-ciphering for nuggets
+other than the currently active nugget. This is still not enough to preserve our
+performance advantage, however, as I/O operations can span multiple nuggets, and
+attempting to take advantage of spatial locality after interacting with every
+nugget is counterproductive. Hence, only the last nugget touched by a read
+operation will trigger the more aggressive N-forward behavior if $N > 0$. These
+considerations have the effect of 1) preserving our performance advantage and 2)
+allowing more aggressive N-forward behavior (where $N > 0$) to take advantage of
+spatial locality during read-heavy workloads to result in a further performance
+advantage (see: \secref{evaluation}).}
+
+\subsection{Quantifying Cipher Security Properties}
 
 \TODO{We additionally stress that \textit{every} cipher explored in this work is
 considered cryptanalytically secure. The security score represents the
@@ -380,19 +363,19 @@ Every cipher mentioned in this paper has been proven formally secure in that
 \emph{there are no known efficient attacks against any of them}~\cite{All,
 Ciphers, Again}. This implies data is kept confidential versus an adversary with
 limited resources, however it is often desirable to secure data at rest in
-special contexts or considering future adversaries with abundant resources. 
-In this way, a cipher that is more resilient to cryptanalysis or
-brute-force than is currently required might be more desirable than a cipher
-with properties that meet current standards, \eg{future-proofing storage}.
+special contexts or considering future adversaries with abundant resources. In
+this way, a cipher that is more resilient to cryptanalysis or brute-force than
+is currently required might be more desirable than a cipher with properties that
+meet current standards, \eg{future-proofing storage}.
 
 To simplify reasoning about trading off such disparate cryptographic properties
 in the FDE context, we must have a way to quantitatively compare a cipher's
-``desirability'' or usefulness to SwitchCrypt and to FDE more generally. Hence, we
-do not attempt to define a generally applicable \textit{ranking} of
-\emph{security strength}. Instead, we score ciphers
-(\ie{a so-called ``security score''}) based on three key security properties
-that, when summed, give an estimate of the usefulness of a cipher to SwitchCrypt
-FDE (see: \tblref{security-quant}).
+``desirability'' or usefulness to SwitchCrypt and to FDE more generally. Hence,
+we do not attempt to define a generally applicable \textit{ranking} of
+\emph{security strength}. Instead, we score ciphers (\ie{a so-called ``security
+score''}) based on three key security properties that, when summed, give an
+estimate of the usefulness of a cipher to SwitchCrypt FDE (see:
+\tblref{security-quant}).
 
 Our scoring scheme is a combination of well understood schemes: scoring ciphers
 on their confusion and diffusion of plaintext bits during
@@ -428,8 +411,8 @@ to take longer to finish decrypting ciphertext given an incorrect key versus a
 correct key with high probability.
 
 Scores for this feature range from 0 to 1, where 0 represents no resistance, 0.5
-is standard resistance to brute-force and offline/dictionary attacks,
-and 1 is enhanced resistance. \TODO{Enhanced how?}\\
+is standard resistance to brute-force and offline/dictionary attacks, and 1 is
+enhanced resistance. \TODO{Enhanced how?}\\
 \\
 \textbf{3) Relative round count and key length (RR/RK).} The ciphers we examine
 in this research are all constructed around the notion of \emph{rounds}, where a

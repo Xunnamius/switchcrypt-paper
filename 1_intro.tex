@@ -40,20 +40,20 @@ However, the de facto standard choice for FDE is the slow AES \emph{block
 cipher} (AES-XTS)~\cite{AES, AES-XTS}. Prior research~\cite{StrongBox}
 introduced the motivation and method for using \emph{stream ciphers} like the
 high performance ChaCha20~\cite{ChaCha20} cipher for FDE in lieu of AES-XTS.
-More recent work---such as Google's HBSH
-(hash, block cipher, stream cipher, hash) and Adiantum~\cite{HBSH,
-Adiantum}---brings the use of stream ciphers for drive encryption to industrial strength products.
+More recent work---such as Google's HBSH (hash, block cipher, stream cipher,
+hash) and Adiantum~\cite{HBSH, Adiantum}---brings the use of stream ciphers for
+drive encryption to industrial strength products.
 
-There is a rich choice of stream ciphers with a variety of different performance characteristics
-and opposing security properties. Some of these include: ChaCha variants with
-different round counts (e.g., ChaCha8 \cite{ChaCha8} and ChaCha20
+There is a rich choice of stream ciphers with a variety of different performance
+characteristics and opposing security properties. Some of these include: ChaCha
+variants with different round counts (e.g., ChaCha8 \cite{ChaCha8} and ChaCha20
 \cite{ChaCha20}) or stronger security properties (e.g.,
 Freestyle~\cite{Freestyle}) and others---SalsaX~\cite{SalsaX}, AES in counter
 mode (AES-CTR)~\cite{AES-CTR}, Rabbit~\cite{Rabbit}, Sosemanuk~\cite{Sosemanuk},
-etc. Given this variety, the cipher configuration providing the fastest I/O throughput
-is almost always different than the configuration providing the most desirable
-security properties, and both may differ from the configuration that uses the
-least amount of energy or allows the most writable drive space.
+etc. Given this variety, the cipher configuration providing the fastest I/O
+throughput is almost always different than the configuration providing the most
+desirable security properties, and both may differ from the configuration that
+uses the least amount of energy or allows the most writable drive space.
 
 Further, while the cipher choice can be configured statically at compile- or
 boot-time with respect to some common-case, in traditional FDE, these
@@ -68,17 +68,17 @@ another configuration becomes more desirable later on?}
 
 \subsection{Our Contributions}
 
-To realize the goal of flexibly adjusting storage tradeoffs, we first introduce 
-a scheme to \emph{quantify} the usefulness
-or relative ``strength'' of ciphers based on key security properties relevant to
-FDE. We call these ``security scores''. Using these security scores, we then
-define a tradeoff space of cipher configurations over competing concerns: total
-energy use, desirable security properties in the FDE context, read and write
-performance, total writable space on the drive, and how quickly the drive can
-converge to a single configuration. Finally, we present SwitchCrypt, a novel
-design substantively expanding prior FDE work by \emph{decoupling} cipher
-implementations from encryption and employing various \emph{switching
-strategies} to ``re-cipher'' those units dynamically with acceptable overhead.
+To realize the goal of flexibly adjusting storage tradeoffs, we first introduce
+a scheme to \emph{quantify} the usefulness or relative ``strength'' of ciphers
+based on key security properties relevant to FDE. We call these ``security
+scores''. Using these security scores, we then define a tradeoff space of cipher
+configurations over competing concerns: total energy use, desirable security
+properties in the FDE context, read and write performance, total writable space
+on the drive, and how quickly the drive can converge to a single configuration.
+Finally, we present SwitchCrypt, a novel design substantively expanding prior
+FDE work by \emph{decoupling} cipher implementations from encryption and
+employing various \emph{switching strategies} to ``re-cipher'' those units
+dynamically with acceptable overhead.
 
 \TODO{Overhead summary of empirical paragraph here that expounds a bit on the
 final sentence of the abstract. We support up to X security configurations, etc.

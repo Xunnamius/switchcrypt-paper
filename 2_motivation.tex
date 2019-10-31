@@ -15,15 +15,15 @@ Energy Use}\par\medskip
 
 Suppose we are downloading a particularly large high-resolution movie file to
 our mobile work device from a network. As this is an enterprise device, our
-employer requires all data to be encrypted by default,
-so we chose to initialize our backing store at a configuration point using a
-high-security, high-latency cipher.
+employer requires all data to be encrypted by default, so we chose to initialize
+our backing store at a configuration point using a high-security, high-latency
+cipher.
 
 For the ciphers we examine in this paper, we find a correlation between high
-latency and greater total energy use, meaning our device is using more
-energy to facilitate FDE at this configuration point. Though this correlation
-applies to the ciphers we examined, note that this is certainly not true for all
-possible ciphers across all hardware.
+latency and greater total energy use, meaning our device is using more energy to
+facilitate FDE at this configuration point. Though this correlation applies to
+the ciphers we examined, note that this is certainly not true for all possible
+ciphers across all hardware.
 
 Further suppose that, after some amount of time downloading this movie, our
 device determines its remaining battery life is too low and enters a ``battery
@@ -48,33 +48,33 @@ encrypted container or restart the device.
 
 \subsection{Key Challenges}
 
-The above is possible if---rather than restricting the system to a single cipher---we could
-flexibly encrypt data at rest with a range of ciphers and cryptographic keys at
-the block level. To achieve this, we must address the following three
-challenges: 1) \emph{quantify} the desirable security properties of different
-ciphers, 2) \emph{decouple} cipher implementations from the encryption, and 3)
-employ \emph{switching strategies} to dynamically ``re-cipher'' those units with
-acceptable overhead. 
+The above is possible if---rather than restricting the system to a single
+cipher---we could flexibly encrypt data at rest with a range of ciphers and
+cryptographic keys at the block level. To achieve this, we must address the
+following three challenges: 1) \emph{quantify} the desirable security properties
+of different ciphers, 2) \emph{decouple} cipher implementations from the
+encryption, and 3) employ \emph{switching strategies} to dynamically
+``re-cipher'' those units with acceptable overhead.
 
 \textbf{Quantifying ciphers with disparate security properties.} To obtain a
 configuration space that we might reason about, it is necessary to score certain
 security properties of stream ciphers. This is challenging since different
 ciphers have a wide range of disparate security properties, including ciphers
-that are not length-preserving in their output. To address this
-challenge, we propose a method for quantitative cipher comparison in the FDE
-context and use it to define our configuration space. 
+that are not length-preserving in their output. To address this challenge, we
+propose a method for quantitative cipher comparison in the FDE context and use
+it to define our configuration space.
 
-\textbf{Decoupling ciphers from encryption for mixed-cipher layouts.}
-To rapidly switch ciphers for the drive, we require a \emph{generic cipher API} and flexible drive
-layout. These requirements are challenging because, even with the class of stream ciphers, we find vastly
-different input requirements, output formats, and other barriers to presenting
- a single unified interface that can work with our flexible drive
-layout. We achieve the required generality by defining independent
-storage units we call \emph{nuggets}. We borrow this terminology from prior work (see \cite{StrongBox})
-to easily differentiate our logical blocks (nuggets) from physical drive and
-other storage blocks. And since they are independent, we can use our cipher API
-to select any cipher to encrypt or decrypt any nugget at any point, answering
-the ``how'' of switching ciphers.
+\textbf{Decoupling ciphers from encryption for mixed-cipher layouts.} To rapidly
+switch ciphers for the drive, we require a \emph{generic cipher API} and
+flexible drive layout. These requirements are challenging because, even with the
+class of stream ciphers, we find vastly different input requirements, output
+formats, and other barriers to presenting a single unified interface that can
+work with our flexible drive layout. We achieve the required generality by
+defining independent storage units we call \emph{nuggets}. We borrow this
+terminology from prior work (see \cite{StrongBox}) to easily differentiate our
+logical blocks (nuggets) from physical drive and other storage blocks. And since
+they are independent, we can use our cipher API to select any cipher to encrypt
+or decrypt any nugget at any point, answering the ``how'' of switching ciphers.
 
 \textbf{Strategies to switch nugget ciphers with acceptable overhead.} Finally,
 to answer ``when'' to switch a nugget's cipher and to ``where'' we commit the
@@ -82,7 +82,14 @@ output, we implement a series of policies we call \textit{cipher switching
 strategies} that leverage the generic cipher API and drive layout to selectively
 ``re-cipher'' groups of nuggets, whereby the key and the cipher used to
 encrypt/decrypt a nugget are switched at runtime. These strategies allow us to
-navigate our cipher configuration tradeoff space and settle on optimal points
-unreachable with prior work.
+navigate our configuration tradeoff space and settle on optimal points
+unreachable with prior work. The challenge here is to accomplish this while
+minimizing overhead.
 
-\TODO{I like the how, when, where framework.  Should we add why? to the first challenge (of scoring) and say that we can now define a tradeoff space used to answer "why?" we would prefer one cipher over another? If you do that, then you should add to the paragraph that introduces these challenges that they correspond to the why, how, when, and where of cipher-switching and maybe give people a preview of what that means.}
+\TODO{I like the how, when, where framework.  Should we add why? to the first
+challenge (of scoring) and say that we can now define a tradeoff space used to
+answer "why?" we would prefer one cipher over another? If you do that, then you
+should add to the paragraph that introduces these challenges that they
+correspond to the why, how, when, and where of cipher-switching and maybe give
+people a preview of what that means.}
+
