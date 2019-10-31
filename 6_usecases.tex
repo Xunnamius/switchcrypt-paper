@@ -1,7 +1,11 @@
 \section{SwitchCrypt Case Studies}\label{sec:usecases}
 
-\TODO{You need some sort of overview paragraph that tells people what is to come in this section and why they should care about it.
-For example, you want to say something about these case studies cover a wide range of situations including... They also demonstrate uses of both temporal and spatial switching... Basically, make the argument that these case studies provide good coverage of all the things that you discussed earlier in the paper.}
+\TODO{You need some sort of overview paragraph that tells people what is to come
+in this section and why they should care about it. For example, you want to say
+something about these case studies cover a wide range of situations including...
+They also demonstrate uses of both temporal and spatial switching... Basically,
+make the argument that these case studies provide good coverage of all the
+things that you discussed earlier in the paper.}
 
 \subsection{Balancing Security Goals with a Constrained Energy Budget}
 
@@ -13,10 +17,10 @@ complete our task while staying within our energy budget.
 
 We begin sequentially writing 10 40MB files using the Freestyle Balanced cipher
 configuration. After 5 seconds, the device enters ``battery saver'' mode. We
-simulate this event by 1) underclocking the cores to their lowest
-frequencies and 2) using \texttt{taskset} to transition the SwitchCrypt processes
-to the energy-efficient LITTLE cores. Afterwards, we complete the remaining
-workload using the ChaCha8 cipher. We repeat this experiment three times.
+simulate this event by 1) underclocking the cores to their lowest frequencies
+and 2) using \texttt{taskset} to transition the SwitchCrypt processes to the
+energy-efficient LITTLE cores. Afterwards, we complete the remaining workload
+using the ChaCha8 cipher. We repeat this experiment three times.
 
 \begin{figure}[ht] \textbf{Batter Saver Use Case: Energy-Security Tradeoff vs
    Strict Energy Budget}\par\medskip
@@ -42,7 +46,8 @@ Balanced except when the system enters a low power state, after which the
 storage layer switches to favoring optimal energy use using ChaCha20 via the
 Forward switching strategy. Our results show that, while the system uses
 slightly more power in the short term, we stay within our energy budget and
-finish before the devices dies. \TODO{Add that when we get back to a charger, SwitchCrypt can easily recrypt the parts in ChaCha8 back to Freestyle Balanced?}
+finish before the devices dies. \TODO{Add that when we get back to a charger,
+SwitchCrypt can easily recrypt the parts in ChaCha8 back to Freestyle Balanced?}
 
 On average, using Forward cipher switching results in a \TODO{XXX} total energy
 use reduction.
@@ -54,7 +59,11 @@ performance win over prior work, where the entire drive is encrypted with a
 single cipher. We demonstrate \emph{Variable Security Regions} (VSR), where we
 can choose to encrypt select files or portions of files with different keys and
 ciphers below the filesystem level. Similar ``energy-security scalable
-encryption'' has been explored in related work~\cite{ScalableEncryption}. \TODO{If you mention this prior work here, you need to say more about what the difference is. Like prior work used a similar idea for streaming data, but not for data at rest?  I don't know how they handled their metadata now that I think about it.}
+encryption'' has been explored in related work~\cite{ScalableEncryption}.
+\TODO{If you mention this prior work here, you need to say more about what the
+difference is. Like prior work used a similar idea for streaming data, but not
+for data at rest?  I don't know how they handled their metadata now that I think
+about it.}
 
 Communicating classified materials, corporate secrets, etc. require the highest
 level of discretion when handled, yet sensitive information like this can
@@ -62,13 +71,17 @@ appears within a (much) larger amount of data that we value less. In this
 scenario, a user wants to indicate one or more regions of a file or files are
 more sensitive than the others. For example, perhaps banking transaction
 information is littered throughout a document; perhaps passwords and other
-sensitive information exists within several much larger files. \TODO{The "file or files" language detracts from this section a bit.  It would be stronger if you just stuck with one.  Can you actually support different regions within a file?  If so, that is much stronger in my mind.  Even saying you simulate it would be better to me.}
+sensitive information exists within several much larger files. \TODO{The "file
+or files" language detracts from this section a bit.  It would be stronger if
+you just stuck with one.  Can you actually support different regions within a
+file?  If so, that is much stronger in my mind.  Even saying you simulate it
+would be better to me.}
 
 We begin by writing 10 5MB and 4KB files to unique SwitchCrypt instances using
 ChaCha8 and again on instances using Freestyle Balanced. We repeat this on a
-SwitchCrypt instance using Selective switching with a 3:1 ratio of ChaCha8 nugget
-I/O operations versus Freestyle Balanced operations. We repeat this experiment
-three times.
+SwitchCrypt instance using Selective switching with a 3:1 ratio of ChaCha8
+nugget I/O operations versus Freestyle Balanced operations. We repeat this
+experiment three times.
 
 \begin{figure}[ht] \textbf{VSR Use Case: ChaCha8 vs Freestyle Secure Sequential
 4KB, 5MB Performance}\par\medskip
@@ -81,8 +94,8 @@ three times.
 
 In \figref{usecase-vsr-bar}, we see the sequential read and write performance of
 4K and 5M workloads when nuggets are encrypted exclusively with ChaCha8 or
-Freestyle Balanced. Between them, we see SwitchCrypt Selective switching 3:1 ratio
-I/O results.
+Freestyle Balanced. Between them, we see SwitchCrypt Selective switching 3:1
+ratio I/O results.
 
 Our goal is to use VSRs to keep our sensitive data secure while keeping the
 performance and energy use benefits of using a fast cipher for the majority of
@@ -100,13 +113,13 @@ security requirements, which is not possible using prior work.
 Due to garbage collection and wear-leveling requirements of SSDs, as free space
 becomes constrained, I/O performance drops precipitously~\cite{SSDEOL1, SSDEOL2,
 SSDEOL3}. With prior work, our strict latency ceiling is violated. However, if
-SwitchCrypt is made aware when the backing store is in such a state, we can offset
-some of the performance loss by switching the ciphers of high traffic nuggets to
-the fastest cipher available using Forward switching.
+SwitchCrypt is made aware when the backing store is in such a state, we can
+offset some of the performance loss by switching the ciphers of high traffic
+nuggets to the fastest cipher available using Forward switching.
 
-We begin by writing 10 40MB files to SwitchCrypt per each cipher as a baseline. We
-then introduce a delay into SwitchCrypt I/O of $20ms$ and repeat the experiment
-three times.
+We begin by writing 10 40MB files to SwitchCrypt per each cipher as a baseline.
+We then introduce a delay into SwitchCrypt I/O of $20ms$ and repeat the
+experiment three times.
 
 \begin{figure}[ht] \textbf{SSD EoL Use Case: Latency-Security Tradeoff vs
    Goals}\par\medskip
@@ -167,10 +180,11 @@ Our goal is to ``lock down'' the backing store, slowing down any attacker as
 much as possible such that, even if they copy and permanently store her data
 off-site for later attempts at decryption with more advanced compute resources
 and new technologies, our researcher's data is some degree more likely to remain
-irrecoverable. We show that, given a device that support SSD ISE, SwitchCrypt, and
-the Mirrored strategy, we can quickly and practically converge the backing store
-to this locked down state. With prior work, data is either too weakly encrypted
-or the device becomes too slow for daily use (latency ceiling). In exchange, we
-trade off half of our drive's writeable space.
+irrecoverable. We show that, given a device that support SSD ISE, SwitchCrypt,
+and the Mirrored strategy, we can quickly and practically converge the backing
+store to this locked down state. With prior work, data is either too weakly
+encrypted or the device becomes too slow for daily use (latency ceiling). In
+exchange, we trade off half of our drive's writeable space.
 
-\TODO{Consider adding some kind of lessons learned at the end if you can think of some "pithy" lessons here.}
+\TODO{Consider adding some kind of lessons learned at the end if you can think
+of some "pithy" lessons here.}
