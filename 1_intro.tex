@@ -31,8 +31,8 @@ Traditionally, FDE's impact on drive performance and energy efficiency depends
 on choice of filesystem/mapper and the choice of cipher, as different ciphers
 express different performance and efficiency characteristics while offering
 contrasting security properties. In this way, cipher choice can be viewed as a
-key \emph{configuration} parameter for FDE systems. The benefits of choosing
-cipher include: 1) increased filesystem performance (\ie{overall reduced FDE
+key \emph{configuration} parameter for FDE systems. The tradeoffs of choosing
+a cipher include: 1) increased filesystem performance (\ie{overall reduced FDE
 overhead}), 2) reduced energy use, and 3) the ability to encrypt devices that
 would otherwise be too slow or energy-inefficient to support FDE.
 
@@ -40,17 +40,17 @@ However, the de facto standard choice for FDE is the slow AES \emph{block
 cipher} (AES-XTS)~\cite{AES, AES-XTS}. Prior research~\cite{StrongBox}
 introduced the motivation and method for using \emph{stream ciphers} like the
 high performance ChaCha20~\cite{ChaCha20} cipher for FDE in lieu of AES-XTS.
-More recent work achieves something similar in practice, such as Google's HBSH
-(hash, block cipher, stream cipher, hash) and Adiantum, among others~\cite{HBSH,
-Adiantum}.
+More recent work---such as Google's HBSH
+(hash, block cipher, stream cipher, hash) and Adiantum~\cite{HBSH,
+Adiantum}---brings the use of stream ciphers for drive encryption to industrial strength products.
 
-But many ciphers exist with a variety of different performance characteristics
+There is a rich choice of stream ciphers with a variety of different performance characteristics
 and opposing security properties. Some of these include: ChaCha variants with
 different round counts (e.g., ChaCha8 \cite{ChaCha8} and ChaCha20
 \cite{ChaCha20}) or stronger security properties (e.g.,
 Freestyle~\cite{Freestyle}) and others---SalsaX~\cite{SalsaX}, AES in counter
 mode (AES-CTR)~\cite{AES-CTR}, Rabbit~\cite{Rabbit}, Sosemanuk~\cite{Sosemanuk},
-etc. This implies the cipher configuration providing the fastest I/O throughput
+etc. Given this variety, the cipher configuration providing the fastest I/O throughput
 is almost always different than the configuration providing the most desirable
 security properties, and both may differ from the configuration that uses the
 least amount of energy or allows the most writable drive space.
@@ -68,7 +68,8 @@ another configuration becomes more desirable later on?}
 
 \subsection{Our Contributions}
 
-To enable this, we first, introduce a scheme to \emph{quantify} the usefulness
+To realize the goal of flexibly adjusting storage tradeoffs, we first introduce 
+a scheme to \emph{quantify} the usefulness
 or relative ``strength'' of ciphers based on key security properties relevant to
 FDE. We call these ``security scores''. Using these security scores, we then
 define a tradeoff space of cipher configurations over competing concerns: total
