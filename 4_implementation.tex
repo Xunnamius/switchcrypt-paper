@@ -57,4 +57,62 @@ $R_{max}$=$28$, $H_I$=$2$, $I_C$=$10$)}, and a ``secure'' mode with parameters
 $I_C$=$12$)} per the recommendations of the Freestyle authors~\cite{Freestyle}.
 
 Thanks to Freestyle's output randomization, we can skip the overhead of
-tracking, detecting, and handling overwrites.
+tracking, detecting, and handling overwrites when nuggets are using it.
+
+\subsubsection{Implementing Cipher Switching}
+
+A naive implementation is trivial (\eg{execute the chosen strategy on every I/O
+operation}), this navigation must occur with acceptable overhead by preserving
+performance wherever possible. The cryptographic driver provides such a
+mechanism, tying together cipher switching strategies and the generic stream
+cipher API.
+
+In the cases of Mirrored and Selective switching, we use offset to determine in
+which area of the backing store receives I/O.
+
+In the case of Forward switching, it is tempting to implement it such that a
+nugget is completely re-ciphered during I/O every time its metadata indicates
+that it was previously encrypted using a non-active cipher. However, such a
+naive implementation can have disastrous effects on performance depending on the
+workload.
+
+First, a nugget is considered \emph{pristine} if it has not had any data written
+into it yet. SwitchCrypt determines if a nugget is pristine by checking the
+state of the transaction journal for that nugget. A pristine nugget will have a
+clean transaction journal.
+
+All nuggets start out as pristine. All nuggets start out with metadata
+indicating that they are to be encrypted and decrypted by the initially active
+cipher. This is true \emph{even if the nugget has not been written to yet}. This
+means, on read and write operations after a different cipher becomes the active
+cipher configuration using a naively implemented forward switching strategy,
+every write operation will trigger a re-keying, which carries significant
+overhead.
+
+The solution is to divide forward switching into \emph{soft re-ciphering} and
+\emph{hard re-ciphering}. Fortunately, the SwitchCrypt design lends itself
+nicely to such a distinction for free, as per-nugget metadata is managed
+separately from a nugget's actual data.
+
+During soft re-ciphering, only the nugget's metadata is changed to indicate that
+the nugget can be encrypted and decrypted with the newly active cipher
+configuration but \emph{without actually re-ciphering the nugget data itself}.
+This keeps the nugget in its pristine condition, preserving SwitchCrypt's
+ability to write data into it without triggering a costly re-keying operation
+every time, preserving our performance advantage. At the same time, SwitchCrypt
+can now use the newly active cipher configuration to interact with the nugget as
+expected. On the other hand, during hard re-cipher, the nugget's metadata is
+changed to match the active cipher configuration \emph{and} the nugget data is
+encrypted using the new cipher.
+
+\PUNT{When using forward switching other that 0-forward, \ie{N-forward} where $N
+> 0$, only read operations are allowed to trigger hard re-ciphering for nuggets
+other than the currently active nugget. This is still not enough to preserve our
+performance advantage, however, as I/O operations can span multiple nuggets, and
+attempting to take advantage of spatial locality after interacting with every
+nugget is counterproductive. Hence, only the last nugget touched by a read
+operation will trigger the more aggressive N-forward behavior if $N > 0$. These
+considerations have the effect of 1) preserving our performance advantage and 2)
+allowing more aggressive N-forward behavior (where $N > 0$) to take advantage of
+spatial locality during read-heavy workloads to result in a further performance
+advantage (see: \secref{evaluation}).}
