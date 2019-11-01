@@ -101,7 +101,8 @@ cipher switching.
 
 At any moment, the currently active cipher configuration is used to encrypt
 nugget contents. When a cipher switch occurs, the active cipher configuration is
-switched. There are choices to determine \emph{when} to encrypt a nugget with a
+switched. \TODO{Repeated use of "switch."} 
+There are choices to determine \emph{when} to encrypt a nugget with a
 different cipher and \emph{where} to direct the output. Depending on the
 complexity of the use case, it may make the most sense to re-cipher a nugget
 immediately, or eventually, or to maintain several areas of differently-ciphered
@@ -121,7 +122,7 @@ nuggets--to output ciphertext we call \emph{spatial switching}, for which we
 propose the \emph{Mirrored} and \emph{Selective} switching strategies.
 
 \tblref{strategies-advantages} summarizes the various advantages and
-disadvantages of these strategies.
+disadvantages of these strategies. \TODO{Consider just removing this sentence. You have a good description of the table and breakdown of the issues later.  Putting this reference to the table here without explaining the categories is jarring.}
 
 \subsubsection{Forward Switching Strategy}
 
@@ -164,7 +165,9 @@ use; each region's nuggets are encrypted by each of the $C$ ciphers
 respectively. For instance, were SwitchCrypt initialized using two ciphers ($C =
 2$), the backing store would be partitioned in half; all nuggets in the first
 partition would be encrypted with the first cipher while all nuggets in the
-second partition would be encrypted with the second.
+second partition would be encrypted with the second. \TODO{Problem here: you 
+	have talked about an "active cipher" and now you are introducing "ciphers in use."  
+	You don't want to define a new term here.  You need to either define $C$ in simple terms or you need to more formally introduce the new terminology.  Ask me if that advice does not make sense. }
 
 Hence, unlike the Forward strategy, which schedules individual nuggets to be
 re-ciphered at some point in time after the active cipher configuration is
@@ -172,7 +175,7 @@ switched, the Selective strategy allows the wider system to indicate
 \emph{where} on the backing store a read or write operation should occur. In
 this way, the selective strategy represents a form of spatial cipher switching
 where different regions of the backing store can store different pieces of data
-encrypted with different ciphers.
+encrypted with different ciphers. \TODO{Again, I think this needs more explanation.  Talk about how a user would interact with this: They could set up different security regions and either manage them as distinct virtual drives, or even write different files to different security regions on the same drive with a little support from the file read/write APIs.}
 
 \subsubsection{Mirrored Switching Strategy}
 
@@ -213,9 +216,9 @@ the entire backing store to a single cipher configuration without losing data is
 very useful (see: \secref{usecases}). The near-instantaneous nature of SSD
 Instant Secure Erase (ISE) implementations on modern SSDs~\cite{ISE1,ISE2,ISE3}
 makes this a very fast process for the Mirrored strategy. The Forward strategy
-slow to converge compared to Mirrored since, in the worse case, every nugget on
+is slow to converge compared to Mirrored since, in the worse case, every nugget on
 the drive will require re-ciphering. When using the Selective strategy, the
-backing store cannot converge without loss of data.
+backing store cannot converge without loss of data. \TODO{Why can't selective converge without data loss?  Don't I just recrypt one of the two partitions using the same cipher as the other partition?}
 
 \textbf{``Waste'':} Unlike the other two strategies, using the Forward strategy
 does not dramatically reduce the total usable space on the drive by the
@@ -243,6 +246,8 @@ writes is ``mirrored'' across all partitions. As with reads, the Forward
 strategy writes with low overhead except in the case where the current nugget is
 not pristine and was not encrypted with the active cipher configuration. This
 triggers costly re-ciphering, which can compound depending on workload.
+
+\TODO{At this point the text still has not been clear enough about why someone would pick one of these over another. You might just add a paragraph that says things like: "Each of these strategies is best-suited to a different workload.  When ...... Forward is best because ....  When ..... Selective might be preferred because it .....  When ..... Mirrored may be the best choice because of .....  Section XXX presents several use cases with specific scenarios that highlight the different strategies."}
 
 \subsubsection{Threat Model for Cipher Switching Strategies}
 
@@ -291,8 +296,9 @@ in the FDE context, we must have a way to quantitatively compare a cipher's
 do not attempt to define a generally applicable \textit{ranking} of
 \emph{security strength}. Instead, we score ciphers (\ie{a so-called ``security
 score''}) based on three key security properties that, when summed, give an
-estimate of the usefulness of a cipher to SwitchCrypt FDE (see:
-\tblref{security-quant}).
+estimate of the difficulty (or resources required) to attack a cipher to SwitchCrypt FDE (see:
+\tblref{security-quant}). \TODO{I do not like the word "useful" (or its derivatives) in a 
+	technical context, so I reworded the previous sentence.  Make sure you are okay with it.}
 
 Our scoring scheme is a combination of well understood schemes: scoring ciphers
 on their confusion and diffusion of plaintext bits during
@@ -362,3 +368,5 @@ ChaCha20. Variants are distributed evenly from 0-1. For instance, ChaCha8 scores
   SwitchCrypt and to FDE more generally.}
   \label{tbl:security-quant}
 \end{table}
+
+\TODO{It would be good to say something here about the implications of this table.  Basically summarizing what all this scoring means in practice.}
