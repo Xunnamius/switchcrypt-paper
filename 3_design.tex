@@ -149,7 +149,7 @@ selecting $N$ equal to the total number of nuggets managed by SwitchCrypt. This
 would have the overhead of re-ciphering large swaths of the backing store upon
 every I/O operation where a nugget encrypted with the non-active cipher
 configuration is encountered. Of course, this has the same dire implications for
-performance as simply re-initializing the entire filesystem or encrypted
+performance as simply re-initializing the entire system or encrypted
 container with the new cipher.}
 
 \subsubsection{Selective Switching Strategy}
@@ -213,17 +213,17 @@ slow to converge compared to Mirrored since, in the worse case, every nugget on
 the drive will require re-ciphering. When using the Selective strategy, the
 backing store cannot converge without loss of data.
 
-\textbf{``Waste'':} Unlike the other two strategies, using
-the Forward strategy does not dramatically reduce the total usable space on the
-drive by the end-user. This is because the Forward strategy allows nuggets with
-various cipher configurations to co-exist contiguously on the backing store.
-Since the Mirrored and Selective strategies require partitioning the backing
-store into some number of partitions---where the filesystem size reported back
-to the OS is some function of partition size---there is a necessary reduction in
-usable space.
+\textbf{``Waste'':} Unlike the other two strategies, using the Forward strategy
+does not dramatically reduce the total usable space on the drive by the
+end-user. This is because the Forward strategy allows nuggets with various
+cipher configurations to co-exist contiguously on the backing store. Since the
+Mirrored and Selective strategies require partitioning the backing store into
+some number of partitions---where the writeable size reported back to the OS is
+some function of partition size---there is a necessary reduction in usable
+space.
 
-\textbf{Performance:} The Selective and Mirrored strategies can read data
-from the backing store with low overhead, reaching performance parity with prior
+\textbf{Performance:} The Selective and Mirrored strategies can read data from
+the backing store with low overhead, reaching performance parity with prior
 work. This is because switching ciphers using these strategies amount to
 offsetting the read index so it lands in the proper partition, which has little
 overhead. The Forward strategy also reads with low overhead except in the case

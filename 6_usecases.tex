@@ -46,8 +46,8 @@ Balanced except when the system enters a low power state, after which the
 storage layer switches to favoring optimal energy use using ChaCha20 via the
 Forward switching strategy. Our results show that, while the system uses
 slightly more power in the short term, we stay within our energy budget and
-finish before the devices dies. \TODO{Add that when we get back to a charger,
-SwitchCrypt can easily recrypt the parts in ChaCha8 back to Freestyle Balanced?}
+finish before the devices dies. Further, when we get our device to a charger,
+SwitchCrypt can converge nuggets back to Freestyle Balanced.
 
 On average, using Forward cipher switching results in a \TODO{XXX} total energy
 use reduction.
@@ -58,24 +58,15 @@ This usecase illustrates utility of spatial Selective switching to achieve a
 performance win over prior work, where the entire drive is encrypted with a
 single cipher. We demonstrate \emph{Variable Security Regions} (VSR), where we
 can choose to encrypt select files or portions of files with different keys and
-ciphers below the filesystem level. Similar ``energy-security scalable
-encryption'' has been explored in related work~\cite{ScalableEncryption}.
-\TODO{If you mention this prior work here, you need to say more about what the
-difference is. Like prior work used a similar idea for streaming data, but not
-for data at rest?  I don't know how they handled their metadata now that I think
-about it.}
+ciphers below the filesystem level.
 
 Communicating classified materials, corporate secrets, etc. require the highest
 level of discretion when handled, yet sensitive information like this can
 appears within a (much) larger amount of data that we value less. In this
-scenario, a user wants to indicate one or more regions of a file or files are
-more sensitive than the others. For example, perhaps banking transaction
-information is littered throughout a document; perhaps passwords and other
-sensitive information exists within several much larger files. \TODO{The "file
-or files" language detracts from this section a bit.  It would be stronger if
-you just stuck with one.  Can you actually support different regions within a
-file?  If so, that is much stronger in my mind.  Even saying you simulate it
-would be better to me.}
+scenario, a user wants to indicate one or more regions of a file are more
+sensitive than the others. For example, perhaps banking transaction information
+is littered throughout a document; perhaps passwords and other sensitive
+information exists within several much larger files.
 
 We begin by writing 10 5MB and 4KB files to unique SwitchCrypt instances using
 ChaCha8 and again on instances using Freestyle Balanced. We repeat this on a
@@ -176,15 +167,12 @@ as 3 seconds~\cite{SeaGate,Samsung,ThatOtherOEM}. Once complete, the most secure
 form of the data is all that remains. The backing store has been ``locked
 down''.
 
-Our goal is to ``lock down'' the backing store, slowing down any attacker as
+Our goal is to lock down the backing store, slowing down any attacker as
 much as possible such that, even if they copy and permanently store her data
 off-site for later attempts at decryption with more advanced compute resources
 and new technologies, our researcher's data is some degree more likely to remain
-irrecoverable. We show that, given a device that support SSD ISE, SwitchCrypt,
+irrecoverable. We show that, given a device that supports SSD ISE, SwitchCrypt,
 and the Mirrored strategy, we can quickly and practically converge the backing
 store to this locked down state. With prior work, data is either too weakly
 encrypted or the device becomes too slow for daily use (latency ceiling). In
 exchange, we trade off half of our drive's writeable space.
-
-\TODO{Consider adding some kind of lessons learned at the end if you can think
-of some "pithy" lessons here.}
