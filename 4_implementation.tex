@@ -24,7 +24,8 @@ For experimental purposes, our implementation makes the choice of ciphers
 binary: either the system wants SwitchCrypt to access the backing store using the
 primary cipher or the secondary cipher. However, there is no technical
 limitation preventing various different nuggets encrypted with three, four, or
-more unique ciphers.
+more unique ciphers. \TODO{For consistent naming, we should say that one cipher is active, right?  
+	I do not think we defined what a primary cipher is.}
 
 Cipher switching is a cross-cutting concern---for instance, the desire to switch
 ciphers could come from an unrelated process in user space, so we use POSIX
@@ -34,7 +35,9 @@ A production-ready implementation would be greatly simplified by adding an
 ``intent'' parameter to the POSIX \textit{read()} and \textit{write()} system
 calls, allowing SwitchCrypt to more exactly map individual I/O operations to
 specific areas of the backing store when spatially switching. We simulate this
-with IPC. \PUNT{This is especially important when considering the selective
+with IPC. 
+\TODO{This intent parameter could also be a security score or something right? You should spell out exactly what that intent parameter means and maybe change its name so its use is clearer.}
+\PUNT{This is especially important when considering the selective
 switching strategy; a production-ready implementation supporting selective
 switching would need to differentiate between metadata operations belonging to
 the filesystem (should be mirrored across all partitions) and actual end-user
@@ -44,7 +47,7 @@ partitions).}
 Further, to operate securely, SwitchCrypt must be seeded with random data
 initially rather than have the backing store consist of all zeroes. This is a
 one-time cost paid during initialization and has no tangible effect on
-performance.
+performance. \TODO{Or other system operation, like wear?}
 
 \subsection{Freestyle Configurations}
 
@@ -57,7 +60,7 @@ $R_{max}$=$28$, $H_I$=$2$, $I_C$=$10$)}, and a ``secure'' mode with parameters
 $I_C$=$12$)} per the recommendations of the Freestyle authors~\cite{Freestyle}.
 
 Thanks to Freestyle's output randomization, we can skip the overhead of
-tracking, detecting, and handling overwrites when nuggets are using it.
+tracking, detecting, and handling overwrites when nuggets are using it. \TODO{Add one more thing.  If read quickly, it sounds like Freestyle should be very fast, but it gets all this because the encryption itself is much slower, right?  If so, it is worth saying that removing this overhead is just a minor reduction in the cost of using this cipher.  You can word it better than me.}
 
 \subsubsection{Implementing Cipher Switching}
 
@@ -65,7 +68,7 @@ A naive implementation is trivial (\eg{execute the chosen strategy on every I/O
 operation}), this navigation must occur with acceptable overhead by preserving
 performance wherever possible. The cryptographic driver provides such a
 mechanism, tying together cipher switching strategies and the generic stream
-cipher API.
+cipher API. \TODO{Which cryptographic driver? You need to clarify if you are talking about a piece of our design or something we are using from prior work.}
 
 In the cases of Mirrored and Selective switching, we use offset to determine in
 which area of the backing store receives I/O.
@@ -73,8 +76,7 @@ which area of the backing store receives I/O.
 In the case of Forward switching, it is tempting to implement it such that a
 nugget is completely re-ciphered during I/O every time its metadata indicates
 that it was previously encrypted using a non-active cipher. However, such a
-naive implementation can have disastrous effects on performance depending on the
-workload.
+naive implementation can have disastrous effects on performance. \TODO{It is not clear why that would be disastrous.}
 
 First, a nugget is considered \emph{pristine} if it has not had any data written
 into it yet. SwitchCrypt determines if a nugget is pristine by checking the
@@ -104,6 +106,8 @@ can now use the newly active cipher configuration to interact with the nugget as
 expected. On the other hand, during hard re-cipher, the nugget's metadata is
 changed to match the active cipher configuration \emph{and} the nugget data is
 encrypted using the new cipher.
+
+\TODO{MAybe repeat that mirrored relies on someone to implement the fast secure erase, so that you can read the fast partition until it is time to panic and then you quickly erase?  Are there other uses of mirrored?}
 
 \PUNT{When using forward switching other that 0-forward, \ie{N-forward} where $N
 > 0$, only read operations are allowed to trigger hard re-ciphering for nuggets
