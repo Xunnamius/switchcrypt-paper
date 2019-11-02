@@ -56,16 +56,16 @@ determined by ciphers loaded through the \emph{generic stream cipher API}.
 
 \subsection{Generic Stream Cipher API} \label{subsec:api}
 
-There are *many* ciphers we might use with SwitchCrypt, each with various input
-requirements and output considerations. Unlike prior work, SwitchCrypt must be
-able to encrypt and decrypt arbitrary nuggets without worrying about a cipher's
-implementation details. At the same time, these implementation details must be
-handled with care or the security of the system is violated. With our novel
-cipher API, we present an interface that \emph{decouples} cipher implementations
-from the encryption/decryption process. This allows any cipher to be integrated
-into SwitchCrypt without modification or special considerations. Hence,
-different stream ciphers become interchangeable when they would normally be
-incompatible, preventing us from trading them off one another.
+There are \emph{many} ciphers we might use with SwitchCrypt, each with various
+input requirements and output considerations. Unlike prior work, SwitchCrypt
+must be able to encrypt and decrypt arbitrary nuggets without worrying about a
+cipher's implementation details. At the same time, these implementation details
+must be handled with care or the security of the system is violated. With our
+novel cipher API, we present an interface that \emph{decouples} cipher
+implementations from the encryption/decryption process. This allows any cipher
+to be integrated into SwitchCrypt without modification or special
+considerations. Hence, different stream ciphers become interchangeable when they
+would normally be incompatible, preventing us from trading them off one another.
 
 The API is accessible at three levels:
 
