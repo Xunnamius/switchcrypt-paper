@@ -36,8 +36,8 @@ the backing store when spatially switching. We simulate this with IPC.
 \PUNT{This is especially important when considering the selective switching
 strategy; a production-ready implementation supporting selective switching would
 need to differentiate between metadata operations belonging to the filesystem
-(should be mirrored across all partitions) and actual end-user data (should be
-selectively read from and written to nuggets in specific partitions).}
+(should be mirrored across all regions) and actual end-user data (should be
+selectively read from and written to nuggets in specific regions).}
 
 Further, to operate securely, SwitchCrypt must be seeded with random data
 initially rather than have the backing store consist of all zeroes. This is a
@@ -93,7 +93,7 @@ re-keying operation every time. On the other hand, during hard re-cipher, the
 nugget's metadata is changed to match the active cipher configuration \emph{and}
 the nugget data is encrypted using the new cipher.
 
-\TODO{MAybe repeat that mirrored relies on someone to implement the fast secure erase, so that you can read the fast partition until it is time to panic and then you quickly erase?  Are there other uses of mirrored?}
+\TODO{MAybe repeat that mirrored relies on someone to implement the fast secure erase, so that you can read the fast region until it is time to panic and then you quickly erase?  Are there other uses of mirrored?}
 
 \PUNT{When using forward switching other that 0-forward, \ie{N-forward} where $N
 > 0$, only read operations are allowed to trigger hard re-ciphering for nuggets
