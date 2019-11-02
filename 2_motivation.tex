@@ -32,8 +32,8 @@ With a traditional filesystem or encrypted container, we are stuck with the
 high-latency \emph{high-energy} cipher configuration chosen at initialization.
 
 With the ability to re-cipher individual storage units, we can achieve this
-functionality by switching to a cipher configuration that trades the security
-properties of active areas of storage (\ie{to where the downloaded movie's bytes
+functionality by switching to a cipher configuration that trades \emph{some}
+security of active areas of storage (\ie{to where the downloaded movie's bytes
 and filesystem metadata updates are being committed}) so that we stay within our
 curtailed energy budget and successfully retrieve the entire file. Had we
 remained at the high-latency high-energy cipher configuration, we would have
@@ -41,10 +41,10 @@ blown past our budget in the middle of downloading the file.
 
 And thanks to the ``battery saver'' mode, our device remains alive long enough
 for us to reach a charger, allowing the system to return to a non-curtailed
-energy budget, our system can return those storage areas to their even more
-secure cipher configuration dynamically, allowing the security of the backing
-store to recover without having to recreate the entire underlying filesystem or
-encrypted container or restart the device.
+energy budget. Our system can return any storage areas to their more secure
+cipher configuration dynamically, allowing the security of the backing store to
+recover without having to recreate the entire underlying filesystem or encrypted
+container or restart the device.
 
 \subsection{Key Challenges}
 
