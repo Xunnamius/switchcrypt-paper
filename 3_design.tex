@@ -1,18 +1,27 @@
-\section{SwitchCrypt Design}\label{sec:design}
+\section{SwitchCrypt Design} \label{sec:design}
 
+What follows is a brief overview of SwitchCrypt's design
+(\cref{subsec:overview}). We then discuss \emph{decoupling} the cipher
+implementations from the encryption/decryption process by providing a generic
+API (\cref{subsec:api}), describe and contrast three cipher \emph{switching
+strategies} (\cref{subsec:strategies}), and then detail our scheme to
+\emph{quantify} cipher strength and the tradeoff of configurations that yields
+(\cref{subsec:quantify}). Finally, we revisit the battery saver example and
+summarize how the SwitchCrypt components fit together (\cref{subsec:summary}).
 In this section, we first give a brief overview of SwitchCrypt's design. We then
-1) discuss our novel, general API for \emph{decoupling} the cipher implementations from the
-encryption/decryption process, 2) describe and contrast three
-cipher \emph{switching strategies}, and finally 3) detail our scheme to
-\emph{quantify} cipher strength and the tradeoff of configurations this quantification yields.
+1) discuss our novel, general API for \emph{decoupling} the cipher
+implementations from the encryption/decryption process, 2) describe and contrast
+three cipher \emph{switching strategies}, and finally 3) detail our scheme to
+\emph{quantify} cipher strength and the tradeoff of configurations this
+quantification yields.
 
-\subsection{SwitchCrypt Overview}
+\subsection{SwitchCrypt Overview}\label{subsec:overview}
 
-SwitchCrypt divides the underlying drive(s) or ``backing store'' into a series
-independent same-size logical blocks called \emph{nuggets}. A nugget consists of
-one or more physical drive blocks/sectors depending on its configured size and
-per-nugget metadata indicating which cipher was used to encrypt the nugget. Each
-nugget is subdivided into a constant number of units called \emph{flakes}.
+SwitchCrypt divides the underlying drive into a series independent same-size
+logical units called \emph{nuggets}. Each nugget is subdivided into a constant
+number of units called \emph{flakes}. A flake consists of one or more contiguous
+physical drive  blocks with per-nugget metadata indicating which cipher was used
+to encrypt the nugget.
 
 SwitchCrypt uses this flake-nugget structure to 1) track, detect, and handle
 overwrites, 2) limit the maximum length of any plaintexts provided to ciphers,
@@ -52,7 +61,7 @@ cryptographic material is stored depending on the cipher used to encrypt the
 nugget. The size of the array is determined by the \emph{generic stream cipher
 API}. \TODO{So, this is a new component, right? I think it should be explicitly called out as such and probably the first four components need to be labeled as Strongbox pieces. }
 
-\subsection{Generic Stream Cipher API: Decoupling Implementation And Process}
+\subsection{Generic Stream Cipher API: Decoupling Implementation And Process} \label{subsec:api}
 
 We \emph{decouple} the cipher implementations from the encryption/decryption
 process through the generic stream cipher API, which allows any cipher to work
@@ -65,7 +74,7 @@ SwitchCrypt exposes API hooks at three levels:
 \begin{enumerate}
    \item \textbf{\texttt{crypt\_data}}\\\texttt{crypt\_data}
    operates at a fine-grain level, provides intra- and inter- nugget offset as
-    inputs, and returns crypted the specified region. There is no distinction
+    inputs, and returns encrypted the specified region. There is no distinction
     made between encryption and decryption. Further, this interface does not
     allow any access to the SwitchCrypt internals and is expected to execute
     independently of SwitchCrypt. \TODO{I got confused by the bit about not distinguishing between encrypt and decrypt.  First, why don't you need to distinguish the two?  Second, what does it save you to treat them the same?}
@@ -89,13 +98,13 @@ cryptographic material}) or other considerations. Coarse-grain cipher
 implementations must only ever operate on a single nugget or API behavior is
 undefined. Further, due to cipher switching, implementations must not read in
 any nugget/flake data from the backstore if a perfectly aligned nugget-sized
-chunk is requested. This is because the nugget data might be crypted with a
+chunk is requested. This is because the nugget data might be encrypted with a
 different algorithm when attempting to read it, corrupting the plaintext during
 cipher switching.
 
 \TODO{An issue: this API is set up to be one of the big contributions of the paper, but at this point I still don't really understand why it is necessary.  You may need to add an example.  Maybe two, a negative example and positive one.  Like, if you just want to switchc between different version of ChaCha, what would you need in your API?  What changes when you decide you want to switch between ChaCha and freestyle.  I know that adding freestyle added a lot of work to your implementaiton and that fact certainly implies that it was hard to do, so any insights you derived from doing it should be valuable.  I assume these API functions are the insights, but more explanation is needed for why these functions are the right functions and what problems their existence addresses.}
 
-\subsection{Cipher Switching Strategies}
+\subsection{Cipher Switching Strategies} \label{subsec:strategies}
 
 \TODO{Maybe one more paragraph of setup. Like: The SwitchCrypt design allows many, separately encrypted regions to co-exist on the drive. However, at any moment there will be one \emph{active cipher}.  The active cipher represents that which would be used to handle the next data to be sent (or requested?) from the drive.  Then, you just need a small transition into the next paragraph.}
 
@@ -279,7 +288,7 @@ have been proven formally secure. Hence, nuggets encrypted with different secure
 ciphers can co-exist on the backing store securely, depending on the use case
 (see: \secref{usecases}).
 
-\subsection{Quantifying Cipher Security Properties}
+\subsection{Quantifying Cipher Security Properties} \label{subsec:quantify}
 
 Every cipher mentioned in this paper has been proven formally secure in that
 \emph{there are no known efficient attacks against any of them}~\cite{All,
@@ -365,8 +374,13 @@ ChaCha20. Variants are distributed evenly from 0-1. For instance, ChaCha8 scores
   Freestyle (S)   & 1           & 1            & 1              & 3
   \end{tabular}
   \caption{These ``scores'' represent a cipher's desirability or usefulness to
-  SwitchCrypt and to FDE more generally.}
+  SwitchCrypt and to FDE more generally. \TODO{It would be good to say something
+  here about the implications of this table.  Basically summarizing what all
+  this scoring means in practice.}}
   \label{tbl:security-quant}
 \end{table}
 
-\TODO{It would be good to say something here about the implications of this table.  Basically summarizing what all this scoring means in practice.}
+\subsection{Putting It All Together} \label{subsec:summary}
+
+Text goes here.
+

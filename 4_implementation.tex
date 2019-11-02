@@ -21,28 +21,23 @@ to transact block I/O requests to and from virtual block devices exposed via
 domain socket.
 
 For experimental purposes, our implementation makes the choice of ciphers
-binary: either the system wants SwitchCrypt to access the backing store using the
-primary cipher or the secondary cipher. However, there is no technical
+binary: either the system wants SwitchCrypt to access the backing store using
+the primary cipher or the secondary cipher. However, there is no technical
 limitation preventing various different nuggets encrypted with three, four, or
 more unique ciphers. \TODO{For consistent naming, we should say that one cipher is active, right?  
 	I do not think we defined what a primary cipher is.}
 
-Cipher switching is a cross-cutting concern---for instance, the desire to switch
-ciphers could come from an unrelated process in user space, so we use POSIX
-message queues in our implementation.
-
-A production-ready implementation would be greatly simplified by adding an
-``intent'' parameter to the POSIX \textit{read()} and \textit{write()} system
-calls, allowing SwitchCrypt to more exactly map individual I/O operations to
-specific areas of the backing store when spatially switching. We simulate this
-with IPC. 
+we use POSIX message queues to indicate intent to switch. A production-ready
+implementation would be greatly simplified by adding an ``intent'' parameter to
+the POSIX \textit{read()} and \textit{write()} system calls, allowing
+SwitchCrypt to more exactly map individual I/O operations to specific areas of
+the backing store when spatially switching. We simulate this with IPC.
 \TODO{This intent parameter could also be a security score or something right? You should spell out exactly what that intent parameter means and maybe change its name so its use is clearer.}
-\PUNT{This is especially important when considering the selective
-switching strategy; a production-ready implementation supporting selective
-switching would need to differentiate between metadata operations belonging to
-the filesystem (should be mirrored across all partitions) and actual end-user
-data (should be selectively read from and written to nuggets in specific
-partitions).}
+\PUNT{This is especially important when considering the selective switching
+strategy; a production-ready implementation supporting selective switching would
+need to differentiate between metadata operations belonging to the filesystem
+(should be mirrored across all partitions) and actual end-user data (should be
+selectively read from and written to nuggets in specific partitions).}
 
 Further, to operate securely, SwitchCrypt must be seeded with random data
 initially rather than have the backing store consist of all zeroes. This is a
@@ -56,11 +51,11 @@ configurations: a ``fast'' mode with parameters
 \\\texttt{FreestyleFast($R_{min}$=$8$, $R_{max}$=$20$, $H_I$=$4$, $I_C$=$8$)}, a
 ``balanced'' mode with parameters \texttt{FreestyleBalanced($R_{min}$=$12$,
 $R_{max}$=$28$, $H_I$=$2$, $I_C$=$10$)}, and a ``secure'' mode with parameters
-\texttt{FreestyleSecure($R_{min}$=$20$, $R_{max}$=$36$, $H_I$=$1$,
-$I_C$=$12$)} per the recommendations of the Freestyle authors~\cite{Freestyle}.
+\texttt{FreestyleSecure($R_{min}$=$20$, $R_{max}$=$36$, $H_I$=$1$, $I_C$=$12$)}.
 
 Thanks to Freestyle's output randomization, we can skip the overhead of
-tracking, detecting, and handling overwrites when nuggets are using it. \TODO{Add one more thing.  If read quickly, it sounds like Freestyle should be very fast, but it gets all this because the encryption itself is much slower, right?  If so, it is worth saying that removing this overhead is just a minor reduction in the cost of using this cipher.  You can word it better than me.}
+tracking, detecting, and handling overwrites when nuggets are using it,
+offsetting the 1.6x to 3.2x slowdown compared to the ChaCha20~\cite{Freestyle}.
 
 \subsubsection{Implementing Cipher Switching}
 
@@ -80,32 +75,23 @@ naive implementation can have disastrous effects on performance. \TODO{It is not
 
 First, a nugget is considered \emph{pristine} if it has not had any data written
 into it yet. SwitchCrypt determines if a nugget is pristine by checking the
-state of the transaction journal for that nugget. A pristine nugget will have a
-clean transaction journal.
+state of the transaction journal for that nugget. All nuggets start out pristine
+with metadata indicating that they are to be encrypted and decrypted by the
+initially active cipher. This is true \emph{even if the nugget has not been
+written to yet}. This means, on read and write operations after a different
+cipher becomes the active cipher configuration using a naively implemented
+forward switching strategy, every write operation will trigger a re-keying,
+which carries significant overhead.
 
-All nuggets start out as pristine. All nuggets start out with metadata
-indicating that they are to be encrypted and decrypted by the initially active
-cipher. This is true \emph{even if the nugget has not been written to yet}. This
-means, on read and write operations after a different cipher becomes the active
-cipher configuration using a naively implemented forward switching strategy,
-every write operation will trigger a re-keying, which carries significant
-overhead.
-
-The solution is to divide forward switching into \emph{soft re-ciphering} and
-\emph{hard re-ciphering}. Fortunately, the SwitchCrypt design lends itself
-nicely to such a distinction for free, as per-nugget metadata is managed
-separately from a nugget's actual data.
-
-During soft re-ciphering, only the nugget's metadata is changed to indicate that
-the nugget can be encrypted and decrypted with the newly active cipher
-configuration but \emph{without actually re-ciphering the nugget data itself}.
-This keeps the nugget in its pristine condition, preserving SwitchCrypt's
-ability to write data into it without triggering a costly re-keying operation
-every time, preserving our performance advantage. At the same time, SwitchCrypt
-can now use the newly active cipher configuration to interact with the nugget as
-expected. On the other hand, during hard re-cipher, the nugget's metadata is
-changed to match the active cipher configuration \emph{and} the nugget data is
-encrypted using the new cipher.
+Our solution was to divide forward switching into \emph{soft re-ciphering} and
+\emph{hard re-ciphering}. During soft re-ciphering, only the nugget's metadata
+is changed to indicate that the nugget can be encrypted and decrypted with the
+newly active cipher configuration but \emph{without actually re-ciphering the
+nugget data itself}. This keeps the nugget in its pristine condition, preserving
+SwitchCrypt's ability to write data into it without triggering a costly
+re-keying operation every time. On the other hand, during hard re-cipher, the
+nugget's metadata is changed to match the active cipher configuration \emph{and}
+the nugget data is encrypted using the new cipher.
 
 \TODO{MAybe repeat that mirrored relies on someone to implement the fast secure erase, so that you can read the fast partition until it is time to panic and then you quickly erase?  Are there other uses of mirrored?}
 
