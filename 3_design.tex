@@ -397,14 +397,14 @@ which divides the request by which nuggets it touches. For each nugget, the
 per-nugget metadata is consulted to determine with which cipher the nugget is
 encrypted. If it's encrypted with the active cipher, which must be true if we
 have not initiated a cipher switch, the write is handled like prior work:
-encrypted data is read in from the backing storage, the merkle tree is consulted
-to ensure the integrity of encrypted data, the transaction journal is consulted
-during write operations so that overwrites are handled and pad-reuse violations
-are avoided, and then the keycount store is consulted to derive the nugget's
-unique encryption key from some master secret. Using the generic stream cipher
-API to call out to the active stream cipher implementation, SwitchCrypt
-encrypts/decrypts the nugget's contents~\cite{StrongBox} and commits any updates
-back to backing storage.
+encrypted data is read in from the backing storage, the merkle tree and
+monotonic counter are consulted to ensure the integrity of encrypted data, the
+transaction journal is consulted during write operations so that overwrites are
+handled and pad-reuse violations are avoided, and then the keycount store is
+consulted to derive the nugget's unique encryption key from some master secret.
+Using the generic stream cipher API to call out to the active stream cipher
+implementation, SwitchCrypt encrypts/decrypts the nugget's
+contents~\cite{StrongBox} and commits any updates back to backing storage.
 
 When the device enters ``battery saver'' mode, the energy monitoring software
 downclocks the CPU and indicates to SwitchCrypt that a more energy-efficient
@@ -416,7 +416,7 @@ Since we're using the Forward switching strategy, this means the nugget data is
 immediately decrypted by calling out to the inactive cipher through the API and
 then re-encrypted by calling out to the active cipher. Depending on the API
 level the cipher is implemented at, either 1) the cryptographic driver manages
-encrypting/decrypting data and updating the merkle tree, transaction journal,
-and keycount store or 2) the cipher implementation handles updating SwitchCrypt
-internals directly. Afterwards, the I/O operation is committed to the backing
-store.
+encrypting/decrypting data and updating the merkle tree and monotonic counter,
+transaction journal, and keycount store or 2) the cipher implementation handles
+updating SwitchCrypt internals directly. Afterwards, the I/O operation is
+committed to the backing store.
