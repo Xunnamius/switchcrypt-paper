@@ -338,9 +338,7 @@ the same input or it does not. A cipher with non-deterministic output given the
 same key, nonce, and message as inputs scores a 1 for this feature while a
 cipher with deterministic output given the same input scores a 0.\\
 \\
-\textbf{2) Resistance to brute force and offline/dictionary attacks (RBF).}
-All the ciphers we consider are resistant to ciphertext-only brute force and
-dictionary attacks, which is paramount for the encryption of data at rest. We
+\textbf{2) Resistance to brute force and offline/dictionary attacks (RBF).} We
 narrowly define ``standard resistance'' versus brute-force and
 offline/dictionary attacks with respect to the time taken to finish decrypting
 ciphertext given an incorrect key versus a correct key; a cipher with standard
@@ -361,8 +359,10 @@ higher number of rounds typically implies a stronger confidentiality guarantee
 given there are no fatal related-key attacks. This feature represents how many
 rounds the cipher executes compared to the accepted ``standard'' round count for
 that cipher. For instance, ChaCha8 is a reduced round version of the standard
-ChaCha20. Variants are distributed evenly from 0-1. For instance, ChaCha8 scores
-0 and ChaCha20 scores 1\@.
+ChaCha20.
+
+Scores for variants are distributed evenly from 0-1. For instance, ChaCha8
+scores 0 and ChaCha20 scores 1\@.
 
 \begin{table}[]
   \begin{tabular}{@{}lllll@{}}

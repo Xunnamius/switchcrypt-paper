@@ -20,29 +20,30 @@ the standard Linux Network Block Device (NBD). BUSE allows an operating system
 to transact block I/O requests to and from virtual block devices exposed via
 domain socket.
 
-For experimental purposes, our implementation makes the choice of ciphers
+\PUNT{For experimental purposes, our implementation makes the choice of ciphers
 binary: either the system wants SwitchCrypt to access the backing store using
-the primary cipher or the secondary cipher. However, there is no technical
+the active cipher or the inactive cipher. However, there is no technical
 limitation preventing various different nuggets encrypted with three, four, or
-more unique ciphers. \TODO{For consistent naming, we should say that one cipher is active, right?  
-	I do not think we defined what a primary cipher is.}
+more unique ciphers.
 
 we use POSIX message queues to indicate intent to switch. A production-ready
 implementation would be greatly simplified by adding an ``intent'' parameter to
 the POSIX \textit{read()} and \textit{write()} system calls, allowing
 SwitchCrypt to more exactly map individual I/O operations to specific areas of
 the backing store when spatially switching. We simulate this with IPC.
-\TODO{This intent parameter could also be a security score or something right? You should spell out exactly what that intent parameter means and maybe change its name so its use is clearer.}
-\PUNT{This is especially important when considering the selective switching
-strategy; a production-ready implementation supporting selective switching would
-need to differentiate between metadata operations belonging to the filesystem
-(should be mirrored across all regions) and actual end-user data (should be
-selectively read from and written to nuggets in specific regions).}
+\TODO{This intent parameter could also be a security score or something right?
+You should spell out exactly what that intent parameter means and maybe change
+its name so its use is clearer.} \PUNT{This is especially important when
+considering the selective switching strategy; a production-ready implementation
+supporting selective switching would need to differentiate between metadata
+operations belonging to the filesystem (should be mirrored across all regions)
+and actual end-user data (should be selectively read from and written to nuggets
+in specific regions).}
 
 Further, to operate securely, SwitchCrypt must be seeded with random data
 initially rather than have the backing store consist of all zeroes. This is a
 one-time cost paid during initialization and has no tangible effect on
-performance. \TODO{Or other system operation, like wear?}
+performance. SSDs that support ISE can accomplish this with minimal wear.}
 
 \subsection{Freestyle Configurations}
 
@@ -57,13 +58,14 @@ Thanks to Freestyle's output randomization, we can skip the overhead of
 tracking, detecting, and handling overwrites when nuggets are using it,
 offsetting the 1.6x to 3.2x slowdown compared to the ChaCha20~\cite{Freestyle}.
 
-\subsubsection{Implementing Cipher Switching}
+\PUNT{\subsubsection{Implementing Cipher Switching}
 
 A naive implementation is trivial (\eg{execute the chosen strategy on every I/O
 operation}), this navigation must occur with acceptable overhead by preserving
 performance wherever possible. The cryptographic driver provides such a
 mechanism, tying together cipher switching strategies and the generic stream
-cipher API. \TODO{Which cryptographic driver? You need to clarify if you are talking about a piece of our design or something we are using from prior work.}
+cipher API. \TODO{Which cryptographic driver? You need to clarify if you are
+talking about a piece of our design or something we are using from prior work.}
 
 In the cases of Mirrored and Selective switching, we use offset to determine in
 which area of the backing store receives I/O.
@@ -93,7 +95,9 @@ re-keying operation every time. On the other hand, during hard re-cipher, the
 nugget's metadata is changed to match the active cipher configuration \emph{and}
 the nugget data is encrypted using the new cipher.
 
-\TODO{MAybe repeat that mirrored relies on someone to implement the fast secure erase, so that you can read the fast region until it is time to panic and then you quickly erase?  Are there other uses of mirrored?}
+\TODO{Maybe repeat that mirrored relies on someone to implement the fast secure
+erase, so that you can read the fast region until it is time to panic and then
+you quickly erase?  Are there other uses of mirrored?}}
 
 \PUNT{When using forward switching other that 0-forward, \ie{N-forward} where $N
 > 0$, only read operations are allowed to trigger hard re-ciphering for nuggets
