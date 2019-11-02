@@ -227,3 +227,5 @@ threat model and maintains confidentiality and integrity guarantees.
 \end{table}
 
 \TODO{There is at least one more attack that needs to be addressed.  I think this approach is susceptible to physical attacks.  If we encrypt some data with ChaCha8 and then swtich the active cipher to Freestyle, if an attacker accesses data through our system, they will get the Freestyle version, right?  But, if they can remove the storage from our software, the ChaCha8 version is there. I guess that I assumed forward when I wrote that, but something similar is ture for mirrored.  I think we need to acknowledge (agian) that an attacker could access data that has not been switched yet.  That is a new threat and the only solution I can see is to be careful.  We might say that we should combine strategies in some cases.  Like use selective with the best freestyle on one side and write your most sensitive data there, then on the other side, use forward switching.  I may not be coherent anymore...}
+
+\TODO{One more thing: you never explicitly say what the answer to all those qwustions is.  I like the questions at the beginning.  Now you need to declare victory.}
