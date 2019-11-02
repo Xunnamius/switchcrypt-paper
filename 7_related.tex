@@ -1,7 +1,8 @@
 \section{Related Work}\label{sec:related}
 
-The standard approach to FDE, using AES-XTS, introduces significant overhead. It
-is well known that encryption using \emph{stream ciphers} is faster than using
+The standard approach to FDE, using AES-XTS, introduces significant overhead. 
+Within the last year and a half it has been established that encryption 
+using \emph{stream ciphers} for FDE is faster than using
 AES~\cite{StrongBox, AnotherPaper1, AnotherPaper2}. However, when used naively
 in drive encryption, stream ciphers are widely known to be vulnerable to
 ``overwrite attacks'' like pad reuse and rollback~\cite{KatzLindell, StrongBox}.
@@ -38,4 +39,4 @@ Device; include other ciphers in the same vein as Freestyle}
 
 \TODO{Include papers that trade energy/perf vs securty; Scalable Encryption
 paper, energy saving cryptosystems, LastPass whitepaper trading crypto for
-reduced latency in PBKDF2, etc.}
+reduced latency in PBKDF2, etc.} \TODO{Agreed that this last one is critical. PErhaps cut the prior todo for space.}
