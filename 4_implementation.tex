@@ -45,10 +45,8 @@ initially rather than have the backing store consist of all zeroes. This is a
 one-time cost paid during initialization and has no tangible effect on
 performance. SSDs that support ISE can accomplish this with minimal wear.}
 
-\subsection{Freestyle Configurations}
-
-As Freestyle is highly configurable, we implement it in three different
-configurations: a ``fast'' mode with parameters
+Finally, as the Freestyle cipher is highly configurable, we implement it in
+three different configurations: a ``fast'' mode with parameters
 \\\texttt{FreestyleFast($R_{min}$=$8$, $R_{max}$=$20$, $H_I$=$4$, $I_C$=$8$)}, a
 ``balanced'' mode with parameters \texttt{FreestyleBalanced($R_{min}$=$12$,
 $R_{max}$=$28$, $H_I$=$2$, $I_C$=$10$)}, and a ``secure'' mode with parameters
@@ -73,7 +71,8 @@ which area of the backing store receives I/O.
 In the case of Forward switching, it is tempting to implement it such that a
 nugget is completely re-ciphered during I/O every time its metadata indicates
 that it was previously encrypted using a non-active cipher. However, such a
-naive implementation can have disastrous effects on performance. \TODO{It is not clear why that would be disastrous.}
+naive implementation can have disastrous effects on performance. \TODO{It is not
+clear why that would be disastrous.}
 
 First, a nugget is considered \emph{pristine} if it has not had any data written
 into it yet. SwitchCrypt determines if a nugget is pristine by checking the
