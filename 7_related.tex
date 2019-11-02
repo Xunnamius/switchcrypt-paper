@@ -23,7 +23,7 @@ lattermost prior approach with SwitchCrypt: a stream cipher based FDE and
 metadata layer that exploits LFS overwrite-averse behavior to achieve
 high-performance encryption.
 
-Unlike prior work, which focuses on optimizing performance despite re-encrypting
+Unlike prior work, which focuses on optimizing performance despite re-ciphering
 due to overwrites, SwitchCrypt maintains overwrite protections while abstracting
 the idea of re-encrypting nuggets out into re-ciphering or \emph{cipher
 switching}, where a nugget's contents are decrypted using the old key and

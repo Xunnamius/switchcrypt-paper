@@ -108,7 +108,7 @@ disparate concerns are abstracted away, laying the groundwork for
 
 \subsection{Cipher Switching Strategies} \label{subsec:strategies}
 
-The SwitchCrypt design allows many differently-encrypted storage units to
+The SwitchCrypt design allows many differently-ciphered storage units to
 co-exist on the backing store. However, at any moment, there is a single
 \emph{active cipher} configuration. The active cipher is the only cipher used to
 encrypt nugget contents. When a cipher switch occurs, a different cipher becomes
@@ -177,7 +177,7 @@ re-ciphered at some point in time after the active cipher configuration is
 switched, the Selective strategy allows the wider system to indicate
 \emph{where} on the backing store a read or write operation should occur. In
 this way, the selective strategy represents a form of spatial cipher switching
-where different regions of the backing store can store differently-encrypted
+where different regions of the backing store can store differently-ciphered
 nuggets. A user could take advantage of this to, for instance, set up regions
 with different security properties and performance characteristics, managing
 them as distinct virtual drives or even reading/writing bytes to different
@@ -192,13 +192,13 @@ partitioned into $C$ regions where $C$ represents the maximum number of ciphers;
 each regions' nuggets are encrypted by each of the $C$ ciphers respectively.
 
 However, unlike the Selective strategy, all write operations that hit one
-partition are mirrored into the other partitions immediately. The mirrored
+region are mirrored into the other regions immediately. The mirrored
 strategy allows the wider system to indicate (via the active cipher) within
 which region a \emph{read} operation should occur. In this way, the Mirrored
 strategy represents a form of spatial cipher switching. A user could take
 advantage of this to \emph{quickly} converge the backing store to a single
 cipher configuration without loss any data or the performance penalty of
-re-encrypting an entire region's nuggets.
+re-ciphering an entire region's nuggets.
 
 All regions of the backing store will always be in a consistent state and always
 share the same data.
@@ -206,14 +206,14 @@ share the same data.
 \subsubsection{Comparing Cipher Switching Strategies}
 
 \begin{table}[]
-   \begin{tabular}{@{}|l|l|l|l|@{}}
+   \begin{tabular}{@{}|c|c|c|C{25mm}|@{}}
       \toprule
       \textbf{Strategy} & \textbf{Convergence} & \textbf{Waste} & \textbf{Performance} \\ \midrule
-      Forward   & Slow           & Low  & Workload dependent    \\
+      Forward   & Slow           & Low  & Fast reads and writes unless switching \\
       \hline
-      Mirrored  & Nearly instant & High & Fast read; slow write \\
+      Mirrored  & Nearly instant & High & Fast reads; slow writes \\
       \hline
-      Selective & Impossible     & High & Fast read and write   \\
+      Selective & Slow           & High & Fast reads and writes  \\
       \hline
    \end{tabular}
    \caption{A summary comparison between the three cipher switching strategies.}
@@ -228,38 +228,45 @@ the entire backing store to a single cipher configuration without losing data is
 very useful (see: \secref{usecases}). The near-instantaneous nature of SSD
 Instant Secure Erase (ISE) implementations on modern SSDs~\cite{ISE1,ISE2,ISE3}
 makes this a very fast process for the Mirrored strategy. The Forward strategy
-is slow to converge compared to Mirrored since, in the worse case, every nugget on
-the drive will require re-ciphering. When using the Selective strategy, the
-backing store cannot converge without loss of data. \TODO{Why can't selective converge without data loss?  Don't I just recrypt one of the two partitions using the same cipher as the other partition?}
+is slow to converge compared to Mirrored since, in the worse case, every nugget
+on the drive will require re-ciphering. The Selective strategy is similarly slow
+to converge since entire regions of nuggets must be re-ciphered to prevent data
+loss; those regions can be destroyed with ISE too, which would be very fast, but
+unlike Mirrored the data would be lost forever, which is rarely desirable.
 
 \textbf{``Waste'':} Unlike the other two strategies, using the Forward strategy
 does not dramatically reduce the total usable space on the drive by the
-end-user. This is because the Forward strategy allows nuggets with various
-cipher configurations to co-exist contiguously on the backing store. Since the
-Mirrored and Selective strategies require partitioning the backing store into
-some number of partitions---where the writeable size reported back to the OS is
-some function of partition size---there is a necessary reduction in usable
-space.
+end-user. This is because the Forward strategy allows differently-ciphered
+nuggets to co-exist contiguously on the backing store. Since the Mirrored and
+Selective strategies require partitioning the backing store into some number of
+regions---where the writeable size reported back to the OS is some function of
+region size---there is a necessary reduction in usable space.
 
 \textbf{Performance:} The Selective and Mirrored strategies can read data from
 the backing store with low overhead, reaching performance parity with prior
-work. This is because switching ciphers using these strategies amount to
-offsetting the read index so it lands in the proper partition, which has little
+work. This is because switching ciphers using these strategies amounts to
+offsetting the read index so it lands in the proper region, which has little
 overhead. The Forward strategy also reads with low overhead except in the case
-where the current nugget was not encrypted with the active cipher configuration.
-This triggers re-ciphering, which can be costly if the workload touches unique
-nuggets and is small enough that cost is not amortized.
+where a nugget was not encrypted with the active cipher. This triggers
+re-ciphering, which can be costly if the workload touches unique nuggets and is
+small enough that cost is not amortized.
 
 The Selective strategy also writes with low overhead because, like with reads,
 an offset is the only requirement. The Mirrored strategy, on the other hand, can
 be two or more times slower for writes (when $C = 2$) compared to baseline. Each
-additional partition ($C > 2$) compounds the write penalty. This is because each
-writes is ``mirrored'' across all partitions. As with reads, the Forward
-strategy writes with low overhead except in the case where the current nugget is
-not pristine and was not encrypted with the active cipher configuration. This
-triggers costly re-ciphering, which can compound depending on workload.
+additional region ($C > 2$) compounds the write penalty. This is because each
+writes is ``mirrored'' across all regions. As with reads, the Forward strategy
+writes with low overhead except in the case where a nugget was not
+encrypted with the active cipher configuration. This triggers costly
+re-ciphering, which can compound depending on workload.\\
 
-\TODO{At this point the text still has not been clear enough about why someone would pick one of these over another. You might just add a paragraph that says things like: "Each of these strategies is best-suited to a different workload.  When ...... Forward is best because ....  When ..... Selective might be preferred because it .....  When ..... Mirrored may be the best choice because of .....  Section XXX presents several use cases with specific scenarios that highlight the different strategies."}
+With these tradeoffs in mind: Mirrored is ideal when the backing store must
+converge quickly, write performance is not the primary concern, and drive space
+is abundant; Selective is ideal when different data should be encrypted
+differently and drive space is abundant; and Forward is ideal when some subset
+of nuggets should be encrypted differently without wasting drive space. See
+\secref{usecases} for specific scenarios that highlight the practical difference
+between strategies.
 
 \subsubsection{Threat Model for Cipher Switching Strategies}
 
@@ -307,10 +314,9 @@ in the FDE context, we must have a way to quantitatively compare a cipher's
 ``desirability'' or usefulness to SwitchCrypt and to FDE more broadly. Hence, we
 do not attempt to define a generally applicable \textit{ranking} of
 \emph{security strength}. Instead, we score ciphers (\ie{a so-called ``security
-score''}) based on three key security properties that, when summed, give an
-estimate of the difficulty (or resources required) to attack a cipher to SwitchCrypt FDE (see:
-\tblref{security-quant}). \TODO{I do not like the word "useful" (or its derivatives) in a 
-	technical context, so I reworded the previous sentence.  Make sure you are okay with it.}
+score''}) based on three key security properties that, when summed, give a
+relative estimate of the difficulty (or resources required) to attack data
+secured under SwitchCrypt FDE (see: \tblref{security-quant}).
 
 Our scoring scheme is a combination of well understood schemes: scoring ciphers
 on their confusion and diffusion of plaintext bits during
@@ -376,10 +382,10 @@ ChaCha20. Variants are distributed evenly from 0-1. For instance, ChaCha8 scores
   Freestyle (B)   & 1           & 1            & 0.5            & 2.5            \\
   Freestyle (S)   & 1           & 1            & 1              & 3
   \end{tabular}
-  \caption{These ``scores'' represent a cipher's desirability or usefulness to
-  SwitchCrypt and to FDE more generally. \TODO{It would be good to say something
-  here about the implications of this table.  Basically summarizing what all
-  this scoring means in practice.}}
+  \caption{These ``scores'' represent a cipher's desirability to SwitchCrypt and
+  to FDE more generally. Ciphers with OR can operate below overwrite
+  protections, increasing performance; ciphers with RBF and high RR/RK have
+  extra resilience against confidentiality attacks.}
   \label{tbl:security-quant}
 \end{table}
 
