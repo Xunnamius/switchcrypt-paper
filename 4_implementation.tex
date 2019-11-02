@@ -36,8 +36,8 @@ the backing store when spatially switching. We simulate this with IPC.
 \PUNT{This is especially important when considering the selective switching
 strategy; a production-ready implementation supporting selective switching would
 need to differentiate between metadata operations belonging to the filesystem
-(should be mirrored across all partitions) and actual end-user data (should be
-selectively read from and written to nuggets in specific partitions).}
+(should be mirrored across all regions) and actual end-user data (should be
+selectively read from and written to nuggets in specific regions).}
 
 Further, to operate securely, SwitchCrypt must be seeded with random data
 initially rather than have the backing store consist of all zeroes. This is a
