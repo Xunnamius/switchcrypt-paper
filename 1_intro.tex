@@ -16,13 +16,13 @@ this process impacts system performance and energy use considerably. Yet, end
 users expect their device to be secure \emph{and} performant \emph{and} energy
 efficient. The obvious solution is to balance these concerns with respect to the
 most general use case and ship the product, but this common-case approach often
-fails to deliver an optimal outcome.
+fails to deliver an optimal outcome for specific users and workloads.
 
 An example is Google's Android OS. Android supported FDE with the release of
 Android 3.0, yet it was not enabled by default until Android
 6.0~\cite{android-M-mobile-motivation}. Two years prior, Google attempted to
 roll out FDE by default on Android 5.0 but had to backtrack. In a statement to
-Engadget, Google blamed ``"performance issues on some partner devices" ... for
+Engadget, Google blamed ``'performance issues on some partner devices' ... for
 the backtracking''~\cite{google-engadget}. AnandTech reported a ``62.9\% drop in
 random read performance, a 50.5\% drop in random write performance, and a
 staggering 80.7\% drop in sequential read
@@ -30,7 +30,7 @@ performance''~\cite{android-M-mobile-motivation-2}.
 
 Traditionally, FDE's impact on drive performance and energy efficiency depends
 on choice of filesystem/mapper and the choice of cipher, as different ciphers
-express different performance and efficiency characteristics while offering
+expose different performance and efficiency characteristics while offering
 contrasting security properties. In this way, cipher choice can be viewed as a
 key \emph{configuration} parameter for FDE systems. The tradeoffs of choosing a
 cipher include: 1) increased system performance (\ie{overall reduced FDE
@@ -53,7 +53,7 @@ security properties (e.g., Freestyle) and others---SalsaX, AES in counter mode
 ChaCha20, AES-CTR}. Given this variety, the cipher configuration providing the
 fastest I/O throughput is almost always different than the configuration
 providing the most desirable security properties, and both may differ from the
-configuration that uses the least amount of energy or allows the most writable
+configuration that uses the least energy or allows the most writable
 drive space.
 
 Further, while the cipher choice can be configured statically at compile- or
@@ -72,7 +72,7 @@ another configuration becomes more desirable later on?}
 To realize the goal of flexibly adjusting storage tradeoffs, we first introduce
 a scheme to \emph{quantify} the usefulness or relative ``strength'' of ciphers
 based on key security properties relevant to FDE. We call these ``security
-scores''. Using these security scores, we then define a tradeoff space of cipher
+scores.'' Using these security scores, we then define a tradeoff space of cipher
 configurations over competing concerns: total energy use, desirable security
 properties in the FDE context, read and write performance, total writable space
 on the drive, and how quickly the drive can converge to a single configuration.

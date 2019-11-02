@@ -8,6 +8,12 @@ strategies} (\cref{subsec:strategies}), and then detail our scheme to
 \emph{quantify} cipher strength and the tradeoff of configurations that yields
 (\cref{subsec:quantify}). Finally, we revisit the battery saver example and
 summarize how the SwitchCrypt components fit together (\cref{subsec:summary}).
+In this section, we first give a brief overview of SwitchCrypt's design. We then
+1) discuss our novel, general API for \emph{decoupling} the cipher
+implementations from the encryption/decryption process, 2) describe and contrast
+three cipher \emph{switching strategies}, and finally 3) detail our scheme to
+\emph{quantify} cipher strength and the tradeoff of configurations this
+quantification yields.
 
 \subsection{SwitchCrypt Overview}\label{subsec:overview}
 
@@ -53,7 +59,7 @@ four components track, detect, and handle overwrites~\cite{StrongBox}.
 The \emph{per-nugget metadata} is a drive-backed per-nugget array where extra
 cryptographic material is stored depending on the cipher used to encrypt the
 nugget. The size of the array is determined by the \emph{generic stream cipher
-API}.
+API}. \TODO{So, this is a new component, right? I think it should be explicitly called out as such and probably the first four components need to be labeled as Strongbox pieces. }
 
 \subsection{Generic Stream Cipher API: Decoupling Implementation And Process} \label{subsec:api}
 
@@ -71,7 +77,7 @@ SwitchCrypt exposes API hooks at three levels:
     inputs, and returns encrypted the specified region. There is no distinction
     made between encryption and decryption. Further, this interface does not
     allow any access to the SwitchCrypt internals and is expected to execute
-    independently of SwitchCrypt.
+    independently of SwitchCrypt. \TODO{I got confused by the bit about not distinguishing between encrypt and decrypt.  First, why don't you need to distinguish the two?  Second, what does it save you to treat them the same?}
 
    \item \textbf{\texttt{crypt\_data\_low}}\\\texttt{crypt\_data\_low}
    is identical to \texttt{crypt\_data} but provides a slightly lower level of
@@ -96,11 +102,16 @@ chunk is requested. This is because the nugget data might be encrypted with a
 different algorithm when attempting to read it, corrupting the plaintext during
 cipher switching.
 
+\TODO{An issue: this API is set up to be one of the big contributions of the paper, but at this point I still don't really understand why it is necessary.  You may need to add an example.  Maybe two, a negative example and positive one.  Like, if you just want to switchc between different version of ChaCha, what would you need in your API?  What changes when you decide you want to switch between ChaCha and freestyle.  I know that adding freestyle added a lot of work to your implementaiton and that fact certainly implies that it was hard to do, so any insights you derived from doing it should be valuable.  I assume these API functions are the insights, but more explanation is needed for why these functions are the right functions and what problems their existence addresses.}
+
 \subsection{Cipher Switching Strategies} \label{subsec:strategies}
+
+\TODO{Maybe one more paragraph of setup. Like: The SwitchCrypt design allows many, separately encrypted regions to co-exist on the drive. However, at any moment there will be one \emph{active cipher}.  The active cipher represents that which would be used to handle the next data to be sent (or requested?) from the drive.  Then, you just need a small transition into the next paragraph.}
 
 At any moment, the currently active cipher configuration is used to encrypt
 nugget contents. When a cipher switch occurs, the active cipher configuration is
-switched. There are choices to determine \emph{when} to encrypt a nugget with a
+switched. \TODO{Repeated use of "switch."} 
+There are choices to determine \emph{when} to encrypt a nugget with a
 different cipher and \emph{where} to direct the output. Depending on the
 complexity of the use case, it may make the most sense to re-cipher a nugget
 immediately, or eventually, or to maintain several areas of differently-ciphered
@@ -120,7 +131,7 @@ nuggets--to output ciphertext we call \emph{spatial switching}, for which we
 propose the \emph{Mirrored} and \emph{Selective} switching strategies.
 
 \tblref{strategies-advantages} summarizes the various advantages and
-disadvantages of these strategies.
+disadvantages of these strategies. \TODO{Consider just removing this sentence. You have a good description of the table and breakdown of the issues later.  Putting this reference to the table here without explaining the categories is jarring.}
 
 \subsubsection{Forward Switching Strategy}
 
@@ -163,7 +174,9 @@ use; each region's nuggets are encrypted by each of the $C$ ciphers
 respectively. For instance, were SwitchCrypt initialized using two ciphers ($C =
 2$), the backing store would be partitioned in half; all nuggets in the first
 partition would be encrypted with the first cipher while all nuggets in the
-second partition would be encrypted with the second.
+second partition would be encrypted with the second. \TODO{Problem here: you 
+	have talked about an "active cipher" and now you are introducing "ciphers in use."  
+	You don't want to define a new term here.  You need to either define $C$ in simple terms or you need to more formally introduce the new terminology.  Ask me if that advice does not make sense. }
 
 Hence, unlike the Forward strategy, which schedules individual nuggets to be
 re-ciphered at some point in time after the active cipher configuration is
@@ -171,7 +184,7 @@ switched, the Selective strategy allows the wider system to indicate
 \emph{where} on the backing store a read or write operation should occur. In
 this way, the selective strategy represents a form of spatial cipher switching
 where different regions of the backing store can store different pieces of data
-encrypted with different ciphers.
+encrypted with different ciphers. \TODO{Again, I think this needs more explanation.  Talk about how a user would interact with this: They could set up different security regions and either manage them as distinct virtual drives, or even write different files to different security regions on the same drive with a little support from the file read/write APIs.}
 
 \subsubsection{Mirrored Switching Strategy}
 
@@ -212,9 +225,9 @@ the entire backing store to a single cipher configuration without losing data is
 very useful (see: \secref{usecases}). The near-instantaneous nature of SSD
 Instant Secure Erase (ISE) implementations on modern SSDs~\cite{ISE1,ISE2,ISE3}
 makes this a very fast process for the Mirrored strategy. The Forward strategy
-slow to converge compared to Mirrored since, in the worse case, every nugget on
+is slow to converge compared to Mirrored since, in the worse case, every nugget on
 the drive will require re-ciphering. When using the Selective strategy, the
-backing store cannot converge without loss of data.
+backing store cannot converge without loss of data. \TODO{Why can't selective converge without data loss?  Don't I just recrypt one of the two partitions using the same cipher as the other partition?}
 
 \textbf{``Waste'':} Unlike the other two strategies, using the Forward strategy
 does not dramatically reduce the total usable space on the drive by the
@@ -242,6 +255,8 @@ writes is ``mirrored'' across all partitions. As with reads, the Forward
 strategy writes with low overhead except in the case where the current nugget is
 not pristine and was not encrypted with the active cipher configuration. This
 triggers costly re-ciphering, which can compound depending on workload.
+
+\TODO{At this point the text still has not been clear enough about why someone would pick one of these over another. You might just add a paragraph that says things like: "Each of these strategies is best-suited to a different workload.  When ...... Forward is best because ....  When ..... Selective might be preferred because it .....  When ..... Mirrored may be the best choice because of .....  Section XXX presents several use cases with specific scenarios that highlight the different strategies."}
 
 \subsubsection{Threat Model for Cipher Switching Strategies}
 
@@ -290,8 +305,9 @@ in the FDE context, we must have a way to quantitatively compare a cipher's
 do not attempt to define a generally applicable \textit{ranking} of
 \emph{security strength}. Instead, we score ciphers (\ie{a so-called ``security
 score''}) based on three key security properties that, when summed, give an
-estimate of the usefulness of a cipher to SwitchCrypt FDE (see:
-\tblref{security-quant}).
+estimate of the difficulty (or resources required) to attack a cipher to SwitchCrypt FDE (see:
+\tblref{security-quant}). \TODO{I do not like the word "useful" (or its derivatives) in a 
+	technical context, so I reworded the previous sentence.  Make sure you are okay with it.}
 
 Our scoring scheme is a combination of well understood schemes: scoring ciphers
 on their confusion and diffusion of plaintext bits during
@@ -358,10 +374,13 @@ ChaCha20. Variants are distributed evenly from 0-1. For instance, ChaCha8 scores
   Freestyle (S)   & 1           & 1            & 1              & 3
   \end{tabular}
   \caption{These ``scores'' represent a cipher's desirability or usefulness to
-  SwitchCrypt and to FDE more generally.}
+  SwitchCrypt and to FDE more generally. \TODO{It would be good to say something
+  here about the implications of this table.  Basically summarizing what all
+  this scoring means in practice.}}
   \label{tbl:security-quant}
 \end{table}
 
 \subsection{Putting It All Together} \label{subsec:summary}
 
 Text goes here.
+
