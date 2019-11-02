@@ -129,14 +129,14 @@ performed), and is generally much slower than the ChaCha variants (see
 \figref{tradeoff-no-ratios}). Doubly invoking Freestyle in a ratio configuration
 means these penalties are paid more often, ballooning latency.
 
-\begin{figure*}[ht]
+\begin{figure}[ht]
   \textbf{Mirrored and Selective Switching I/O Ratio Performance}\par\medskip
   \centering
   {\input{charts/mirrored-selective-baseline.tex}} \caption{Median sequential
   and random read and write performance comparison of Mirrored and Selective
   switching strategies to baseline.}
  \label{fig:mirrored-selective-baseline}
-\end{figure*}
+\end{figure}
 
 \figref{mirrored-selective-baseline} show the the performance of the Mirrored
 and Selective strategies with the same configuration of ratios as

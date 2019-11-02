@@ -5,7 +5,7 @@
 
     \begin{groupplot}[
         group style={
-            group size=4 by 4,
+            group size=2 by 4,
             xlabels at=edge bottom,
             ylabels at=edge left,
             xticklabels at=edge bottom,
@@ -76,7 +76,7 @@
         legend style={
             draw=none,
             legend columns=4,
-            at={(2.0,1.45)},
+            at={(1.0,1.45)},
             anchor=south,
         },
     ]
@@ -232,10 +232,7 @@
             ] {charts/mirrored-selective-baseline.dat};
         \nextgroupplot[
             legend to name={throwaway15},
-            title={40M Mirrored Writes},
-            xlabel={\footnotesize Security Score},
-            xtick={ 0, 1, 2, 3, 4 },
-            xticklabels={ 0,,, 3, \empty }
+            title={40M Mirrored Writes}
         ]
             \addplot [thick, red] table [
                 meta=cipher,
@@ -275,10 +272,7 @@
             ] {charts/mirrored-selective-baseline.dat};
         \nextgroupplot[
             legend to name={throwaway16},
-            title={40M Selective Writes},
-            xlabel={\footnotesize Security Score},
-            xtick={ 0, 1, 2, 3, 4 },
-            xticklabels={ 0,,, 3, \empty }
+            title={40M Selective Writes}
         ]
             \addplot [thick, red] table [
                 meta=cipher,
