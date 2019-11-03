@@ -193,12 +193,13 @@ tradeoffs for full drive encryption.
 
 \subsection{Augmented Threat Analysis}\label{subsec:4}
 
-\tblref{security} lists possible attacks and their results. The incorporation of
-cipher switching requires considering each attack in the context of each
-strategy. It can be inferred from these results and SwitchCrypt's design that
-SwitchCrypt addresses its threat model and maintains confidentiality and
-integrity guarantees. In the case of the final attack, we stress that even the
-least scored cipher is still considered secure (\secref{design}).
+The incorporation of cipher switching requires considering each attack in the
+context of each strategy and novel attacks on mixed-cipher nugget states.
+\tblref{security} lists possible attacks and their results. It can be inferred
+from these results and SwitchCrypt's design that SwitchCrypt addresses its
+threat model and maintains confidentiality and integrity guarantees. In the case
+of the final attack, we stress that even the least scored cipher is still
+considered secure (\secref{design}).
 
 \begin{table}[t]
   \caption{Attacks on SwitchCrypt and their results}\label{tbl:security}
@@ -237,5 +238,3 @@ least scored cipher is still considered secure (\secref{design}).
     \hline\hline
   \end{tabu}
 \end{table}
-
-\TODO{Add summary here.}
