@@ -400,7 +400,7 @@ have not initiated a cipher switch, the write is handled similarly to prior
 work: encrypted data is read in from the backing storage, the merkle tree and
 monotonic counter are consulted to ensure the integrity of encrypted data, the
 transaction journal is consulted during write operations so that overwrites are
-handled and pad-reuse violations are avoided, and then the keycount store is
+handled and pad reuse violations are avoided, and then the keycount store is
 consulted to derive the nugget's unique encryption key from some master secret.
 Using the generic stream cipher API to call out to the active stream cipher
 implementation, SwitchCrypt encrypts/decrypts the nugget's contents and commits
