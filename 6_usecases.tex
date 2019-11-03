@@ -3,9 +3,9 @@
 In this section, we provide four case studies and empirical results
 demonstrating the practical utility of cipher switching. We cover a wide range
 of situations, highlighting concerns like configuration convergence
-(\cref{subsecuc4}), trading off security and writable space (\cref{subsecuc2}),
-meeting latency goals (\cref{subsecuc3}), keeping within an energy budget
-(\cref{subsecuc1}), etc. We also demonstrate the utility of both temporal and
+(\cref{subsec:uc4}), trading off security and writable space (\cref{subsec:uc2}),
+meeting latency goals (\cref{subsec:uc3}), keeping within an energy budget
+(\cref{subsec:uc1}), etc. We also demonstrate the utility of both temporal and
 spatial switching strategies, exploring the range of conditions under which
 certain strategies are optimal.
 
@@ -156,8 +156,7 @@ the wrong hands, she cannot afford to lose that data either. In such a scenario,
 it would be useful if, instead of destroying the data, the storage layer could
 switch itself to a more secure state as quickly as possible.
 
-\begin{figure}[ht] \textbf{Custody Panic Use Case: Security Goals vs Time
-Constraint}\par\medskip
+\begin{figure}[ht] \textbf{Custody Panic Use Case: Security Goals vs Time}\par\medskip
    \centering
    {\input{charts/usecase-custody.tex}} \caption{Actual security score vs
    security goal with respect to the time and ISE.}
