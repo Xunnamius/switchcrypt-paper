@@ -15,13 +15,13 @@ Forward switching to save our battery. We revisit the motivating example from
 \secref{motivation}, demonstrating that the ability to re-cipher individual
 nuggets allows us to complete our task while staying within our energy budget.
 
-\TODO{We may need to say something about how/why these file sizes were chosen. We want to make it clear that they are not magic numbers and the results would hold with different sizes.}
-We begin sequentially writing 10 40MB files using the Freestyle Balanced cipher
-configuration. After 5 seconds, the device enters ``battery saver'' mode. We
-simulate this event by 1) underclocking the cores to their lowest frequencies
-and 2) using \texttt{taskset} to transition the SwitchCrypt processes to the
-energy-efficient LITTLE cores. Afterwards, we complete the remaining workload
-using the ChaCha8 cipher. We repeat this experiment three times.
+To simulate a 400MB video download (in parts), we begin sequentially writing 10
+40MB files using the Freestyle Balanced cipher configuration. After 5 seconds,
+the device enters ``battery saver'' mode. We simulate this event by 1)
+underclocking the cores to their lowest frequencies and 2) using
+\texttt{taskset} to transition the SwitchCrypt processes to the energy-efficient
+LITTLE cores. Afterwards, we complete the remaining workload using the ChaCha8
+cipher. We repeat this experiment three times.
 
 \begin{figure}[ht] \textbf{Batter Saver Use Case: Energy-Security Tradeoff vs
    Strict Energy Budget}\par\medskip
@@ -59,14 +59,14 @@ This usecase illustrates utility of spatial Selective switching to achieve a
 performance win over prior work, where the entire drive is encrypted with a
 single cipher. We demonstrate \emph{Variable Security Regions} (VSR), where we
 can choose to encrypt select files or portions of files with different keys and
-ciphers below the filesystem level. 
+ciphers below the filesystem level.
 
-The goal is that if only a small percentage
-of the data needs the strongest encryption, then only a small percentage of the
-data should have that associated overhead.  Using prior techniques, either all 
-the data would be stored with high overhead, the critical data would be stored 
-without sufficient security, or the data would have to be split among separate 
-files and stored across partitioned stores.
+The goal is that if only a small percentage of the data needs the strongest
+encryption, then only a small percentage of the data should have that associated
+overhead.  Using prior techniques, either all the data would be stored with high
+overhead, the critical data would be stored without sufficient security, or the
+data would have to be split among separate files and stored across partitioned
+stores.
 
 Communicating classified materials, corporate secrets, etc. require the highest
 level of discretion when handled, yet sensitive information like this can
@@ -168,12 +168,12 @@ In \figref{usecase-eol-tradeoff}, we see the system begins at 0 seconds, where
 all data is mirrored across the backing store (perhaps consisting of multiple
 physical drives). Both the desired and minimum security score of the drive is
 1.5, a balance between performance and security. At 6 seconds, custody panic is
-triggered---the desired minimum security score goes to 3, the highest possible---at which point the
-system executes ISE and completely erases the drive containing the minimally
-scored data. ISE is known to be much faster than TRIM and completes in as little
-as 3 seconds~\cite{SeaGate,Samsung,ThatOtherOEM}. Once complete, the most secure
-form of the data is all that remains. The backing store has been ``locked
-down.''
+triggered---the desired minimum security score goes to 3, the highest
+possible---at which point the system executes ISE and completely erases the
+drive containing the minimally scored data. ISE is known to be much faster than
+TRIM and completes in as little as 3
+seconds~\cite{SeaGate,Samsung,ThatOtherOEM}. Once complete, the most secure form
+of the data is all that remains. The backing store has been ``locked down.''
 
 Our goal is to lock down the backing store, slowing down any attacker as
 much as possible such that, even if they copy and permanently store her data
