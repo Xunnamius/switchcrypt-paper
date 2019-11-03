@@ -145,16 +145,17 @@ ability to quickly converge the entire backing store to a single high-security
 cipher leveraging SSD Instant Secure Erase (ISE).
 
 Nation-state and other adversaries have extensive compute resources, knowledge
-of obscure side-channels (\eg{Heartbleed}), and access to technology like
-quantum computers. Suppose a scientist were attempting to re-enter her country
-through a border entry point when she is stopped. Further suppose her laptop
-containing sensitive priceless research data is confiscated from her custody.
-Being a security researcher, she has a chance to trigger a remote wipe, where
-the laptop uses Instant Secure Erase to reset its internal storage, permanently
-destroying all her data. While she certainly doesn't want her data falling into
-the wrong hands, she cannot afford to lose that data either. In such a scenario,
-it would be useful if, instead of destroying the data, the storage layer could
-switch itself to a more secure state as quickly as possible.
+of obscure side-channels (\eg{Dual\_EC\_DRBG~\cite{DualECDRBG}}), and access to
+technology like quantum computers. Suppose a scientist were attempting to
+re-enter her country through a border entry point when she is stopped. Further
+suppose her laptop containing sensitive priceless research data is confiscated
+from her custody. Being a security researcher, she has a chance to trigger a
+remote wipe, where the laptop uses Instant Secure Erase to reset its internal
+storage, permanently destroying all her data. While she certainly doesn't want
+her data falling into the wrong hands, she cannot afford to lose that data
+either. In such a scenario, it would be useful if, instead of destroying the
+data, the storage layer could switch itself to a more secure state as quickly as
+possible.
 
 \begin{figure}[ht] \textbf{Custody Panic Use Case: Security Goals vs Time}\par\medskip
    \centering
