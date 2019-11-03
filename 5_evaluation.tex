@@ -10,7 +10,7 @@ eMMC5.0 HS400 backing store running Ubuntu Trusty 14.04.6 LTS, kernel version
 
 We evaluate SwitchCrypt using a Linux RAM disk (tmpfs). The maximum theoretical
 memory bandwidth for this Odroid model is 14.9GB/s\@. Our observed maximum
-memory bandwidth is 4.5GB/s. Using a RAM disk focuses the evaluation on the 
+memory bandwidth is 4.5GB/s. Using a RAM disk focuses the evaluation on the
 performance differences due to different ciphers.
 
 In each experiment below, we evaluate SwitchCrypt on two high level workloads:
@@ -19,9 +19,10 @@ then read (either 4KB, 512KB, 5MB, 40MB) 10 times. Each experiment is repeated
 three times.
 
 When evaluating switching strategies, a finer breakdown in workloads is made
-using a pre-selected pair of ciphers, yielding a cipher configuration point
-given some switching strategy; a specific \emph{ratio} of those 10 write-read
-pairs is performed using one cipher and the remainder with the other. These
+using a pre-selected pair of ciphers we call the \emph{primary cipher} and
+\emph{secondary cipher} in context, yielding a cipher configuration point given
+some switching strategy; a specific \emph{ratio} of those 10 write-read pairs is
+performed using the primary cipher and the remainder with secondary other. These
 ratio workloads test SwitchCrypt's ability to reach configuration points not
 accessible to prior work.
 
@@ -31,7 +32,7 @@ operation in the primary cipher for every 3 whole file write-read operations in
 the secondary cipher (1:3), 1 whole file write-read operation in the primary
 cipher for every other whole file write-read operation in the secondary cipher
 (1:1), and 3 whole file write-read operations in the primary cipher for every 1
-whole file write-read operation in the secondary cipher (3:1). \TODO{primary/secondary terminology again, although it makes more sense here in the narrower context of evaluation.} The security
+whole file write-read operation in the secondary cipher (3:1). The security
 score for each ratio point is calculated as $score$=$score_L + ||score_L -
 score_H|| * r * 0.25)$ where $score_L$ is the lowest security score
 (configuration), $score_H$ is the highest, and $r$ is a number representing the
@@ -44,16 +45,16 @@ In this section we answer the following questions:
 
 \begin{enumerate}
  \item What shape does the cipher configuration tradeoff space take under
- our workloads?
+ our workloads? (\cref{subsec:1})
  \item Can SwitchCrypt achieve dynamic security/energy tradeoffs by reaching
- configuration points not accessible with prior work?
+ configuration points not accessible with prior work? (\cref{subsec:2})
  \item What is the performance and storage overhead of each cipher switching
- strategy?
- \item How does incorporation of cipher-switching change the threat analysis
- versus prior work?
+ strategy? (\cref{subsec:3})
+ \item How does incorporation of cipher switching change the threat analysis
+ versus prior work? (\cref{subsec:4})
 \end{enumerate}
 
-\subsection{Switching Strategies Under Various Workloads}
+\subsection{Switching Strategies Under Various Workloads}\label{subsec:1}
 
 \begin{figure}[ht]
   \textbf{Baseline Cipher I/O Performance}\par\medskip
@@ -64,18 +65,19 @@ In this section we answer the following questions:
 
 \figref{tradeoff-no-ratios} shows the security score versus median normalized
 latency tradeoff between different stream ciphers when completing our sequential
-and random I/O workloads. \TODO{Might be interesting to get the 95\% latencies too.  It would certainly be strong to claim that the trends for median hold when looking at tail latencies, as well.} Each line represents one workload. From left to right:
-4K, 512K, 5M, and 40M respectively. Each symbol represents one of our ciphers.
-From left to right: ChaCha8, ChaCha20, Freestyle Fast, Freestyle Balanced, and
-Freestyle Secure. As expected, of the ciphers we tested, those with higher
-security scores result in higher latency for I/O operations while ciphers with
-less desirable security properties result in lower latency. The relationship
-between these concerns is not simply linear, however, which exposes a rich
-security vs latency/energy tradeoff space.
+and random I/O workloads. Trends for median hold when looking at tail latencies
+as well. Each line represents one workload. From left to right: 4K, 512K, 5M,
+and 40M respectively. Each symbol represents one of our ciphers. From left to
+right: ChaCha8, ChaCha20, Freestyle Fast, Freestyle Balanced, and Freestyle
+Secure. As expected, of the ciphers we tested, those with higher security scores
+result in higher latency for I/O operations while ciphers with less desirable
+security properties result in lower latency. The relationship between these
+concerns is not simply linear, however, which exposes a rich security vs
+latency/energy tradeoff space.
 
 Besides the 4K workload, each workload follows a similar superlinear
-latency-vs-security slope, hence we will mostly focus on 40MB and 4K workloads
-going forward. Due to the overhead of metadata management and the fast
+latency-vs-security slope and shape, hence we will mostly focus on 40MB and 4K
+workloads going forward. Due to the overhead of metadata management and the fast
 completion time of the 4K workloads (\ie{little time for amortization of
 overhead}), ChaCha8 and ChaCha20 take longer to complete than the higher scoring
 Freestyle Fast. This advantage is not enough to make Freestyle Balanced or
@@ -86,7 +88,7 @@ our timing setup when capturing extremely fast events occurring close together
 in time. This is why ChaCha8 sometimes appears with higher latency than
 ChaCha20 for normalized 4K workloads. ChaCha8 is not slower than ChaCha20.
 
-\subsection{Reaching Between Static Configuration Points}
+\subsection{Reaching Between Static Configuration Points}\label{subsec:2}
 
 \begin{figure}[ht]
   \textbf{Forward Switching I/O Ratio Performance}\par\medskip
@@ -112,8 +114,8 @@ and 3:1 described above}).
 The point of this experiment is to determine if SwitchCrypt can effectively
 transition the backing store between ciphers without devastating performance.
 For the 40M, 5M, and 512K workloads (40M is shown), we see that SwitchCrypt can
-achieve configuration points between the static baseline that is unreachable via
-prior work using single ciphers, all with minimal overhead.
+achieve dynamic security/energy tradeoffs reaching points not accessible with
+prior work, all with minimal overhead.
 
 Again, due to the overhead of metadata management for non-Freestyle ciphers (see
 \secref{implementation}) and the fast completion time of the 4K workloads
@@ -159,9 +161,9 @@ experiments, the backing store can be considered partitioned in half. This
 overhead is most egregious for the 4K Mirrored write workload. This makes
 Selective preferable to Mirrored; however, Selective can never converge the
 backing store to a single cipher configuration or survive the loss of an entire
-region (see: \secref{sec:usecases}).
+region (see: \secref{usecases}).
 
-\subsection{Cipher Switching Overhead}
+\subsection{Cipher Switching Overhead}\label{subsec:3}
 
 From the results of the previous three experiments, we calculate that Forward
 switching has between \TODO{X} and \TODO{Y} latency overhead compared to
@@ -183,14 +185,20 @@ to baseline I/O, with average overhead at \TODO{XX}/\TODO{XXX} for 40M, 5M and
 read/write workloads. Spatial overhead was half of all writable space on the
 backing store.
 
-These overhead numbers are the penalty paid for the additional flexibility of being able to 
-reach configurations points that are simply unachievable without SwitchCrypt.  We believe SwitchCrypt's design keeps these overheads acceptably low and thus achieves the desired goal of flexibly navigating latency/security tradeoffs for full drive encryption.
+These overhead numbers are the penalty paid for the additional flexibility of
+being able to reach configurations points that are simply unachievable without
+SwitchCrypt. We believe SwitchCrypt's design keeps these overheads acceptably
+low and thus achieves the desired goal of flexibly navigating latency/security
+tradeoffs for full drive encryption.
 
-\subsection{Augmented Threat Analysis}
+\subsection{Augmented Threat Analysis}\label{subsec:4}
 
-\tblref{security} lists possible attacks and their results. It can be inferred
-from these results and SwitchCrypt's design that SwitchCrypt addresses its
-threat model and maintains confidentiality and integrity guarantees.
+\tblref{security} lists possible attacks and their results. The incorporation of
+cipher switching requires considering each attack in the context of each
+strategy. It can be inferred from these results and SwitchCrypt's design that
+SwitchCrypt addresses its threat model and maintains confidentiality and
+integrity guarantees. In the case of the final attack, we stress that even the
+least scored cipher is still considered secure (\secref{design}).
 
 \begin{table}[t]
   \caption{Attacks on SwitchCrypt and their results}\label{tbl:security}
@@ -200,7 +208,7 @@ threat model and maintains confidentiality and integrity guarantees.
     \hline
     \textbf{Attack} & \textbf{Result} & \textbf{Explanation} \\
     \hline\hline
-    Nugget user data in backing store is mutated out-of-band online &
+    Nugget data in backing store is mutated out-of-band online &
     SwitchCrypt immediately fails with exception on successive IO request &
     Regardless of switching strategy, Merkle Tree check fails on read-in\\
     \hline
@@ -222,10 +230,12 @@ threat model and maintains confidentiality and integrity guarantees.
     offline, secure counter in sync & SwitchCrypt refuses to mount & Secure
     monotonic counter is in sync with the system, yet illegal data manipulation
     occurred\\
+    \hline
+    Nugget accessed out-of-band in mixed-cipher backing store & Nugget's cipher
+    may not match active cipher & Worst case, the nugget data is available
+    encrypted with the lowest scored cipher in the system\\
     \hline\hline
   \end{tabu}
 \end{table}
 
-\TODO{There is at least one more attack that needs to be addressed.  I think this approach is susceptible to physical attacks.  If we encrypt some data with ChaCha8 and then swtich the active cipher to Freestyle, if an attacker accesses data through our system, they will get the Freestyle version, right?  But, if they can remove the storage from our software, the ChaCha8 version is there. I guess that I assumed forward when I wrote that, but something similar is ture for mirrored.  I think we need to acknowledge (agian) that an attacker could access data that has not been switched yet.  That is a new threat and the only solution I can see is to be careful.  We might say that we should combine strategies in some cases.  Like use selective with the best freestyle on one side and write your most sensitive data there, then on the other side, use forward switching.  I may not be coherent anymore...}
-
-\TODO{One more thing: you never explicitly say what the answer to all those qwustions is.  I like the questions at the beginning.  Now you need to declare victory.}
+\TODO{Add summary here.}
