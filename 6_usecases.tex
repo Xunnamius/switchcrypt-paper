@@ -1,13 +1,15 @@
 \section{SwitchCrypt Case Studies}\label{sec:usecases}
 
-In this section, we provide case studies and empirical results demonstrating the
-practical utility of cipher switching. We cover a wide range of situations,
-highlighting concerns like configuration convergence, trading off writable
-space, meeting latency goals, keeping within an energy budget, etc. We also
-demonstrate the utility of both temporal and spatial switching strategies,
-exploring the range of conditions under which certain strategies are optimal.
+In this section, we provide four case studies and empirical results
+demonstrating the practical utility of cipher switching. We cover a wide range
+of situations, highlighting concerns like configuration convergence
+(\cref{subsecuc4}), trading off security and writable space (\cref{subsecuc2}),
+meeting latency goals (\cref{subsecuc3}), keeping within an energy budget
+(\cref{subsecuc1}), etc. We also demonstrate the utility of both temporal and
+spatial switching strategies, exploring the range of conditions under which
+certain strategies are optimal.
 
-\subsection{Balancing Security Goals with a Constrained Energy Budget}
+\subsection{Balancing Security Goals with a Constrained Energy Budget}\label{subsec:uc1}
 
 This usecase illustrates that, because latency and energy use are correlated
 among the ciphers we examined, we can exploit that property using temporal
@@ -53,7 +55,7 @@ SwitchCrypt can converge nuggets back to Freestyle Balanced.
 On average, using Forward cipher switching resulted in a \TODO{XXX} total energy
 use reduction.
 
-\subsection{Variable Security Regions}
+\subsection{Variable Security Regions}\label{subsec:uc2}
 
 This usecase illustrates utility of spatial Selective switching to achieve a
 performance win over prior work, where the entire drive is encrypted with a
@@ -99,7 +101,7 @@ the performance and battery life benefits of using a fast cipher for the
 majority of I/O operations. On average, using SwitchCrypt Selective switching
 versus prior work results in a \TODO{XXX} reduction in latency.
 
-\subsection{Responding to End-of-Life Slowdown in Solid State Drives}
+\subsection{Responding to End-of-Life Slowdown in Solid State Drives}\label{subsec:uc3}
 
 This usecase illustrates using temporal Forward switching to offset the
 debilitating decline in performance when SSDs reach end-of-life
@@ -135,7 +137,7 @@ Our goal is to remain under the latency ceiling while remaining above the
 security floor. Thanks to Forward switching, accesses to highly trafficked areas
 of the drive can remain performant even during drive end-of-life.
 
-\subsection{Custody Panic: Securing Device Data Under Duress}
+\subsection{Custody Panic: Securing Device Data Under Duress}\label{subsec:uc4}
 
 This usecase illustrates the utility of spatial Mirrored switching to take
 advantage of more energy-efficient high-performance ciphers while retaining the
