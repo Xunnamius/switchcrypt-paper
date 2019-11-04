@@ -48,27 +48,26 @@ API}.
 The \emph{merkle tree} ensures the integrity of all data on a per-nugget level.
 The \emph{keycount store} keeps track of each nugget's 64-bit cryptographic key.
 The \emph{transaction journal} keeps track of writes to nuggets, allowing
-SwitchCrypt to detect and respond to overwrites. The \emph{monotonic counter} 
-prevents the system state from being rolled back. The \emph{per-nugget
-metadata} is a drive-backed array where extra cryptographic material is stored
-depending on the cipher used to encrypt the nugget. The size of the array is
-determined by ciphers loaded through the \emph{generic stream cipher API}.
+SwitchCrypt to detect and respond to overwrites. The \emph{monotonic counter}
+prevents the system state from being rolled back. The \emph{per-nugget metadata}
+is a drive-backed array where extra cryptographic material is stored depending
+on the cipher used to encrypt the nugget. The size of the array is determined by
+ciphers loaded through the \emph{generic stream cipher API}.
 
 \subsection{Generic Stream Cipher API} \label{subsec:api}
 
 There are \emph{many} ciphers we might use with SwitchCrypt, each with various
-input requirements and output considerations. A key difference with prior work 
-is that SwitchCrypt
-must be able to encrypt and decrypt arbitrary nuggets without worrying about a
-cipher's implementation details; prior approaches could have cipher-specific 
-implementations because they did not consider switching.   
-Thus, the cipher-specific details
-must be handled with care or security is violated. With our
-novel cipher API, we present an interface that \emph{decouples} cipher
-implementations from the encryption/decryption process. This allows any cipher
-to be integrated into SwitchCrypt without modification or special
-considerations. Hence, different stream ciphers become interchangeable when they
-would normally be incompatible, preventing us from trading them off one another.
+input requirements and output considerations. A key difference with prior work
+is that SwitchCrypt must be able to encrypt and decrypt arbitrary nuggets
+without worrying about a cipher's implementation details; prior approaches could
+have cipher-specific implementations because they did not consider switching.
+Thus, the cipher-specific details must be handled with care or security is
+violated. With our novel cipher API, we present an interface that
+\emph{decouples} cipher implementations from the encryption/decryption process.
+This allows any cipher to be integrated into SwitchCrypt without modification or
+special considerations. Hence, different stream ciphers become interchangeable
+when they would normally be incompatible, preventing us from trading them off
+one another.
 
 The API is accessible at three levels:
 
@@ -97,17 +96,16 @@ The API is accessible at three levels:
    approach.
 \end{enumerate}
 
-Were we using simple ciphers exclusively, \ie{those that do not differentiate between
-encryption and decryption and always produce output of the same length as the
-input}, we could generate a keystream and XOR it with data without the
-the need for a new a API. However, some cipher implementations treat
-encryption and decryption as two distinct operations. Others require different
-parameters or special considerations before XORing the keystream with data.
-Others produce extra output that must be stored during encryption and fetched
-during decryption. Others exhibit some combination of these concerns. Our API
-presents the cryptographic driver with a single unified interface where these
-disparate concerns are abstracted away, laying the groundwork for
-\emph{cipher switching}.
+Were we using simple ciphers exclusively, \ie{those that do not differentiate
+between encryption and decryption and always produce output of the same length
+as the input}, we could generate a keystream and XOR it with data without the
+the need for a new a API. However, some cipher implementations treat encryption
+and decryption as two distinct operations. Others require different parameters
+or special considerations before XORing the keystream with data. Others produce
+extra output that must be stored during encryption and fetched during
+decryption. Others exhibit some combination of these concerns. Our API presents
+the cryptographic driver with a single unified interface where these disparate
+concerns are abstracted away, laying the groundwork for \emph{cipher switching}.
 
 \subsection{Cipher Switching Strategies} \label{subsec:strategies}
 
@@ -118,10 +116,10 @@ encrypt nugget contents. When a cipher switch occurs, a different cipher becomes
 the active cipher. At this point, SwitchCrypt must determine \emph{when} to
 re-cipher a nugget and \emph{where} to store the output on the drive.
 ``Re-ciphering'' here means using a non-active cipher to decrypt a nugget's
-contents and using the active cipher to re-encrypt them. Depending on
- the use case, it may make the most sense to re-cipher a nugget
-immediately, or eventually, or to maintain several areas of differently-ciphered
-nuggets concurrently.
+contents and using the active cipher to re-encrypt them. Depending on the use
+case, it may make the most sense to re-cipher a nugget immediately, or
+eventually, or to maintain several areas of differently-ciphered nuggets
+concurrently.
 
 A naive approach would immediately switch every nugget to the desired cipher,
 but the latency and energy cost would be unacceptable. Hence, a more adaptable
@@ -135,7 +133,7 @@ strategy. Determining \emph{where}---in which storage region and across which
 nuggets--to output ciphertext we call \emph{spatial switching}, for which we
 propose the \emph{Mirrored} and \emph{Selective} switching strategies.
 
-\textbf{A) Forward Switching Strategy.} When a nugget is encountered during I/O
+\textbf{Forward Switching Strategy.} When a nugget is encountered during I/O
 that is encrypted using a cipher other than the active cipher, the Forward
 strategy dictates that this nugget be re-ciphered immediately. If a particular
 nugget encrypted with a non-active cipher configuration is never encountered
@@ -167,13 +165,13 @@ configuration is encountered. Of course, this has the same dire implications for
 performance as simply re-initializing the entire system or encrypted
 container with the new cipher.}
 
-\textbf{B) Selective Switching Strategy.} When SwitchCrypt is initialized with
-the Selective strategy, the backing store is partitioned into $C$ regions where
-$C$ represents the maximum number of ciphers; each regions' nuggets are
-encrypted by each of the $C$ ciphers respectively. For instance, were
-SwitchCrypt initialized using two ciphers ($C = 2$), the backing store would be
-partitioned in half; all nuggets in the first region would be encrypted with the
-first cipher while all nuggets in the second would be encrypted with the other.
+\textbf{Selective Switching Strategy.} When SwitchCrypt is initialized with the
+Selective strategy, the backing store is partitioned into $C$ regions where $C$
+represents the maximum number of ciphers; each regions' nuggets are encrypted by
+each of the $C$ ciphers respectively. For instance, were SwitchCrypt initialized
+using two ciphers ($C = 2$), the backing store would be partitioned in half; all
+nuggets in the first region would be encrypted with the first cipher while all
+nuggets in the second would be encrypted with the other.
 
 Hence, unlike the Forward strategy, which schedules individual nuggets to be
 re-ciphered at some point in time after the active cipher configuration is
@@ -189,19 +187,19 @@ security regions on the same drive.
 Regions of the backing store will not be in a consistent state and will likely
 contain different data.
 
-\textbf{C) Mirrored Switching Strategy.} Similar to the Selective strategy, when
+\textbf{Mirrored Switching Strategy.} Similar to the Selective strategy, when
 SwitchCrypt is initialized with the Mirrored strategy, the backing store is
 partitioned into $C$ regions where $C$ represents the maximum number of ciphers;
 each regions' nuggets are encrypted by each of the $C$ ciphers respectively.
 
-However, unlike the Selective strategy, all write operations that hit one
-region are mirrored into the other regions immediately. The mirrored
-strategy allows the wider system to indicate (via the active cipher) within
-which region a \emph{read} operation should occur. In this way, the Mirrored
-strategy represents a form of spatial cipher switching. A user could take
-advantage of this to \emph{quickly} converge the backing store to a single
-cipher configuration without loss any data or the performance penalty of
-re-ciphering an entire region's nuggets.
+However, unlike the Selective strategy, all write operations that hit one region
+are mirrored into the other regions immediately. The mirrored strategy allows
+the wider system to indicate (via the active cipher) within which region a
+\emph{read} operation should occur. In this way, the Mirrored strategy
+represents a form of spatial cipher switching. A user could take advantage of
+this to \emph{quickly} converge the backing store to a single cipher
+configuration without loss any data or the performance penalty of re-ciphering
+an entire region's nuggets.
 
 All regions of the backing store will always be in a consistent state and always
 share the same data.

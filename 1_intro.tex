@@ -4,12 +4,11 @@ There are several important concerns modern filesystems must balance. Paramount
 among them are data security and performance. Increasingly important is energy
 consumption in both mobile devices and in enterprise storage
 \cite{android-M-mobile-motivation, enterprise-motivation}. However, all of these
-concerns exist in contention with one another: stronger security properties can
-harm latency and require increased energy use, while reducing energy consumption
-will generally require increasing latency or accepting weaker security
-properties.
+concerns exist in contention: stronger security properties can harm latency and
+increase energy use, while reducing energy consumption typically requires
+increasing latency or accepting weaker security properties.
 
-The state of the art for securing data is Full-Drive Encryption (FDE).
+The state of the art for securing data is Full Drive Encryption (FDE).
 Traditional FDE employs a single \emph{cryptographic cipher} to encrypt,
 decrypt, and authenticate backing store contents on the fly. Understandably,
 this process impacts system performance and energy use considerably. Yet, end
@@ -28,14 +27,14 @@ random read performance, a 50.5\% drop in random write performance, and a
 staggering 80.7\% drop in sequential read
 performance''~\cite{android-M-mobile-motivation-2}.
 
-Traditionally, FDE's impact on drive performance and energy efficiency depends
-on choice of filesystem/mapper and the choice of cipher, as different ciphers
-expose different performance and efficiency characteristics while offering
-contrasting security properties. In this way, cipher choice can be viewed as a
-key \emph{configuration} parameter for FDE systems. The tradeoffs of choosing a
-cipher include: 1) increased system performance (\ie{overall reduced FDE
-overhead}), 2) reduced energy use, and 3) the ability to encrypt devices that
-would otherwise be too slow or energy-inefficient to support FDE.
+FDE's impact on drive performance and energy efficiency depends on choice of
+filesystem/mapper and the choice of cipher, as different ciphers expose
+different performance and efficiency characteristics. In this way, cipher choice
+can be viewed as a key \emph{configuration} parameter for FDE systems. The
+tradeoffs of choosing a cipher include: 1) increased system performance
+(\ie{overall reduced FDE overhead}), 2) reduced energy use, and 3) the ability
+to encrypt devices that would otherwise be too slow or energy-inefficient to
+support FDE.
 
 However, the de facto standard choice for FDE is the slow AES \emph{block
 cipher} (AES-XTS)~\cite{AES, AES-XTS}. Prior research introduced the motivation
@@ -58,7 +57,7 @@ drive space.
 
 Further, while the cipher choice can be configured statically at compile- or
 boot-time with respect to some common-case, in traditional FDE, these
-configurations cannot adapt to changes that might arise while the system is
+configurations cannot adapt to changes that arise while the system is
 running. Examples include changes in resource availability, runtime environment,
 desired security properties, and adhering to changing OS energy budgets.
 
