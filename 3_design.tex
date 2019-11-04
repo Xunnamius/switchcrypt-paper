@@ -332,15 +332,9 @@ defender})~\cite{scrypt,Freestyle,others2}.
 
 \textbf{1) Output randomization (OR).} A cipher with output randomization
 generates different ciphertexts non-\\deterministically given the same key,
-%<<<<<<< HEAD
-%nonce, and message. This makes chosen-ciphertext (CCA) and other attacks where
-%the ciphertext is in full control of the adversary much more difficult. 
-%\TODO{Can you add a citation here?}
-%=======
-nonce, and message. This makes chosen-ciphertext (CCA) and other attacks
-where the ciphertext is in full control of the adversary much more difficult.
-\TODO{Can you add a citation here?}
-%>>>>>>> c212222a366c7b905b6d580af590a606317a93c2
+nonce, and message. This makes chosen-ciphertext (CCA) and other attacks where
+the ciphertext is in full control of the adversary much more
+difficult~\cite{Freestyle}.
 
 This is a binary feature in that a cipher either outputs deterministically given
 the same input or it does not. A cipher with non-deterministic output given the
@@ -404,17 +398,10 @@ scores 0 and ChaCha20 scores 1\@.
 We revisit the motivating example from \secref{motivation}. Initially, I/O
 requests come down from the LFS and are received by the cryptographic driver,
 which divides the request by which nuggets it touches. For each nugget, the
-%<<<<<<< HEAD
-%per-nugget metadata is consulted to determine the cipher with which the nugget is
-%encrypted. If it is encrypted with the active cipher, which must be true if we
-%have not initiated a cipher switch, the write is handled like prior work:
-%encrypted data is read in from the backing storage, the merkle tree and
-%=======
 per-nugget metadata is consulted to determine with which cipher the nugget is
 encrypted. If it is encrypted with the active cipher, which must be true if we
 have not initiated a cipher switch, the write is handled similarly to prior
-work: encrypted data is read in from the backing storage, the merkle tree and
-%>>>>>>> c212222a366c7b905b6d580af590a606317a93c2
+work: encrypted data is read in from backing storage, the merkle tree and
 monotonic counter are consulted to ensure the integrity of encrypted data, the
 transaction journal is consulted during write operations so that overwrites are
 handled and pad reuse violations are avoided, and then the keycount store is

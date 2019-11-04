@@ -84,12 +84,11 @@ dynamically with acceptable overhead. \TODO{I just realized the order on these
 	 structure of section 3 (and the challenges at the end of section 2).}
 
 We implement SwitchCrypt and three switching strategies---\emph{Forward},
-\emph{Selective}, and \emph{Mirrored}---to dynamically change between 
-the ChaCha and Freestyle
-stream ciphers using our novel API. We then study SwitchCrypt's dynamic
-flexibility through four case studies where latency, energy, and desired
+\emph{Selective}, and \emph{Mirrored}---to dynamically change between the ChaCha
+and Freestyle stream ciphers using our novel API. We then study SwitchCrypt's
+dynamic flexibility through four case studies where latency, energy, and desired
 security properties change dynamically. SwitchCrypt achieves a reduction of at
 least 3.3x in total energy use when compared to static approaches; further, we
 see a reduction of 3.1x to 4.8x for read latency and 1.6x to 2.8x for write
-latency compared to static approaches that must pick a single point in the 
+latency compared to static approaches that must pick a single point in the
 latency/energy/security tradeoff space.
