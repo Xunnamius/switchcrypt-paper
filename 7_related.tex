@@ -30,12 +30,12 @@ HaleemEtAl, LiOmiecinski}. For instance, Goodman et al. introduced trading
 security for decreased energy dissipated to encrypt a bit back in
 1998~\cite{ScalableSecurity}. Similar in intent to VSRs and the Selective
 strategy (see \secref{usecases}), Goodman minimizes energy consumption by
-separating low-priority data from high-priority and encrypting them differently.
+separating low-priority data from high-priority and encrypting them differently. \TODO{Was Goodman's approach just for communication?  We need to say more about what makes your work unique.  For example: "Goodman et al.'s approach is designed for communication and only considered changing key lengths, thus it did not anticipate the need for SwitchCrypt's generic API, switching strategies, or security scores."}
 Further, Wolter and Reinecke study performance and security tradeoffs, exploring
-approaches to quantifying security~\cite{WolterReinecke}.
+approaches to quantifying security~\cite{WolterReinecke}. \TODO{Again, need to say something more to differentiate us.  Something like: "This study anticipates the value of dynamically switching ciphers but proposes no mechanisms to actually enable this switch."}
 
 In the wild, companies like Google~\cite{AndroidM} and Apple~\cite{iOSFDE} have
 explored performance-security tradeoffs in hardware when considering FDE
 support. Google's Adiantum uses a less secure reduced round version of
 ChaCha~\cite{Adiantum}. LastPass (LogMeIn) has dealt with scaling the number of
-iterations of its PBKDF\#2, trading performance for security~\cite{LastPass}.
+iterations of its PBKDF\#2, trading performance for security~\cite{LastPass}. \TODO{Need a summary sentence here, too.  Again, need to make it clear that what we are doing is related to this work, but solved many novel challenges.}
