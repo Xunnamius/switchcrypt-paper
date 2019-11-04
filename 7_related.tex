@@ -12,25 +12,21 @@ behavior to prevent overwrites (StrongBox~\cite{StrongBox}).
 Unlike StrongBox and other work, which focuses on optimizing performance despite
 re-ciphering due to overwrites, SwitchCrypt maintains overwrite protections
 while abstracting the idea of re-encrypting nuggets out into cipher switching;
-instead of myopically pursuing a performance win, we trade off various cipher
-configurations dynamically.
+instead of myopically pursuing a performance win, we can pursue energy/battery
+and security wins as well.
 
-However, trading off security for energy, performance, and other concerns is not
-a new idea~\cite{ScalableSecurity, WolterReinecke, ZengChow1, ZengChow2,
-HaleemEtAl, LiOmiecinski}. For instance, Goodman et al. introduced selectively
-decreasing security to save energy~\cite{ScalableSecurity}. Similar in intent to
-VSRs, Goodman et al. minimizes energy consumption by separating low-priority
-communications from high-priority and encrypting them differently. Goodman et
-al.'s approach is designed for communication and only considered iteration/round
-count, thus it did not anticipate the need for SwitchCrypt's generic API,
-switching strategies, or security scores. Further, Wolter and Reinecke study
+Further, trading off security for energy, performance, and other concerns is not
+a new research area~\cite{ScalableSecurity, WolterReinecke, ZengChow1,
+ZengChow2, HaleemEtAl, LiOmiecinski}. Goodman et al. introduced selectively
+decreasing the security of some data to save energy~\cite{ScalableSecurity}.
+However, their approach is designed for communication and only considered
+iteration/round count, thus it did not anticipate the need for SwitchCrypt's
+generic API, switching strategies, or security scores. Wolter and Reinecke study
 approaches to quantifying security in several contexts~\cite{WolterReinecke}.
 This study anticipates the value of dynamically switching ciphers but proposes
-no mechanisms to enable this in FDE.
-
-Companies like LastPass and Google have explored performance-security tradeoffs.
-Google's Adiantum uses a less secure reduced round version of
-ChaCha~\cite{Adiantum}; LastPass has dealt with scaling the number of iterations
-of PBKDF\#2, trading performance for security~\cite{LastPass}. \TODO{Need a
-summary sentence here, too.  Again, need to make it clear that what we are doing
-is related to this work, but solved many novel challenges.}
+no mechanisms to enable this in FDE. Similarly, companies like LastPass and
+Google have explored performance-security tradeoffs. Google's Adiantum (above)
+uses a less secure reduced round version of ChaCha~\cite{Adiantum}. While not an
+FDE solution, LastPass has dealt with scaling the number of iterations of
+PBKDF\#2, trading performance for security during login
+sessions~\cite{LastPass}.
