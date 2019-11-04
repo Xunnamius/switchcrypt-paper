@@ -26,13 +26,19 @@ various cipher configurations dynamically.
 
 However, trading off security for energy, performance, and other concerns is not
 a new idea~\cite{ScalableSecurity, WolterReinecke, ZengChow1, ZengChow2,
-HaleemEtAl, LiOmiecinski}. For instance, Goodman et al. introduced trading
-security for decreased energy dissipated to encrypt a bit back in
-1998~\cite{ScalableSecurity}. Similar in intent to VSRs and the Selective
-strategy (see \secref{usecases}), Goodman minimizes energy consumption by
-separating low-priority data from high-priority and encrypting them differently. \TODO{Was Goodman's approach just for communication?  We need to say more about what makes your work unique.  For example: "Goodman et al.'s approach is designed for communication and only considered changing key lengths, thus it did not anticipate the need for SwitchCrypt's generic API, switching strategies, or security scores."}
-Further, Wolter and Reinecke study performance and security tradeoffs, exploring
-approaches to quantifying security~\cite{WolterReinecke}. \TODO{Again, need to say something more to differentiate us.  Something like: "This study anticipates the value of dynamically switching ciphers but proposes no mechanisms to actually enable this switch."}
+HaleemEtAl, LiOmiecinski}. For instance, Goodman et al. (1998) introduced
+trading decreased security for saving energy dissipated to encrypt a bit during
+wireless communication~\cite{ScalableSecurity}. Similar in intent to VSRs,
+Goodman minimizes energy consumption by separating low-priority communications
+from high-priority and encrypting them differently. Goodman et al.'s approach is
+designed for communication and only considered changing key lengths, thus it did
+not anticipate the need for SwitchCrypt's generic API, switching strategies, or
+security scores. Further, Wolter and Reinecke study performance and security
+tradeoffs, exploring approaches to quantifying security in several
+contexts~\cite{WolterReinecke}. \TODO{Again, need to say something more to
+differentiate us.  Something like: "This study anticipates the value of
+dynamically switching ciphers but proposes no mechanisms to actually enable this
+switch."}
 
 In the wild, companies like Google~\cite{AndroidM} and Apple~\cite{iOSFDE} have
 explored performance-security tradeoffs in hardware when considering FDE

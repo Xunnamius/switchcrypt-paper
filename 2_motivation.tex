@@ -51,22 +51,13 @@ container or restart the device.
 The above is possible if---rather than restricting the system to a single
 cipher---we could flexibly encrypt data with a range of ciphers and
 cryptographic keys at the block level. To achieve this, we must address three
-challenges. First, we must reason about why we use one cipher over another. This
-requires we \emph{quantify} the desirable security properties of different
-ciphers. Second, we must understand how to flexibly encrypt independent storage
-units efficiently. This requires we \emph{decouple} cipher implementations from
-the encryption. Third, we need to know when to ``re-cipher'' those units and
-where to store the output, ensuring acceptable overhead. We accomplish this with
-our \emph{switching strategies}.
-
-\textbf{Quantifying ciphers with disparate security properties.} To obtain a
-configuration space that we might reason about, it is necessary to score certain
-security properties of stream ciphers. This is challenging since different
-ciphers have a wide range of disparate security properties, including ciphers
-that are not length-preserving in their output. To address this challenge, we
-propose a method for quantitative cipher comparison in the FDE context and use
-it to define our configuration space. These cipher configurations, each with
-different strengths, answer ``why'' we might prefer one over another.
+challenges. First, we must understand how to flexibly encrypt independent
+storage units efficiently. This requires we \emph{decouple} cipher
+implementations from the encryption. Second, we need to know when to
+``re-cipher'' those units and where to store the output, ensuring acceptable
+overhead. We accomplish this with our \emph{switching strategies}. Third, we
+must reason about why to use one cipher over another. This requires we
+\emph{quantify} the desirable security properties of different ciphers.
 
 \textbf{Decoupling ciphers from encryption for mixed-cipher layouts.} To rapidly
 switch ciphers for the drive, we require a \emph{generic cipher API} and
@@ -80,13 +71,21 @@ logical blocks (nuggets) from physical drive and other storage blocks. And since
 they are independent, we can use our cipher API to select any cipher to encrypt
 or decrypt any nugget at any point, answering the ``how'' of switching ciphers.
 
-\textbf{Strategies to switch nugget ciphers with acceptable overhead.} Finally,
-to answer ``when'' to switch a nugget's cipher and to ``where'' we commit the
-output, we implement a series of policies we call \textit{cipher switching
-strategies} that leverage the generic cipher API and drive layout to selectively
-``re-cipher'' groups of nuggets, whereby the key and the cipher used to
-encrypt/decrypt a nugget are switched at runtime. These strategies allow us to
-navigate our configuration tradeoff space and settle on optimal points
-unreachable with prior work. The challenge here is to accomplish this while
-minimizing overhead.
+\textbf{Strategies to switch nugget ciphers with acceptable overhead.} To answer
+``when'' to switch a nugget's cipher and to ``where'' we commit the output, we
+implement a series of policies we call \textit{cipher switching strategies} that
+leverage the generic cipher API and drive layout to selectively ``re-cipher''
+groups of nuggets, whereby the key and the cipher used to encrypt/decrypt a
+nugget are switched at runtime. These strategies allow us to navigate our
+configuration tradeoff space and settle on optimal points unreachable with prior
+work. The challenge here is to accomplish this while minimizing overhead.
 
+\textbf{Quantifying ciphers with disparate security properties.} Finally, to
+obtain a configuration space that we might reason about, it is necessary to
+score certain security properties of stream ciphers. This is challenging since
+different ciphers have a wide range of disparate security properties, including
+ciphers that are not length-preserving in their output. To address this
+challenge, we propose a method for quantitative cipher comparison in the FDE
+context and use it to define our configuration space. These cipher
+configurations, each with different strengths, answer ``why'' we might prefer
+one over another.
