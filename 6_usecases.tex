@@ -52,7 +52,7 @@ slightly more power in the short term, we stay within our energy budget and
 finish before the devices dies. Further, when we get our device to a charger,
 SwitchCrypt can converge nuggets back to Freestyle Balanced.
 
-On average, using Forward cipher switching resulted in a \TODO{XXX} total energy
+On average, using Forward cipher switching resulted in a 3.3x total energy
 use reduction.
 
 \subsection{Variable Security Regions}\label{subsec:uc2}
@@ -96,10 +96,11 @@ In \figref{usecase-vsr-bar}, we see the sequential read and write performance of
 Freestyle Balanced. Between them, we see Selective switching 3:1 ratio I/O
 results.
 
-Our goal is to use VSRs to keep our sensitive data secure while keeping
-the performance and battery life benefits of using a fast cipher for the
-majority of I/O operations. On average, using SwitchCrypt Selective switching
-versus prior work results in a \TODO{XXX} reduction in latency.
+Our goal is to use VSRs to keep our sensitive data secure while keeping the
+performance and battery life benefits of using a fast cipher for the majority of
+I/O operations. Using SwitchCrypt Selective switching versus prior work results
+in a reduction of 3.1x to 4.8x for read latency and 1.6x to 2.8x for write
+latency.
 
 \subsection{Responding to End-of-Life Slowdown in Solid State Drives}\label{subsec:uc3}
 
