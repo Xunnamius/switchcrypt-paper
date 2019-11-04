@@ -303,23 +303,22 @@ ciphers can co-exist on the backing store securely, depending on the use case
 
 \subsection{Quantifying Cipher Security Properties} \label{subsec:quantify}
 
-Every cipher mentioned in this paper has been proven formally secure in that
-\emph{there are no known efficient attacks against any of them}~\cite{All,
-Ciphers, Again}. This implies data is kept confidential versus an adversary with
-limited resources, however it is often desirable to secure data at rest in
-special contexts or considering future adversaries with abundant resources. In
-this way, a cipher that is more resilient to cryptanalysis or brute-force than
-is currently required might be more desirable than a cipher with properties that
-meet current standards.
+Every cipher mentioned in this paper is considered secure in that \emph{there
+are no known practical attacks against them}~\cite{All, Ciphers, Again}. This
+implies data is kept confidential versus any adversary, however it is often
+desirable to secure data at rest in special contexts or considering future
+adversaries with abundant resources. In this way, a cipher that is more
+resilient to cryptanalysis or brute-force or round count than is currently
+required or a cipher that elegantly handles nonce-reuse might be more desirable.
 
 To simplify reasoning about trading off such disparate cryptographic properties
 in the FDE context, we must have a way to quantitatively compare a cipher's
-``desirability'' or usefulness to SwitchCrypt and to FDE more broadly. Hence, we
-do not attempt to define a generally applicable \textit{ranking} of
-\emph{security strength}. Instead, we score ciphers (\ie{a so-called ``security
-score''}) based on three key security properties that, when summed, give a
-relative estimate of the difficulty (or resources required) to attack data
-secured under SwitchCrypt FDE (see: \tblref{security-quant}).
+``desirability'' for SwitchCrypt and for FDE more broadly. Hence, we do not
+attempt to define a generally applicable \textit{ranking} of \emph{security
+strength}. Instead, we score ciphers (\ie{a so-called ``security score''}) based
+on three key security properties that, when summed, give a relative estimate of
+the difficulty (or resources required) to attack data secured under SwitchCrypt
+FDE (see: \tblref{security-quant}).
 
 Our scoring scheme is a combination of well understood schemes: scoring ciphers
 on their confusion and diffusion of plaintext bits during
@@ -333,9 +332,15 @@ defender})~\cite{scrypt,Freestyle,others2}.
 
 \textbf{1) Output randomization (OR).} A cipher with output randomization
 generates different ciphertexts non-\\deterministically given the same key,
-nonce, and message. This makes chosen-ciphertext (CCA) and other attacks where
-the ciphertext is in full control of the adversary much more difficult. 
+%<<<<<<< HEAD
+%nonce, and message. This makes chosen-ciphertext (CCA) and other attacks where
+%the ciphertext is in full control of the adversary much more difficult. 
+%\TODO{Can you add a citation here?}
+%=======
+nonce, and message. This makes chosen-ciphertext (CCA) and other attacks
+where the ciphertext is in full control of the adversary much more difficult.
 \TODO{Can you add a citation here?}
+%>>>>>>> c212222a366c7b905b6d580af590a606317a93c2
 
 This is a binary feature in that a cipher either outputs deterministically given
 the same input or it does not. A cipher with non-deterministic output given the
@@ -351,7 +356,8 @@ resistance to brute force and offline/dictionary attacks has no kind of
 slower when given the incorrect key versus the correct key. Similarly, we
 consider ciphers with so-called ``enhanced resistance,'' where they are expected
 to take longer to finish decrypting ciphertext given an incorrect key versus a
-correct key with high probability.
+correct key with high probability. This property is also useful in instances
+where SwitchCrypt is initialized with a weak password/key.
 
 Scores for this feature range from 0 to 1, where 0 represents no resistance, 0.5
 is standard resistance to brute-force and offline/dictionary attacks, and 1 is
@@ -359,11 +365,11 @@ the aforementioned ``enhanced resistance''.
 
 \textbf{3) Relative round count and key length (RR/RK).} The ciphers we examine
 in this research are all constructed around the notion of \emph{rounds}, where a
-higher number of rounds typically implies a stronger confidentiality guarantee
-given there are no fatal related-key attacks. This feature represents how many
-rounds the cipher executes compared to the accepted ``standard'' round count for
-that cipher. For instance, ChaCha8 is a reduced round version of the standard
-ChaCha20.
+higher number of rounds or longer key typically imply a stronger confidentiality
+guarantee given there are no fatal related-key attacks. This feature represents
+how many rounds the cipher executes compared to the accepted ``standard'' round
+count for that cipher. For instance: ChaCha8 is a reduced round version of the
+standard ChaCha20, both using 256-bit keys.
 
 Scores for variants are distributed evenly from 0-1. For instance, ChaCha8
 scores 0 and ChaCha20 scores 1\@.
@@ -398,17 +404,24 @@ scores 0 and ChaCha20 scores 1\@.
 We revisit the motivating example from \secref{motivation}. Initially, I/O
 requests come down from the LFS and are received by the cryptographic driver,
 which divides the request by which nuggets it touches. For each nugget, the
-per-nugget metadata is consulted to determine the cipher with which the nugget is
+%<<<<<<< HEAD
+%per-nugget metadata is consulted to determine the cipher with which the nugget is
+%encrypted. If it is encrypted with the active cipher, which must be true if we
+%have not initiated a cipher switch, the write is handled like prior work:
+%encrypted data is read in from the backing storage, the merkle tree and
+%=======
+per-nugget metadata is consulted to determine with which cipher the nugget is
 encrypted. If it is encrypted with the active cipher, which must be true if we
-have not initiated a cipher switch, the write is handled like prior work:
-encrypted data is read in from the backing storage, the merkle tree and
+have not initiated a cipher switch, the write is handled similarly to prior
+work: encrypted data is read in from the backing storage, the merkle tree and
+%>>>>>>> c212222a366c7b905b6d580af590a606317a93c2
 monotonic counter are consulted to ensure the integrity of encrypted data, the
 transaction journal is consulted during write operations so that overwrites are
-handled and pad-reuse violations are avoided, and then the keycount store is
+handled and pad reuse violations are avoided, and then the keycount store is
 consulted to derive the nugget's unique encryption key from some master secret.
 Using the generic stream cipher API to call out to the active stream cipher
-implementation, SwitchCrypt encrypts/decrypts the nugget's
-contents~\cite{StrongBox} and commits any updates back to backing storage.
+implementation, SwitchCrypt encrypts/decrypts the nugget's contents and commits
+any updates back to storage~\cite{StrongBox}.
 
 When the device enters ``battery saver'' mode, the energy monitoring software
 downclocks the CPU and indicates to SwitchCrypt that a more energy-efficient

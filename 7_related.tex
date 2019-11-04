@@ -1,12 +1,12 @@
 \section{Related Work}\label{sec:related}
 
-The standard approach to FDE, using AES-XTS, introduces significant overhead. 
-Within the last year and a half it has been established that encryption 
-using \emph{stream ciphers} for FDE is faster than using
-AES~\cite{StrongBox, AnotherPaper1, AnotherPaper2}. However, when used naively
-in drive encryption, stream ciphers are widely known to be vulnerable to
-``overwrite attacks'' like pad reuse and rollback~\cite{KatzLindell, StrongBox}.
-To enable FDE using stream ciphers, prior work explores several approaches:
+The standard approach to FDE, using AES-XTS, introduces significant overhead.
+Recently, it has been established that encryption using \emph{stream ciphers}
+for FDE is faster than using AES~\cite{StrongBox, AnotherPaper1, AnotherPaper2}.
+However, when used naively in drive encryption, stream ciphers are widely known
+to be vulnerable to ``overwrite attacks'' like pad reuse and
+rollback~\cite{KatzLindell, StrongBox}. To enable FDE using stream ciphers,
+prior work explores several approaches:
 
 \begin{itemize}
    \item Use a non-deterministic CTR mode with specially designed cipher and
@@ -18,25 +18,24 @@ To enable FDE using stream ciphers, prior work explores several approaches:
    to prevent overwrites (StrongBox~\cite{StrongBox}).
 \end{itemize}
 
-Though the tradeoffs and ideas explored in this paper can apply to any use of
-stream ciphers in FDE using some binary additive operation, we focus on the
-lattermost prior approach with SwitchCrypt: a stream cipher based FDE and
-metadata layer that exploits LFS overwrite-averse behavior to achieve
-high-performance encryption.
+Unlike StrongBox and other work, which focuses on optimizing performance despite
+re-ciphering due to overwrites, SwitchCrypt maintains overwrite protections
+while abstracting the idea of re-encrypting nuggets out into cipher switching;
+instead of myopically pursuing a performance win, this allows the trade off of
+various cipher configurations dynamically.
 
-Unlike prior work, which focuses on optimizing performance despite re-ciphering
-due to overwrites, SwitchCrypt maintains overwrite protections while abstracting
-the idea of re-encrypting nuggets out into re-ciphering or \emph{cipher
-switching}, where a nugget's contents are decrypted using the old key and
-inactive cipher configuration and encrypted using a new key and the active
-cipher configuration before completing the I/O operation; instead of myopically
-pursuing a performance win, this allows users (or the operating system) to trade
-off different ciphers and their characteristics dynamically.
+However, trading off security for energy, performance, and other concerns is not
+a new idea~\cite{ScalableSecurity, WolterReinecke, ZengChow1, ZengChow2,
+HaleemEtAl, LiOmiecinski}. For instance, Goodman et al. introduced trading
+security for decreased energy dissipated to encrypt a bit back in
+1998~\cite{ScalableSecurity}. Similar in intent to VSRs and the Selective
+strategy (see \secref{usecases}), Goodman minimizes energy consumption by
+separating low-priority data from high-priority and encrypting them differently.
+Further, Wolter and Reinecke study performance and security tradeoffs, exploring
+approaches to quantifying security~\cite{WolterReinecke}.
 
-\TODO{A paragraph on FDE prior work; include StrongBox, Google Adiantum using a
-reduced round version of ChaCha for real life crypto, dm-crypt?, Secure Block
-Device; include other ciphers in the same vein as Freestyle}
-
-\TODO{Include papers that trade energy/perf vs securty; Scalable Encryption
-paper, energy saving cryptosystems, LastPass whitepaper trading crypto for
-reduced latency in PBKDF2, etc.} \TODO{Agreed that this last one is critical. PErhaps cut the prior todo for space.}
+In the wild, companies like Google~\cite{AndroidM} and Apple~\cite{iOSFDE} have
+explored performance-security tradeoffs in hardware when considering FDE
+support. Google's Adiantum uses a less secure reduced round version of
+ChaCha~\cite{Adiantum}. LastPass (LogMeIn) has dealt with scaling the number of
+iterations of its PBKDF\#2, trading performance for security~\cite{LastPass}.

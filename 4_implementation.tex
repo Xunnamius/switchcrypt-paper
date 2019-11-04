@@ -26,12 +26,12 @@ the active cipher or the inactive cipher. However, there is no technical
 limitation preventing various different nuggets encrypted with three, four, or
 more unique ciphers.
 
-we use POSIX message queues to indicate intent to switch. A production-ready
+We use POSIX message queues to indicate intent to switch. A production-ready
 implementation would be greatly simplified by adding an ``intent'' parameter to
 the POSIX \textit{read()} and \textit{write()} system calls, allowing
 SwitchCrypt to more exactly map individual I/O operations to specific areas of
 the backing store when spatially switching. We simulate this with IPC.
-\TODO{This intent parameter could also be a security score or something right?
+\TO\DO{This intent parameter could also be a security score or something right?
 You should spell out exactly what that intent parameter means and maybe change
 its name so its use is clearer.} \PUNT{This is especially important when
 considering the selective switching strategy; a production-ready implementation
@@ -52,9 +52,10 @@ three different configurations: a ``fast'' mode with parameters
 $R_{max}$=$28$, $H_I$=$2$, $I_C$=$10$)}, and a ``secure'' mode with parameters
 \texttt{FreestyleSecure($R_{min}$=$20$, $R_{max}$=$36$, $H_I$=$1$, $I_C$=$12$)}.
 
-Thanks to Freestyle's output randomization, we can skip the overhead of
-tracking, detecting, and handling overwrites when nuggets are using it,
-offsetting the 1.6x to 3.2x slowdown compared to the ChaCha20~\cite{Freestyle}.
+Thanks to Freestyle's output randomization (see \secref{design}), we can skip
+the overhead of tracking, detecting, and handling overwrites when nuggets are
+using it, offsetting the 1.6x to 3.2x performance loss of using Freestyle versus
+ChaCha20~\cite{Freestyle}.
 
 \PUNT{\subsubsection{Implementing Cipher Switching}
 
@@ -62,7 +63,7 @@ A naive implementation is trivial (\eg{execute the chosen strategy on every I/O
 operation}), this navigation must occur with acceptable overhead by preserving
 performance wherever possible. The cryptographic driver provides such a
 mechanism, tying together cipher switching strategies and the generic stream
-cipher API. \TODO{Which cryptographic driver? You need to clarify if you are
+cipher API. \TO\DO{Which cryptographic driver? You need to clarify if you are
 talking about a piece of our design or something we are using from prior work.}
 
 In the cases of Mirrored and Selective switching, we use offset to determine in
@@ -71,7 +72,7 @@ which area of the backing store receives I/O.
 In the case of Forward switching, it is tempting to implement it such that a
 nugget is completely re-ciphered during I/O every time its metadata indicates
 that it was previously encrypted using a non-active cipher. However, such a
-naive implementation can have disastrous effects on performance. \TODO{It is not
+naive implementation can have disastrous effects on performance. \TO\DO{It is not
 clear why that would be disastrous.}
 
 First, a nugget is considered \emph{pristine} if it has not had any data written
@@ -94,7 +95,7 @@ re-keying operation every time. On the other hand, during hard re-cipher, the
 nugget's metadata is changed to match the active cipher configuration \emph{and}
 the nugget data is encrypted using the new cipher.
 
-\TODO{Maybe repeat that mirrored relies on someone to implement the fast secure
+\TO\DO{Maybe repeat that mirrored relies on someone to implement the fast secure
 erase, so that you can read the fast region until it is time to panic and then
 you quickly erase?  Are there other uses of mirrored?}}
 

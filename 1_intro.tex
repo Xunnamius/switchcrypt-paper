@@ -65,14 +65,13 @@ desired security properties, and adhering to changing OS energy budgets.
 Hence, any common-case configuration will inevitably sacrifice one concern for
 another, even when it is not optimal to the end user. \emph{But what if our
 system did not have to sit at some generic configuration point, especially when
-another configuration becomes more desirable later on?}
-
-\subsection{Our Contributions}
-
+another configuration becomes more desirable later on?}\\
+\\
+\textbf{Our Contributions}\\
 To realize the goal of flexibly adjusting storage tradeoffs, we first introduce
 a scheme to \emph{quantify} the usefulness or relative ``strength'' of ciphers
 based on key security properties relevant to FDE. We call these ``security
-scores.'' Using these security scores, we then define a tradeoff space of cipher
+scores.'' Using these security scores, we define a tradeoff space of cipher
 configurations over competing concerns: total energy use, desirable security
 properties in the FDE context, read and write performance, total writable space
 on the drive, and how quickly the drive can converge to a single configuration.
@@ -84,9 +83,13 @@ dynamically with acceptable overhead. \TODO{I just realized the order on these
 	 I think the whole paragraph needs a rewrite to reflect the updated 
 	 structure of section 3 (and the challenges at the end of section 2).}
 
-\TODO{Overhead summary of empirical paragraph here that expounds a bit on the
-final sentence of the abstract. We support up to X security configurations, etc.
-And then present some empirical results showing the wide range of security and
-energy tradeoffs that become available with various state-of-the-art ciphers as
-a result.} We find that SwitchCrypt achieves at least \TODO{XXX} improvement
-compared to static approaches that must pick only a single operating point.
+We implement SwitchCrypt and three switching strategies---\emph{Forward},
+\emph{Selective}, and \emph{Mirrored}---to dynamically change between 
+the ChaCha and Freestyle
+stream ciphers using our novel API. We then study SwitchCrypt's dynamic
+flexibility through four case studies where latency, energy, and desired
+security properties change dynamically. SwitchCrypt achieves a reduction of at
+least 3.3x in total energy use when compared to static approaches; further, we
+see a reduction of 3.1x to 4.8x for read latency and 1.6x to 2.8x for write
+latency compared to static approaches that must pick a single point in the 
+latency/energy/security tradeoff space.
