@@ -1,5 +1,25 @@
 \section{Conclusion}\label{sec:conclusion}
+This paper advocates for a more agile approach to full 
+drive encryption where the storage system can dynamically 
+alter the tradeoffs between security and latency (or energy) 
+for data at rest.  To support this vision of agile encryption,
+we have proposed an API that allows mulitple stream ciphers, with 
+different input and output characteristics to be composed in a 
+generic manner.  We have identified three strategies for using 
+this API to switch ciphers dynamically, but with low overhead.  
+We have also proposed a scoring method for determining when to 
+use one cipher over another. Our case studies show how different 
+strategies can be used to achieve different goals in practice.
+We believe that agile encryption will become increasingly important 
+as successful operation of computer systems increasingly requires 
+balancing seemingly conflicting operational requirements.  We hope 
+that this work inspires further research into achieving this balance, 
+including both mechanisms and policies for exposing and navigating 
+the underlying tradeoff spaces.
 
-\TODO{That is all, folks!}
+\TODO{I really wanted a conclusion in here.  
+	Feel free to edit it in any way you want.}
+
+%\TODO{That is all, folks!}
 
 \PUNT{\TODO{Add David to acknowledgements once we get out of anon reviews.}}

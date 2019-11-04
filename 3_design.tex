@@ -48,8 +48,8 @@ API}.
 The \emph{merkle tree} ensures the integrity of all data on a per-nugget level.
 The \emph{keycount store} keeps track of each nugget's 64-bit cryptographic key.
 The \emph{transaction journal} keeps track of writes to nuggets, allowing
-SwitchCrypt to detect and respond to overwrites. The \emph{monotonic counter} is
-used to prevent the system state from being rolled back. The \emph{per-nugget
+SwitchCrypt to detect and respond to overwrites. The \emph{monotonic counter} 
+prevents the system state from being rolled back. The \emph{per-nugget
 metadata} is a drive-backed array where extra cryptographic material is stored
 depending on the cipher used to encrypt the nugget. The size of the array is
 determined by ciphers loaded through the \emph{generic stream cipher API}.
@@ -57,10 +57,13 @@ determined by ciphers loaded through the \emph{generic stream cipher API}.
 \subsection{Generic Stream Cipher API} \label{subsec:api}
 
 There are \emph{many} ciphers we might use with SwitchCrypt, each with various
-input requirements and output considerations. Unlike prior work, SwitchCrypt
+input requirements and output considerations. A key difference with prior work 
+is that SwitchCrypt
 must be able to encrypt and decrypt arbitrary nuggets without worrying about a
-cipher's implementation details. At the same time, these implementation details
-must be handled with care or the security of the system is violated. With our
+cipher's implementation details; prior approaches could have cipher-specific 
+implementations because they did not consider switching.   
+Thus, the cipher-specific details
+must be handled with care or security is violated. With our
 novel cipher API, we present an interface that \emph{decouples} cipher
 implementations from the encryption/decryption process. This allows any cipher
 to be integrated into SwitchCrypt without modification or special
@@ -94,10 +97,10 @@ The API is accessible at three levels:
    approach.
 \end{enumerate}
 
-Were we using simple ciphers exclusively, \ie{they don't differentiate between
-encryption and decryption and always produces output of the same length as its
+Were we using simple ciphers exclusively, \ie{those that do not differentiate between
+encryption and decryption and always produce output of the same length as the
 input}, we could generate a keystream and XOR it with data without the
-implementation overhead of an API. However, some cipher implementations treat
+the need for a new a API. However, some cipher implementations treat
 encryption and decryption as two distinct operations. Others require different
 parameters or special considerations before XORing the keystream with data.
 Others produce extra output that must be stored during encryption and fetched
@@ -115,8 +118,8 @@ encrypt nugget contents. When a cipher switch occurs, a different cipher becomes
 the active cipher. At this point, SwitchCrypt must determine \emph{when} to
 re-cipher a nugget and \emph{where} to store the output on the drive.
 ``Re-ciphering'' here means using a non-active cipher to decrypt a nugget's
-contents and using the active cipher to re-encrypt them. Depending on the
-complexity of the use case, it may make the most sense to re-cipher a nugget
+contents and using the active cipher to re-encrypt them. Depending on
+ the use case, it may make the most sense to re-cipher a nugget
 immediately, or eventually, or to maintain several areas of differently-ciphered
 nuggets concurrently.
 
@@ -124,7 +127,7 @@ A naive approach would immediately switch every nugget to the desired cipher,
 but the latency and energy cost would be unacceptable. Hence, a more adaptable
 approach is necessary: cipher \emph{switching strategies}. These strategies
 allow re-ciphering nuggets in a variety of cases with minimal impact on
-performance and battery life and without compromising data security.
+performance and battery life, without compromising data security.
 
 Determining \emph{when} to target a nugget for re-ciphering we call
 \emph{temporal switching}, for which we propose the \emph{Forward} switching
@@ -331,7 +334,8 @@ defender})~\cite{scrypt,Freestyle,others2}.
 \textbf{1) Output randomization (OR).} A cipher with output randomization
 generates different ciphertexts non-\\deterministically given the same key,
 nonce, and message. This makes chosen-ciphertext (CCA) and other attacks where
-the ciphertext is in full control of the adversary much more difficult.
+the ciphertext is in full control of the adversary much more difficult. 
+\TODO{Can you add a citation here?}
 
 This is a binary feature in that a cipher either outputs deterministically given
 the same input or it does not. A cipher with non-deterministic output given the
@@ -391,11 +395,11 @@ scores 0 and ChaCha20 scores 1\@.
 
 \subsection{Putting It All Together} \label{subsec:summary}
 
-Let's revisit the motivating example from \secref{motivation}. Initially, I/O
+We revisit the motivating example from \secref{motivation}. Initially, I/O
 requests come down from the LFS and are received by the cryptographic driver,
 which divides the request by which nuggets it touches. For each nugget, the
-per-nugget metadata is consulted to determine with which cipher the nugget is
-encrypted. If it's encrypted with the active cipher, which must be true if we
+per-nugget metadata is consulted to determine the cipher with which the nugget is
+encrypted. If it is encrypted with the active cipher, which must be true if we
 have not initiated a cipher switch, the write is handled like prior work:
 encrypted data is read in from the backing storage, the merkle tree and
 monotonic counter are consulted to ensure the integrity of encrypted data, the
@@ -412,7 +416,7 @@ cipher should be used until we return to a non-curtailed energy budget. Now,
 when the cryptographic driver divides I/O requests into each affected nugget,
 the per-nugget metadata shows SwitchCrypt that the nugget is encrypted using a
 cipher that is not the active cipher. This triggers the re-ciphering code path.
-Since we're using the Forward switching strategy, this means the nugget data is
+Since we are using the Forward switching strategy, this means the nugget data is
 immediately decrypted by calling out to the inactive cipher through the API and
 then re-encrypted by calling out to the active cipher. Depending on the API
 level the cipher is implemented at, either 1) the cryptographic driver manages

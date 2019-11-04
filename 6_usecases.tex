@@ -51,7 +51,10 @@ finish before the devices dies. Further, when we get our device to a charger,
 SwitchCrypt can converge nuggets back to Freestyle Balanced.
 
 On average, using Forward cipher switching results in a \TODO{XXX} total energy
-use reduction.
+use reduction. We note, however, that the energy savings is not the point of 
+this experiment.  Rather, the lesson learned is that SwitchCrypt enables the 
+system to move to the right point in the energy/security tradeoff space that the 
+current task can still be accomplished before the battery is drained.
 
 \subsection{Variable Security Regions}
 
@@ -99,7 +102,8 @@ ratio I/O results.
 Our goal is to use VSRs to keep our sensitive data secure while keeping the
 performance and energy use benefits of using a fast cipher for the majority of
 I/O operations. On average, using SwitchCrypt Selective switching versus prior
-work results in a \TODO{XXX} reduction in latency.
+work results in a \TODO{XXX} reduction in latency without compromising the 
+security needs of the most sensitive data.
 
 \subsection{Responding to End-of-Life Slowdown in Solid State Drives}
 
@@ -151,7 +155,7 @@ entry point when she is stopped. Further suppose her laptop containing sensitive
 priceless research data is confiscated from her custody. Being a security
 researcher, she has a chance to trigger a remote wipe, where the laptop uses
 Instant Secure Erase to reset its internal storage, permanently destroying all
-her data. While she certainly doesn't want her data falling into the wrong
+her data. While she certainly does not want her data falling into the wrong
 hands, she cannot afford to lose that data either. In such a scenario, it would
 be useful if, instead of destroying the data, the storage layer could switch
 itself to a more secure state as quickly as possible.
