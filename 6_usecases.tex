@@ -3,11 +3,11 @@
 In this section, we provide four case studies and empirical results
 demonstrating the practical utility of cipher switching. We cover a wide range
 of situations, highlighting concerns like configuration convergence
-(\cref{subsec:uc4}), trading off security and writable space (\cref{subsec:uc2}),
-meeting latency goals (\cref{subsec:uc3}), and keeping within an energy budget
-(\cref{subsec:uc1}). We also demonstrate the utility of both temporal and
-spatial switching strategies, exploring the range of conditions under which
-certain strategies are optimal.
+(\cref{subsec:uc4}), trading off security and writable space
+(\cref{subsec:uc2}), meeting latency goals (\cref{subsec:uc3}), and keeping
+within an energy budget (\cref{subsec:uc1}). We also demonstrate the utility of
+both temporal and spatial switching strategies, exploring the range of
+conditions under which certain strategies are optimal.
 
 \subsection{Balancing Security Goals with a Constrained Energy Budget}\label{subsec:uc1}
 
@@ -52,16 +52,11 @@ slightly more power in the short term, we stay within our energy budget and
 finish before the devices dies. Further, when we get our device to a charger,
 SwitchCrypt can converge nuggets back to Freestyle Balanced.
 
-%<<<<<<< HEAD
-%On average, using Forward cipher switching results in a \TODO{XXX} total energy
-%use reduction. 
-%=======
-On average, using Forward cipher switching resulted in a 3.3x total energy
-use reduction. We note, however, that the energy savings is not the point of 
-this experiment.  Rather, the lesson learned is that SwitchCrypt enables the 
-system to move to the right point in the energy/security tradeoff space that the 
+On average, using Forward cipher switching resulted in a 3.3x total energy use
+reduction. We note, however, that the energy savings is not the point of this
+experiment.  Rather, the lesson learned is that SwitchCrypt enables the system
+to move to the right point in the energy/security tradeoff space that the
 current task can still be accomplished before the battery is drained.
-%>>>>>>> c212222a366c7b905b6d580af590a606317a93c2
 
 \subsection{Variable Security Regions}\label{subsec:uc2}
 
@@ -105,18 +100,10 @@ Freestyle Balanced. Between them, we see Selective switching 3:1 ratio I/O
 results.
 
 Our goal is to use VSRs to keep our sensitive data secure while keeping the
-%<<<<<<< HEAD
-%performance and energy use benefits of using a fast cipher for the majority of
-%I/O operations. On average, using SwitchCrypt Selective switching versus prior
-%work results in a \TODO{XXX} reduction in latency without compromising the 
-%security needs of the most sensitive data.
-%=======
 performance and battery life benefits of using a fast cipher for the majority of
 I/O operations. Using SwitchCrypt Selective switching versus prior work results
 in a reduction of 3.1x to 4.8x for read latency and 1.6x to 2.8x for write
-latency, all without compromising the 
-security needs of the most sensitive data. 
-%>>>>>>> c212222a366c7b905b6d580af590a606317a93c2
+latency, all without compromising the security needs of the most sensitive data.
 
 \subsection{Responding to End-of-Life Slowdown in Solid State Drives}\label{subsec:uc3}
 
@@ -161,22 +148,6 @@ advantage of more energy-efficient high-performance ciphers while retaining the
 ability to quickly converge the entire backing store to a single high-security
 cipher leveraging SSD Instant Secure Erase (ISE).
 
-%<<<<<<< HEAD
-%Nation-state and other ``adversaries'' have extensive compute resources,
-%knowledge of side-channels, and access to technology like quantum computers.
-%Suppose a scientist were attempting to re-enter her country through a border
-%entry point when she is stopped. Further suppose her laptop containing sensitive
-%priceless research data is confiscated from her custody. Being a security
-%researcher, she has a chance to trigger a remote wipe, where the laptop uses
-%Instant Secure Erase to reset its internal storage, permanently destroying all
-%her data. While she certainly does not want her data falling into the wrong
-%hands, she cannot afford to lose that data either. In such a scenario, it would
-%be useful if, instead of destroying the data, the storage layer could switch
-%itself to a more secure state as quickly as possible.
-
-%\begin{figure}[ht] \textbf{Custody Panic Use Case: Security Goals vs Time
-%Constraint}\par\medskip
-%=======
 Nation-state and other adversaries have extensive compute resources, knowledge
 of obscure side-channels (\eg{Dual\_EC\_DRBG~\cite{DualECDRBG}}), and access to
 technology like quantum computers. Suppose a scientist were attempting to
@@ -191,7 +162,6 @@ data, the storage layer could switch itself to a more secure state as quickly as
 possible.
 
 \begin{figure}[ht] \textbf{Custody Panic Use Case: Security Goals vs Time}\par\medskip
-%>>>>>>> c212222a366c7b905b6d580af590a606317a93c2
    \centering
    {\input{charts/usecase-custody.tex}} \caption{Actual security score vs
    security goal with respect to the time and ISE.}
