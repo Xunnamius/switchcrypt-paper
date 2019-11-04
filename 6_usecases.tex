@@ -106,7 +106,7 @@ I/O operations. Using SwitchCrypt Selective switching versus prior work results
 in a reduction of 3.1x to 4.8x for read latency and 1.6x to 2.8x for write
 latency, all without compromising the security needs of the most sensitive data.
 
-\subsection{Responding to End-of-Life Slowdown in Solid State Drives}\label{subsec:uc3}
+\subsection{Responding to End-of-Life Slowdown in SSDs}\label{subsec:uc3}
 
 This usecase illustrates using temporal Forward switching to offset the
 debilitating decline in performance when SSDs reach end-of-life
@@ -142,7 +142,7 @@ Our goal is to remain under the latency ceiling while remaining above the
 security floor. Thanks to Forward switching, accesses to highly trafficked areas
 of the drive can remain performant even during drive end-of-life.
 
-\subsection{Custody Panic: Securing Device Data Under Duress}\label{subsec:uc4}
+\subsection{Custody Panic: Device Data Under Duress}\label{subsec:uc4}
 
 This usecase illustrates the utility of spatial Mirrored switching to take
 advantage of more energy-efficient high-performance ciphers while retaining the
@@ -150,17 +150,17 @@ ability to quickly converge the entire backing store to a single high-security
 cipher leveraging SSD Instant Secure Erase (ISE).
 
 Nation-state and other adversaries have extensive compute resources, knowledge
-of obscure side-channels (\eg{Dual\_EC\_DRBG~\cite{DualECDRBG}}), and access to
-technology like quantum computers. Suppose a scientist were attempting to
-re-enter her country through a border entry point when she is stopped. Further
-suppose her laptop containing sensitive priceless research data is confiscated
-from her custody. Being a security researcher, she has a chance to trigger a
-remote wipe, where the laptop uses Instant Secure Erase to reset its internal
-storage, permanently destroying all her data. While she certainly doesn't want
-her data falling into the wrong hands, she cannot afford to lose that data
-either. In such a scenario, it would be useful if, instead of destroying the
-data, the storage layer could switch itself to a more secure state as quickly as
-possible.
+of obscure side-channels and back doors (\eg{Dual\_EC\_DRBG~\cite{DualECDRBG}}),
+and access to technology like quantum computers. Suppose a scientist were
+attempting to re-enter her country through a border entry point when she is
+stopped. Further suppose her laptop containing sensitive priceless research data
+is confiscated from her custody. Being a security researcher, she has a chance
+to trigger a remote wipe, where the laptop uses Instant Secure Erase to reset
+its internal storage, permanently destroying all her data. While she certainly
+doesn't want her data falling into the wrong hands, she cannot afford to lose
+that data either. In such a scenario, it would be useful if, instead of
+destroying the data, the storage layer could switch itself to a more secure
+state as quickly as possible.
 
 \begin{figure}[ht] \textbf{Custody Panic Use Case: Security Goals vs Time}\par\medskip
    \centering
