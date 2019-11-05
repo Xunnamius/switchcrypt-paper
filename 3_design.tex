@@ -302,12 +302,13 @@ ciphers can co-exist on the backing store securely, depending on the use case
 \subsection{Quantifying Cipher Security Properties} \label{subsec:quantify}
 
 Every cipher mentioned in this paper is considered secure in that \emph{there
-are no known practical attacks against them}~\cite{All, Ciphers, Again}. This
-implies data is kept confidential versus any adversary, however it is often
-desirable to secure data at rest in special contexts or considering future
-adversaries with abundant resources. In this way, a cipher that is more
-resilient to cryptanalysis or brute-force or round count than is currently
-required or a cipher that elegantly handles nonce-reuse might be more desirable.
+are no known practical attacks against them}~\cite{ChaCha20, Freestyle, SalsaX,
+Rabbit, Sosemanuk, AESCTR}. This implies data is kept confidential versus any
+adversary, however it is often desirable to secure data at rest in special
+contexts or considering future adversaries with abundant resources. In this way,
+a cipher that is more resilient to cryptanalysis or brute-force or round count
+than is currently required or a cipher that elegantly handles nonce-reuse might
+be more desirable.
 
 To simplify reasoning about trading off such disparate cryptographic properties
 in the FDE context, we must have a way to quantitatively compare a cipher's
@@ -320,13 +321,12 @@ FDE (see: \tblref{security-quant}).
 
 Our scoring scheme is a combination of well understood schemes: scoring ciphers
 on their confusion and diffusion of plaintext bits during
-encryption~\cite{MicrosoftCryptanalysisAES,SchneiersOnRounds} (commonly known as
-\emph{round count}), on how they behave when given the same input
-parameters~\cite{random-output1,Freestyle,random-output2} (normally an
-unacceptable confidentiality-breaking overwrite condition), and on there being
-penalties for supplying the wrong key when attempting to decrypt (\ie{an
-attacker should have to do more work than the
-defender})~\cite{scrypt,Freestyle,others2}.
+encryption~\cite{attack1,attack2,AESItself} (commonly known as \emph{round
+count}), on how they behave when given the same input
+parameters~\cite{random1,Freestyle,random2} (normally an unacceptable
+confidentiality-breaking overwrite condition), and on there being penalties for
+supplying the wrong key when attempting to decrypt (\ie{an attacker should have
+to do more work than the defender})~\cite{Freestyle,Mercy}.
 
 \textbf{1) Output randomization (OR).} A cipher with output randomization
 generates different ciphertexts non-\\deterministically given the same key,

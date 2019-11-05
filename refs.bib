@@ -1,79 +1,19 @@
-@techreport{Poly1305,
-    institution="University of Illinois at Chicago",
-    title="The Poly1305-AES message-authentication code",
-    author="Daniel J. Bernstein",
-    year="2005",
-}
-
-@online{MAC,
-  title = "Message Authentication Code Standard ISO/IEC 9797-1:2011",
-  year = 2011,
-  url = "https://www.iso.org/standard/50375.html",
-  urldate = "2017-04-26",
-}
-
-@inproceedings{asplos2,
-  author    = {Rui Zhang and
-               Natalie Stanley and
-               Christopher Griggs and
-               Andrew Chi and
-               Cynthia Sturton},
-  title     = {Identifying Security Critical Properties for the Dynamic Verification
-               of a Processor},
-  booktitle = {Proceedings of the Twenty-Second International Conference on Architectural
-               Support for Programming Languages and Operating Systems, {ASPLOS}
-               2017, Xi'an, China, April 8-12, 2017},
-  pages     = {541--554},
-  year      = {2017},
-  _crossref  = {DBLP:conf/asplos/2017},
-  url       = {http://doi.acm.org/10.1145/3037697.3037734},
-  doi       = {10.1145/3037697.3037734},
-  timestamp = {Wed, 05 Apr 2017 10:02:53 +0200},
-  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/asplos/ZhangSGCS17},
-  bibsource = {dblp computer science bibliography, http://dblp.org}
-}
-
-@inproceedings{asplos3,
-  author    = {Matthew Hicks and
-               Cynthia Sturton and
-               Samuel T. King and
-               Jonathan M. Smith},
-  title     = {{SPECS:} {A} Lightweight Runtime Mechanism for Protecting Software
-               from Security-Critical Processor Bugs},
-  booktitle = {Proceedings of the Twentieth International Conference on Architectural
-               Support for Programming Languages and Operating Systems, {ASPLOS}
-               '15, Istanbul, Turkey, March 14-18, 2015},
-  pages     = {517--529},
-  year      = {2015},
-  _crossref  = {DBLP:conf/asplos/2015},
-  url       = {http://doi.acm.org/10.1145/2694344.2694366},
-  doi       = {10.1145/2694344.2694366},
-  timestamp = {Thu, 26 Feb 2015 17:21:18 +0100},
-  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/asplos/HicksSKS15},
-  bibsource = {dblp computer science bibliography, http://dblp.org}
-}
-
-@inproceedings{asplos4,
-  author    = {Xun Li and
-               Vineeth Kashyap and
-               Jason K. Oberg and
-               Mohit Tiwari and
-               Vasanth Ram Rajarathinam and
-               Ryan Kastner and
-               Timothy Sherwood and
-               Ben Hardekopf and
-               Frederic T. Chong},
-  title     = {Sapper: a language for hardware-level security policy enforcement},
-  booktitle = {Architectural Support for Programming Languages and Operating Systems,
-               {ASPLOS} '14, Salt Lake City, UT, USA, March 1-5, 2014},
-  pages     = {97--112},
-  year      = {2014},
-  _crossref  = {DBLP:conf/asplos/2014},
-  url       = {http://doi.acm.org/10.1145/2541940.2541947},
-  doi       = {10.1145/2541940.2541947},
-  timestamp = {Wed, 05 Mar 2014 20:44:09 +0100},
-  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/asplos/0001KOTRKSHC14},
-  bibsource = {dblp computer science bibliography, http://dblp.org}
+@inproceedings{Thereska,
+ author = {Thereska, Eno and Donnelly, Austin and Narayanan, Dushyanth},
+ title = {Sierra: Practical Power-proportionality for Data Center Storage},
+ booktitle = {Proceedings of the Sixth Conference on Computer Systems},
+ series = {EuroSys '11},
+ year = {2011},
+ isbn = {978-1-4503-0634-8},
+ location = {Salzburg, Austria},
+ pages = {169--182},
+ numpages = {14},
+ url = {http://doi.acm.org/10.1145/1966445.1966461},
+ doi = {10.1145/1966445.1966461},
+ acmid = {1966461},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {data center, energy, power-proportionality},
 }
 
 @techreport{ChaCha20,
@@ -83,11 +23,180 @@
     year="2008",
 }
 
-@techreport{XEX,
-    institution="University of California at Davis",
-    title="Efficient Instantiations of Tweakable Blockciphers and Refinements to Modes OCB and PMAC",
-    author="Phillip Rogaway",
-    year="2004",
+@article{Adiantum,
+title	= {Adiantum: length-preserving encryption for entry-level processors},
+author	= {Paul Crowley and Eric Biggers},
+year	= {2018},
+URL	= {https://tosc.iacr.org/index.php/ToSC/article/view/7360},
+journal	= {IACR Transactions on Symmetric Cryptology},
+pages	= {39-61},
+volume	= {2018(4)}
+}
+
+@misc{Freestyle,
+    author = {P. Arun Babu and Jithin Jose Thomas},
+    title = {Freestyle, a randomized version of ChaCha for resisting offline brute-force and dictionary attacks},
+    howpublished = {Cryptology ePrint Archive, Report 2018/1127},
+    year = {2018},
+    note = {\url{https://eprint.iacr.org/2018/1127}},
+}
+
+@inproceedings{SalsaX,
+  title={The Salsa20 Family of Stream Ciphers},
+  author={Daniel J. Bernstein},
+  booktitle={The eSTREAM Finalists},
+  year={2008}
+}
+
+@Inbook{Rabbit,
+author="Boesgaard, Martin
+and Vesterager, Mette
+and Zenner, Erik",
+editor="Robshaw, Matthew
+and Billet, Olivier",
+title="The Rabbit Stream Cipher",
+bookTitle="New Stream Cipher Designs: The eSTREAM Finalists",
+year="2008",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="69--83",
+abstract="The stream cipher Rabbit was first presented at FSE 2003 [3], and no attacks against it have been published until now. With a measured encryption/decryption speed of 3.7 clock cycles per byte on a Pentium III processor, Rabbit does also provide very high performance. This paper gives a concise description of the Rabbit design and some of the cryptanalytic results available.",
+isbn="978-3-540-68351-3",
+doi="10.1007/978-3-540-68351-3_7",
+url="https://doi.org/10.1007/978-3-540-68351-3_7"
+}
+
+@Inbook{Sosemanuk,
+  author="Berbain, C{\^o}me
+  and Billet, Olivier
+  and Canteaut, Anne
+  and Courtois, Nicolas
+  and Gilbert, Henri
+  and Goubin, Louis
+  and Gouget, Aline
+  and Granboulan, Louis
+  and Lauradoux, C{\'e}dric
+  and Minier, Marine
+  and Pornin, Thomas
+  and Sibert, Herv{\'e}",
+  editor="Robshaw, Matthew
+  and Billet, Olivier",
+  title="Sosemanuk, a Fast Software-Oriented Stream Cipher",
+  bookTitle="New Stream Cipher Designs: The eSTREAM Finalists",
+  year="2008",
+  publisher="Springer Berlin Heidelberg",
+  address="Berlin, Heidelberg",
+  pages="98--118",
+  abstract="Sosemanuk is a new synchronous software-oriented stream cipher, corresponding to Profile 1 of the ECRYPT call for stream cipher primitives. Its key length is variable between 128 and 256 bits. It accommodates a 128-bit initial value. Any key length is claimed to achieve 128-bit security. The Sosemanuk cipher uses both some basic design principles from the stream cipher SNOW 2.0 and some transformations derived from the block cipher SERPENT. Sosemanuk aims at improving SNOW 2.0 both from the security and from the efficiency points of view. Most notably, it uses a faster IV-setup procedure. It also requires a reduced amount of static data, yielding better performance on several architectures.",
+  isbn="978-3-540-68351-3",
+  doi="10.1007/978-3-540-68351-3_9",
+  url="https://doi.org/10.1007/978-3-540-68351-3_9"
+}
+
+@article{random1,
+  title={Quantum-noise randomized ciphers},
+  author={Nair, Ranjith and Yuen, Horace P and Corndorf, Eric and Eguchi, Takami and Kumar, Prem},
+  journal={Physical Review A},
+  volume={74},
+  number={5},
+  pages={052309},
+  year={2006},
+  publisher={APS}
+}
+
+@InProceedings{random2,
+author="Rivest, Ronald L.
+and Sherman, Alan T.",
+editor="Chaum, David
+and Rivest, Ronald L.
+and Sherman, Alan T.",
+title="Randomized Encryption Techniques",
+booktitle="Advances in Cryptology",
+year="1983",
+publisher="Springer US",
+address="Boston, MA",
+pages="145--163",
+abstract="A randomized encryption procedure enciphers a message by randomly choosing a ciphertext from a set of ciphertexts corresponding to the message under the current encryption key. At the cost of increasing the required bandwidth, such procedures may achieve greater cryptographic security than their deterministic counterparts by increasing the apparent size of the message space, eliminating the threat of chosen plaintext attacks, and improving the a priori statistics for the inputs to the encryption algorithms. In this paper we explore various ways of using randomization in encryption.",
+isbn="978-1-4757-0602-4"
+}
+
+@misc{AESCTR, title={Using Advanced Encryption Standard Counter Mode
+(AES-CTR) with the Internet Key Exchange version 02 (IKEv2) Protocol},
+url={https://tools.ietf.org/html/rfc5930}, journal={IETF Tools}}
+
+@misc{android-M-mobile-motivation, title={Google quietly backs away from encrypting new Lollipop devices by default}, url={https://arstechnica.com/gadgets/2015/03/google-quietly-backs-away-from-encrypting-new-lollipop-devices-by-default/}, journal={Ars Technica}, author={Cunningham, Andrew and Utc}, year={2015}, month={Mar}}
+
+@misc{android-M-mobile-motivation-2, title={Encryption and Storage Performance in Android 5.0 Lollipop}, url={https://www.anandtech.com/show/8725/encryption-and-storage-performance-in-android-50-lollipop}, publisher={AnandTech}, author={Ho, Joshua and Chester, Brandon}, year={2014}, month={Nov}}
+
+@misc{google-engadget, title={Google won't force Android encryption by default}, url={https://www.engadget.com/2015/03/02/android-lollipop-automatic-encryption/}, journal={Engadget}, author={Seppala, Timothy J.}, year={2019}, month={Jul}}
+
+@misc{ISE1, url={http://h10032.www1.hp.com/ctg/Manual/c03453264.pdf}}
+
+@misc{ISE2, title={Seagate Instant Secure Erase Deployment Options}, url={www.seagate.com/files/www-content/product-content/_cross-product/en-us/docs/ise-deployment-technology-paper-tp627-1-1203us.pdf}, journal={Seagate}}
+
+@inproceedings{ISE3,
+  title={Self-encrypting disks pose self-decrypting risks},
+  author={M{\"u}ller, Tilo and Latzo, Tobias and Freiling, Felix C},
+  booktitle={the 29th Chaos Communinication Congress},
+  pages={1--10},
+  year={2012}
+}
+
+@InProceedings{attack1,
+  author="Bogdanov, Andrey
+  and Khovratovich, Dmitry
+  and Rechberger, Christian",
+  editor="Lee, Dong Hoon
+  and Wang, Xiaoyun",
+  title="Biclique Cryptanalysis of the Full AES",
+  booktitle="Advances in Cryptology -- ASIACRYPT 2011",
+  year="2011",
+  publisher="Springer Berlin Heidelberg",
+  address="Berlin, Heidelberg",
+  pages="344--371",
+  abstract="Since Rijndael was chosen as the Advanced Encryption Standard (AES), improving upon 7-round attacks on the 128-bit key variant (out of 10 rounds) or upon 8-round attacks on the 192/256-bit key variants (out of 12/14 rounds) has been one of the most difficult challenges in the cryptanalysis of block ciphers for more than a decade. In this paper, we present the novel technique of block cipher cryptanalysis with bicliques, which leads to the following results:",
+  isbn="978-3-642-25385-0"
+}
+
+@article{AESItself,
+  title={AES proposal: Rijndael},
+  author={Daemen, Joan and Rijmen, Vincent},
+  year={1999}
+}
+
+@misc{attack2,
+    author = {Alex Biryukov and Dmitry Khovratovich},
+    title = {Related-key Cryptanalysis of the Full AES-192 and AES-256},
+    howpublished = {Cryptology ePrint Archive, Report 2009/317},
+    year = {2009},
+    note = {\url{https://eprint.iacr.org/2009/317}},
+}
+
+@inproceedings{Mercy,
+  title={Mercy: A fast large block cipher for disk sector encryption},
+  author={Crowley, Paul},
+  booktitle={International Workshop on Fast Software Encryption},
+  pages={49--63},
+  year={2000},
+  organization={Springer}
+}
+
+@inproceedings{StrongBox,
+  author = {Dickens III, Bernard and Gunawi, Haryadi S. and Feldman, Ariel J. and Hoffmann, Henry},
+  title = {StrongBox: Confidentiality, Integrity, and Performance Using Stream Ciphers for Full Drive Encryption},
+  booktitle = {Proceedings of the Twenty-Third International Conference on Architectural Support for Programming Languages and Operating Systems},
+  series = {ASPLOS '18},
+  year = {2018},
+  isbn = {978-1-4503-4911-6},
+  location = {Williamsburg, VA, USA},
+  pages = {708--721},
+  numpages = {14},
+  url = {http://doi.acm.org/10.1145/3173162.3173183},
+  doi = {10.1145/3173162.3173183},
+  acmid = {3173183},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+  keywords = {AES-XTS, dm-crypt, full disk encryption, high read performance, log-structured, replay protected memory block},
 }
 
 @Inbook{CipherTextStealing,
@@ -141,7 +250,7 @@
  acmid = "2983956",
  publisher = "ACM",
  keywords = "portable energy measurement",
-} 
+}
 
 @online{LinuxDeviceMapper,
   title = "RedHat: Device-mapper Resource Page",
@@ -206,7 +315,7 @@
     publisher = "ACM",
     address = "New York, NY, USA",
     keywords = "Unix, disk storage management, fast crash recovery, file system organization, file system performance, high write performance, Log-structured, logging",
-} 
+}
 
 @misc{NISTXTS,
        title = "Recommendation for Block Cipher Modes of Operation: The XTS-AES Mode for Confidentiality on Storage Devices",
@@ -251,6 +360,16 @@
     doi="10.1109/Trustcom.2015.378",
 }
 
+@misc{DualECDRBG, title={How a Crypto 'Backdoor' Pitted the Tech World Against the NSA}, url={https://www.wired.com/2013/09/nsa-backdoor/}, journal={Wired}, publisher={Conde Nast}, author={Zetter, Kim}, year={2017}, month={Jun}}
+
+@inproceedings{SSDEOL1,
+  title={The Tail at Store: A Revelation from Millions of Hours of Disk and SSD Deployments},
+  author={Hao, Mingzhe and Soundararajan, Gokul and Kenchammana-Hosekote, Deepak and Chien, Andrew A and Gunawi, Haryadi S},
+  booktitle={14th $\{$USENIX$\}$ Conference on File and Storage Technologies ($\{$FAST$\}$ 16)},
+  pages={263--276},
+  year={2016}
+}
+
 @misc{TPM,
     title="TCG: Trusted platform module summary",
     author="Trusted Computing Group",
@@ -289,7 +408,7 @@
     acmid = "2385276",
     publisher = "ACM",
     address = "New York, NY, USA",
-} 
+}
 
 @ARTICLE{STES,
     author={D. Chakraborty and C. Mancillas-López and P. Sarkar},
@@ -351,6 +470,11 @@
     year="2015",
 }
 
+@misc{Floodyberry, title={floodyberry/chacha-opt}, url={https://github.com/floodyberry/chacha-opt}, journal={GitHub}, author={Floodyberry}, year={2015}, month={Mar}}
+
+@misc{libestream, title={lvella/libestream},
+url={https://github.com/lvella/libestream}, journal={GitHub}, author={Lvella}}
+
 @INPROCEEDINGS{RPMB, 
 author={Anil Kumar Reddy and P. Paramasivam and Prakash Babu Vemula}, 
 booktitle={2015 International Conference on Computing and Network Communications (CoCoNet)}, 
@@ -395,3 +519,98 @@ month={Dec},}
  address = {New York, NY, USA},
  keywords = {TPM, forking attack, freshness, integrity checking, replay attack, untrusted storage, virtual monotonic counters},
 }
+
+@misc{LastPass, title={What makes LastPass secure?}, url={https://support.logmeininc.com/lastpass/help/what-makes-lastpass-secure-lp070015}, journal={Support}} 
+
+@article{ScalableSecurity,
+  title={An energy/security scalable encryption processor using an embedded variable voltage DC/DC converter},
+  author={Goodman, James and Dancy, Abram P and Chandrakasan, Anantha P},
+  journal={IEEE Journal of Solid-State Circuits},
+  volume={33},
+  number={11},
+  pages={1799--1809},
+  year={1998},
+  publisher={IEEE}
+}
+
+@inproceedings{WolterReinecke,
+  title={Performance and security tradeoff},
+  author={Wolter, Katinka and Reinecke, Philipp},
+  booktitle={International School on Formal Methods for the Design of Computer, Communication and Software Systems},
+  pages={135--167},
+  year={2010},
+  organization={Springer}
+}
+
+@ARTICLE{ZengChow1,
+  author={W. {Zeng} and M. {Chow}},
+  journal={IEEE Transactions on Industrial Electronics},
+  title={Optimal Tradeoff Between Performance and Security in Networked Control Systems Based on Coevolutionary Algorithms},
+  year={2012},
+  volume={59},
+  number={7},
+  pages={3016-3025},
+  keywords={DC motors;genetic algorithms;networked control systems;networked control systems;malicious attackers;Internet;NCS security;NCS real-time performance;networked DC motor system;performance-security tradeoff optimization;coevolutionary genetic algorithm;Nash equilibrium;DC motors;Measurement;Optimization;Encryption;Genetic algorithms;Delay effects;Coevolutionary genetic algorithm (CGA);networked control systems (NCS);networked DC motor system},
+  doi={10.1109/TIE.2011.2178216},
+  ISSN={},
+  month={July},}
+
+@inproceedings{Merkel4,
+ author = {Merkel, Andreas and Bellosa, Frank},
+ title = {Balancing Power Consumption in Multiprocessor Systems},
+ booktitle = {Proceedings of the 1st ACM SIGOPS/EuroSys European Conference on Computer Systems 2006},
+ series = {EuroSys '06},
+ year = {2006},
+ isbn = {1-59593-322-0},
+ location = {Leuven, Belgium},
+ pages = {403--414},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/1217935.1217974},
+ doi = {10.1145/1217935.1217974},
+ acmid = {1217974},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {energy estimation, energy-aware scheduling, event counters, task migration, thermal management},
+}
+
+@ARTICLE{Merkle3,
+author={W. {Zeng} and M. {Chow}},
+journal={IEEE Transactions on Industrial Informatics},
+title={Modeling and Optimizing the Performance-Security Tradeoff on D-NCS Using the Coevolutionary Paradigm},
+year={2013},
+volume={9},
+number={1},
+pages={394-402},
+keywords={cryptography;distributed control;genetic algorithms;networked control systems;real-time systems;resource allocation;telecommunication control;telecommunication security;distributed networked control system;network attack;security mechanism;cryptography;system resources;D-NCS security;real-time performance;intelligent space;iSpace;system dynamic performance;system resource allocation;real-time dynamic performance requirement;performance-security tradeoff optimization;coevolutionary genetic algorithm;CGA;Simulink-based test-bed;performance-security tradeoff model;Measurement;Optimization;Wheels;Bandwidth;Real time systems;Cryptography;Coevolutionary genetic algorithm (CGA);distributed networked control systems (D-NCS);iSpace},
+doi={10.1109/TII.2012.2209662},
+ISSN={},
+month={Feb},}
+
+@ARTICLE{HaleemEtAl,
+  author={M. {Haleem} and C. {Mathur} and R. {Chandramouli} and K. {Subbalakshmi}},
+  journal={IEEE Transactions on Dependable and Secure Computing},
+  title={Opportunistic Encryption: A Trade-Off between Security and Throughput in Wireless Networks},
+  year={2007},
+  volume={4},
+  number={4},
+  pages={313-324},
+  keywords={cryptography;error statistics;forward error correction;modulation;optimisation;radio networks;telecommunication channels;telecommunication security;opportunistic encryption;wireless network security;avalanche effect;block ciphers;random bit errors;channel opportunity;joint optimization;modulation;forward error correcting codes;Rijndael cipher;Cryptography;Throughput;Wireless networks;Mathematical model;Error correction codes;Fading;Wireless sensor networks;Communication system security;Signal to noise ratio;Modulation coding;Security;integrity;and protection;Data encryption;Data Encryption;Wireless communication;Security and Privacy Protection;Optimization;Emerging technologies;Simulation;Algorithms;Cost/performance;Wireless systems;Dynamic programming;Security;integrity;and protection;Data encryption;Data Encryption;Wireless communication;Security and Privacy Protection;Optimization;Emerging technologies;Simulation;Algorithms;Cost/performance;Wireless systems;Dynamic programming},
+  doi={10.1109/TDSC.2007.70214},
+  ISSN={},
+  month={Oct},}
+
+@InProceedings{LiOmiecinski,
+  author="Li, Jun
+  and Omiecinski, Edward R.",
+  editor="Jajodia, Sushil
+  and Wijesekera, Duminda",
+  title="Efficiency and Security Trade-Off in Supporting Range Queries on Encrypted Databases",
+  booktitle="Data and Applications Security XIX",
+  year="2005",
+  publisher="Springer Berlin Heidelberg",
+  address="Berlin, Heidelberg",
+  pages="69--83",
+  abstract="The database-as-a-service (DAS) model is a newly emerging computing paradigm, where the DBMS functions are outsourced. It is desirable to store data on database servers in encrypted form to reduce security and privacy risks since the server may not be fully trusted. But this usually implies that one has to sacrifice functionality and efficiency for security. Several approaches have been proposed in recent literature for efficiently supporting queries on encrypted databases. These approaches differ from each other in how the index of attribute values is created. Random one-to-one mapping and order-preserving are two examples. In this paper we will adapt a prefix-preserving encryption scheme to create the index. Certainly, all these approaches look for a convenient trade-off between efficiency and security. In this paper we will discuss the security issues and efficiency of these approaches for supporting range queries on encrypted numeric data.",
+  isbn="978-3-540-31937-5"
+}
+

@@ -2,12 +2,12 @@
 
 The standard approach to FDE, using AES-XTS, introduces significant overhead.
 Recently, it has been established that encryption using \emph{stream ciphers}
-for FDE is faster than using AES~\cite{StrongBox, AnotherPaper1, AnotherPaper2},
-but in practice it is non-trivial. Prior work explores several approaches: a
-non-deterministic CTR mode (Freestyle~\cite{Freestyle}), a length-preserving
-``tweakable super-pseudorandom permutation'' (Adiantum~\cite{Adiantum}), and a
-stream cipher in a binary additive (XOR) mode leveraging LFS overwrite-averse
-behavior to prevent overwrites (StrongBox~\cite{StrongBox}).
+for FDE is faster than using AES~\cite{StrongBox}, but in practice it is
+non-trivial. Prior work explores several approaches: a non-deterministic CTR
+mode (Freestyle~\cite{Freestyle}), a length-preserving ``tweakable
+super\\-pseudorandom permutation'' (Adiantum~\cite{Adiantum}), and a stream cipher
+in a binary additive (XOR) mode leveraging LFS overwrite-averse behavior to
+prevent overwrites (StrongBox~\cite{StrongBox}).
 
 Unlike StrongBox and other work, which focuses on optimizing performance despite
 re-ciphering due to overwrites, SwitchCrypt maintains overwrite protections
@@ -17,16 +17,16 @@ and security wins as well.
 
 Further, trading off security for energy, performance, and other concerns is not
 a new research area~\cite{ScalableSecurity, WolterReinecke, ZengChow1,
-ZengChow2, HaleemEtAl, LiOmiecinski}. Goodman et al. introduced selectively
-decreasing the security of some data to save energy~\cite{ScalableSecurity}.
-However, their approach is designed for communication and only considered
-iteration/round count, thus it did not anticipate the need for SwitchCrypt's
-generic API, switching strategies, or security scores. Wolter and Reinecke study
-approaches to quantifying security in several contexts~\cite{WolterReinecke}.
-This study anticipates the value of dynamically switching ciphers but proposes
-no mechanisms to enable this in FDE. Similarly, companies like LastPass and
-Google have explored performance-security tradeoffs. Google's Adiantum (above)
-uses a less secure reduced round version of ChaCha~\cite{Adiantum}. While not an
-FDE solution, LastPass has dealt with scaling the number of iterations of
-PBKDF\#2, trading performance for security during login
-sessions~\cite{LastPass}.
+ZengChow2, HaleemEtAl, LiOmiecinski, Merkel4, Merkle3}. Goodman et al.
+introduced selectively decreasing the security of some data to save
+energy~\cite{ScalableSecurity}. However, their approach is designed for
+communication and only considered iteration/round count, thus it did not
+anticipate the need for SwitchCrypt's generic API, switching strategies, or
+security scores. Wolter and Reinecke study approaches to quantifying security in
+several contexts~\cite{WolterReinecke}. This study anticipates the value of
+dynamically switching ciphers but proposes no mechanisms to enable this in FDE.
+Similarly, companies like LastPass and Google have explored performance-security
+tradeoffs. Google's Adiantum (above) uses a less secure reduced round version of
+ChaCha~\cite{Adiantum}. While not an FDE solution, LastPass has dealt with
+scaling the number of iterations of PBKDF\#2, trading performance for security
+during login sessions~\cite{LastPass}.

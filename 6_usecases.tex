@@ -110,16 +110,16 @@ latency, all without compromising the security needs of the most sensitive data.
 
 This usecase illustrates using temporal Forward switching to offset the
 debilitating decline in performance when SSDs reach end-of-life
-(EoL)~\cite{SSDEOL1, SSDEOL2, SSDEOL3}. We demonstrate the utility of such a
-system to dynamically stay within a strict latency budget while meeting minimum
-security requirements, which is not possible using prior work.
+(EoL)~\cite{SSDEOL1}. We demonstrate the utility of such a system to dynamically
+stay within a strict latency budget while meeting minimum security requirements,
+which is not possible using prior work.
 
 Due to garbage collection and wear-leveling requirements of SSDs, as free space
-becomes constrained, I/O performance drops precipitously~\cite{SSDEOL1, SSDEOL2,
-SSDEOL3}. With prior work, our strict latency ceiling is violated. However, if
-SwitchCrypt is made aware when the backing store is in such a state, we can
-offset some of the performance loss by switching the ciphers of high traffic
-nuggets to the fastest cipher available using Forward switching.
+becomes constrained, I/O performance drops precipitously~\cite{SSDEOL1}. With
+prior work, our strict latency ceiling is violated. However, if SwitchCrypt is
+made aware when the backing store is in such a state, we can offset some of the
+performance loss by switching the ciphers of high traffic nuggets to the fastest
+cipher available using Forward switching.
 
 We begin by writing 10 40MB files to SwitchCrypt per each cipher as a baseline.
 We then introduce a delay into SwitchCrypt I/O of $20ms$, simulating drive
@@ -176,9 +176,9 @@ physical drives). Both the desired and minimum security score of the drive is
 triggered---the desired minimum security score goes to 3, the highest
 possible---at which point the system executes ISE and completely erases the
 drive containing the minimally scored data. ISE is known to be much faster than
-TRIM and completes in as little as 3
-seconds~\cite{SeaGate,Samsung,ThatOtherOEM}. Once complete, the most secure form
-of the data is all that remains. The backing store has been ``locked down.''
+TRIM and completes in as little as 3 seconds~\cite{ISE1,ISE2,ISE3}. Once
+complete, the most secure form of the data is all that remains. The backing
+store has been ``locked down.''
 
 Our goal is to lock down the backing store, slowing down any attacker as much as
 possible such that, even if they copy and permanently store her data off-site

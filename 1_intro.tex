@@ -3,7 +3,7 @@
 There are several important concerns modern filesystems must balance. Paramount
 among them are data security and performance. Increasingly important is energy
 consumption in both mobile devices and in enterprise storage
-\cite{android-M-mobile-motivation, enterprise-motivation}. However, all of these
+\cite{DmC-Android,Thereska}. However, all of these
 concerns exist in contention: stronger security properties can harm latency and
 increase energy use, while reducing energy consumption typically requires
 increasing latency or accepting weaker security properties.
@@ -37,19 +37,19 @@ to encrypt devices that would otherwise be too slow or energy-inefficient to
 support FDE.
 
 However, the de facto standard choice for FDE is the slow AES \emph{block
-cipher} (AES-XTS)~\cite{AES, AES-XTS}. Prior research introduced the motivation
-and method for using \emph{stream ciphers} like the high performance ChaCha20
-cipher for FDE in lieu of AES-XTS~\cite{StrongBox, ChaCha20}. More recent
-work---such as Google's HBSH (hash, block cipher, stream cipher, hash) and
-Adiantum~\cite{HBSH, Adiantum}---brings the use of stream ciphers for drive
-encryption to industrial strength products.
+cipher} (AES-XTS)~\cite{XTS, XTSComments, NISTXTS}. Prior research introduced
+the motivation and method for using \emph{stream ciphers} like the high
+performance ChaCha20 cipher for FDE in lieu of AES-XTS~\cite{StrongBox,
+ChaCha20}. More recent work---such as Google's HBSH (hash, block cipher, stream
+cipher, hash) and Adiantum~\cite{Adiantum}---brings the use of stream ciphers
+for drive encryption to industrial strength products.
 
 There is a rich choice of stream ciphers with a variety of different performance
 characteristics and opposing security properties. Some of these include: ChaCha
 variants with different round counts (e.g., ChaCha8 and ChaCha20) or stronger
 security properties (e.g., Freestyle) and others---SalsaX, AES in counter mode
 (AES-CTR), Rabbit, Sosemanuk, etc~\cite{Freestyle, SalsaX, Rabbit, Sosemanuk,
-ChaCha20, AES-CTR}. Given this variety, the cipher configuration providing the
+ChaCha20, AESCTR}. Given this variety, the cipher configuration providing the
 fastest I/O throughput is almost always different than the configuration
 providing the most desirable security properties, and both may differ from the
 configuration that uses the least energy or allows the most writable
@@ -57,9 +57,9 @@ drive space.
 
 Further, while the cipher choice can be configured statically at compile- or
 boot-time with respect to some common-case, in traditional FDE, these
-configurations cannot adapt to changes that arise while the system is
-running. Examples include changes in resource availability, runtime environment,
-desired security properties, and adhering to changing OS energy budgets.
+configurations cannot adapt to changes that arise while the system is running.
+Examples include changes in resource availability, runtime environment, desired
+security properties, and adhering to changing OS energy budgets.
 
 Hence, any common-case configuration will inevitably sacrifice one concern for
 another, even when it is not optimal to the end user. \emph{But what if our
