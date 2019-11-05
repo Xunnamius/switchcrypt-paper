@@ -168,7 +168,7 @@ region (see: \secref{usecases}).
 From the results of the previous three experiments, we calculate that Forward
 switching has average overhead at 0.08x/0.10x for 40MB, 5MB and 512KB read/write
 workloads compared to baseline I/O, demonstrating SwitchCrypt's amortization of
-cipher switching costs. Average overhead is 0.38x/0.44x for 4KB read/write
+cipher switching costs. Average overhead is\\0.38x/0.44x for 4KB read/write
 workloads when SwitchCrypt is unable to amortize cost. There is no spatial
 overhead with the Forward switching strategy.
 
@@ -186,8 +186,8 @@ writable space on the backing store.
 These overhead numbers are the penalty paid for the additional flexibility of
 being able to reach configurations points that are unachievable without
 SwitchCrypt. We believe SwitchCrypt's design keeps these overheads acceptably
-low in practice, achieving the desired goal of flexibly navigating
-latency/security tradeoffs for FDE.
+low in practice (see \secref{usecases}), achieving the desired goal of flexibly
+navigating latency/security tradeoffs for FDE.
 
 \subsection{Augmented Threat Analysis}\label{subsec:4}
 
