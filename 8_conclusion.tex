@@ -1,33 +1,15 @@
 \section{Conclusion}\label{sec:conclusion}
-%This paper advocates for a more agile approach to full 
-%drive encryption where the storage system can dynamically 
-%alter the tradeoffs between security and latency (or energy) 
-%for data at rest.  To support this vision of agile encryption,
-%we have proposed an API that allows mulitple stream ciphers, with 
-%different input and output characteristics to be composed in a 
-%generic manner.  We have identified three strategies for using 
-%this API to switch ciphers dynamically, but with low overhead.  
-%We have also proposed a scoring method for determining when to 
-%use one cipher over another. Our case studies show how different 
-%strategies can be used to achieve different goals in practice.
-%We believe that agile encryption will become increasingly important 
-%as successful operation of computer systems increasingly requires 
-%balancing seemingly conflicting operational requirements.  We hope 
-%that this work inspires further research into achieving this balance, 
-%including both mechanisms and policies for exposing and navigating 
-%the underlying tradeoff spaces. TODO
-
-Stream ciphers are fast and offer strong security properties, but optimizing for
-performance often conflicts with other key concerns. In this paper we presented
-SwitchCrypt to navigate the security and latency/energy tradeoff space via
-\emph{cipher switching} in space and time. We provided empirical results
-demonstrating the conditions under which different switching strategies are
-optimal and explored four related cases. In all cases, we found that SwitchCrypt
-achieves reduced energy usage and I/O latency compared to static approaches.
-Perhaps more importantly, though, in all cases SwitchCrypt achieves flexibility
-that is simply not possible with prior designs.  We hope that this work inspires
-further research into balancing competing security, energy, and performance
-tradeoffs, including both mechanisms and policies for exposing and navigating
-these tradeoff spaces.
+This paper advocates for a more agile approach to FDE where the storage system
+can dynamically alter the tradeoffs between security and latency/energy. To
+support this vision of agile encryption, we have proposed an API that allows
+multiple stream ciphers with different input and output characteristics to be
+composed in a generic manner. We have identified three strategies for using this
+API to switch ciphers dynamically, but with low overhead. We have also proposed
+a scoring method for determining when to use one cipher over another. Our case
+studies show how different strategies can be used to achieve different goals in
+practice. We believe that agile encryption will become increasingly important as
+successful systems are increasingly required to balance conflicting operational
+requirements. We hope that this work inspires further research into achieving
+this balance. It is publicly available open-source\footnoteref{note1}.
 
 \PUNT{\TO\DO{Add David to acknowledgements once we get out of anon reviews.}}

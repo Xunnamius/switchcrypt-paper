@@ -223,6 +223,10 @@
 \newcommand{\appref}[1]{Appendix~\ref{app:#1}}
 \newcommand{\algoref}[1]{Algorithm~\ref{algo:#1}}
 
+\makeatletter
+\newcommand\footnoteref[1]{\protected@xdef\@thefnmark{\ref{#1}}\@footnotemark}
+\makeatother
+
 %% Math
 \newcommand{\argmin}{\arg\!\min}
 \newcommand{\argmax}{\arg\!\max}
