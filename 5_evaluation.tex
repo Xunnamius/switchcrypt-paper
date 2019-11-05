@@ -76,9 +76,9 @@ concerns is not simply linear, however, which exposes a rich security vs
 latency/energy tradeoff space.
 
 Besides the 4KB workload, the shape of each workload follows a similar
-superlinear latency-vs-security trend, hence we will mostly focus on 40MB and 4KB
-workloads going forward. Due to the overhead of metadata management and the fast
-completion time of the 4KB workloads (\ie{little time for amortization of
+superlinear latency-vs-security trend, hence we will mostly focus on 40MB and
+4KB workloads going forward. Due to the overhead of metadata management and the
+fast completion time of the 4KB workloads (\ie{little time for amortization of
 overhead}), ChaCha8 and ChaCha20 take longer to complete than the higher scoring
 Freestyle Fast. This advantage is not enough to make Freestyle Balanced or
 Secure complete faster than the ChaCha variants, however.

@@ -72,8 +72,8 @@ which area of the backing store receives I/O.
 In the case of Forward switching, it is tempting to implement it such that a
 nugget is completely re-ciphered during I/O every time its metadata indicates
 that it was previously encrypted using a non-active cipher. However, such a
-naive implementation can have disastrous effects on performance. \TO\DO{It is not
-clear why that would be disastrous.}
+naive implementation can have disastrous effects on performance. \TO\DO{It is
+not clear why that would be disastrous.}
 
 First, a nugget is considered \emph{pristine} if it has not had any data written
 into it yet. SwitchCrypt determines if a nugget is pristine by checking the
