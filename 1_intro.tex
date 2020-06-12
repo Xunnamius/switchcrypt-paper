@@ -1,96 +1,97 @@
 \section{Introduction}\label{sec:introduction}
 
-There are several important concerns modern filesystems must balance. Paramount
-among them are data security and performance. Increasingly important is energy
-consumption in both mobile devices and in enterprise storage
-\cite{DmC-Android,Thereska}. However, all of these
-concerns exist in contention: stronger security properties can harm latency and
-increase energy use, while reducing energy consumption typically requires
-increasing latency or accepting weaker security properties.
+The state of the art for securing data at rest, such as the contents of a
+laptop's SSD, is Full Drive Encryption (FDE). Traditional FDE employs a single
+cryptographic cipher to encrypt, decrypt, and authenticate drive contents on the
+fly. Unfortunately, encryption introduces overhead which can drastically impact
+system performance and total energy consumption. Hence, modern storage systems
+must carefully balance these competing concerns. On the one hand, stronger
+security guarantees come with increased latency and threaten to balloon energy
+consumption. On the other, capping total energy consumption requires tolerating
+increased latency or weaker security guarantees.
 
-The state of the art for securing data is Full Drive Encryption (FDE).
-Traditional FDE employs a single \emph{cryptographic cipher} to encrypt,
-decrypt, and authenticate backing store contents on the fly. Understandably,
-this process impacts system performance and energy use considerably. Yet, end
-users expect their device to be secure \emph{and} performant \emph{and} energy
-efficient. The obvious solution is to balance these concerns with respect to the
-most general use case and ship the product, but this common-case approach often
-fails to deliver an optimal outcome for specific users and workloads.
-
-An example is Google's Android OS. Android supported FDE with the release of
-Android 3.0, yet it was not enabled by default until Android
+FDE implementations such as dm-crypt for Linux and BitLocker for Windows balance
+these concerns with respect to some generic ``common case'' workload, but
+this approach often fails to deliver an optimal outcome for specific workloads.
+Google's Android OS is a good example of this. Android supported FDE with the
+release of Android 3.0, yet it was not enabled by default until Android
 6.0~\cite{android-M-mobile-motivation}. Two years prior, Google attempted to
 roll out FDE by default on Android 5.0 but had to backtrack. In a statement to
 Engadget, Google blamed ``'performance issues on some partner devices' ... for
-the backtracking''~\cite{google-engadget}. AnandTech reported a ``62.9\% drop in
-random read performance, a 50.5\% drop in random write performance, and a
-staggering 80.7\% drop in sequential read
-performance''~\cite{android-M-mobile-motivation-2}.
+the backtracking''~\cite{google-engadget}. At the same time, AnandTech reported
+a ``62.9\% drop in random read performance, a 50.5\% drop in random write
+performance, and a staggering 80.7\% drop in sequential read performance''
+versus Android 5.0 unencrypted storage for various
+workloads~\cite{android-M-mobile-motivation-2}.
 
-FDE's impact on drive performance and energy efficiency depends on choice of
-filesystem/mapper and the choice of cipher, as different ciphers expose
-different performance and efficiency characteristics. In this way, cipher choice
-can be viewed as a key \emph{configuration} parameter for FDE systems. The
-tradeoffs of choosing a cipher include: 1) increased system performance
-(\ie{overall reduced FDE overhead}), 2) reduced energy use, and 3) the ability
-to encrypt devices that would otherwise be too slow or energy-inefficient to
-support FDE.
+FDE's impact on drive performance and energy efficiency depends on a multitude
+of choices. Paramount among them is the choice of cipher, as different ciphers
+expose different performance and energy efficiency characteristics. In this way,
+cipher choice can be viewed as a key \emph{configuration} parameter for FDE
+systems. The benefits of choosing one cipher over another might include: 1)
+improved performance (\ie{overall reduction in FDE overhead}), 2) reduced energy
+use, and 3) the ability to encrypt devices that would otherwise be too slow or
+energy-inefficient to support FDE.
 
-However, the de facto standard choice for FDE is the slow AES \emph{block
-cipher} (AES-XTS)~\cite{XTS, XTSComments, NISTXTS}. Prior research introduced
-the motivation and method for using \emph{stream ciphers} like the high
-performance ChaCha20 cipher for FDE in lieu of AES-XTS~\cite{StrongBox,
-ChaCha20}. More recent work---such as Google's HBSH (hash, block cipher, stream
-cipher, hash) and Adiantum~\cite{Adiantum}---brings the use of stream ciphers
-for drive encryption to industrial strength products.
+However, the standard cipher choice for FDE is the slow AES \emph{block cipher}
+(AES-XTS)~\cite{XTS, XTSComments, NISTXTS}. Prior research introduced a method
+for using ciphers other than AES-XTS for FDE; specifically, the high performance
+ChaCha20 \emph{stream cipher}~\cite{StrongBox, ChaCha20}. More recent
+work---such as Google's HBSH (hash, block cipher, stream cipher, hash) and
+Adiantum---brings stream cipher based FDE to devices that do not or cannot
+support hardware accelerated AES~\cite{Adiantum}. Hence, it has been
+demonstrated that using stream ciphers for FDE is not only feasible at industry
+scale but is desirable in a variety of contexts.
 
-There is a rich choice of stream ciphers with a variety of different performance
-characteristics and opposing security properties. Some of these include: ChaCha
-variants with different round counts (e.g., ChaCha8 and ChaCha20) or stronger
-security properties (e.g., Freestyle) and others---SalsaX, AES in counter mode
-(AES-CTR), Rabbit, Sosemanuk, etc~\cite{Freestyle, SalsaX, Rabbit, Sosemanuk,
-ChaCha20, AESCTR}. Given this variety, the cipher configuration providing the
-fastest I/O throughput is almost always different than the configuration
-providing the most desirable security properties, and both may differ from the
-configuration that uses the least energy or allows the most writable
-drive space.
+In this paper, we explore the rich configuration space of FDE-ready stream
+ciphers beyond the narrow scope of previous work. Each cipher comes with a
+variety of performance, energy efficiency, and security properties under FDE.
+These ciphers include ChaCha variants with different round counts (e.g., ChaCha8
+and ChaCha12), ciphers with stronger security guarantees versus more robust
+adversaries (e.g., Freestyle), and other ciphers like SalsaX, AES in counter
+mode (AES-CTR), Rabbit, Sosemanuk, etc~\cite{Freestyle, SalsaX, Rabbit,
+Sosemanuk, ChaCha20, AESCTR}. Given this space, the cipher configuration
+providing the least latency overhead is almost always different than the
+configuration providing the most desirable security properties, and both may
+differ from the configuration using the least energy or preserving the most free
+space on the encrypted drive.
 
-Further, while the cipher choice can be configured statically at compile- or
-boot-time with respect to some common-case, in traditional FDE, these
-configurations cannot adapt to changes that arise while the system is running.
-Examples include changes in resource availability, runtime environment, desired
-security properties, and adhering to changing OS energy budgets.
+Further, while the cipher choice might be configured statically at compile or
+boot time with respect to some common case, these configurations cannot
+dynamically adapt to changes that arise while the system is running. Examples
+include changes in resource availability, runtime environment, desired security
+properties, and respecting changing OS energy budgets.
 
-Hence, any common-case configuration will inevitably sacrifice one concern for
-another, even when it is not optimal to the end user. \emph{But what if our
-system did not have to sit at some generic configuration point, especially when
-another configuration becomes more desirable later on?}\\
+Hence, any static common-case FDE configuration will sacrifice one concern for
+another, even when it is not optimal to do so for a given workload. But what if
+a system could dynamically transition into a more desirable configuration given
+runtime changes?\\
 \\
 \textbf{Our Contributions}\\
-To realize the goal of flexibly adjusting storage tradeoffs, we first introduce
-a novel design substantively expanding prior FDE work by \emph{decoupling}
-cipher implementations from the encryption process. We then introduce the idea
-of cipher switching using \emph{switching strategies} to ``re-cipher'' storage
-units dynamically with acceptable overhead. Finally, we take advantage of cipher
-switching with a scheme to \emph{quantify} the relative strength of ciphers
-based on key security properties relevant to FDE. We call these ``security
-scores.'' Using these security scores, we define a tradeoff space of cipher
-configurations over competing concerns: total energy use, desirable security
-properties in the FDE context, read and write performance, total writable space
-on the drive, and how quickly the drive can converge to a single configuration.
+To realize the goal of dynamically adjusting storage tradeoffs at runtime, we
+first introduce a novel design substantively expanding prior FDE work by wholly
+\emph{decoupling} cipher implementations from the encryption process. We then
+introduce the idea of cipher switching using \emph{switching strategies} to
+``re-cipher'' storage units dynamically with reduced overhead. Finally, we
+develop a scheme to \emph{quantify} the usefulness of each cipher based on key
+security properties relevant to FDE. Using this scheme, we define a tradeoff
+space of cipher configurations over competing concerns: total energy use,
+desirable security properties, read and write performance (latency), total
+writable space on the drive, and how quickly the contents of the drive can
+converge to a single encryption configuration.
 
 Unifying these contributions, we present SwitchCrypt, a software mechanism that
 navigates the tradeoff space made by balancing competing security and latency
-requirements via cipher switching in space or time. We implement SwitchCrypt and
-three switching strategies---\emph{Forward}, \emph{Selective}, and
-\emph{Mirrored}---to dynamically change between the ChaCha and Freestyle stream
-ciphers using our novel API. We then study SwitchCrypt's flexibility through
+requirements via cipher switching in space and time. We implement SwitchCrypt
+and three switching strategies---\emph{Forward}, \emph{Selective}, and
+\emph{Mirrored}---to dynamically transition the system between configurations
+using our custom user space API. We then study SwitchCrypt's flexibility through
 four case studies where latency, energy, and desired security properties change
-dynamically. SwitchCrypt achieves a reduction of at least 3.3x in total energy
-use when compared to static approaches; further, we see a reduction of 3.1x to
-4.8x for read latency and 1.6x to 2.8x for write latency compared to static
-approaches that must pick a single point in the latency/energy/security tradeoff
-space.
+over time.
+
+SwitchCrypt achieves a reduction of at least 3.3x in total energy use compared
+to static configurations without cipher switching. We further observe a
+reduction of 3.1x to 4.8x for read latency and 1.6x to 2.8x for write latency.
 
 We make the SwitchCrypt source publicly available open
 source\footnote{\label{note1}\SystemURI}.
