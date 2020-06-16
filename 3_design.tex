@@ -1,15 +1,5 @@
 \section{SwitchCrypt Design} \label{sec:design}
 
-What follows is a brief overview of SwitchCrypt's design
-(\cref{subsec:overview}). We then discuss our novel, general API for
-\emph{decoupling} the cipher implementations from the encryption/decryption
-process (\cref{subsec:api}), describe and contrast three cipher \emph{switching
-strategies} (\cref{subsec:strategies}), and then detail our scheme to
-\emph{quantify} cipher strength (\cref{subsec:quantify}). Finally, we revisit
-the battery saver example and summarize how the SwitchCrypt components fit
-together (\cref{subsec:summary}). In this section, we first give a brief
-overview of SwitchCrypt's design.
-
 \subsection{SwitchCrypt Overview} \label{subsec:overview}
 
 Like StrongBox, SwitchCrypt sits between a Log-structured File System (LFS) and
