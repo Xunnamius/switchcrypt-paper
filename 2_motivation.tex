@@ -17,7 +17,7 @@ Suppose we have an ARM-based ultra-low-voltage netbook provided to us by our
 employer. As this is an enterprise device, our employer requires that 1) our
 drive is fully encrypted at all times and 2) our encrypted data is constantly
 backed up to an offsite system. The industry standard in full drive encryption
-is AES-XTS, so we initialized our filesystem with it. Given these requirements,
+is AES-XTS, so we initialize our drive with it. Given these requirements,
 three primary concerns present themselves.
 
 First, it is well known that FDE using AES-XTS adds significant latency and
@@ -77,15 +77,18 @@ space~\cite{Freestyle}.
 Further complicating matters is our final concern: a constrained energy budget.
 Our example system is battery constrained. Even if we accepted trading off
 performance, drive space, and energy for security in some situations, in other
-situations, there may be a more optimal tradeoff possible. For example, when we
-trigger ``battery saver'' mode, we expect our device to conserve as much energy
-as possible.
+situations, there may be a more optimal tradeoff possible.
 
-It would be ideal if our device could pause backups and the encryption driver
-could switch from the high security Freestyle configuration back to the high
+For example, when we
+trigger ``battery saver'' mode, we expect our device to conserve as much energy
+as possible. It would be ideal if our device could pause backups and the encryption driver
+could switch from the high security Freestyle configuration back to our initial high
 performance energy-efficient ChaCha20 configuration when conserving energy is a
-top priority, and then switch back to Freestyle when we connect to a charger and
+top priority, and then switch back to the Freestyle configuration when we connect to a charger and
 backups are eventually resumed.
+
+With SwitchCrypt, we can dynamically trade off between these two configurations and more without
+compromising security or performance or requiring the device be restarted.
 
 \subsection{Key Challenges}
 
