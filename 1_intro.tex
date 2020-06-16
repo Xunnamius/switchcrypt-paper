@@ -30,11 +30,11 @@ expose different performance and energy efficiency characteristics. In this way,
 cipher choice can be viewed as a key \emph{configuration} parameter for FDE
 systems. The benefits of choosing one cipher over another might include: 1)
 improved performance (\ie{overall reduction in FDE overhead}), 2) reduced energy
-use, and 3) the ability to encrypt devices that would otherwise be too slow or
-energy-inefficient to support FDE.
+use, 3) more useful security guarantees, and 4) the ability to encrypt devices
+that would otherwise be too slow or energy-inefficient to support FDE.
 
 However, the standard cipher choice for FDE is the slow AES \emph{block cipher}
-(AES-XTS)~\cite{XTS, XTSComments, NISTXTS}. Prior research introduced a method
+(AES-XTS)~\cite{XTS, XTSComments, NISTXTS}. Dickens et al. introduced a method
 for using ciphers other than AES-XTS for FDE; specifically, the high performance
 ChaCha20 \emph{stream cipher}~\cite{StrongBox, ChaCha20}. More recent
 work---such as Google's HBSH (hash, block cipher, stream cipher, hash) and

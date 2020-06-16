@@ -13,38 +13,79 @@ Energy Use}\par\medskip
   \label{fig:linearity-latency-energy}
 \end{figure}}
 
-Suppose we are downloading a particularly large high-resolution movie file to
-our mobile work device from a network. As this is an enterprise device, our
-employer requires all data to be encrypted by default, so we chose to initialize
-our backing store at a configuration point using a high-security, high-latency
-cipher.
+Suppose we have an ARM-based ultra-low-voltage netbook provided to us by our
+employer. As this is an enterprise device, our employer requires that 1) our
+drive is fully encrypted at all times and 2) our encrypted data is constantly
+backed up to an offsite system. The industry standard in full drive encryption
+is AES-XTS, so we initialized our filesystem with it. Given these requirements,
+three primary concerns present themselves.
 
-For the ciphers we examine in this paper, we find a correlation between high
-latency and greater total energy use, meaning our device is using more energy to
-facilitate FDE at this configuration point. Though this correlation applies to
-the ciphers we examined, note that this is certainly not true for all possible
-ciphers across all hardware.
+First, it is well known that FDE using AES-XTS adds significant latency and
+power overhead to I/O operations, especially on mobile and battery-constrained
+devices~\cite{google-engadget, android-M-mobile-motivation,
+android-M-mobile-motivation-2}. To keep our drive encrypted at all times with
+AES-XTS means we must accept this hit to performance and battery life. Worse, if
+our device does not support hardware accelerated AES, performance can be
+degraded even further; I/O latency can be as high as 3-5x~\cite{StrongBox}.
+Hardware accelerated AES is hardly ubiquitous, and the existence of myriad
+devices that do not support it cannot simply be ignored, hence Google's
+investment in Adiantum~\cite{Adiantum}.
 
-Further suppose that, after some amount of time downloading this movie, our
-device determines its remaining battery life is too low and enters a ``battery
-saver'' mode with a curtailed energy budget and reduced processor frequency.
-With a traditional filesystem or encrypted container, we are stuck with the
-high-latency \emph{high-energy} cipher configuration chosen at initialization.
+Second, AES-XTS was designed to mitigate threats to drive data ``at rest,''
+which implies an attacker cannot access snapshots of our encrypted data nor
+manipulate that data without it being immediately obvious to us. With access to
+multiple snapshots of a drive's AES-XTS-encrypted contents, an attacker can
+passively glean information about the plaintext over time, possibly violating
+data confidentiality~\cite{XEX, XTS}. Similarly, an attacker that can flip
+encrypted bits without drawing our attention will corrupt any eventual
+plaintext. Unfortunately, in real life, data rarely remains ``at rest'' in this
+way. In our example, our employer requires we back up the contents of our drive
+to some offsite backup service. This service will receive periodic snapshots of
+the encrypted state of our drive, violating our invariant.
 
-With the ability to re-cipher individual storage units, we can achieve this
-functionality by switching to a cipher configuration that trades \emph{some}
-security of active areas of storage (\ie{to where the downloaded movie's bytes
-and filesystem metadata updates are being committed}) so that we stay within our
-curtailed energy budget and successfully retrieve the entire file. Had we
-remained at the high-latency high-energy cipher configuration, we would have
-blown past our budget in the middle of downloading the file.
+Third, our system is battery constrained, placing a cap on our energy budget
+that can change at any moment.
 
-And thanks to the ``battery saver'' mode, our device remains alive long enough
-for us to reach a charger, allowing the system to return to a non-curtailed
-energy budget. Our system can return any storage areas to their more secure
-cipher configuration dynamically, allowing the security of the backing store to
-recover without having to recreate the entire underlying filesystem or encrypted
-container or restart the device.
+To alleviate the performance concern, we can choose a stream cipher like
+ChaCha20 rather than the AES-XTS block cipher. Using StrongBox, an encryption
+driver built for ChaCha20-based FDE, we can achieve on average a 1.7x speedup
+and a commensurate reduction in energy use~\cite{StrongBox}.
+
+When it comes to the security concern, StrongBox solves the snapshot problem by
+never writing data encrypted with the same key to the same location; generally,
+this guarantees confidentiality even when snapshots are compared. StrongBox
+solves the integrity problem by tracking drive state using a Merkle tree
+construction along with trusted hardware like a TPM, ensuring data manipulations
+cannot occur. Unfortunately, an attacker with sufficient permissions might
+restore the drive state from one of these backups without our knowledge,
+allowing an attacker to compare any new snapshots against the old ones and
+potentially violate confidentiality.
+
+To truly address this concern requires a cipher with an additional security
+property: ciphertext randomization. Even after a rollback of drive state
+occurred after restoring from a backup (or during an attack), using
+Freestyle~\cite{Freestyle}, a ChaCha20-based stream cipher that supports
+ciphertext randomization, we can guarantee data confidentiality regardless. So,
+we switch to an encryption driver that supports Freestyle.
+
+Unfortunately, like AES-XTS, Freestyle has significant overhead compared to the
+original ChaCha20. In exchange for stronger security properties, Freestyle is up
+to 1.6x slower than ChaCha20, uses more energy, has a higher initialization
+cost, and expands the ciphertext which reduces total writeable drive
+space~\cite{Freestyle}.
+
+Further complicating matters is our final concern: a constrained energy budget.
+Our example system is battery constrained. Even if we accepted trading off
+performance, drive space, and energy for security in some situations, in other
+situations, there may be a more optimal tradeoff possible. For example, when we
+trigger ``battery saver'' mode, we expect our device to conserve as much energy
+as possible.
+
+It would be ideal if our device could pause backups and the encryption driver
+could switch from the high security Freestyle configuration back to the high
+performance energy-efficient ChaCha20 configuration when conserving energy is a
+top priority, and then switch back to Freestyle when we connect to a charger and
+backups are eventually resumed.
 
 \subsection{Key Challenges}
 
