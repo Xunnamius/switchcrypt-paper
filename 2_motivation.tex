@@ -51,19 +51,18 @@ ChaCha20 rather than the AES-XTS block cipher. Using StrongBox, an encryption
 driver built for ChaCha20-based FDE, we can achieve on average a 1.7x speedup
 and a commensurate reduction in energy use~\cite{StrongBox}.
 
-When it comes to the security concern, StrongBox solves the snapshot problem by
-never writing data encrypted with the same key to the same location; generally,
-this guarantees confidentiality even when snapshots are compared. StrongBox
-solves the integrity problem by tracking drive state using a Merkle tree
-construction along with trusted hardware like a TPM, ensuring data manipulations
-cannot occur. Unfortunately, an attacker with sufficient permissions might
-restore the drive state from one of these backups without our knowledge,
-allowing an attacker to compare any new snapshots against the old ones and
-potentially violate confidentiality.
+When it comes to the security concern, StrongBox solves both the snapshot and
+integrity problems by 1) never writing data encrypted with the same key to the
+same location and 2) tracking drive state using a Merkle tree and monotonic
+counter supported by trusted hardware to prevent rollbacks. This ensures data
+manipulations cannot occur and guarantees confidentiality even when snapshots
+are compared. Unfortunately, restoring from a backup necessitates a forced
+rollback of drive state, potentially opening us back up to
+confidentiality-violating snapshot comparison attacks~\cite{StrongBox}.
 
-To truly address this concern requires a cipher with an additional security
-property: ciphertext randomization. Even after a rollback of drive state
-occurred after restoring from a backup (or during an attack), using
+To truly address the security concern requires a cipher with an additional
+security property: ciphertext randomization. Even after a rollback of drive
+state occurred, if after restoring from a backup or during an attack, using
 Freestyle~\cite{Freestyle}, a ChaCha20-based stream cipher that supports
 ciphertext randomization, we can guarantee data confidentiality regardless. So,
 we switch to an encryption driver that supports Freestyle.
