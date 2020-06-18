@@ -78,16 +78,17 @@ Our example system is battery constrained. Even if we accepted trading off
 performance, drive space, and energy for security in some situations, in other
 situations, there may be a more optimal tradeoff possible.
 
-For example, when we
-trigger ``battery saver'' mode, we expect our device to conserve as much energy
-as possible. It would be ideal if our device could pause backups and the encryption driver
-could switch from the high security Freestyle configuration back to our initial high
-performance energy-efficient ChaCha20 configuration when conserving energy is a
-top priority, and then switch back to the Freestyle configuration when we connect to a charger and
-backups are eventually resumed.
+For example, when we trigger ``battery saver'' mode, we expect our device to
+conserve as much energy as possible. It would be ideal if our device could pause
+backups and the encryption driver could switch from the high security Freestyle
+configuration back to our initial high performance energy-efficient ChaCha20
+configuration when conserving energy is a top priority, and then switch back to
+the Freestyle configuration when we connect to a charger and backups are
+eventually resumed.
 
-With SwitchCrypt, we can dynamically trade off between these two configurations and more without
-compromising security or performance or requiring the device be restarted.
+With SwitchCrypt, we can dynamically trade off between these two configurations
+and others without compromising security or performance or requiring the device
+be restarted.
 
 \subsection{Key Challenges}
 
