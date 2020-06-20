@@ -91,13 +91,22 @@ be restarted.
 \subsection{Key Challenges}
 
 To trade off between different configurations, we must address three key
-challenges. First, we must understand how to flexibly encrypt independent
-storage units efficiently. This requires we decouple cipher implementations from
-the encryption process. Second, we need to determine when to re-encrypt those
-units and where to store the output. We address this with switching strategies.
-Third, we must reason about which cipher configurations are most desirable in
-which contexts and why. This requires we quantify the desirable properties of
-different configurations.
+challenges. First, we must reason about which cipher configurations are most
+desirable in which contexts and why. This requires we quantify the desirable
+properties of different configurations. Second, we must understand how to
+flexibly encrypt independent storage units efficiently. This requires we
+decouple cipher implementations from the encryption process. Third, we need to
+determine when to re-encrypt those units and where to store the output. We
+address this with switching strategies.
+
+\textbf{Quantifying ciphers with disparate properties.} Finally, to obtain a
+configuration space that we might reason about, it is necessary to compare
+certain properties of stream ciphers. This is challenging since different
+ciphers have a wide range of disparate security properties, including ciphers
+that are not length-preserving in their output. To address this, we propose a
+method for quantitative cipher comparison in the FDE context and use it to
+define our configuration space. These cipher configurations, each with different
+strengths, answer ``why'' we might prefer one over another.
 
 \textbf{Decoupling ciphers from encryption.} To flexibly switch ciphers, we
 require a generic cipher interface that can work with our drive layout. This is
@@ -119,12 +128,3 @@ used to encrypt/decrypt a nugget are switched at runtime. These strategies allow
 us to navigate our configuration space and settle on more optimal configurations
 unachievable with prior work. The challenge here is to accomplish this while
 minimizing overhead.
-
-\textbf{Quantifying ciphers with disparate properties.} Finally, to obtain a
-configuration space that we might reason about, it is necessary to score certain
-security properties of stream ciphers. This is challenging since different
-ciphers have a wide range of disparate security properties, including ciphers
-that are not length-preserving in their output. To address this, we propose a
-method for quantitative cipher comparison in the FDE context and use it to
-define our configuration space. These cipher configurations, each with different
-strengths, answer ``why'' we might prefer one over another.
