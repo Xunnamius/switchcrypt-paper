@@ -43,9 +43,9 @@ support hardware accelerated AES~\cite{Adiantum}. Hence, it has been
 demonstrated that using stream ciphers for FDE is not only feasible at industry
 scale but is desirable in a variety of contexts.
 
-In this paper, we explore the rich configuration space of FDE-ready stream
-ciphers beyond the narrow scope of previous work. Each cipher comes with a
-variety of performance, energy efficiency, and security properties under FDE.
+In this paper, we explore the rich configuration space of stream ciphers beyond
+the narrow scope of previous work. Each cipher comes with a variety of
+performance, energy efficiency, and security properties in the FDE context.
 These ciphers include ChaCha variants with different round counts (e.g., ChaCha8
 and ChaCha12), ciphers with stronger security guarantees versus more robust
 adversaries (e.g., Freestyle), and other ciphers like SalsaX, AES in counter
@@ -85,9 +85,9 @@ navigates the tradeoff space made by balancing competing security and latency
 requirements via cipher switching in space and time. We implement SwitchCrypt
 and three switching strategies---\emph{Forward}, \emph{Selective}, and
 \emph{Mirrored}---to dynamically transition the system between configurations
-using our custom user space API. We then study SwitchCrypt's flexibility through
-four case studies where latency, energy, and desired security properties change
-over time.
+using our generic cipher interface. We then study the utility of cipher
+switching through four case studies where latency, energy, and desired security
+properties change over time.
 
 SwitchCrypt achieves a reduction of at least 3.3x in total energy use compared
 to static configurations without cipher switching. We further observe a
