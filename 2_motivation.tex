@@ -2,17 +2,6 @@
 
 \subsection{Example: Filesystem Reacts to ``Battery Saver''}
 
-\PUNT{\begin{figure}[ht] \textbf{Linearity Between Baseline Cipher Latency and
-Energy Use}\par\medskip
-   \centering
-   {\input{charts/linearity-latency-energy.tex}} \caption{Comparison of cipher
-   configuration median sequential and random latency versus median total energy
-   use per I/O operation size (4KB, 512KB, 5MB, 40MB) without switching. The
-   relationship between latency and total energy use is linear for the cipher
-   configurations we examine in this paper.}
-  \label{fig:linearity-latency-energy}
-\end{figure}}
-
 Suppose we have an ARM-based ultra-low-voltage netbook provided to us by our
 employer. As this is an enterprise device, our employer requires that 1) our
 drive is fully encrypted at all times and 2) our encrypted data is constantly
@@ -32,19 +21,24 @@ devices that do not support it cannot simply be ignored, hence Google's
 investment in Adiantum~\cite{Adiantum}.
 
 Second, AES-XTS was designed to mitigate threats to drive data ``at rest,''
-which implies an attacker cannot access snapshots of our encrypted data nor
-manipulate that data without it being immediately obvious to us. With access to
-multiple snapshots of a drive's AES-XTS-encrypted contents, an attacker can
-passively glean information about the plaintext over time, possibly violating
-data confidentiality~\cite{XEX, XTS}. Similarly, an attacker that can flip
-encrypted bits without drawing our attention will corrupt any eventual
-plaintext. Unfortunately, in real life, data rarely remains ``at rest'' in this
-way. In our example, our employer requires we back up the contents of our drive
-to some offsite backup service. This service will receive periodic snapshots of
-the encrypted state of our drive, violating our invariant.
+which assumes an attacker cannot access snapshots of our encrypted data nor
+manipulate our data without those manipulations being immediately obvious to us.
+With access to multiple snapshots of a drive's AES-XTS-encrypted contents, an
+attacker can passively glean information about the plaintext over time by
+contrasting those snapshots, leading to confidentiality violations in some
+situations~\cite{XEX, XTS}. Similarly, an attacker that can manipulate encrypted
+bits without drawing our attention will corrupt any eventual plaintext,
+violating data integrity and, in the worst case, influencing the behavior of
+software. Unfortunately, in real life, data rarely remains ``at rest'' in these
+ways. In our example, our employer requires we back up the contents of our drive
+to some offsite backup service; this service will receive periodic snapshots of
+the encrypted state of our drive, violating our ``at rest'' invariant. These
+backups occur at a layer above the drive controller, meaning any encryption
+happening at the FTL or below is irrelevant.
 
 Third, our system is battery constrained, placing a cap on our energy budget
-that can change at any moment.
+that can change at any moment. Our system should respond to these changing
+requirements without violating any other concerns.
 
 To alleviate the performance concern, we can choose a stream cipher like
 ChaCha20 rather than the AES-XTS block cipher. Using StrongBox, an encryption
@@ -56,15 +50,25 @@ integrity problems by 1) never writing data encrypted with the same key to the
 same location and 2) tracking drive state using a Merkle tree and monotonic
 counter supported by trusted hardware to prevent rollbacks. This ensures data
 manipulations cannot occur and guarantees confidentiality even when snapshots
-are compared. Unfortunately, restoring from a backup necessitates a forced
-rollback of drive state, potentially opening us back up to
-confidentiality-violating snapshot comparison attacks~\cite{StrongBox}.
+are compared regardless of the stream cipher used. Unfortunately, restoring from
+a backup necessitates a forced rollback of drive state, potentially opening us
+back up to confidentiality-violating snapshot comparison
+attacks~\cite{StrongBox}.
 
 To truly address the security concern requires a cipher with an additional
-security property: ciphertext randomization. Using Freestyle~\cite{Freestyle}, a
-ChaCha20-based stream cipher that supports ciphertext randomization, we can
-guarantee data confidentiality even after a rollback of drive state occurs. So,
-we switch to an encryption driver that supports Freestyle.
+security property: \emph{ciphertext randomization}. Without ciphertext
+randomization, an attacker can map plaintexts to their ciphertext counterparts
+during snapshot comparison, especially if they can predict what might be written
+to certain drive regions. However, with ciphertext randomization, a cipher will
+output a different ``random'' ciphertext even when given the same key, nonce,
+and plaintext; this means, even after a forced rollback of system state and/or
+legitimate restoration from a backup, comparing future writes is no longer
+confidentiality violating because each snapshot will always consist of different
+ciphertext regardless of the plaintext being encrypted or the state of the
+drive. Using Freestyle~\cite{Freestyle}, a ChaCha20-based stream cipher that
+supports ciphertext randomization, we can guarantee data confidentiality in this
+way. So, we switch from StrongBox to an encryption driver that supports
+Freestyle.
 
 Unfortunately, like AES-XTS, Freestyle has significant overhead compared to the
 original ChaCha20. In exchange for stronger security properties, Freestyle is up
@@ -78,15 +82,23 @@ performance, drive space, and energy for security in some situations, in other
 situations we might prioritize reducing total energy use. For example, when we
 trigger ``battery saver'' mode, we expect our device to conserve as much energy
 as possible. It would be ideal if our device could pause backups and the
-encryption driver could switch from the ciphertext randomizing Freestyle
+encryption driver could switch from the ciphertext-randomizing Freestyle
 configuration back to our high performance energy-efficient ChaCha20
 configuration when conserving energy is a top priority, and then switch back to
 the Freestyle configuration when we connect to a charger and backups are
 eventually resumed.
 
-With SwitchCrypt, we can dynamically trade off between these two configurations
-and others without compromising security or performance or requiring the device
-be restarted.
+In this paper we present SwitchCrypt, a device mapper that can trade off between
+these two configurations and others without compromising security or performance
+or requiring the device be restarted. With prior work, the user must select a
+static operating point in the energy-security-latency space at initialization
+time and hope it is optimal across all workloads and cases. If they choose the
+Freestyle configuration, their device will be slower and battery hungry even
+when they are not backing up. If they choose the more performant ChaCha20
+configuration, they risk confidentiality-violating snapshot comparison attacks.
+SwitchCrypt solves this problem by encrypting data with the high performance
+ChaCha20 when the battery is low and switching to Freestyle when plugged in and
+syncing with the backup service resumes.
 
 \subsection{Key Challenges}
 

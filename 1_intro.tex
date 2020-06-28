@@ -27,7 +27,7 @@ workloads~\cite{android-M-mobile-motivation-2}.
 FDE's impact on drive performance and energy efficiency depends on a multitude
 of choices. Paramount among them is the choice of cipher, as different ciphers
 expose different performance and energy efficiency characteristics. In this way,
-cipher choice can be viewed as a key \emph{configuration} parameter for FDE
+cipher choice can be viewed as a key \emph{configuration parameter} for FDE
 systems. The benefits of choosing one cipher over another might include: 1)
 improved performance (\ie{overall reduction in FDE overhead}), 2) reduced energy
 use, 3) more useful security guarantees, and 4) the ability to encrypt devices
@@ -56,11 +56,11 @@ configuration providing the most desirable security properties, and both may
 differ from the configuration using the least energy or preserving the most free
 space on the encrypted drive.
 
-Further, while the cipher choice might be configured statically at compile or
-boot time with respect to some common case, these configurations cannot
-dynamically adapt to changes that arise while the system is running. Examples
-include changes in resource availability, runtime environment, desired security
-properties, and respecting changing OS energy budgets.
+Further, while cipher choice might be configured statically at compile or boot
+time with respect to some common case in traditional FDE, such configurations
+cannot dynamically adapt to changes that arise while the system is running.
+Examples include changes in resource availability, runtime environment, desired
+security properties, and respecting changing OS energy budgets.
 
 Hence, any static common-case FDE configuration will sacrifice one concern for
 another, even when it is not optimal to do so for a given workload. But what if
@@ -69,16 +69,17 @@ runtime changes?\\
 \\
 \textbf{Our Contributions}\\
 To realize the goal of dynamically adjusting storage tradeoffs at runtime, we
-first introduce a novel design substantively expanding prior FDE work by wholly
-\emph{decoupling} cipher implementations from the encryption process. We then
-introduce the idea of cipher switching using \emph{switching strategies} to
-``re-cipher'' storage units dynamically with reduced overhead. Finally, we
-develop a scheme to \emph{quantify} the usefulness of each cipher based on key
-security properties relevant to FDE. Using this scheme, we define a tradeoff
-space of cipher configurations over competing concerns: total energy use,
-desirable security properties, read and write performance (latency), total
+first define a scheme to \emph{quantify} the usefulness of each cipher based on
+key security properties relevant to FDE in context. Using this scheme, we define
+a tradeoff space of cipher configurations over competing concerns: total energy
+use, desirable security properties, read and write performance (latency), total
 writable space on the drive, and how quickly the contents of the drive can
-converge to a single encryption configuration.
+converge to a single encryption configuration. We then introduce a novel design
+substantively expanding prior FDE work by wholly \emph{decoupling} cipher
+implementations from the encryption process. Finally, we develop the idea of
+cipher switching using \emph{switching strategies} to ``re-cipher'' storage
+units dynamically, allowing us to tradeoff different performance and security
+properties of various configurations at runtime.
 
 Unifying these contributions, we present SwitchCrypt, a software mechanism that
 navigates the tradeoff space made by balancing competing security and latency
@@ -89,9 +90,13 @@ using our generic cipher interface. We then study the utility of cipher
 switching through four case studies where latency, energy, and desired security
 properties change over time.
 
-SwitchCrypt achieves a reduction of at least 3.3x in total energy use compared
-to static configurations without cipher switching. We further observe a
-reduction of 3.1x to 4.8x for read latency and 1.6x to 2.8x for write latency.
+In one study, where we require the filesystem to react to a shrinking energy
+budget by switching ciphers, we find that SwitchCrypt achieves up to a 3.3x
+total energy use reduction compared to prior static approaches that only use the
+Freestyle stream cipher without switching. In another case, where we allow the
+user to manually switch between ChaCha20 and Freestyle stream ciphers
+dynamically, we achieve a 3.1x to 4.8x reduction to read latency and 1.6x to
+2.8x reduction to write latency compared to prior static approaches.
 
 We make the SwitchCrypt source publicly available open
 source\footnote{\label{note1}\SystemURI}.
