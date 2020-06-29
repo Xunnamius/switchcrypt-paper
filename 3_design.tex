@@ -8,7 +8,7 @@
    \caption{Layout of SwitchCrypt's drive layout.}\label{fig:backstore}
 \end{figure}
 
-SwitchCrypt consists of a \emph{Generic Stream Cipher interface} and
+SwitchCrypt consists of a \emph{Generic Stream Cipher Interface} and
 \emph{Cryptographic Driver}; SwitchCrypt sits between a Log-structured File
 System (LFS) on the OS and the underlying drive (backing storage) and device
 controller (e.g. Flash Translation Layer). This is illustrated in
@@ -44,7 +44,7 @@ overwrites, preventing rollback attacks, and limiting plaintext length using the
 nugget layout and aforesaid components. In the remainder of this section, we
 detail the primary components of the SwitchCrypt design: how we quantify the
 properties traded off between configurations (\cref{subsec:quantify}), the
-Generic Stream Cipher interface and Per-Nugget Metadata component
+Generic Stream Cipher Interface and Per-Nugget Metadata component
 (\cref{subsec:interface}) which decouples cipher implementations from the
 encryption process, and our Cipher Switching Strategy implementations
 (\cref{subsec:strategies}) used to efficiently encrypt nuggets with different
@@ -142,7 +142,7 @@ scores 0 and ChaCha20 scores 1\@.
   \label{tbl:security-quant}
 \end{table}
 
-\subsection{Generic Stream Cipher interface} \label{subsec:interface}
+\subsection{Generic Stream Cipher Interface} \label{subsec:interface}
 
 There are \emph{many} ciphers we might use with SwitchCrypt, each with various
 input requirements and output considerations. A key difference with prior work
@@ -400,7 +400,7 @@ monotonic counter are consulted to ensure the integrity of encrypted data, the
 transaction journal is consulted during write operations so that overwrites are
 handled and pad reuse violations are avoided, and then the keycount store is
 consulted to derive the nugget's unique encryption key from some master secret.
-Using the generic stream cipher interface to call out to the active stream
+Using the Generic Stream Cipher Interface to call out to the active stream
 cipher implementation, SwitchCrypt encrypts/decrypts the nugget's contents and
 commits any updates back to storage~\cite{StrongBox}.
 

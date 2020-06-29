@@ -16,7 +16,8 @@ performance differences due to different ciphers.
 In each experiment below, we evaluate SwitchCrypt on two high level workloads:
 sequential and random I/O. In both workloads, a number of bytes are written and
 then read (either 4KB, 512KB, 5MB, 40MB) 10 times. Each experiment is repeated
-three times.
+three times for a total of 240 tests; 30 results per byte size, 120 results per
+workload. Results are accumulated and the median is taken for each byte size.
 
 When evaluating switching strategies, a finer breakdown in workloads is made
 using a pre-selected pair of ciphers we call the \emph{primary cipher} and
