@@ -140,8 +140,8 @@ means these penalties are paid more often, ballooning latency.
  \label{fig:mirrored-selective-baseline}
 \end{figure}
 
-\figref{mirrored-selective-baseline} show the the performance of the Mirrored
-and Selective strategies with the same configuration of ratios as
+\figref{mirrored-selective-baseline} show the performance of the Mirrored and
+Selective strategies with the same configuration of ratios as
 \figref{tradeoff-with-ratios}.
 
 For the 40MB, 5MB, and 512KB workloads (40MB is shown), we see that Mirrored and
@@ -188,7 +188,7 @@ SwitchCrypt. We believe SwitchCrypt's design keeps these overheads acceptably
 low in practice (see \secref{usecases}), achieving the desired goal of flexibly
 navigating latency/security tradeoffs for FDE.
 
-\subsection{Augmented Threat Analysis}\label{subsec:4}
+\subsection{Revisiting Our Threat Model}\label{subsec:4}
 
 The incorporation of cipher switching requires considering each attack in the
 context of each strategy and novel attacks on mixed-cipher nugget states.

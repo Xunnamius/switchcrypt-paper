@@ -63,8 +63,9 @@ A naive implementation is trivial (\eg{execute the chosen strategy on every I/O
 operation}), this navigation must occur with acceptable overhead by preserving
 performance wherever possible. The cryptographic driver provides such a
 mechanism, tying together cipher switching strategies and the generic stream
-cipher API. \TO\DO{Which cryptographic driver? You need to clarify if you are
-talking about a piece of our design or something we are using from prior work.}
+cipher interface. \TO\DO{Which cryptographic driver? You need to clarify if you
+are talking about a piece of our design or something we are using from prior
+work.}
 
 In the cases of Mirrored and Selective switching, we use offset to determine in
 which area of the backing store receives I/O.

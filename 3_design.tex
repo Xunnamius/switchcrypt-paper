@@ -2,22 +2,17 @@
 
 \subsection{SwitchCrypt Overview} \label{subsec:overview}
 
-Like StrongBox, SwitchCrypt sits between a Log-structured File System (LFS) and
-the backing storage, dividing it into a series independent same-size logical
-units called \emph{nuggets}. A nugget consists of one or more contiguous
-physical drive blocks with per-nugget metadata indicating which cipher was used
-to encrypt the nugget.
+\begin{figure}[t]
+   \centering
+   \includegraphics[width=\linewidth]{backstore.png}
+   \caption{Layout of SwitchCrypt's drive layout.}\label{fig:backstore}
+\end{figure}
 
-SwitchCrypt uses the nugget layout to 1) track, detect, and handle overwrites,
-2) limit the maximum length of any plaintext input to ciphers, thus amortizing
-the overhead incurred during encryption~\cite{StrongBox}, and 3) independently
-switch the cipher used to crypt individual nuggets.
-
-\PUNT{\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{backstore.png}
- \caption{Layout of SwitchCrypt's backing storage.}\label{fig:backstore2}
-\end{figure}}
+SwitchCrypt consists of a \emph{Generic Stream Cipher interface} and
+\emph{Cryptographic Driver}; SwitchCrypt sits between a Log-structured File
+System (LFS) on the OS and the underlying drive (backing storage) and device
+controller (e.g. Flash Translation Layer). This is illustrated in
+\figref{overview}, which provides an overview of the SwitchCrypt system design.
 
 \begin{figure}[ht]
    \centering
@@ -25,26 +20,127 @@ switch the cipher used to crypt individual nuggets.
    \caption{Overview of the SwitchCrypt construction.}\label{fig:overview}
 \end{figure}
 
-\figref{overview} provides an overview of the SwitchCrypt design. SwitchCrypt is
-composed of the cryptographic driver---responsible for executing our
-\emph{switching strategies}---and six components. The first four components
-belong to StrongBox: an in-memory \emph{merkle tree}; two drive-backed byte
-arrays, \ie{the \emph{keycount store} and the \emph{transaction journal}}; a
-globally persistent cryptographically secure monotonic counter~\cite{StrongBox}.
-Our design adds the final two components: a flexible drive-backed store for
-cipher-specific \emph{per-nugget metadata} and the \emph{generic stream cipher
-API}.
+The drive itself is divided into a \emph{HEAD} section and \emph{BODY} section
+upon initialization, illustrated in \figref{backstore}. The HEAD consists of
+metadata headers written during initialization~\cite{StrongBox} along with the
+\emph{Keycount Store}, \emph{Transaction Journal}, \emph{Rekeying Journal}, and
+\emph{Per-Nugget Metadata}, each drive-backed. These components are used by the
+\emph{Cryptographic Driver} together with the \emph{Cipher Switching Strategy}
+implementations to enable efficient per-unit cipher switching.
 
-The \emph{merkle tree} ensures the integrity of all data on a per-nugget level.
-The \emph{keycount store} keeps track of each nugget's 64-bit cryptographic key.
-The \emph{transaction journal} keeps track of writes to nuggets, allowing
-SwitchCrypt to detect and respond to overwrites. The \emph{monotonic counter}
-prevents the system state from being rolled back. The \emph{per-nugget metadata}
-is a drive-backed array where extra cryptographic material is stored depending
-on the cipher used to encrypt the nugget. The size of the array is determined by
-ciphers loaded through the \emph{generic stream cipher API}.
+The BODY consists of a series independent same-size logical units called
+\emph{nuggets}. A nugget consists of one or more contiguous physical drive
+blocks. Each nugget is coupled with metadata in the HEAD indicating which cipher
+was used to encrypt the nugget along with any additional per-nugget ciphertext
+metadata. SwitchCrypt uses the Keycount Store and Transaction Journal components
+along with our nugget layout to 1) track, detect, and handle overwrites, 2)
+limit the maximum length of any plaintext input to ciphers, thus amortizing the
+overhead incurred during encryption, and 3) independently and efficiently switch
+the cipher used to encrypt individual nuggets.
 
-\subsection{Generic Stream Cipher API} \label{subsec:api}
+See Dickens et al.~\cite{StrongBox} for further discussion on handling
+overwrites and limiting plaintext length using the nugget layout and aforesaid
+components. In the rest of this section, we detail the primary components of the
+SwitchCrypt design: how we quantify the properties traded off between
+configurations (\cref{subsec:quantify}), the Generic Stream Cipher interface and
+per-Nugget metadata (\cref{subsec:interface}) to decouple ciphers from the
+encryption process, and our Cipher Switching Strategy implementations
+(\cref{subsec:strategies}) to efficiently encrypt nuggets with different
+ciphers.
+
+\subsection{Quantifying Cipher Security Properties} \label{subsec:quantify}
+
+Every cipher mentioned in this paper is considered secure in that \emph{there
+are no known practical attacks against them}~\cite{ChaCha20, Freestyle, SalsaX,
+Rabbit, Sosemanuk, AESCTR}. This implies data is kept confidential versus any
+adversary, however it is often desirable to secure data at rest in special
+contexts or considering future adversaries with abundant resources. In this way,
+a cipher that is more resilient to cryptanalysis or brute-force or round count
+than is currently required or a cipher that elegantly handles nonce-reuse might
+be more desirable.
+
+To simplify reasoning about trading off such disparate cryptographic properties
+in the FDE context, we must have a way to quantitatively compare a cipher's
+``desirability'' for SwitchCrypt and for FDE more broadly. Hence, we do not
+attempt to define a generally applicable \textit{ranking} of \emph{security
+strength}. Instead, we score ciphers (\ie{a so-called ``security score''}) based
+on three key security properties that, when summed, give a relative estimate of
+the difficulty (or resources required) to attack data secured under SwitchCrypt
+FDE (see: \tblref{security-quant}).
+
+Our scoring scheme is a combination of well understood schemes: scoring ciphers
+on their confusion and diffusion of plaintext bits during
+encryption~\cite{attack1,attack2,AESItself} (commonly known as \emph{round
+count}), on how they behave when given the same input
+parameters~\cite{random1,Freestyle,random2} (normally an unacceptable
+confidentiality-breaking overwrite condition), and on there being penalties for
+supplying the wrong key when attempting to decrypt (\ie{an attacker should have
+to do more work than the defender})~\cite{Freestyle,Mercy}.
+
+\textbf{1) Output randomization (OR).} A cipher with output randomization
+generates different ciphertexts non-\\deterministically given the same key,
+nonce, and message. This makes chosen-ciphertext (CCA) and other attacks where
+the ciphertext is in full control of the adversary much more
+difficult~\cite{Freestyle}.
+
+This is a binary feature in that a cipher either outputs deterministically given
+the same input or it does not. A cipher with non-deterministic output given the
+same key, nonce, and message as inputs scores a 1 for this feature while a
+cipher with deterministic output given the same input scores a 0.
+
+\textbf{2) Resistance to brute force and offline/dictionary attacks (RBF).} We
+narrowly define ``standard resistance'' versus brute-force and
+offline/dictionary attacks with respect to the time taken to finish decrypting
+ciphertext given an incorrect key versus a correct key; a cipher with standard
+resistance to brute force and offline/dictionary attacks has no kind of
+\emph{key-guessing penalty}~\cite{Freestyle}---the ciphertext is decrypted no
+slower when given the incorrect key versus the correct key. Similarly, we
+consider ciphers with so-called ``enhanced resistance,'' where they are expected
+to take longer to finish decrypting ciphertext given an incorrect key versus a
+correct key with high probability. This property is also useful in instances
+where SwitchCrypt is initialized with a weak password/key.
+
+Scores for this feature range from 0 to 1, where 0 represents no resistance, 0.5
+is standard resistance to brute-force and offline/dictionary attacks, and 1 is
+the aforementioned ``enhanced resistance''.
+
+\textbf{3) Relative round count and key length (RR/RK).} The ciphers we examine
+in this research are all constructed around the notion of \emph{rounds}, where a
+higher number of rounds or longer key typically imply a stronger confidentiality
+guarantee given there are no fatal related-key attacks. This feature represents
+how many rounds the cipher executes compared to the accepted ``standard'' round
+count for that cipher. For instance: ChaCha8 is a reduced round version of the
+standard ChaCha20, both using 256-bit keys.
+
+Scores for variants are distributed evenly from 0-1. For instance, ChaCha8
+scores 0 and ChaCha20 scores 1\@.
+
+\begin{table}[]
+  \begin{tabular}{@{}lllll@{}}
+  \toprule
+  \textbf{Cipher} & \textbf{OR} & \textbf{RBF} & \textbf{RR/RK} & \textbf{score} \\ \midrule
+  ChaCha8         & 0           & 0.5          & 0              & 0.5            \\
+  %ChaCha12        & 0           & 0.5          & 0.5            & 1              \\
+  ChaCha20        & 0           & 0.5          & 1              & 1.5            \\
+  %Salsa8          & 0           & 0.5          & 0              & 0.5            \\
+  %Salsa12         & 0           & 0.5          & 0.5            & 1              \\
+  %Salsa20         & 0           & 0.5          & 1              & 1.5            \\
+  %AES128-CTR      & 0           & 0.5          & 0              & 0.5            \\
+  %AES256-CTR      & 0           & 0.5          & 1              & 1.5            \\
+  %HC128           & 0           & 0.5          & 0              & 0.5            \\
+  %HC256           & 0           & 0.5          & 1              & 1.5            \\
+  Freestyle (F)   & 1           & 1            & 0              & 2              \\
+  Freestyle (B)   & 1           & 1            & 0.5            & 2.5            \\
+  Freestyle (S)   & 1           & 1            & 1              & 3
+  \end{tabular}
+  \caption{These ``scores'' represent a cipher's desirability to SwitchCrypt and
+  to FDE more generally. Ciphers with OR can operate below overwrite
+  protections, increasing performance; ciphers with RBF and high RR/RK have
+  extra resilience against confidentiality attacks.}
+  \label{tbl:security-quant}
+\end{table}
+
+\subsection{Generic Stream Cipher interface} \label{subsec:interface}
 
 There are \emph{many} ciphers we might use with SwitchCrypt, each with various
 input requirements and output considerations. A key difference with prior work
@@ -52,22 +148,22 @@ is that SwitchCrypt must be able to encrypt and decrypt arbitrary nuggets
 without worrying about a cipher's implementation details; prior approaches could
 have cipher-specific implementations because they did not consider switching.
 Thus, the cipher-specific details must be handled with care or security is
-violated. With our novel cipher API, we present an interface that
+violated. With our novel cipher interface, we present an interface that
 \emph{decouples} cipher implementations from the encryption/decryption process.
 This allows any cipher to be integrated into SwitchCrypt without modification or
 special considerations. Hence, different stream ciphers become interchangeable
 when they would normally be incompatible, preventing us from trading them off
 one another.
 
-The API is accessible at three levels:
+The interface is accessible at three levels:
 
 \begin{enumerate}
-   \item \textbf{\texttt{crypt\_data}}\\\texttt{crypt\_data}
-   operates at a fine-grain level independent of SwitchCrypt's internals.
-   Implementations receive an index and offset and are expected to return some
-   number of bytes, \ie{a keystream}, which is XORed with nugget contents. At
-   this level, there is no distinction made between encryption and decryption
-   since both are accomplished with a simple XOR. This API level has the lowest
+   \item \textbf{\texttt{crypt\_data}}\\\texttt{crypt\_data} operates at a
+   fine-grain level independent of SwitchCrypt's internals. Implementations
+   receive an index and offset and are expected to return some number of bytes,
+   \ie{a keystream}, which is XORed with nugget contents. At this level, there
+   is no distinction made between encryption and decryption since both are
+   accomplished with a simple XOR. This interface level has the lowest
    implementation overhead and least flexibility.
 
    \item \textbf{\texttt{crypt\_data\_low}}\\\texttt{crypt\_data\_low}
@@ -89,13 +185,14 @@ The API is accessible at three levels:
 Were we using simple ciphers exclusively, \ie{those that do not differentiate
 between encryption and decryption and always produce output of the same length
 as the input}, we could generate a keystream and XOR it with data without the
-the need for a new a API. However, some cipher implementations treat encryption
-and decryption as two distinct operations. Others require different parameters
-or special considerations before XORing the keystream with data. Others produce
-extra output that must be stored during encryption and fetched during
-decryption. Others exhibit some combination of these concerns. Our API presents
-the cryptographic driver with a single unified interface where these disparate
-concerns are abstracted away, laying the groundwork for \emph{cipher switching}.
+the need for a new a interface. However, some cipher implementations treat
+encryption and decryption as two distinct operations. Others require different
+parameters or special considerations before XORing the keystream with data.
+Others produce extra output that must be stored during encryption and fetched
+during decryption. Others exhibit some combination of these concerns. Our
+interface presents the cryptographic driver with a single unified interface
+where these disparate concerns are abstracted away, laying the groundwork for
+\emph{cipher switching}.
 
 \subsection{Cipher Switching Strategies} \label{subsec:strategies}
 
@@ -266,8 +363,7 @@ adversary should not be able to decrypt encrypted plaintext without the right
 key. With this research, we select five cipher implementations and configure
 them under SwitchCrypt: ChaCha~\cite{ChaCha20} (ChaCha8 and ChaCha20), and
 Freestyle~\cite{Freestyle} in fast, balanced, and secure configurations (see:
-\secref{implementation}). Each cipher has been proven formally secure in that
-there are no known efficient attacks against them.
+\secref{implementation}).
 
 Encryption is achieved via a binary additive approach: cipher output (keystream)
 is combined with plaintext nugget contents using XOR, with metadata to track
@@ -289,98 +385,6 @@ have been proven formally secure. Hence, nuggets encrypted with different secure
 ciphers can co-exist on the backing store securely, depending on the use case
 (see: \secref{usecases}).
 
-\subsection{Quantifying Cipher Security Properties} \label{subsec:quantify}
-
-Every cipher mentioned in this paper is considered secure in that \emph{there
-are no known practical attacks against them}~\cite{ChaCha20, Freestyle, SalsaX,
-Rabbit, Sosemanuk, AESCTR}. This implies data is kept confidential versus any
-adversary, however it is often desirable to secure data at rest in special
-contexts or considering future adversaries with abundant resources. In this way,
-a cipher that is more resilient to cryptanalysis or brute-force or round count
-than is currently required or a cipher that elegantly handles nonce-reuse might
-be more desirable.
-
-To simplify reasoning about trading off such disparate cryptographic properties
-in the FDE context, we must have a way to quantitatively compare a cipher's
-``desirability'' for SwitchCrypt and for FDE more broadly. Hence, we do not
-attempt to define a generally applicable \textit{ranking} of \emph{security
-strength}. Instead, we score ciphers (\ie{a so-called ``security score''}) based
-on three key security properties that, when summed, give a relative estimate of
-the difficulty (or resources required) to attack data secured under SwitchCrypt
-FDE (see: \tblref{security-quant}).
-
-Our scoring scheme is a combination of well understood schemes: scoring ciphers
-on their confusion and diffusion of plaintext bits during
-encryption~\cite{attack1,attack2,AESItself} (commonly known as \emph{round
-count}), on how they behave when given the same input
-parameters~\cite{random1,Freestyle,random2} (normally an unacceptable
-confidentiality-breaking overwrite condition), and on there being penalties for
-supplying the wrong key when attempting to decrypt (\ie{an attacker should have
-to do more work than the defender})~\cite{Freestyle,Mercy}.
-
-\textbf{1) Output randomization (OR).} A cipher with output randomization
-generates different ciphertexts non-\\deterministically given the same key,
-nonce, and message. This makes chosen-ciphertext (CCA) and other attacks where
-the ciphertext is in full control of the adversary much more
-difficult~\cite{Freestyle}.
-
-This is a binary feature in that a cipher either outputs deterministically given
-the same input or it does not. A cipher with non-deterministic output given the
-same key, nonce, and message as inputs scores a 1 for this feature while a
-cipher with deterministic output given the same input scores a 0.
-
-\textbf{2) Resistance to brute force and offline/dictionary attacks (RBF).} We
-narrowly define ``standard resistance'' versus brute-force and
-offline/dictionary attacks with respect to the time taken to finish decrypting
-ciphertext given an incorrect key versus a correct key; a cipher with standard
-resistance to brute force and offline/dictionary attacks has no kind of
-\emph{key-guessing penalty}~\cite{Freestyle}---the ciphertext is decrypted no
-slower when given the incorrect key versus the correct key. Similarly, we
-consider ciphers with so-called ``enhanced resistance,'' where they are expected
-to take longer to finish decrypting ciphertext given an incorrect key versus a
-correct key with high probability. This property is also useful in instances
-where SwitchCrypt is initialized with a weak password/key.
-
-Scores for this feature range from 0 to 1, where 0 represents no resistance, 0.5
-is standard resistance to brute-force and offline/dictionary attacks, and 1 is
-the aforementioned ``enhanced resistance''.
-
-\textbf{3) Relative round count and key length (RR/RK).} The ciphers we examine
-in this research are all constructed around the notion of \emph{rounds}, where a
-higher number of rounds or longer key typically imply a stronger confidentiality
-guarantee given there are no fatal related-key attacks. This feature represents
-how many rounds the cipher executes compared to the accepted ``standard'' round
-count for that cipher. For instance: ChaCha8 is a reduced round version of the
-standard ChaCha20, both using 256-bit keys.
-
-Scores for variants are distributed evenly from 0-1. For instance, ChaCha8
-scores 0 and ChaCha20 scores 1\@.
-
-\begin{table}[]
-  \begin{tabular}{@{}lllll@{}}
-  \toprule
-  \textbf{Cipher} & \textbf{OR} & \textbf{RBF} & \textbf{RR/RK} & \textbf{score} \\ \midrule
-  ChaCha8         & 0           & 0.5          & 0              & 0.5            \\
-  %ChaCha12        & 0           & 0.5          & 0.5            & 1              \\
-  ChaCha20        & 0           & 0.5          & 1              & 1.5            \\
-  %Salsa8          & 0           & 0.5          & 0              & 0.5            \\
-  %Salsa12         & 0           & 0.5          & 0.5            & 1              \\
-  %Salsa20         & 0           & 0.5          & 1              & 1.5            \\
-  %AES128-CTR      & 0           & 0.5          & 0              & 0.5            \\
-  %AES256-CTR      & 0           & 0.5          & 1              & 1.5            \\
-  %HC128           & 0           & 0.5          & 0              & 0.5            \\
-  %HC256           & 0           & 0.5          & 1              & 1.5            \\
-  Freestyle (F)   & 1           & 1            & 0              & 2              \\
-  Freestyle (B)   & 1           & 1            & 0.5            & 2.5            \\
-  Freestyle (S)   & 1           & 1            & 1              & 3
-  \end{tabular}
-  \caption{These ``scores'' represent a cipher's desirability to SwitchCrypt and
-  to FDE more generally. Ciphers with OR can operate below overwrite
-  protections, increasing performance; ciphers with RBF and high RR/RK have
-  extra resilience against confidentiality attacks.}
-  \label{tbl:security-quant}
-\end{table}
-
 \subsection{Putting It All Together} \label{subsec:summary}
 
 We revisit the motivating example from \secref{motivation}. Initially, I/O
@@ -394,9 +398,9 @@ monotonic counter are consulted to ensure the integrity of encrypted data, the
 transaction journal is consulted during write operations so that overwrites are
 handled and pad reuse violations are avoided, and then the keycount store is
 consulted to derive the nugget's unique encryption key from some master secret.
-Using the generic stream cipher API to call out to the active stream cipher
-implementation, SwitchCrypt encrypts/decrypts the nugget's contents and commits
-any updates back to storage~\cite{StrongBox}.
+Using the generic stream cipher interface to call out to the active stream
+cipher implementation, SwitchCrypt encrypts/decrypts the nugget's contents and
+commits any updates back to storage~\cite{StrongBox}.
 
 When the device enters ``battery saver'' mode, the energy monitoring software
 downclocks the CPU and indicates to SwitchCrypt that a more energy-efficient
@@ -405,10 +409,10 @@ when the cryptographic driver divides I/O requests into each affected nugget,
 the per-nugget metadata shows SwitchCrypt that the nugget is encrypted using a
 cipher that is not the active cipher. This triggers the re-ciphering code path.
 Since we are using the Forward switching strategy, this means the nugget data is
-immediately decrypted by calling out to the inactive cipher through the API and
-then re-encrypted by calling out to the active cipher. Depending on the API
-level the cipher is implemented at, either 1) the cryptographic driver manages
-encrypting/decrypting data and updating the merkle tree and monotonic counter,
-transaction journal, and keycount store or 2) the cipher implementation handles
-updating SwitchCrypt internals directly. Afterwards, the I/O operation is
-committed to the backing store.
+immediately decrypted by calling out to the inactive cipher through the
+interface and then re-encrypted by calling out to the active cipher. Depending
+on the interface level the cipher is implemented at, either 1) the cryptographic
+driver manages encrypting/decrypting data and updating the merkle tree and
+monotonic counter, transaction journal, and keycount store or 2) the cipher
+implementation handles updating SwitchCrypt internals directly. Afterwards, the
+I/O operation is committed to the backing store.
