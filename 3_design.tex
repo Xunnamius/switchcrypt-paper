@@ -32,9 +32,9 @@ The BODY consists of a series independent same-size logical units called
 \emph{nuggets}. A nugget consists of one or more contiguous physical drive
 blocks. Each nugget is coupled with metadata in the HEAD indicating which cipher
 was used to encrypt the nugget along with any additional ciphertext output; the
-latter effectively transforms our non-length-preserving ciphers into
-length-preserving ciphers. SwitchCrypt uses the Keycount Store and Transaction
-Journal components along with our nugget layout to 1) track, detect, and handle
+latter allows us to treat any non-length-preserving ciphers as if they were
+length-preserving. SwitchCrypt uses the Keycount Store and Transaction Journal
+components along with our nugget layout to 1) track, detect, and handle
 overwrites, 2) limit the maximum length of any plaintext input to ciphers, thus
 amortizing the overhead incurred during encryption, and 3) independently and
 efficiently switch the cipher used to encrypt individual nuggets.
@@ -44,103 +44,71 @@ overwrites, preventing rollback attacks, and limiting plaintext length using the
 nugget layout and aforesaid components. In the remainder of this section, we
 detail the primary components of the SwitchCrypt design: how we quantify the
 properties traded off between configurations (\cref{subsec:quantify}), the
-Generic Stream Cipher Interface and Per-Nugget Metadata component
-(\cref{subsec:interface}) which decouples cipher implementations from the
+Generic Stream Cipher Interface and Per-Nugget Metadata components
+(\cref{subsec:interface}) which decouple cipher implementations from the
 encryption process, and our Cipher Switching Strategy implementations
 (\cref{subsec:strategies}) used to efficiently encrypt nuggets with different
 ciphers.
 
 \subsection{Quantifying Cipher Security Properties} \label{subsec:quantify}
 
-Every cipher mentioned in this paper is considered secure in that \emph{there
-are no known practical attacks against them}~\cite{ChaCha20, Freestyle, SalsaX,
-Rabbit, Sosemanuk, AESCTR}. This implies data is kept confidential versus any
-adversary, however it is often desirable to secure data at rest in special
-contexts or considering future adversaries with abundant resources. In this way,
-a cipher that is more resilient to cryptanalysis or brute-force or round count
-than is currently required or a cipher that elegantly handles nonce-reuse might
-be more desirable.
+To reason about when to trade off between the ciphers evaluated in this work, we
+must have a way to quantitatively compare ciphers' utility for SwitchCrypt FDE.
+However, different ciphers have a wide range of security properties, performance
+profiles, and output characteristics. To address this need, we propose the
+following framework for evaluating ciphers for SwitchCrypt FDE (see:
+\tblref{security-quant}). Our framework is composed of three features: relative
+round count, ciphertext randomization, and ciphertext expansion.
 
-To simplify reasoning about trading off such disparate cryptographic properties
-in the FDE context, we must have a way to quantitatively compare a cipher's
-``desirability'' for SwitchCrypt and for FDE more broadly. Hence, we do not
-attempt to define a generally applicable \textit{ranking} of \emph{security
-strength}. Instead, we score ciphers (\ie{a so-called ``security score''}) based
-on three key security properties that, when summed, give a relative estimate of
-the difficulty (or resources required) to attack data secured under SwitchCrypt
-FDE (see: \tblref{security-quant}).
+\begin{table}[]
+   \begin{tabular}{@{}lllll@{}}
+   \toprule
+   \textbf{Cipher} & \textbf{RR} & \textbf{CR} & \textbf{CE} \\ \midrule
+   ChaCha8         & 0           & 0           & 0           \\
+   ChaCha12        & 0.5         & 0           & 0           \\
+   ChaCha20        & 1           & 0           & 0           \\
+   Salsa8          & 0           & 0           & 0           \\
+   Salsa12         & 0.5         & 0           & 0           \\
+   Salsa20         & 1           & 0           & 0           \\
+   HC128           & 0           & 0           & 0           \\
+   HC256           & 1           & 0           & 0           \\
+   Freestyle (F)   & 0           & 0.3         & 1           \\
+   Freestyle (B)   & 0.5         & 0.6         & 1           \\
+   Freestyle (S)   & 1           & 1           & 1           \\
+\end{tabular}
+   \caption{\TODO{caption here}}
+   \label{tbl:security-quant}
+ \end{table}
 
-Our scoring scheme is a combination of well understood schemes: scoring ciphers
-on their confusion and diffusion of plaintext bits during
-encryption~\cite{attack1,attack2,AESItself} (commonly known as \emph{round
-count}), on how they behave when given the same input
-parameters~\cite{random1,Freestyle,random2} (normally an unacceptable
-confidentiality-breaking overwrite condition), and on there being penalties for
-supplying the wrong key when attempting to decrypt (\ie{an attacker should have
-to do more work than the defender})~\cite{Freestyle,Mercy}.
+\subsubsection{Relative Rounds (RR)}
 
-\textbf{1) Output randomization (OR).} A cipher with output randomization
-generates different ciphertexts non-\\deterministically given the same key,
-nonce, and message. This makes chosen-ciphertext (CCA) and other attacks where
-the ciphertext is in full control of the adversary much more
-difficult~\cite{Freestyle}.
+The ciphers we examine in this paper are all constructed around the notion of
+\emph{rounds}, where a higher number of rounds or longer key is positively
+correlated with a higher resistance to brute force given no fatal related-key
+attacks. This feature represents how many rounds the cipher executes compared to
+the accepted ``standard'' round count for that cipher. For instance: ChaCha8 is
+a reduced round version of the standard ChaCha20, both using 256-bit keys.
+
+Include the following? Work it in: a cipher with standard resistance to brute
+force and offline/dictionary attacks has no kind of \emph{key-guessing
+penalty}~\cite{Freestyle}---the ciphertext is decrypted no slower when given the
+incorrect key versus the correct key.
+
+\subsubsection{Ciphertext Randomization (CR)}
+
+A cipher with output randomization generates different ciphertexts
+non-\\deterministically given the same key, nonce, and message. This makes
+chosen-ciphertext (CCA) and other attacks where the ciphertext is in full
+control of the adversary much more difficult~\cite{Freestyle}.
 
 This is a binary feature in that a cipher either outputs deterministically given
 the same input or it does not. A cipher with non-deterministic output given the
 same key, nonce, and message as inputs scores a 1 for this feature while a
 cipher with deterministic output given the same input scores a 0.
 
-\textbf{2) Resistance to brute force and offline/dictionary attacks (RBF).} We
-narrowly define ``standard resistance'' versus brute-force and
-offline/dictionary attacks with respect to the time taken to finish decrypting
-ciphertext given an incorrect key versus a correct key; a cipher with standard
-resistance to brute force and offline/dictionary attacks has no kind of
-\emph{key-guessing penalty}~\cite{Freestyle}---the ciphertext is decrypted no
-slower when given the incorrect key versus the correct key. Similarly, we
-consider ciphers with so-called ``enhanced resistance,'' where they are expected
-to take longer to finish decrypting ciphertext given an incorrect key versus a
-correct key with high probability. This property is also useful in instances
-where SwitchCrypt is initialized with a weak password/key.
+\subsubsection{Ciphertext Expansion (CE)}
 
-Scores for this feature range from 0 to 1, where 0 represents no resistance, 0.5
-is standard resistance to brute-force and offline/dictionary attacks, and 1 is
-the aforementioned ``enhanced resistance''.
-
-\textbf{3) Relative round count and key length (RR/RK).} The ciphers we examine
-in this research are all constructed around the notion of \emph{rounds}, where a
-higher number of rounds or longer key typically imply a stronger confidentiality
-guarantee given there are no fatal related-key attacks. This feature represents
-how many rounds the cipher executes compared to the accepted ``standard'' round
-count for that cipher. For instance: ChaCha8 is a reduced round version of the
-standard ChaCha20, both using 256-bit keys.
-
-Scores for variants are distributed evenly from 0-1. For instance, ChaCha8
-scores 0 and ChaCha20 scores 1\@.
-
-\begin{table}[]
-  \begin{tabular}{@{}lllll@{}}
-  \toprule
-  \textbf{Cipher} & \textbf{OR} & \textbf{RBF} & \textbf{RR/RK} & \textbf{score} \\ \midrule
-  ChaCha8         & 0           & 0.5          & 0              & 0.5            \\
-  %ChaCha12        & 0           & 0.5          & 0.5            & 1              \\
-  ChaCha20        & 0           & 0.5          & 1              & 1.5            \\
-  %Salsa8          & 0           & 0.5          & 0              & 0.5            \\
-  %Salsa12         & 0           & 0.5          & 0.5            & 1              \\
-  %Salsa20         & 0           & 0.5          & 1              & 1.5            \\
-  %AES128-CTR      & 0           & 0.5          & 0              & 0.5            \\
-  %AES256-CTR      & 0           & 0.5          & 1              & 1.5            \\
-  %HC128           & 0           & 0.5          & 0              & 0.5            \\
-  %HC256           & 0           & 0.5          & 1              & 1.5            \\
-  Freestyle (F)   & 1           & 1            & 0              & 2              \\
-  Freestyle (B)   & 1           & 1            & 0.5            & 2.5            \\
-  Freestyle (S)   & 1           & 1            & 1              & 3
-  \end{tabular}
-  \caption{These ``scores'' represent a cipher's desirability to SwitchCrypt and
-  to FDE more generally. Ciphers with OR can operate below overwrite
-  protections, increasing performance; ciphers with RBF and high RR/RK have
-  extra resilience against confidentiality attacks.}
-  \label{tbl:security-quant}
-\end{table}
+It's binary. Words.
 
 \subsection{Generic Stream Cipher Interface} \label{subsec:interface}
 
