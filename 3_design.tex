@@ -31,21 +31,23 @@ implementations to enable efficient per-unit cipher switching.
 The BODY consists of a series independent same-size logical units called
 \emph{nuggets}. A nugget consists of one or more contiguous physical drive
 blocks. Each nugget is coupled with metadata in the HEAD indicating which cipher
-was used to encrypt the nugget along with any additional per-nugget ciphertext
-metadata. SwitchCrypt uses the Keycount Store and Transaction Journal components
-along with our nugget layout to 1) track, detect, and handle overwrites, 2)
-limit the maximum length of any plaintext input to ciphers, thus amortizing the
-overhead incurred during encryption, and 3) independently and efficiently switch
-the cipher used to encrypt individual nuggets.
+was used to encrypt the nugget along with any additional ciphertext output; the
+latter effectively transforms our non-length-preserving ciphers into
+length-preserving ciphers. SwitchCrypt uses the Keycount Store and Transaction
+Journal components along with our nugget layout to 1) track, detect, and handle
+overwrites, 2) limit the maximum length of any plaintext input to ciphers, thus
+amortizing the overhead incurred during encryption, and 3) independently and
+efficiently switch the cipher used to encrypt individual nuggets.
 
 See Dickens et al.~\cite{StrongBox} for further discussion on handling
-overwrites and limiting plaintext length using the nugget layout and aforesaid
-components. In the rest of this section, we detail the primary components of the
-SwitchCrypt design: how we quantify the properties traded off between
-configurations (\cref{subsec:quantify}), the Generic Stream Cipher interface and
-per-Nugget metadata (\cref{subsec:interface}) to decouple ciphers from the
+overwrites, preventing rollback attacks, and limiting plaintext length using the
+nugget layout and aforesaid components. In the remainder of this section, we
+detail the primary components of the SwitchCrypt design: how we quantify the
+properties traded off between configurations (\cref{subsec:quantify}), the
+Generic Stream Cipher interface and Per-Nugget Metadata component
+(\cref{subsec:interface}) which decouples cipher implementations from the
 encryption process, and our Cipher Switching Strategy implementations
-(\cref{subsec:strategies}) to efficiently encrypt nuggets with different
+(\cref{subsec:strategies}) used to efficiently encrypt nuggets with different
 ciphers.
 
 \subsection{Quantifying Cipher Security Properties} \label{subsec:quantify}
