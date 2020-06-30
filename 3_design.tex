@@ -39,16 +39,29 @@ overwrites, 2) limit the maximum length of any plaintext input to ciphers, thus
 amortizing the overhead incurred during encryption, and 3) independently and
 efficiently switch the cipher used to encrypt individual nuggets.
 
-See Dickens et al.~\cite{StrongBox} for further discussion on handling
-overwrites, preventing rollback attacks, and limiting plaintext length using the
-nugget layout and aforesaid components. In the remainder of this section, we
-detail the primary components of the SwitchCrypt design: how we quantify the
-properties traded off between configurations (\cref{subsec:quantify}), the
-Generic Stream Cipher Interface and Per-Nugget Metadata components
-(\cref{subsec:interface}) which decouple cipher implementations from the
-encryption process, and our Cipher Switching Strategy implementations
-(\cref{subsec:strategies}) used to efficiently encrypt nuggets with different
-ciphers.
+\hank{This paragraph needs to be reworded (again for lazy reviewers).
+  As written it would be too easy to get confused and think that
+  Strongbox already solved the hard problems (really it is the first
+  sentence that is the major cause of this issue).  Some subtle
+  rephrasing can help draw a clear line between Strongbox and
+  switchcrypt.  Something like ``Dickens et al. showed how to make
+  this drive organization secure using a single stream cipher
+  including (then list the things you are inheriting from that paper).
+  However, they did not envision dynamically switching ciphers, so in
+  the remainder of this section we show how to transform this prior
+  approach by....''  Then I think you can insert something like that
+  into this paragraph, keeping the bulk of the text, but subtly
+  changing the way people percieve it.) } See Dickens et
+al.~\cite{StrongBox} for further discussion on handling overwrites,
+preventing rollback attacks, and limiting plaintext length using the
+nugget layout and aforesaid components. In the remainder of this
+section, we detail the primary components of the SwitchCrypt design:
+how we quantify the properties traded off between configurations
+(\cref{subsec:quantify}), the Generic Stream Cipher Interface and
+Per-Nugget Metadata components (\cref{subsec:interface}) which
+decouple cipher implementations from the encryption process, and our
+Cipher Switching Strategy implementations (\cref{subsec:strategies})
+used to efficiently encrypt nuggets with different ciphers.
 
 \subsection{Quantifying Cipher Security Properties} \label{subsec:quantify}
 

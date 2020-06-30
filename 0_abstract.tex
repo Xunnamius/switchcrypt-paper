@@ -11,7 +11,7 @@ low-overhead switching is to leverage the overwrite-averse, append-mostly
 behavior of underlying solid-state storage to trade throughput for reduced
 energy use and/or certain security properties. We implement SwitchCrypt on an
 ARM big.LITTLE mobile processor and test its performance under the popular F2FS
-LFS. We provide empirical results demonstrating the conditions under which
+file system. We provide empirical results demonstrating the conditions under which
 different switching strategies are optimal through the exploration of four cases
 studies. In one study, where we require the filesystem to react to a shrinking
 energy budget by switching ciphers, we find that SwitchCrypt achieves up to a

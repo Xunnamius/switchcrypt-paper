@@ -9,18 +9,22 @@ backed up to an offsite system. The industry standard in full drive encryption
 is AES-XTS, so we initialize our drive with it. Given these requirements, three
 primary concerns present themselves.
 
-First, it is well known that FDE using AES-XTS adds significant latency and
-power overhead to I/O operations, especially on mobile and battery-constrained
-devices~\cite{google-engadget, android-M-mobile-motivation,
-android-M-mobile-motivation-2}. To keep our drive encrypted at all times with
-AES-XTS means we must accept this hit to performance and battery life. Worse, if
-our device does not support hardware accelerated AES, performance can be
-degraded even further; I/O latency can be as high as 3-5x~\cite{StrongBox}.
-Hardware accelerated AES is hardly ubiquitous, and the existence of myriad
-devices that do not support it cannot simply be ignored, hence Google's
-investment in Adiantum~\cite{Adiantum}.
+First, it is well known that FDE using AES-XTS adds significant
+latency and power overhead to I/O operations, especially on mobile and
+battery-constrained devices~\cite{google-engadget,
+  android-M-mobile-motivation, android-M-mobile-motivation-2}. To keep
+our drive encrypted at all times with AES-XTS means we must accept
+this hit to performance and battery life. Worse, if our device does
+not support hardware accelerated AES, performance can be degraded even
+further; I/O latency can be as high as 3--5x~\cite{StrongBox}.
+Hardware accelerated AES is hardly ubiquitous, and the existence of
+myriad devices that do not support it cannot simply be ignored, hence
+Google's investment in Adiantum~\cite{Adiantum}. \hank{probably need a
+  parenthetical statement or similar to remind people what Adiantum
+  is, since to this point it was only mentioned once in the intro, and
+  even then it was separated from the main sentence by M-dashes.}
 
-Second, AES-XTS was designed to mitigate threats to drive data ``at rest,''
+Second, AES-XTS is designed to mitigate threats to drive data ``at rest,''
 which assumes an attacker cannot access snapshots of our encrypted data nor
 manipulate our data without those manipulations being immediately obvious to us.
 With access to multiple snapshots of a drive's AES-XTS-encrypted contents, an
@@ -36,8 +40,9 @@ the encrypted state of our drive, violating our ``at rest'' invariant. These
 backups occur at a layer above the drive controller, meaning any encryption
 happening at the FTL or below is irrelevant.
 
-Third, our system is battery constrained, placing a cap on our energy budget
-that can change at any moment. Our system should respond to these changing
+Third, our system is battery constrained, placing a cap on our energy
+budget that can change at any moment as we transition from line power
+to battery power and back. Our system should respond to these changing
 requirements without violating any other concerns.
 
 To alleviate the performance concern, we can choose a stream cipher like
@@ -63,7 +68,7 @@ to certain drive regions. However, with ciphertext randomization, a cipher will
 output a different ``random'' ciphertext even when given the same key, nonce,
 and plaintext; this means, even after a forced rollback of system state and/or
 legitimate restoration from a backup, comparing future writes is no longer
-confidentiality violating because each snapshot will always consist of different
+violates confidentiality because each snapshot will always consist of different
 ciphertext regardless of the plaintext being encrypted or the state of the
 drive. Using Freestyle~\cite{Freestyle}, a ChaCha20-based stream cipher that
 supports ciphertext randomization, we can guarantee data confidentiality in this
