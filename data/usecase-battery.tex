@@ -75,7 +75,7 @@
                 discard if symbol not={iop}{w},
                 col sep=space,
                 mark=none
-            ] {charts/usecase-battery.dat};
+            ] {data/usecase-battery.dat};
             \addplot [thick, dashdotted] table [
                 x=time,
                 y=energy,
@@ -83,7 +83,7 @@
                 discard if symbol not={iop}{w},
                 col sep=space,
                 mark=none
-            ] {charts/usecase-battery.dat};
+            ] {data/usecase-battery.dat};
             \addplot [thick, densely dashed] table [
                 x=time,
                 y=energy,
@@ -91,7 +91,7 @@
                 discard if symbol not={iop}{w},
                 col sep=space,
                 mark=none
-            ] {charts/usecase-battery.dat};
+            ] {data/usecase-battery.dat};
             \coordinate (c1) at (35, 16.5);
             \coordinate (c2) at (89, 45);
             \coordinate (c3) at (1, 45);
@@ -105,21 +105,21 @@
                 discard if symbol not={cipher}{fb},
                 discard if symbol not={iop}{w},
                 col sep=space
-            ] {charts/usecase-battery.dat};
+            ] {data/usecase-battery.dat};
             \addplot [thick, dashdotted] table [
                 x=time,
                 y=score,
                 discard if symbol not={cipher}{fb+c8},
                 discard if symbol not={iop}{w},
                 col sep=space
-            ] {charts/usecase-battery.dat};
+            ] {data/usecase-battery.dat};
             \addplot [thick, densely dashed] table [
                 x=time,
                 y=score,
                 discard if symbol not={cipher}{c8},
                 discard if symbol not={iop}{w},
                 col sep=space
-            ] {charts/usecase-battery.dat};
+            ] {data/usecase-battery.dat};
             \coordinate (c4) at (35, 2.0);
             \draw [dotted] (120, 0) -- (120, 3);
             \draw [dotted] (5, 0) -- (5, 3);

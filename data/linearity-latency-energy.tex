@@ -64,7 +64,7 @@
             discard if symbol not={iop}{4k-r},
             discard if symbol not={order}{seq},
             col sep=space,
-        ] {charts/tradeoff-baseline.dat};
+        ] {data/tradeoff-baseline.dat};
         \addlegendentry{\scriptsize 4K I/O}
         \addplot [] table [
             only marks,
@@ -73,7 +73,7 @@
             discard if symbol not={iop}{512k-r},
             discard if symbol not={order}{seq},
             col sep=space
-            ] {charts/tradeoff-baseline.dat};
+            ] {data/tradeoff-baseline.dat};
         \addlegendentry{\scriptsize 512K/5M/40M I/O}
         \addlegendimage{mark=none, red, thick}
         \addlegendentry{\scriptsize Regression}
@@ -84,7 +84,7 @@
             discard if symbol not={iop}{5m-r},
             discard if symbol not={order}{seq},
             col sep=space
-        ] {charts/tradeoff-baseline.dat};
+        ] {data/tradeoff-baseline.dat};
         \addplot [] table [
             only marks,
             x=energy,
@@ -92,7 +92,7 @@
             discard if symbol not={iop}{40m-r},
             discard if symbol not={order}{seq},
             col sep=space
-        ] {charts/tradeoff-baseline.dat};
+        ] {data/tradeoff-baseline.dat};
         \addplot [blue] table [
             only marks,
             x=energy,
@@ -100,7 +100,7 @@
             discard if symbol not={iop}{4k-w},
             discard if symbol not={order}{rnd},
             col sep=space,
-        ] {charts/tradeoff-baseline.dat};
+        ] {data/tradeoff-baseline.dat};
         \addplot [] table [
             only marks,
             x=energy,
@@ -108,7 +108,7 @@
             discard if symbol not={iop}{512k-w},
             discard if symbol not={order}{rnd},
             col sep=space
-        ] {charts/tradeoff-baseline.dat};
+        ] {data/tradeoff-baseline.dat};
         \addplot [] table [
             only marks,
             x=energy,
@@ -116,7 +116,7 @@
             discard if symbol not={iop}{5m-w},
             discard if symbol not={order}{rnd},
             col sep=space
-        ] {charts/tradeoff-baseline.dat};
+        ] {data/tradeoff-baseline.dat};
         \addplot [] table [
             only marks,
             x=energy,
@@ -124,11 +124,11 @@
             discard if symbol not={iop}{40m-w},
             discard if symbol not={order}{rnd},
             col sep=space
-        ] {charts/tradeoff-baseline.dat};
+        ] {data/tradeoff-baseline.dat};
         \addplot [sharp plot, mark=none, red] table [
             x=energy,
             y={create col/linear regression={y=latency}},
             col sep=space
-        ] {charts/tradeoff-baseline.dat};
+        ] {data/tradeoff-baseline.dat};
     \end{axis}%
 \end{tikzpicture}%

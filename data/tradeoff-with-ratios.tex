@@ -92,7 +92,7 @@
                 discard if number not={ratio}{0},
                 discard if symbol not={order}{seq},
                 col sep=space,
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -100,7 +100,7 @@
                 discard if number not={ratio}{1},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -108,7 +108,7 @@
                 discard if number not={ratio}{2},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -116,7 +116,7 @@
                 discard if number not={ratio}{3},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
         \nextgroupplot[legend to name={throwaway4}, title={Sequential 4K Reads}]
             \addplot [thick, red] table [
                 meta=cipher,
@@ -126,7 +126,7 @@
                 discard if number not={ratio}{0},
                 discard if symbol not={order}{seq},
                 col sep=space,
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -134,7 +134,7 @@
                 discard if number not={ratio}{1},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -142,7 +142,7 @@
                 discard if number not={ratio}{2},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -150,7 +150,7 @@
                 discard if number not={ratio}{3},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
         \nextgroupplot[legend to name={throwaway5}, title={Sequential 40M Writes}]
             \addplot [thick, red] table [
                 meta=cipher,
@@ -160,7 +160,7 @@
                 discard if number not={ratio}{0},
                 discard if symbol not={order}{seq},
                 col sep=space,
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -168,7 +168,7 @@
                 discard if number not={ratio}{1},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -176,7 +176,7 @@
                 discard if number not={ratio}{2},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -184,7 +184,7 @@
                 discard if number not={ratio}{3},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
         \nextgroupplot[legend to name={throwaway6}, title={Sequential 4K Writes}]
             \addplot [thick, red] table [
                 meta=cipher,
@@ -194,7 +194,7 @@
                 discard if number not={ratio}{0},
                 discard if symbol not={order}{seq},
                 col sep=space,
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -202,7 +202,7 @@
                 discard if number not={ratio}{1},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -210,7 +210,7 @@
                 discard if number not={ratio}{2},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -218,6 +218,6 @@
                 discard if number not={ratio}{3},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-ratios.dat};
+            ] {data/tradeoff-ratios.dat};
     \end{groupplot}
 \end{tikzpicture}%

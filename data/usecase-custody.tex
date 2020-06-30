@@ -86,25 +86,25 @@
                 y=score,
                 discard if number not={line}{1},
                 col sep=space
-            ] {charts/usecase-custody.dat};
+            ] {data/usecase-custody.dat};
             \addplot [thick, red, forget plot] table [
                 x=time,
                 y=score,
                 discard if number not={line}{3},
                 col sep=space
-                ] {charts/usecase-custody.dat};
+                ] {data/usecase-custody.dat};
             \addplot [thick, densely dotted, blue] table [
                 x=time,
                 y=score,
                 discard if number not={line}{2},
                 col sep=space
-                ] {charts/usecase-custody.dat};
+                ] {data/usecase-custody.dat};
             \addplot [thick, dashed, blue] table [
                 x=time,
                 y=score,
                 discard if number not={line}{4},
                 col sep=space,
-                ] {charts/usecase-custody.dat};
+                ] {data/usecase-custody.dat};
             \coordinate (c1) at (0.375, 3.5);
             \coordinate (c2) at (0.415, 3.5);
             \draw [dotted, black] (0.2945, 0) -- (0.2945, 4) node [left of=c1] {\tiny (panic; ISE)};
@@ -124,7 +124,7 @@
                 discard if symbol not={iop}{40m-r},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {charts/tradeoff-baseline.dat};
+            ] {data/tradeoff-baseline.dat};
             \coordinate (c3) at (0.27, 1.75);
             \coordinate (c4) at (0.755, 0.5);
             \draw [dotted] (0.035, 0) -- (0.035, 4) node [above of=c3] {\tiny (pre-panic latency ceiling)};
