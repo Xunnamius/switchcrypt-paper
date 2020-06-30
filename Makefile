@@ -5,7 +5,7 @@ GHOSTSCRIPT=\gs
 TEX-FILES = *.tex
 BIB-FILES = *.bib
 TOP-LEVEL-ROOT = _paper
-CRNAME = dickens-dnschk
+CRNAME = dickens-switchcrypt
 
 all: generate-pdf save-temporary $(CRNAME)
 
@@ -26,8 +26,10 @@ save-temporary: generate-pdf
 	if test -e *.out; then mv *.out out; fi
 	if test -e *.log; then mv *.log out; fi
 	if test -e *.xml; then mv *.xml out; fi
-	if test -e *.cut; then mv *.cut out; fi
 	if test -e *.fls; then mv *.fls out; fi
+	if test -e *.toc; then mv *.toc out; fi
+	if test -e *.lot; then mv *.lot out; fi
+	if test -e *.lof; then mv *.lof out; fi
 	if test -e *.fdb*; then mv *.fdb* out; fi
 	if test -e *.auxlock; then mv *.auxlock out; fi
 	if test -e *blx.bib; then mv *blx.bib out; fi
@@ -38,7 +40,7 @@ $(CRNAME): $(TOP-LEVEL-ROOT).pdf
 	$(GHOSTSCRIPT) -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -dEmbedAllFonts=true -sOutputFile=$(CRNAME).pdf -f $(TOP-LEVEL-ROOT).pdf
 
 clean:
-	rm -f *.bbl *.blg *-blx.bib
-	rm -f *.pdf *.aux* *.log *.out *.xml *.fls *.fdb* *.gz *.cut
-	rm -rf out _minted*
+	rm -rf *.gz *.aux *.blg *.bbl *.out *.log *.xml *.fls *.toc *.lot *.lof *.fdb* *.auxlock *blx.bib out/_minted* _minted* out
 	mkdir out
+	touch out/.gitkeep
+
