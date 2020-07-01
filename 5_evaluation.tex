@@ -1,4 +1,4 @@
-\section{Evaluation}\label{sec:evaluation}
+\section{Evaluation} \label{sec:evaluation}
 
 \subsection{Experimental Setup}
 
@@ -55,7 +55,7 @@ In this section we answer the following questions:
  versus prior work? (\cref{subsec:4})
 \end{enumerate}
 
-\subsection{Switching Strategies Under Various Workloads}\label{subsec:1}
+\subsection{Switching Strategies Under Various Workloads} \label{subsec:1}
 
 \begin{figure}[ht]
   \textbf{Baseline Cipher I/O Performance}\par\medskip
@@ -89,7 +89,7 @@ our timing setup when capturing extremely fast events occurring close together
 in time. This is why ChaCha8 sometimes appears with higher latency than
 ChaCha20 for normalized 4KB workloads. ChaCha8 is not slower than ChaCha20.
 
-\subsection{Reaching Between Static Configuration Points}\label{subsec:2}
+\subsection{Reaching Between Static Configuration Points} \label{subsec:2}
 
 \begin{figure}[ht]
   \textbf{Forward Switching I/O Ratio Performance}\par\medskip
@@ -163,7 +163,7 @@ Selective preferable to Mirrored; however, Selective can never converge the
 backing store to a single cipher configuration or survive the loss of an entire
 region (see: \secref{usecases}).
 
-\subsection{Cipher Switching Overhead}\label{subsec:3}
+\subsection{Cipher Switching Overhead} \label{subsec:3}
 
 From the results of the previous three experiments, we calculate that Forward
 switching has average overhead at 0.08x/0.10x for 40MB, 5MB and 512KB read/write
@@ -189,7 +189,7 @@ SwitchCrypt. We believe SwitchCrypt's design keeps these overheads acceptably
 low in practice (see \secref{usecases}), achieving the desired goal of flexibly
 navigating latency/security tradeoffs for FDE.
 
-\subsection{Revisiting Our Threat Model}\label{subsec:4}
+\subsection{Revisiting Our Threat Model} \label{subsec:4}
 
 The incorporation of cipher switching requires considering each attack in the
 context of each strategy and novel attacks on mixed-cipher nugget states.
@@ -200,7 +200,7 @@ of the final attack, we stress that even the least scored cipher is still
 considered secure (\secref{design}).
 
 \begin{table}[t]
-  \caption{Attacks on SwitchCrypt and their results}\label{tbl:security}
+  \caption{Attacks on SwitchCrypt and their results} \label{tbl:security}
   \footnotesize
   \centering
   \begin{tabu} to \linewidth { | X[l] | X[c] | X[c] | }

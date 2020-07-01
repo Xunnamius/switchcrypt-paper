@@ -1,4 +1,4 @@
-\section{SwitchCrypt Case Studies}\label{sec:usecases}
+\section{SwitchCrypt Case Studies} \label{sec:usecases}
 
 In this section, we provide four case studies and empirical results
 demonstrating the practical utility of cipher switching. We cover a wide range
@@ -9,7 +9,7 @@ within an energy budget (\cref{subsec:uc1}). We also demonstrate the utility of
 both temporal and spatial switching strategies, exploring the range of
 conditions under which certain strategies are optimal.
 
-\subsection{Balancing Security Goals with a Constrained Energy Budget}\label{subsec:uc1}
+\subsection{Balancing Security Goals with a Constrained Energy Budget} \label{subsec:uc1}
 
 This usecase illustrates that, because latency and energy use are correlated
 among the ciphers we examined, we can exploit that property using temporal
@@ -59,7 +59,7 @@ learned is that SwitchCrypt enables the system to move to the right point in the
 energy/security tradeoff space that the current task can still be accomplished
 before the battery is drained.
 
-\subsection{Variable Security Regions}\label{subsec:uc2}
+\subsection{Variable Security Regions} \label{subsec:uc2}
 
 This usecase illustrates utility of spatial Selective switching to achieve a
 performance win over prior work, where the entire drive is encrypted with a
@@ -106,7 +106,7 @@ I/O operations. Using SwitchCrypt Selective switching versus prior work results
 in a reduction of 3.1x to 4.8x for read latency and 1.6x to 2.8x for write
 latency, all without compromising the security needs of the most sensitive data.
 
-\subsection{Responding to End-of-Life Slowdown in SSDs}\label{subsec:uc3}
+\subsection{Responding to End-of-Life Slowdown in SSDs} \label{subsec:uc3}
 
 This usecase illustrates using temporal Forward switching to offset the
 debilitating decline in performance when SSDs reach end-of-life
@@ -142,7 +142,7 @@ Our goal is to remain under the latency ceiling while remaining above the
 security floor. Thanks to Forward switching, accesses to highly trafficked areas
 of the drive can remain performant even during drive end-of-life.
 
-\subsection{Custody Panic: Device Data Under Duress}\label{subsec:uc4}
+\subsection{Custody Panic: Device Data Under Duress} \label{subsec:uc4}
 
 This usecase illustrates the utility of spatial Mirrored switching to take
 advantage of more energy-efficient high-performance ciphers while retaining the

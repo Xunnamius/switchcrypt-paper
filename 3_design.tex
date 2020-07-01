@@ -2,22 +2,22 @@
 
 \subsection{SwitchCrypt Overview} \label{subsec:overview}
 
-\begin{figure}[t]
+\begin{figure}[ht]
    \centering
-   \includegraphics[width=\linewidth]{backstore.png}
-   \caption{Layout of SwitchCrypt's drive layout.}\label{fig:backstore}
+   \includegraphics[width=\linewidth]{overview.png}
+   \caption{Overview of the SwitchCrypt construction.} \label{fig:overview}
 \end{figure}
 
 SwitchCrypt consists of a \emph{Generic Stream Cipher Interface} and
 \emph{Cryptographic Driver}; SwitchCrypt sits between a Log-structured File
-System (LFS) on the OS and the underlying drive (backing storage) and device
+System (LFS) on the OS, and the underlying drive (backing storage) and device
 controller (e.g. Flash Translation Layer). This is illustrated in
 \figref{overview}, which provides an overview of the SwitchCrypt system design.
 
-\begin{figure}[ht]
+\begin{figure}[t]
    \centering
-   \includegraphics[width=\linewidth]{overview.png}
-   \caption{Overview of the SwitchCrypt construction.}\label{fig:overview}
+   \includegraphics[width=\linewidth]{backstore.png}
+   \caption{Layout of SwitchCrypt's drive layout.} \label{fig:backstore}
 \end{figure}
 
 The drive itself is divided into a \emph{HEAD} section and \emph{BODY} section
@@ -39,29 +39,26 @@ overwrites, 2) limit the maximum length of any plaintext input to ciphers, thus
 amortizing the overhead incurred during encryption, and 3) independently and
 efficiently switch the cipher used to encrypt individual nuggets.
 
-\hank{This paragraph needs to be reworded (again for lazy reviewers).
-  As written it would be too easy to get confused and think that
-  Strongbox already solved the hard problems (really it is the first
-  sentence that is the major cause of this issue).  Some subtle
-  rephrasing can help draw a clear line between Strongbox and
-  switchcrypt.  Something like ``Dickens et al. showed how to make
-  this drive organization secure using a single stream cipher
-  including (then list the things you are inheriting from that paper).
-  However, they did not envision dynamically switching ciphers, so in
-  the remainder of this section we show how to transform this prior
-  approach by....''  Then I think you can insert something like that
-  into this paragraph, keeping the bulk of the text, but subtly
-  changing the way people percieve it.) } See Dickens et
-al.~\cite{StrongBox} for further discussion on handling overwrites,
-preventing rollback attacks, and limiting plaintext length using the
-nugget layout and aforesaid components. In the remainder of this
-section, we detail the primary components of the SwitchCrypt design:
-how we quantify the properties traded off between configurations
-(\cref{subsec:quantify}), the Generic Stream Cipher Interface and
-Per-Nugget Metadata components (\cref{subsec:interface}) which
-decouple cipher implementations from the encryption process, and our
-Cipher Switching Strategy implementations (\cref{subsec:strategies})
-used to efficiently encrypt nuggets with different ciphers.
+\hank{This paragraph needs to be reworded (again for lazy reviewers). As written
+  it would be too easy to get confused and think that Strongbox already solved
+  the hard problems (really it is the first sentence that is the major cause of
+  this issue).  Some subtle rephrasing can help draw a clear line between
+  Strongbox and switchcrypt.  Something like ``Dickens et al. showed how to make
+  this drive organization secure using a single stream cipher including (then
+  list the things you are inheriting from that paper). However, they did not
+  envision dynamically switching ciphers, so in the remainder of this section we
+  show how to transform this prior approach by....''  Then I think you can
+  insert something like that into this paragraph, keeping the bulk of the text,
+  but subtly changing the way people percieve it.) } See Dickens et
+  al.~\cite{StrongBox} for further discussion on handling overwrites, preventing
+  rollback attacks, and limiting plaintext length using the nugget layout and
+  aforesaid components. In the remainder of this section, we detail the primary
+  components of the SwitchCrypt design: how we quantify the properties traded
+  off between configurations (\cref{subsec:quantify}), the Generic Stream Cipher
+  Interface and Per-Nugget Metadata components (\cref{subsec:interface}) which
+  decouple cipher implementations from the encryption process, and our Cipher
+  Switching Strategy implementations (\cref{subsec:strategies}) used to
+  efficiently encrypt nuggets with different ciphers.
 
 \subsection{Quantifying Cipher Security Properties} \label{subsec:quantify}
 
@@ -76,8 +73,8 @@ round count, ciphertext randomization, and ciphertext expansion.
 \begin{table}[ht]
    \begin{tabular}{@{}lllll@{}}
    \toprule
-   \textbf{Cipher} & \textbf{RR} & \textbf{CR} & \textbf{CE} \\ \midrule
-   ChaCha8         & 0           & 0           & 1           \\
+   \textbf{Cipher} & \textbf{RR} & \textbf{CR} & \textbf{CE} \\ \midrule ChaCha8
+   & 0           & 0           & 1           \\
    ChaCha12        & 0.5         & 0           & 1           \\
    ChaCha20        & 1           & 0           & 1           \\
    Salsa8          & 0           & 0           & 1           \\
@@ -149,8 +146,8 @@ The interface is accessible at three levels:
    accomplished with a simple XOR. This interface level has the lowest
    implementation overhead and least flexibility.
 
-   \item \textbf{\texttt{crypt\_data\_low}}\\\texttt{crypt\_data\_low}
-   is identical to \texttt{crypt\_data} but provides a slightly lower level of
+   \item \textbf{\texttt{crypt\_data\_low}}\\\texttt{crypt\_data\_low} is
+   identical to \texttt{crypt\_data} but provides a slightly lower level of
    abstraction when accessing the backing store, giving implementations more
    control over the XORing process. This is useful for less flexible ciphers but
    comes at the cost of increased implementation overhead.
@@ -232,8 +229,8 @@ selecting $N$ equal to the total number of nuggets managed by SwitchCrypt. This
 would have the overhead of re-ciphering large swaths of the backing store upon
 every I/O operation where a nugget encrypted with the non-active cipher
 configuration is encountered. Of course, this has the same dire implications for
-performance as simply re-initializing the entire system or encrypted
-container with the new cipher.}
+performance as simply re-initializing the entire system or encrypted container
+with the new cipher.}
 
 \textbf{Selective Switching Strategy.} When SwitchCrypt is initialized with the
 Selective strategy, the backing store is partitioned into $C$ regions where $C$
@@ -279,8 +276,9 @@ share the same data.
 \begin{table}[ht]
    \begin{tabular}{@{}|c|c|c|C{25mm}|@{}}
       \toprule
-      \textbf{Strategy} & \textbf{Convergence} & \textbf{Waste} & \textbf{Performance} \\ \midrule
-      Forward   & Slow           & Low  & Fast reads and writes unless switching \\
+      \textbf{Strategy} & \textbf{Convergence} & \textbf{Waste} &
+      \textbf{Performance} \\ \midrule Forward   & Slow           & Low  & Fast
+      reads and writes unless switching \\
       \hline
       Mirrored  & Nearly instant & High & Fast reads; slow writes \\
       \hline
@@ -327,9 +325,9 @@ an offset is the only requirement. The Mirrored strategy, on the other hand, can
 be two or more times slower for writes (when $C = 2$) compared to baseline. Each
 additional region ($C > 2$) compounds the write penalty. This is because each
 writes is ``mirrored'' across all regions. As with reads, the Forward strategy
-writes with low overhead except in the case where a nugget was not
-encrypted with the active cipher configuration. This triggers costly
-re-ciphering, which can compound depending on workload.\\
+writes with low overhead except in the case where a nugget was not encrypted
+with the active cipher configuration. This triggers costly re-ciphering, which
+can compound depending on workload.\\
 
 With these tradeoffs in mind: Mirrored is ideal when the backing store must
 converge quickly, write performance is not the primary concern, and drive space

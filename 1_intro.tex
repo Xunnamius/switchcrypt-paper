@@ -1,4 +1,4 @@
-\section{Introduction}\label{sec:introduction}
+\section{Introduction} \label{sec:introduction}
 
 The state of the art for securing data at rest, such as the contents of a
 laptop's SSD, is Full Drive Encryption (FDE). Traditional FDE employs a single
@@ -11,10 +11,10 @@ consumption. On the other, capping total energy consumption requires tolerating
 increased latency or weaker security guarantees.
 
 FDE implementations such as dm-crypt for Linux and BitLocker for Windows balance
-these concerns with respect to some generic ``common case'' workload, but
-this approach often fails to deliver an optimal outcome for specific workloads.
-Google's Android OS is a good example. Android supported FDE with the
-release of Android 3.0, yet it was not enabled by default until Android
+these concerns with respect to some generic ``common case'' workload, but this
+approach often fails to deliver an optimal outcome for specific workloads.
+Google's Android OS is a good example. Android supported FDE with the release of
+Android 3.0, yet it was not enabled by default until Android
 6.0~\cite{android-M-mobile-motivation}. Two years prior, Google attempted to
 roll out FDE by default on Android 5.0 but had to backtrack. In a statement to
 Engadget, Google blamed ``'performance issues on some partner devices' ... for
@@ -33,32 +33,28 @@ improved performance (\ie{overall reduction in FDE overhead}), 2) reduced energy
 use, 3) more useful security guarantees, and 4) the ability to encrypt devices
 that would otherwise be too slow or energy-inefficient to support FDE.
 
-However, the standard cipher choice for FDE is the slow AES
-\emph{block cipher} (AES-XTS)~\cite{XTS, XTSComments, NISTXTS}.
-Dickens et al. introduced a method for using ciphers other than
-AES-XTS for FDE; specifically, the high performance ChaCha20
-\emph{stream cipher}~\cite{StrongBox, ChaCha20}. More recent
-work---such as Google's HBSH (hash, block cipher, stream cipher, hash)
-and Adiantum---brings stream cipher based FDE to devices that do not
-or cannot support hardware accelerated AES~\cite{Adiantum}. Hence, it
-has been demonstrated that using stream ciphers for FDE is both
-desirable in a variety of contexts and feasible at industry scale.
+However, the standard cipher choice for FDE is the slow AES \emph{block cipher}
+(AES-XTS)~\cite{XTS, XTSComments, NISTXTS}. Dickens et al. introduced a method
+for using ciphers other than AES-XTS for FDE; specifically, the high performance
+ChaCha20 \emph{stream cipher}~\cite{StrongBox, ChaCha20}. More recent
+work---such as Google's HBSH (hash, block cipher, stream cipher, hash) and
+Adiantum~\cite{Adiantum}---brings stream cipher based FDE to devices that do not
+or cannot support hardware accelerated AES. Hence, it has been demonstrated that
+using stream ciphers for FDE is both desirable in a variety of contexts and
+feasible at industry scale.
 
-In this paper, we explore the rich configuration space of stream
-ciphers beyond the narrow scope of previous work. Each cipher comes
-with a variety of performance, energy efficiency, and security
-properties in the FDE context.  These ciphers include ChaCha variants
-with different round counts (e.g., ChaCha8 and ChaCha12), ciphers with
-stronger security guarantees versus more robust adversaries (e.g.,
-Freestyle), and other ciphers like SalsaX, AES in counter mode
-(AES-CTR), Rabbit, Sosemanuk, etc~\cite{Freestyle, SalsaX, Rabbit,
-  Sosemanuk, ChaCha20, AESCTR}. \hank{REorder this so that the
-  citations for each cipher appear right after the name of that cipher
-  in the sentence.} Given this variety, the cipher configuration
-providing the least latency overhead is almost always different than
-the configuration providing the most desirable security properties,
-and both may differ from the configuration using the least energy or
-preserving the most free space on the encrypted drive.
+In this paper, we explore the rich configuration space of stream ciphers beyond
+the narrow scope of previous work. Each cipher comes with a variety of
+performance, energy efficiency, and security properties in the FDE context.
+These ciphers include ChaCha variants with different round counts (e.g.,
+ChaCha8~\cite{} and ChaCha12)~\cite{ChaCha20}, ciphers with stronger security
+guarantees versus more robust adversaries (e.g., Freestyle~\cite{Freestyle}),
+and other ciphers like SalsaX~\cite{SalsaX}, AES in counter mode
+(AES-CTR)~\cite{AESCTR}, Rabbit~\cite{Rabbit}, Sosemanuk~\cite{Sosemanuk}, etc.
+Given this variety, the cipher configuration providing the least latency
+overhead is almost always different than the configuration providing the most
+desirable security properties, and both may differ from the configuration using
+the least energy or preserving the most free space on the encrypted drive.
 
 Further, while cipher choice might be configured statically at compile or boot
 time with respect to some common case in traditional FDE, such configurations
@@ -66,32 +62,31 @@ cannot dynamically adapt to changes that arise while the system is running.
 Examples include changes in resource availability, runtime environment, desired
 security properties, and respecting changing OS energy budgets.
 
-Hence, any static common-case FDE configuration will sacrifice one
-concern for another, even when it is not optimal to do so for a given
-workload. But what if a system could dynamically transition into a
-more desirable configuration given
+Hence, any static common-case FDE configuration will sacrifice one concern for
+another, even when it is not optimal to do so for a given workload. But what if
+a system could dynamically transition into a more desirable configuration given
 runtime changes?\\
 \\
 \textbf{Our Contributions}\\
-To realize the goal of dynamically adjusting storage tradeoffs at
-runtime, we first define a scheme to \emph{quantify} the usefulness of
-each cipher based on key security properties relevant to FDE in
-context. Using this scheme, we define a tradeoff space of cipher
-configurations over competing concerns: total energy use, desirable
-security properties, read and write performance (latency), total
-writable space on the drive, and how quickly the contents of the drive
-can converge to a single encryption configuration. We then introduce a
-novel design substantively expanding prior FDE work by wholly
-\emph{decoupling} cipher implementations from the encryption process.
-Finally, we develop the idea of cipher switching using \emph{switching
-  strategies} to ``re-cipher'' storage units dynamically, allowing us
-to tradeoff different performance and security properties of various
-configurations at runtime. \hank{I would like to see these three
-  contributions in a bulleted list so that even lazy reviewers will
-  not be confused about how many contributions we claim, nor precisely
-  what they are.}
+To realize the goal of dynamically adjusting storage tradeoffs at runtime, we:
 
-Unifying these contributions, we present SwitchCrypt, a software system that
+\begin{itemize}
+  \item Define a scheme to \emph{quantify} the usefulness of each cipher based
+  on key security properties relevant to FDE in context. Using this scheme, we
+  define a tradeoff space of cipher configurations over competing concerns:
+  total energy use, desirable security properties, read and write performance
+  (latency), total writable space on the drive, and how quickly the contents of
+  the drive can converge to a single encryption configuration.
+
+  \item Introduce a novel design substantively expanding prior FDE work by
+  wholly \emph{decoupling} cipher implementations from the encryption process.
+
+  \item Develop the idea of cipher switching using \emph{switching strategies}
+  to ``re-cipher'' storage units dynamically, allowing us to tradeoff different
+  performance and security properties of various configurations at runtime.
+\end{itemize}
+
+Unifying these contributions, we present SwitchCrypt: a software system that
 navigates the tradeoff space made by balancing competing security and latency
 requirements via cipher switching in space and time. We implement SwitchCrypt
 and three switching strategies---\emph{Forward}, \emph{Selective}, and
