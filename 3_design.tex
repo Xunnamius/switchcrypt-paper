@@ -39,34 +39,34 @@ overwrites, 2) limit the maximum length of any plaintext input to ciphers, thus
 amortizing the overhead incurred during encryption, and 3) independently and
 efficiently switch the cipher used to encrypt individual nuggets.
 
-Dickens et al. showed how to make this drive organization secure using a single
-stream cipher, ChaCha20, while handling overwrites, preventing rollback attacks,
-and limiting plaintext length~\cite{StrongBox}. However, they did not envision
-dynamically cipher switching or the utility in trading off between concerns at
-the filesystem or device-mapper level; in the remainder of this section, we
-detail the primary components that enable this functionality. Specifically: how
-we quantify the properties traded off between configurations
-(\cref{subsec:quantify}), the Generic Stream Cipher Interface and Per-Nugget
-Metadata components (\cref{subsec:interface}) which decouple cipher
-implementations from the encryption process, and our Cipher Switching Strategy
-implementations (\cref{subsec:strategies}) used to efficiently encrypt nuggets
-with different ciphers.
+Dickens et al. showed how to make nugget-based drive organization secure using a
+single stream cipher, ChaCha20, to handle overwrites, prevent rollback attacks,
+and limit plaintext length~\cite{StrongBox}. However, they did not envision the
+utility in trading off between concerns at the filesystem or device-mapper
+level, dynamic cipher switching, or protecting against attacks on data ``in
+motion''; the remainder of this section details the novel components that enable
+this functionality. Specifically: how we quantify the properties traded off
+between configurations (\cref{subsec:quantify}), the Generic Stream Cipher
+Interface and Per-Nugget Metadata components (\cref{subsec:interface}) which
+decouple cipher implementations from the encryption process, and our Cipher
+Switching Strategy implementations (\cref{subsec:strategies}) used to
+efficiently encrypt nuggets with different ciphers.
 
 \subsection{Quantifying Cipher Security Properties} \label{subsec:quantify}
 
 To reason about when to trade off between the ciphers evaluated in this work, we
-must have a way to quantitatively compare ciphers' utility for SwitchCrypt FDE.
-However, different ciphers have a wide range of security properties, performance
-profiles, and output characteristics. To address this need, we propose the
-following framework for evaluating ciphers for SwitchCrypt FDE (see:
-\tblref{security-quant}). Our framework is composed of three features: relative
-round count, ciphertext randomization, and ciphertext expansion.
+must have a way to quantitatively compare ciphers' utility in the context of
+SwitchCrypt FDE. However, different ciphers have a wide range of security
+properties, performance profiles, and output characteristics. To address this
+need, we propose a novel evaluation framework (see: \tblref{security-quant}).
+Our framework classifies stream ciphers according to three key features:
+relative round count, ciphertext randomization, and ciphertext expansion.
 
 \begin{table}[ht]
-   \begin{tabular}{@{}lllll@{}}
+   \begin{tabular}{@{}ccccc@{}}
    \toprule
-   \textbf{Cipher} & \textbf{RR} & \textbf{CR} & \textbf{CE} \\ \midrule ChaCha8
-   & 0           & 0           & 1           \\
+   \textbf{Cipher} & \textbf{Rounds} & \textbf{Randomization} & \textbf{Expansion} \\ \midrule
+   ChaCha8         & 0           & 0           & 1           \\
    ChaCha12        & 0.5         & 0           & 1           \\
    ChaCha20        & 1           & 0           & 1           \\
    Salsa8          & 0           & 0           & 1           \\
@@ -82,35 +82,63 @@ round count, ciphertext randomization, and ciphertext expansion.
    \label{tbl:security-quant}
  \end{table}
 
-\subsubsection{Relative Rounds (RR)}
+\subsubsection{Relative Rounds (Rounds)}
 
 The ciphers we examine in this paper are all constructed around the notion of
-\emph{rounds}, where a higher number of rounds or longer key is positively
-correlated with a higher resistance to brute force given no fatal related-key
-attacks. This feature represents how many rounds the cipher executes compared to
-the accepted ``standard'' round count for that cipher. For instance: ChaCha8 is
-a reduced round version of the standard ChaCha20, both using 256-bit keys.
+\emph{rounds}, where a higher number of rounds (and possibly longer key) is
+positively correlated with a higher resistance to brute force given no fatal
+related-key or other attacks~\cite{ChaCha-Cryptanalysis}. Hence, this feature
+represents how many rounds a cipher executes relative to other implementations
+of the same algorithm. For instance: ChaCha8 is a reduced round version of
+ChaCha12, which is a reduced round version of ChaCha20, all using the ChaCha
+algorithm~\cite{ChaCha20,ChaCha-Cryptanalysis}.
 
-\TODO{Include the following? Work it in: a cipher with standard resistance to
-brute force and offline/dictionary attacks has no kind of \emph{key-guessing
-penalty}~\cite{Freestyle}---the ciphertext is decrypted no slower when given the
-incorrect key versus the correct key.}
+We limit our analysis to groups of three implementations, each using a different
+number of rounds. In the case of HC-128 and HC-256, we limit our analysis to a
+group of two implementations. Scores range from 0 (least number of rounds
+considered) to 1 (greatest number of rounds considered).
 
-\subsubsection{Ciphertext Randomization (CR)}
+\subsubsection{Ciphertext Randomization (Randomization)}
 
-A cipher with output randomization generates different ciphertexts
-non-\\deterministically given the same key, nonce, and message. This makes
-chosen-ciphertext (CCA) and other attacks where the ciphertext is in full
-control of the adversary much more difficult~\cite{Freestyle}.
+A cipher with ciphertext randomization generates different ciphertexts
+non-deterministically given the same key, nonce, and plaintext. This makes it
+much more difficult to execute chosen-ciphertext attacks (CCA), key
+re-installation attacks, XOR-based cryptanalysis and other comparison attacks,
+and other confidentiality-violating schemes where the ciphertext is in full
+control of the adversary ~\cite{Freestyle}. This property is useful in cases
+where we cannot ensure that the same key, nonce, and plaintext will never be
+reused, such as with data ``in motion'' (see the motivational example in
+\secref{motivation}). Ciphers without this property---such as ChaCha20 on which
+prior work is based---are trivially broken when key-nonce-plaintext 3-tuples are
+reused. In StrongBox, this is referred to as an ``overwrite condition'' or
+simply ``overwrite''~\cite{StrongBox}.
 
-This is a binary feature in that a cipher either outputs deterministically given
-the same input or it does not. A cipher with non-deterministic output given the
-same key, nonce, and message as inputs scores a 1 for this feature while a
-cipher with deterministic output given the same input scores a 0.
+Though there are many ways to achieve ciphertext randomization, the ciphers
+included in our analysis implement it using a random number of rounds for each
+block of the message where the exact number of rounds are unknown to the
+receiver a priori~\cite{Freestyle}. In determining the minimum and maximum
+number of rounds used per block in this non-deterministic mode of operation, we
+can customize the computational burden an attacker must bear by choosing lower
+or higher minimums and maximums. Hence, this is not a binary feature; scores
+range from 0 (no ciphertext randomization) to 1 (lowest minimum and maximum
+rounds per block) to 3 (highest minimum and maximum rounds per block).
 
-\subsubsection{Ciphertext Expansion (CE)}
+\subsubsection{Ciphertext Expansion (Expansion)}
 
-It's binary. Words.
+A cipher that exhibits ciphertext expansion is non-length-preserving: it outputs
+more or less ciphertext than was originally input as plaintext. This can cause
+major problems in the FDE context. For instance, cryptosystems that rely on
+AES-XTS or ChaCha (e.g. StrongBox, Google's Adiantum, Linux's dm-crypt,
+Microsoft's BitLocker, Apple's FileVault, et cetera) have storage layouts that
+hold length-preserving output as an invariant, making ciphers that do not
+exhibit this property incompatible with their implementations; yet, ciphertext
+expansion is often (but not always) a necessary side-effect of ciphertext
+randomization.
+
+This is a binary feature in that a cipher either outputs ciphertext of the same
+length as its plaintext input or it does not. A cipher scores either a 0 if it
+\emph{is not} length-preserving in this way or a 1 if the ciphertext is always
+the same length as the plaintext.
 
 \subsection{Generic Stream Cipher Interface} \label{subsec:interface}
 

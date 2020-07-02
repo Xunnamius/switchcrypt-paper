@@ -52,7 +52,7 @@ three different configurations: a ``fast'' mode with parameters
 $R_{max}$=$28$, $H_I$=$2$, $I_C$=$10$)}, and a ``secure'' mode with parameters
 \texttt{FreestyleSecure($R_{min}$=$20$, $R_{max}$=$36$, $H_I$=$1$, $I_C$=$12$)}.
 
-Thanks to Freestyle's output randomization (see \secref{design}), we can skip
+Thanks to Freestyle's ciphertext randomization (see \secref{design}), we can skip
 the overhead of tracking, detecting, and handling overwrites when nuggets are
 using it, offsetting the 1.6x to 3.2x performance loss of using Freestyle versus
 ChaCha20~\cite{Freestyle}.
