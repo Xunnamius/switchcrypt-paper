@@ -55,17 +55,21 @@ efficiently encrypt nuggets with different ciphers.
 \subsection{Quantifying Cipher Security Properties} \label{subsec:quantify}
 
 To reason about when to trade off between the ciphers evaluated in this work, we
-must have a way to quantitatively compare ciphers' utility in the context of
-SwitchCrypt FDE. However, different ciphers have a wide range of security
-properties, performance profiles, and output characteristics. To address this
-need, we propose a novel evaluation framework (see: \tblref{security-quant}).
-Our framework classifies stream ciphers according to three key features:
-relative round count, ciphertext randomization, and ciphertext expansion.
+must have a way to compare ciphers' utility in the context of SwitchCrypt FDE.
+However, different ciphers have a wide range of security properties, performance
+profiles, and output characteristics. To address this need, we propose a novel
+evaluation framework (see: \tblref{security-quant}). Our framework classifies
+stream ciphers according to three quantitative features: relative round count,
+ciphertext randomization, and ciphertext expansion. Taken together, these
+features reveal a rich tradeoff space of cipher configurations optimizing for
+different combinations of concerns.
 
 \begin{table}[ht]
    \begin{tabular}{@{}ccccc@{}}
    \toprule
-   \textbf{Cipher} & \textbf{Rounds} & \textbf{Randomization} & \textbf{Expansion} \\ \midrule
+   \textbf{Cipher} & \textbf{Rounds} & \textbf{Randomization} &
+   \textbf{Expansion} \\
+   \midrule
    ChaCha8         & 0           & 0           & 1           \\
    ChaCha12        & 0.5         & 0           & 1           \\
    ChaCha20        & 1           & 0           & 1           \\
@@ -129,11 +133,10 @@ A cipher that exhibits ciphertext expansion is non-length-preserving: it outputs
 more or less ciphertext than was originally input as plaintext. This can cause
 major problems in the FDE context. For instance, cryptosystems that rely on
 AES-XTS or ChaCha (e.g. StrongBox, Google's Adiantum, Linux's dm-crypt,
-Microsoft's BitLocker, Apple's FileVault, et cetera) have storage layouts that
-hold length-preserving output as an invariant, making ciphers that do not
-exhibit this property incompatible with their implementations; yet, ciphertext
-expansion is often (but not always) a necessary side-effect of ciphertext
-randomization.
+Microsoft's BitLocker, Apple's FileVault) have storage layouts that hold
+length-preserving output as an invariant, making ciphers that do not exhibit
+this property incompatible with their implementations; yet, ciphertext expansion
+is often (but not always) a necessary side-effect of ciphertext randomization.
 
 This is a binary feature in that a cipher either outputs ciphertext of the same
 length as its plaintext input or it does not. A cipher scores either a 0 if it
@@ -142,154 +145,189 @@ the same length as the plaintext.
 
 \subsection{Generic Stream Cipher Interface} \label{subsec:interface}
 
-There are \emph{many} ciphers we might use with SwitchCrypt, each with various
-input requirements and output considerations. A key difference with prior work
-is that SwitchCrypt must be able to encrypt and decrypt arbitrary nuggets
-without worrying about a cipher's implementation details; prior approaches could
-have cipher-specific implementations because they did not consider switching.
-Thus, the cipher-specific details must be handled with care or security is
-violated. With our novel cipher interface, we present an interface that
-\emph{decouples} cipher implementations from the encryption/decryption process.
-This allows any cipher to be integrated into SwitchCrypt without modification or
-special considerations. Hence, different stream ciphers become interchangeable
-when they would normally be incompatible, preventing us from trading them off
-one another.
+There are many ciphers we might use with SwitchCrypt, each with various input
+requirements and output considerations. Unlike prior work, SwitchCrypt must be
+able to encrypt and decrypt arbitrary nuggets with arbitrary ciphers at any
+moment with low overhead without worrying about cipher-specific implementation
+details like required inputs (which vary drastically between cipher
+implementations), length of plaintext and potential ciphertext expansion,
+potential cipher-specific metadata storage, and other special conditions.
 
-The interface is accessible at three levels:
+Hence, there is a need for an interface that decouples cipher implementations
+from the encryption/decryption process entirely. Our novel cipher interface
+allows any stream cipher to be integrated into SwitchCrypt without modifications
+to third-party code, enabling normally incompatible ciphers to encrypt and
+decrypt arbitrary nuggets. The ability for disparate cipher implementations to
+co-exist forms the foundation for SwitchCrypt's ability to move the system
+between different configuration points in our tradeoff space efficiently and
+effectively.
+
+SwitchCrypt receives I/O requests from the operating system at the block device
+level like any other device-mapper. These requests come in the form of either
+reads or writes. When a read request is received, the OS hands SwitchCrypt an
+offset and a length and expects a response with plaintext of that specific
+length starting at that specific offset taken from the beginning of storage
+(i.e. the BODY section; see \figref{backstore}). When a write request is
+received, the OS hands SwitchCrypt an offset, a length, and a buffer of
+plaintext and expects that plaintext to be encrypted and committed to storage
+such that the plaintext is later retrievable given that same offset and length
+in a future read request.
+
+The Generic Stream Cipher Interface presents the cryptographic driver with a
+single unified encryption/decryption model, laying the groundwork for
+\emph{cipher switching}. The interface consists of two mutually exclusive
+function declarations---only one can exist per wrapper implementation. These
+declarations are defined by lightweight wrapper code that is expected to call
+out to some stream cipher implementation to handle plaintext encryption and
+ciphertext decryption; once defined, these functions are invoked by SwitchCrypt
+to handle I/O requests. Choosing to define one declaration over another depends
+on a cipher implementation's input requirements and output characteristics.
 
 \begin{enumerate}
-   \item \textbf{\texttt{crypt\_data}}\\\texttt{crypt\_data} operates at a
-   fine-grain level independent of SwitchCrypt's internals. Implementations
-   receive an index and offset and are expected to return some number of bytes,
-   \ie{a keystream}, which is XORed with nugget contents. At this level, there
-   is no distinction made between encryption and decryption since both are
-   accomplished with a simple XOR. This interface level has the lowest
-   implementation overhead and least flexibility.
+   \item \textbf{\texttt{xor\_interface}}\\\texttt{xor\_interface} executes
+   independently of SwitchCrypt internals and is the simplest interface to
+   implement. At this level of abstraction, encryption and decryption are
+   treated as the same operation accomplished with a simple XOR. Implementations
+   receive an integer offset $F$, an integer length $L$, a key buffer $K$
+   corresponding to the current nugget, and an empty $L$-length XOR buffer.
+   SwitchCrypt expects the XOR buffer to be populated with $L$ bytes of
+   keystream output from some stream cipher seeked to offset $F$ with respect to
+   key $K$. The length of the key buffer will always be exactly what the cipher
+   implementation expects, alleviating the burden of key management by
+   implementers; similarly, the XOR buffer will be XOR-ed with the appropriate
+   portion of nugget contents automatically, alleviating the burden of drive
+   access and other tedious calculations by implementers.
 
-   \item \textbf{\texttt{crypt\_data\_low}}\\\texttt{crypt\_data\_low} is
-   identical to \texttt{crypt\_data} but provides a slightly lower level of
-   abstraction when accessing the backing store, giving implementations more
-   control over the XORing process. This is useful for less flexible ciphers but
-   comes at the cost of increased implementation overhead.
+   This interface has the lowest implementation overhead and least flexibility
+   when it comes to expected inputs and outputs but cannot be used with
+   ciphertext expanding ciphers or ciphers that must distinguish between
+   decryption and encryption. \\
+   \item \textbf{\texttt{read\_interface}} and
+   \textbf{\texttt{write\_interface}}\\
+   Unlike \texttt{xor\_interface}, encryption and decryption are distinct
+   concerns at this abstraction level. \\\texttt{read\_interface} handles
+   decryption during reads. \\\texttt{write\_interface} handles encryption
+   during writes. Implementations receive full access to SwitchCrypt internals
+   and can be considered ``closer to the metal'' with fewer features abstracted
+   away. This gives wrapper code complete control over the encryption and
+   decryption process, allowing implementers to bypass parts of the nugget-based
+   drive layout abstraction (i.e. BODY) if necessary. This comes at the cost of
+   1) significantly increased code complexity, as the implementer must perform
+   all I/O manually, distinguish between independent nuggets on the drive,
+   determine what to encrypt or decrypt at what offset and when, when to commit
+   which metadata and where and 2) potentially reduced performance, since
+   SwitchCrypt must account for not having absolute control over its internal
+   data structures during function invocation.
 
-   \item \textbf{\texttt{read\_data}} and \textbf{\texttt{write\_data}}\\
-   These operate at a coarse-grain level tightly integrated with SwitchCrypt
-   internals. Implementations are expected to handle all stages of cipher
-   switching manually. Unlike the other two levels, encryption and decryption
-   are distinct concerns. \texttt{read\_data} handles decryption during reads.
-   \texttt{write\_data} handles encryption during writes. In exchange for
-   maximum flexibility, there is significant implementation overhead with this
-   approach.
+   Implementers must also account for cipher switches that might occur at any
+   moment after or \emph{before} the function is executed by ensuring they do
+   not read in any data from the drive if a perfectly aligned nugget-sized I/O
+   operation is requested. This is because at the point of execution the
+   underlying drive data might be encrypted with an unexpected cipher.
+
+   This interface is useful for calling out to exotic ciphers like AES-GCM and
+   AES-CTR or AES-XTS and other block ciphers that don't function like stream
+   ciphers. It's also useful when ciphers exhibit ciphertext expansion or are
+   otherwise non-length-preserving or have additional metadata requirements.
 \end{enumerate}
-
-Were we using simple ciphers exclusively, \ie{those that do not differentiate
-between encryption and decryption and always produce output of the same length
-as the input}, we could generate a keystream and XOR it with data without the
-the need for a new a interface. However, some cipher implementations treat
-encryption and decryption as two distinct operations. Others require different
-parameters or special considerations before XORing the keystream with data.
-Others produce extra output that must be stored during encryption and fetched
-during decryption. Others exhibit some combination of these concerns. Our
-interface presents the cryptographic driver with a single unified interface
-where these disparate concerns are abstracted away, laying the groundwork for
-\emph{cipher switching}.
 
 \subsection{Cipher Switching Strategies} \label{subsec:strategies}
 
-The SwitchCrypt design allows many differently-ciphered storage units to
-co-exist on the backing store. However, at any moment, there is a single
-\emph{active cipher} configuration. The active cipher is the only cipher used to
-encrypt nugget contents. When a cipher switch occurs, a different cipher becomes
-the active cipher. At this point, SwitchCrypt must determine \emph{when} to
+The Generic Stream Cipher Interface allows many differently ciphered nuggets to
+co-exist on the same drive. However, at any moment, there is only a single
+\emph{active cipher configuration} (henceforth \emph{active configuration}). The
+active configuration is the only one used to encrypt nugget contents. When the
+OS triggers a cipher switch, a different configuration becomes the active
+configuration. At this point, SwitchCrypt must determine \emph{when} to
 re-cipher a nugget and \emph{where} to store the output on the drive.
-``Re-ciphering'' here means using a non-active cipher to decrypt a nugget's
-contents and using the active cipher to re-encrypt them. Depending on the use
-case, it may make the most sense to re-cipher a nugget immediately, or
-eventually, or to maintain several areas of differently-ciphered nuggets
+``Re-ciphering'' here means using an inactive configuration to decrypt a
+nugget's contents and using the active configuration to re-cipher it. Depending
+on the use case, it may make the most sense to re-cipher a nugget immediately,
+or eventually, or to maintain several areas of differently-ciphered nuggets
 concurrently.
 
-A naive approach would immediately switch every nugget to the desired cipher,
-but the latency and energy cost would be unacceptable. Hence, a more adaptable
-approach is necessary: cipher \emph{switching strategies}. These strategies
-allow re-ciphering nuggets in a variety of cases with minimal impact on
-performance and battery life, without compromising data security.
+A naive approach would switch every nugget in BODY to the active configuration
+immediately, but the latency and energy cost would be unacceptable. Hence, a
+more strategic approach is necessary. We satisfy this need with our \emph{cipher
+switching strategies}. These novel strategies allow for nuggets to be
+re-ciphered in a variety of cases with minimal impact on performance and battery
+life and without compromising security. This is thanks to the nugget-based drive
+layout, which limits the churn of cipher switching operations to relatively
+small regions of ciphertext on the drive.
 
 Determining \emph{when} to target a nugget for re-ciphering we call
 \emph{temporal switching}, for which we propose the \emph{Forward} switching
 strategy. Determining \emph{where}---in which storage region and across which
-nuggets--to output ciphertext we call \emph{spatial switching}, for which we
+nuggets---to output ciphertext we call \emph{spatial switching}, for which we
 propose the \emph{Mirrored} and \emph{Selective} switching strategies.
 
 \textbf{Forward Switching Strategy.} When a nugget is encountered during I/O
-that is encrypted using a cipher other than the active cipher, the Forward
-strategy dictates that this nugget be re-ciphered immediately. If a particular
-nugget encrypted with a non-active cipher configuration is never encountered
-during I/O, it is never re-ciphered and remains on the backing store in its
-original state. In this way, the Forward strategy represents a form of temporal
-cipher switching.
+that was encrypted using something other than the active configuration, the
+Forward strategy dictates that this nugget be re-ciphered immediately. If a
+particular nugget encrypted with an inactive configuration is never encountered
+during I/O, it is never re-ciphered and remains on the drive in its original
+state. In this way, the Forward strategy represents a form of temporal cipher
+switching.
 
-Rather than re-cipher the entire backing store every time the active cipher
-configuration changes, this strategy limits the performance impact of cipher
-switching to individual nuggets. The expense of re-ciphering is paid only once,
-after which the nugget is accessed normally during I/O until the active cipher
-configuration is switched again.
+Rather than re-cipher the entire drive every time the active configuration
+changes, this strategy limits the performance impact of cipher switching to
+individual nuggets. The expense of re-ciphering is paid only once, after which
+the nugget is accessed normally during I/O until the active configuration is
+switched again.
 
 \PUNT{There are several forms the Forward strategy might take. The default and
 most intuitive is \emph{0-forward}, in which SwitchCrypt immediately transitions
-individual nuggets encountered during I/O to the active cipher configuration if
-they are not using it. Over time, if various I/O operations end up touching
-every nugget in the backing store, the encrypted contents of every nugget will
-become decryptable with the currently active cipher configuration.
+individual nuggets encountered during I/O to the active configuration if they
+are not using it. Over time, if various I/O operations end up touching every
+nugget in the drive, the encrypted contents of every nugget will become
+decryptable with the currently active configuration.
 
 The Forward strategy might also take the form of \emph{N-forward}, where
 SwitchCrypt attempts to take advantage of spatial sequential locality to
-transition whole sets of nuggets into the active cipher configuration. We can
-trivially expand the forward strategy to encompass the entire backing store by
-selecting $N$ equal to the total number of nuggets managed by SwitchCrypt. This
-would have the overhead of re-ciphering large swaths of the backing store upon
-every I/O operation where a nugget encrypted with the non-active cipher
-configuration is encountered. Of course, this has the same dire implications for
-performance as simply re-initializing the entire system or encrypted container
-with the new cipher.}
+transition whole sets of nuggets into the active configuration. We can trivially
+expand the forward strategy to encompass the entire drive by selecting $N$ equal
+to the total number of nuggets managed by SwitchCrypt. This would have the
+overhead of re-ciphering large swaths of the drive upon every I/O operation
+where a nugget encrypted with the inactive configuration is encountered. Of
+course, this has the same dire implications for performance as simply
+re-initializing the entire system or encrypted container with the new cipher.}
 
 \textbf{Selective Switching Strategy.} When SwitchCrypt is initialized with the
-Selective strategy, the backing store is partitioned into $C$ regions where $C$
-represents the maximum number of ciphers; each regions' nuggets are encrypted by
-each of the $C$ ciphers respectively. For instance, were SwitchCrypt initialized
-using two ciphers ($C = 2$), the backing store would be partitioned in half; all
-nuggets in the first region would be encrypted with the first cipher while all
-nuggets in the second would be encrypted with the other.
+Selective strategy, the drive is partitioned into $C$ regions where $C$
+represents the total number of available ciphers in the system; each regions'
+nuggets are encrypted by each of the $C$ ciphers respectively. For instance,
+were SwitchCrypt initialized using two ciphers ($C = 2$), the drive would be
+partitioned in half; all nuggets in the first region would be encrypted with the
+first cipher while all nuggets in the second would be encrypted with the other.
 
 Hence, unlike the Forward strategy, which schedules individual nuggets to be
-re-ciphered at some point in time after the active cipher configuration is
-switched, the Selective strategy allows the wider system to indicate
-\emph{where} on the backing store a read or write operation should occur. In
-this way, the selective strategy represents a form of spatial cipher switching
-where different regions of the backing store can store differently-ciphered
-nuggets. A user could take advantage of this to, for instance, set up regions
-with different security properties and performance characteristics, managing
-them as distinct virtual drives or even reading/writing bytes to different
-security regions on the same drive.
-
-Regions of the backing store will not be in a consistent state and will likely
-contain different data.
+re-ciphered at some point in time after the active configuration is switched,
+the Selective strategy allows the wider system to indicate \emph{where} on the
+drive a read or write operation should occur. In this way, the Selective
+strategy represents a form of spatial cipher switching where different regions
+of the drive can store differently-ciphered nuggets independently and
+concurrently. A user could take advantage of this to, for instance, set up
+regions with different security properties and performance characteristics,
+managing them as distinct virtual drives or transparently reading/writing bytes
+to different security regions on the same drive.
 
 \textbf{Mirrored Switching Strategy.} Similar to the Selective strategy, when
-SwitchCrypt is initialized with the Mirrored strategy, the backing store is
-partitioned into $C$ regions where $C$ represents the maximum number of ciphers;
-each regions' nuggets are encrypted by each of the $C$ ciphers respectively.
+SwitchCrypt is initialized with the Mirrored strategy, the drive is partitioned
+into $C$ regions where $C$ represents the total number of available ciphers in
+the system; each regions' nuggets are encrypted by each of the $C$ ciphers
+respectively.
 
 However, unlike the Selective strategy, all write operations that hit one region
-are mirrored into the other regions immediately. The mirrored strategy allows
-the wider system to indicate (via the active cipher) within which region a
-\emph{read} operation should occur. In this way, the Mirrored strategy
-represents a form of spatial cipher switching. A user could take advantage of
-this to \emph{quickly} converge the backing store to a single cipher
-configuration without loss any data or the performance penalty of re-ciphering
-an entire region's nuggets.
-
-All regions of the backing store will always be in a consistent state and always
-share the same data.
+are mirrored into the other regions immediately, so all regions of the drive
+will always be in a consistent state and always share the same data. The wider
+system then indicates (via the active configuration) \emph{where} a read
+operations should occur. In this way, the Mirrored strategy represents a form of
+spatial cipher switching because we're switching which configuration we're using
+to read in and process data. For instance, a user could take advantage of this
+along with SSD Instant Secure Erase~\cite{ISE1,ISE2,ISE3} to delete other
+regions thus quickly and securely converging the drive to a single configuration
+without losing any data or suffering the egregious performance or battery
+penalty that comes with re-ciphering every nugget.
 
 \subsubsection{Comparing Cipher Switching Strategies}
 
@@ -297,123 +335,128 @@ share the same data.
    \begin{tabular}{@{}|c|c|c|C{25mm}|@{}}
       \toprule
       \textbf{Strategy} & \textbf{Convergence} & \textbf{Waste} &
-      \textbf{Performance} \\ \midrule Forward   & Slow           & Low  & Fast
-      reads and writes unless switching \\
+      \textbf{Performance} \\
+      \midrule
+      Forward   & Slower       & None & Faster reads and writes unless switching
+      \\\hline
+      Mirrored  & Nearly instant & High & Faster reads; slower writes \\
       \hline
-      Mirrored  & Nearly instant & High & Fast reads; slow writes \\
-      \hline
-      Selective & Slow           & High & Fast reads and writes  \\
+      Selective & Slower       & High & Faster reads and writes  \\
       \hline
    \end{tabular}
    \caption{A summary comparison between the three cipher switching strategies.}
    \label{tbl:strategies-advantages}
 \end{table}
 
-\tblref{strategies-advantages} summarizes the tradeoffs between the three cipher
-switching strategies.
+\tblref{strategies-advantages} summarizes the higher level tradeoffs between the
+three cipher switching strategies.
 
 \textbf{Convergence.} Depending on the use case, the ability to quickly converge
-the entire backing store to a single cipher configuration without losing data is
-very useful (see: \secref{usecases}). The near-instantaneous nature of SSD
-Instant Secure Erase (ISE) implementations on modern SSDs~\cite{ISE1,ISE2,ISE3}
-makes this a very fast process for the Mirrored strategy. The Forward strategy
-is slow to converge compared to Mirrored since, in the worse case, every nugget
-on the drive will require re-ciphering. The Selective strategy is similarly slow
-to converge since entire regions of nuggets must be re-ciphered to prevent data
-loss; those regions can be destroyed with ISE too, which would be very fast, but
-unlike Mirrored the data would be lost forever, which is rarely desirable.
+the entire drive to a single cipher configuration without losing data is very
+useful (see: \secref{usecases}). The near-instantaneous nature of SSD Instant
+Secure Erase (ISE) implementations on modern SSDs~\cite{ISE1,ISE2,ISE3} makes
+this a very fast process for the Mirrored strategy. The Forward strategy is slow
+to converge compared to Mirrored since, in the worse case, every nugget on the
+drive will require re-ciphering. The Selective strategy is similarly slow to
+converge since entire regions of nuggets must be moved and re-ciphered to
+prevent data loss; those regions could be destroyed without moving data around
+using ISE too, which would be very fast, but unlike Mirrored random data would
+be lost forever which is rarely desirable.
 
-\textbf{``Waste''.} Unlike the other two strategies, using the Forward strategy
-does not dramatically reduce the total usable space on the drive by the
-end-user. This is because the Forward strategy allows differently-ciphered
-nuggets to co-exist contiguously on the backing store. Since the Mirrored and
-Selective strategies require partitioning the backing store into some number of
-regions---where the writeable size reported back to the OS is some function of
-region size---there is a necessary reduction in usable space.
+\textbf{Waste.} Unlike the other two strategies, using the Forward strategy does
+not reduce the total usable space on the drive by the end-user, which we refer
+to here as ``waste''. This is because the Forward strategy allows
+differently-ciphered nuggets to co-exist contiguously on the drive without
+special partitions. Since the Mirrored and Selective strategies require
+partitioning the drive into some number of regions---where the writeable size
+reported back to the OS is some function of region size---there is a necessary
+reduction in usable space.
 
 \textbf{Performance.} The Selective and Mirrored strategies can read data from
-the backing store with low overhead, reaching performance parity with prior
-work. This is because switching ciphers using these strategies amounts to
-offsetting the read index so it lands in the proper region, which has little
-overhead. The Forward strategy also reads with low overhead except in the case
-where a nugget was not encrypted with the active cipher. This triggers
-re-ciphering, which can be costly if the workload touches unique nuggets and is
+the drive with low overhead, reaching performance parity with prior work,
+because they never have to deal with on-demand re-ciphering. This is because
+switching ciphers using these two strategies amounts to offsetting the read
+index so that it lands in the proper region, which has little overhead. The
+Forward strategy also reads with low overhead except in the case where a nugget
+was not encrypted with the active configuration. This triggers re-ciphering
+on-demand, which can be costly if the workload touches unique nuggets and is
 small enough that cost is not amortized.
 
 The Selective strategy also writes with low overhead because, like with reads,
-an offset is the only requirement. The Mirrored strategy, on the other hand, can
-be two or more times slower for writes (when $C = 2$) compared to baseline. Each
-additional region ($C > 2$) compounds the write penalty. This is because each
-writes is ``mirrored'' across all regions. As with reads, the Forward strategy
-writes with low overhead except in the case where a nugget was not encrypted
-with the active cipher configuration. This triggers costly re-ciphering, which
-can compound depending on workload.\\
+an index offset is the only requirement. The Mirrored strategy, on the other
+hand, can be up to two times slower for writes (when $C = 2$) compared to
+baseline. Each additional region ($C > 2$) compounds the write penalty depending
+on the workload. This is because each write is mirrored across \emph{all}
+regions. As with reads, the Forward strategy writes with low overhead except in
+the case where a nugget was not encrypted with the active configuration. This
+triggers re-ciphering on-demand, which can be costly if the workload touches
+unique nuggets and is small enough that cost is not amortized.\\
 
-With these tradeoffs in mind: Mirrored is ideal when the backing store must
-converge quickly, write performance is not the primary concern, and drive space
-is abundant; Selective is ideal when different data should be encrypted
-differently and drive space is abundant; and Forward is ideal when some subset
-of nuggets should be encrypted differently without wasting drive space. See
-\secref{usecases} for specific scenarios that highlight the practical difference
-between strategies.
+With these tradeoffs in mind: Mirrored is ideal when the drive must converge
+quickly, write performance is not a primary concern, and drive space is
+abundant; Selective is ideal when different data should be encrypted differently
+and drive space is abundant; and Forward is ideal when some subset of nuggets
+should be encrypted differently without wasting drive space. See
+\secref{usecases} for specific scenarios that demonstrate these differences in
+practice.
 
 \subsubsection{Threat Model for Cipher Switching Strategies}
 
-The primary concern facing any FDE solution is that of confidentiality: an
-adversary should not be able to decrypt encrypted plaintext without the right
-key. With this research, we select five cipher implementations and configure
-them under SwitchCrypt: ChaCha~\cite{ChaCha20} (ChaCha8 and ChaCha20), and
-Freestyle~\cite{Freestyle} in fast, balanced, and secure configurations (see:
-\secref{implementation}).
+The primary concern facing any FDE solution is that of confidentiality. An
+adversary should not be able to reveal any information about encrypted plaintext
+without the proper key. As with prior work, encryption is achieved via a binary
+additive approach: cipher output (keystream) is combined with plaintext nugget
+contents using XOR, with metadata to track writes and ensure that pad reuse
+never occurs during overwrites and that the system can recover from crashes into
+a secure state. Another concern is data integrity: an adversary should not be
+able to tamper with ciphertext and it go unnoticed. Nugget integrity is tracked
+by an in-memory Merkle tree. See the threat model addressed by Dickens et
+al.~\cite{StrongBox} for further details.
 
-Encryption is achieved via a binary additive approach: cipher output (keystream)
-is combined with plaintext nugget contents using XOR, with metadata to track
-writes and ensure that pad reuse never occurs during overwrites and that the
-system can recover from crashes into a secure state~\cite{StrongBox}.
-
-Another concern is data integrity: an adversary should not be able to tamper
-with ciphertext and it go unnoticed. As with prior work, we use an in-memory
-Merkle Tree to ensure nugget and system integrity~\cite{StrongBox}.
-
-Switching strategies add an additional concern: even if we initiate a ``cipher
-switch,'' there may still be data on the backing store that is encrypted with a
-non-active cipher configuration. Is this a problem? For the Forward strategy,
-this implies data may at any time be encrypted using the least desirable cipher.
-For the Mirrored and Selective strategies, the backing store is partitioned into
-regions where nuggets are guaranteed to be encrypted with each cipher. However,
-in terms of confidentiality, all the ciphers we configured under SwitchCrypt
-have been proven formally secure. Hence, nuggets encrypted with different secure
-ciphers can co-exist on the backing store securely, depending on the use case
-(see: \secref{usecases}).
+Switching strategies add an additional security concern not addressed by prior
+work: even if we initiate a ``cipher switch,'' there may still be data on the
+drive that was encrypted with an inactive configuration. Is this a problem? For
+the Forward strategy, this implies data may at any time be encrypted using the
+``least desirable cipher''. For the Mirrored and Selective strategies, the drive
+is partitioned into regions where nuggets are guaranteed to be encrypted with
+each cipher, including the ``least desirable cipher''. However, in terms of
+confidentiality, all the ciphers we configured under SwitchCrypt have no known
+practical attacks against them, and in this context the confidentiality
+guarantee of SwitchCrypt can be reduced to the individual confidentiality
+guarantees of the available ciphers used to encrypt nuggets.
 
 \subsection{Putting It All Together} \label{subsec:summary}
 
 We revisit the motivating example from \secref{motivation}. Initially, I/O
 requests come down from the LFS and are received by the cryptographic driver,
-which divides the request by which nuggets it touches. For each nugget, the
-per-nugget metadata is consulted to determine with which cipher the nugget is
-encrypted. If it is encrypted with the active cipher, which must be true if we
-have not initiated a cipher switch, the write is handled similarly to prior
-work: encrypted data is read in from backing storage, the merkle tree and
-monotonic counter are consulted to ensure the integrity of encrypted data, the
-transaction journal is consulted during write operations so that overwrites are
-handled and pad reuse violations are avoided, and then the keycount store is
-consulted to derive the nugget's unique encryption key from some master secret.
-Using the Generic Stream Cipher Interface to call out to the active stream
-cipher implementation, SwitchCrypt encrypts/decrypts the nugget's contents and
-commits any updates back to storage~\cite{StrongBox}.
+which divides the request based on which nuggets it touches. For each nugget,
+the per-nugget metadata is consulted to determine with which cipher the nugget
+is encrypted. If it is encrypted with the active cipher configuration, which
+must be true if we have not initiated a cipher switch, the write is handled
+similarly to prior work: encrypted data is read in from the drive, the merkle
+tree and monotonic counter are consulted to ensure the integrity of encrypted
+data, the transaction journal is consulted during write operations so that
+overwrites are handled and pad reuse violations are avoided, and then the
+keycount store is consulted to derive the nugget's unique encryption key from
+some master secret. Finally, using the Generic Stream Cipher Interface, we call
+out to the active stream cipher implementation, allowing SwitchCrypt to
+encrypts/decrypts the nugget's contents and commit any updates back to storage.
+All the while, the drive's Freestyle-encrypted contents are being uploaded up to
+our enterprise backup service every so often.
 
-When the device enters ``battery saver'' mode, the energy monitoring software
-downclocks the CPU and indicates to SwitchCrypt that a more energy-efficient
-cipher should be used until we return to a non-curtailed energy budget. Now,
-when the cryptographic driver divides I/O requests into each affected nugget,
-the per-nugget metadata shows SwitchCrypt that the nugget is encrypted using a
-cipher that is not the active cipher. This triggers the re-ciphering code path.
-Since we are using the Forward switching strategy, this means the nugget data is
-immediately decrypted by calling out to the inactive cipher through the
-interface and then re-encrypted by calling out to the active cipher. Depending
-on the interface level the cipher is implemented at, either 1) the cryptographic
-driver manages encrypting/decrypting data and updating the merkle tree and
-monotonic counter, transaction journal, and keycount store or 2) the cipher
-implementation handles updating SwitchCrypt internals directly. Afterwards, the
-I/O operation is committed to the backing store.
+When the device enters ``battery saver'' mode, drive backups are paused, the
+energy monitoring software downclocks the CPU, and the OS signals to SwitchCrypt
+that a more energy-efficient cipher (ChaCha20) should be used until we return to
+a non-curtailed energy budget. SwitchCrypt sets ChaCha20 as the active cipher
+configuration. Now, when the cryptographic driver divides I/O requests into each
+affected nugget, the per-nugget metadata shows SwitchCrypt that each nugget is
+encrypted using a cipher that is not the active configuration. This triggers the
+re-ciphering code path. Since we are using the Forward switching strategy in
+this example, nugget data is immediately decrypted by calling out to the
+inactive configuration through the Generic Stream Cipher Interface, after which
+the nugget is re-ciphered by calling out to the active configuration. Depending
+on the level at which the interface wrapper code is implemented, either 1) the
+cryptographic driver manages encrypting/decrypting data and updating the merkle
+tree and monotonic counter, transaction journal, and keycount store or 2) the
+wrapper code handles updating SwitchCrypt internals directly. Regardless, the
+I/O operation and related metadata is committed to the drive afterwards.

@@ -45,8 +45,8 @@ caching.
 In this section we answer the following questions:
 
 \begin{enumerate}
- \item What shape does the cipher configuration tradeoff space take under
- our workloads? (\cref{subsec:1})
+ \item What shape does the cipher configuration tradeoff space take under our
+ workloads? (\cref{subsec:1})
  \item Can SwitchCrypt achieve dynamic security/energy tradeoffs by reaching
  configuration points not accessible with prior work? (\cref{subsec:2})
  \item What is the performance and storage overhead of each cipher switching
@@ -86,16 +86,15 @@ Secure complete faster than the ChaCha variants, however.
 
 Though ChaCha8 is generally faster than ChaCha20, there is some variability in
 our timing setup when capturing extremely fast events occurring close together
-in time. This is why ChaCha8 sometimes appears with higher latency than
-ChaCha20 for normalized 4KB workloads. ChaCha8 is not slower than ChaCha20.
+in time. This is why ChaCha8 sometimes appears with higher latency than ChaCha20
+for normalized 4KB workloads. ChaCha8 is not slower than ChaCha20.
 
 \subsection{Reaching Between Static Configuration Points} \label{subsec:2}
 
 \begin{figure}[ht]
   \textbf{Forward Switching I/O Ratio Performance}\par\medskip
-  {\input{data/tradeoff-with-ratios.tex}} \caption{Median sequential and
-  random read and write performance comparison of Forward switching to
-  baseline.}
+  {\input{data/tradeoff-with-ratios.tex}} \caption{Median sequential and random
+  read and write performance comparison of Forward switching to baseline.}
  \label{fig:tradeoff-with-ratios}
 \end{figure}
 
@@ -113,10 +112,10 @@ every ratio point \emph{between} our static configuration points (\ie{1:3, 1:1,
 and 3:1 described above}).
 
 The point of this experiment is to determine if SwitchCrypt can effectively
-transition the backing store between ciphers without devastating performance.
-For the 40MB, 5MB, and 512KB workloads (40MB is shown), we see that SwitchCrypt
-can achieve dynamic security/energy tradeoffs reaching points not accessible
-with prior work, all with minimal overhead.
+transition the drive between ciphers without devastating performance. For the
+40MB, 5MB, and 512KB workloads (40MB is shown), we see that SwitchCrypt can
+achieve dynamic security/energy tradeoffs reaching points not accessible with
+prior work, all with minimal overhead.
 
 Again, due to the overhead of metadata management for non-Freestyle ciphers (see
 \secref{implementation}) and the fast completion time of the 4KB workloads
@@ -135,8 +134,8 @@ means these penalties are paid more often, ballooning latency.
 \begin{figure}[ht]
   \textbf{Mirrored and Selective Switching I/O Ratio Performance}\par\medskip
   \centering
-  {\input{data/mirrored-selective-baseline.tex}} \caption{Median sequential
-  and random read and write performance comparison of Mirrored and Selective
+  {\input{data/mirrored-selective-baseline.tex}} \caption{Median sequential and
+  random read and write performance comparison of Mirrored and Selective
   switching strategies to baseline.}
  \label{fig:mirrored-selective-baseline}
 \end{figure}
@@ -148,20 +147,20 @@ Selective strategies with the same configuration of ratios as
 For the 40MB, 5MB, and 512KB workloads (40MB is shown), we see that Mirrored and
 Selective \emph{read} workloads and the Selective \emph{write} workload achieve
 parity with the Forward strategy experiments. This makes sense, as most of the
-overhead for Selective and Mirrored reads is determining which part of the
-backing store to commit data to. The same applies to Selective writes.
+overhead for Selective and Mirrored reads is determining which part of the drive
+to commit data to. The same applies to Selective writes.
 
 For the 4KB Mirrored and Selective \emph{read} workloads and the Selective
 \emph{write} workload, we see behavior similar to that in
 \figref{tradeoff-with-ratios}, as expected.
 
 Mirrored writes across all workloads are very slow. This is to be expected,
-since the data is being mirrored across all areas of the backing store. In our
-experiments, the backing store can be considered partitioned in half. This
-overhead is most egregious for the 4KB Mirrored write workload. This makes
-Selective preferable to Mirrored; however, Selective can never converge the
-backing store to a single cipher configuration or survive the loss of an entire
-region (see: \secref{usecases}).
+since the data is being mirrored across all areas of the drive. In our
+experiments, the drive can be considered partitioned in half. This overhead is
+most egregious for the 4KB Mirrored write workload. This makes Selective
+preferable to Mirrored; however, Selective can never converge the drive to a
+single cipher configuration or survive the loss of an entire region (see:
+\secref{usecases}).
 
 \subsection{Cipher Switching Overhead} \label{subsec:3}
 
@@ -175,13 +174,13 @@ overhead with the Forward switching strategy.
 Similarly, we calculate that Selective switching has average overhead at 0x/0.3x
 for 40MB, 5MB and 512KB read/write workloads compared to baseline I/O. Average
 overhead is 0.22x/0.71x for 4KB read/write workloads. Spatial overhead in our
-experiment was half of all writable space on the backing store.
+experiment was half of all writable space on the drive.
 
 Finally, we calculate that Mirrored switching has average overhead at
 0.25x/0.61x for 40MB, 5MB and 512KB read/write workloads compared to baseline
 I/O, with high write latency due to mirroring. Average overhead is 0.55x/0.77x
 for 4KB read/write workloads. Spatial overhead in our experiment was half of all
-writable space on the backing store.
+writable space on the drive.
 
 These overhead numbers are the penalty paid for the additional flexibility of
 being able to reach configurations points that are unachievable without
@@ -207,31 +206,30 @@ considered secure (\secref{design}).
     \hline
     \textbf{Attack} & \textbf{Result} & \textbf{Explanation} \\
     \hline\hline
-    Nugget data in backing store is mutated out-of-band online &
-    SwitchCrypt immediately fails with exception on successive IO request &
-    Regardless of switching strategy, Merkle Tree check fails on read-in\\
+    Nugget data in drive is mutated out-of-band online & SwitchCrypt immediately
+    fails with exception on successive IO request & Regardless of switching
+    strategy, Merkle Tree check fails on read-in\\
     \hline
-    Header/cipher metadata in backing store is mutated out-of-band online &
-    SwitchCrypt immediately fails with exception on successive IO request &
-    Regardless of switching strategy, Merkle Tree check fails on read-in\\
+    Header/cipher metadata in drive is mutated out-of-band online & SwitchCrypt
+    immediately fails with exception on successive IO request & Regardless of
+    switching strategy, Merkle Tree check fails on read-in\\
     \hline
-    Backing store is rolled back to a previously consistent state while online &
+    drive is rolled back to a previously consistent state while online &
     SwitchCrypt immediately fails with exception on successive IO request &
     Regardless of switching strategy, secure monotonic counter is out of sync
     with the system\\
     \hline
-    Backing store is rolled back to a previously consistent state while offline,
-    secure counter wildly out of sync & SwitchCrypt refuses to mount; allows for
-    force mount with root access & Regardless of switching strategy, secure
-    monotonic counter is out of sync with the system\\
+    drive is rolled back to a previously consistent state while offline, secure
+    counter wildly out of sync & SwitchCrypt refuses to mount; allows for force
+    mount with root access & Regardless of switching strategy, secure monotonic
+    counter is out of sync with the system\\
     \hline
-    Merkle Tree made inconsistent by mutating backing store out-of-band while
-    offline, secure counter in sync & SwitchCrypt refuses to mount & Secure
-    monotonic counter is in sync with the system, yet illegal data manipulation
-    occurred\\
+    Merkle Tree made inconsistent by mutating drive out-of-band while offline,
+    secure counter in sync & SwitchCrypt refuses to mount & Secure monotonic
+    counter is in sync with the system, yet illegal data manipulation occurred\\
     \hline
-    Nugget accessed out-of-band in mixed-cipher backing store & Nugget's cipher
-    may not match active cipher & Worst case, the nugget data is available
+    Nugget accessed out-of-band in mixed-cipher drive & Nugget's cipher may not
+    match active configuration & Worst case, the nugget data is available
     encrypted with the lowest scored cipher in the system\\
     \hline\hline
   \end{tabu}

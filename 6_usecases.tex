@@ -9,7 +9,7 @@ within an energy budget (\cref{subsec:uc1}). We also demonstrate the utility of
 both temporal and spatial switching strategies, exploring the range of
 conditions under which certain strategies are optimal.
 
-\subsection{Balancing Security Goals with a Constrained Energy Budget} \label{subsec:uc1}
+\subsection{Balancing Security Goals with a Hard Energy Cap} \label{subsec:uc1}
 
 This usecase illustrates that, because latency and energy use are correlated
 among the ciphers we examined, we can exploit that property using temporal
@@ -34,10 +34,9 @@ cipher. We repeat this experiment three times.
 \end{figure}
 
 In \figref{usecase-battery}, we see time versus energy used and average security
-score of the backing store. At 0 seconds, we begin writing. At 5 seconds, the
-``battery critical'' event occurs, causing the system to be underclocked. At 120
-seconds, the system will die. If we blow past our energy ceiling, the system
-will die.
+score of the drive. At 0 seconds, we begin writing. At 5 seconds, the ``battery
+critical'' event occurs, causing the system to be underclocked. At 120 seconds,
+the system will die. If we blow past our energy ceiling, the system will die.
 
 Our goal is to finish downloading the file before the device dies. We have three
 cipher configuration choices. 1) Favor security and use Freestyle Balanced
@@ -89,9 +88,9 @@ Balanced operations. We repeat this experiment three times.
 \begin{figure}[ht] \textbf{VSR Use Case: ChaCha8 vs Freestyle Secure Sequential
 4KB, 5MB Performance}\par\medskip
    \centering
-   {\input{data/usecase-vsr-bar.tex}} \caption{Median sequential read and
-   write performance comparison of 5MB I/O with 3-to-1 ratio of ChaCha8 nuggets
-   to Freestyle Secure nuggets, respectively.}
+   {\input{data/usecase-vsr-bar.tex}} \caption{Median sequential read and write
+   performance comparison of 5MB I/O with 3-to-1 ratio of ChaCha8 nuggets to
+   Freestyle Secure nuggets, respectively.}
   \label{fig:usecase-vsr-bar}
 \end{figure}
 
@@ -117,7 +116,7 @@ which is not possible using prior work.
 Due to garbage collection and wear-leveling requirements of SSDs, as free space
 becomes constrained, I/O performance drops precipitously~\cite{SSDEOL1}. With
 prior work, our strict latency ceiling is violated. However, if SwitchCrypt is
-made aware when the backing store is in such a state, we can offset some of the
+made aware when the drive is in such a state, we can offset some of the
 performance loss by switching the ciphers of high traffic nuggets to the fastest
 cipher available using Forward switching.
 
@@ -126,10 +125,9 @@ We then introduce a delay into SwitchCrypt I/O of $20ms$, simulating drive
 slowdown, and repeat the experiment three times.
 
 \begin{figure}[ht] \textbf{SSD EoL Use Case: Latency-Security Tradeoff vs
-   Goals}\par\medskip
-   {\input{data/usecase-eol-tradeoff.tex}} \caption{Median sequential and
-   random 40MB read and write performance comparison: baseline versus simulated
-   faulty block device.}
+   Goals}\par\medskip {\input{data/usecase-eol-tradeoff.tex}} \caption{Median
+   sequential and random 40MB read and write performance comparison: baseline
+   versus simulated faulty block device.}
   \label{fig:usecase-eol-tradeoff}
 \end{figure}
 
@@ -146,8 +144,8 @@ of the drive can remain performant even during drive end-of-life.
 
 This usecase illustrates the utility of spatial Mirrored switching to take
 advantage of more energy-efficient high-performance ciphers while retaining the
-ability to quickly converge the entire backing store to a single high-security
-cipher leveraging SSD Instant Secure Erase (ISE).
+ability to quickly converge the entire drive to a single high-security cipher
+leveraging SSD Instant Secure Erase (ISE).
 
 Nation-state and other adversaries have extensive compute resources, knowledge
 of obscure side-channels and back doors (\eg{Dual\_EC\_DRBG~\cite{DualECDRBG}}),
@@ -162,17 +160,18 @@ that data either. In such a scenario, it would be useful if, instead of
 destroying the data, the storage layer could switch itself to a more secure
 state as quickly as possible.
 
-\begin{figure}[ht] \textbf{Custody Panic Use Case: Security Goals vs Time}\par\medskip
+\begin{figure}[ht] \textbf{Custody Panic Use Case: Security Goals vs
+Time}\par\medskip
    \centering
-   {\input{data/usecase-custody.tex}} \caption{Actual security score vs
-   security goal with respect to the time and ISE.}
+   {\input{data/usecase-custody.tex}} \caption{Actual security score vs security
+   goal with respect to the time and ISE.}
   \label{fig:usecase-custody}
 \end{figure}
 
 In \figref{usecase-eol-tradeoff}, we see the system begins at 0 seconds, where
-all data is mirrored across the backing store (perhaps consisting of multiple
-physical drives). Both the desired and minimum security score of the drive is
-1.5, a balance between performance and security. At 6 seconds, custody panic is
+all data is mirrored across the drive (perhaps consisting of multiple physical
+drives). Both the desired and minimum security score of the drive is 1.5, a
+balance between performance and security. At 6 seconds, custody panic is
 triggered---the desired minimum security score goes to 3, the highest
 possible---at which point the system executes ISE and completely erases the
 drive containing the minimally scored data. ISE is known to be much faster than
@@ -180,7 +179,7 @@ TRIM and completes in as little as 3 seconds~\cite{ISE1,ISE2,ISE3}. Once
 complete, the most secure form of the data is all that remains. The backing
 store has been ``locked down.''
 
-Our goal is to lock down the backing store, slowing down any attacker as much as
+Our goal is to lock down the drive, slowing down any attacker as much as
 possible such that, even if they copy and permanently store her data off-site
 for later attempts at decryption with more advanced compute resources and new
 technologies, our researcher's data is some degree more likely to remain
