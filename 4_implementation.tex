@@ -2,8 +2,7 @@
 
 Our SwitchCrypt implementation consists of 9,491 lines of C code; our test suite
 consists of 6,077 lines of C code. All together, our solution is comprised of
-15,568 lines of C code. Our implementation is also publicly available
-open-source\footnoteref{note1}.
+15,568 lines of C code and is publicly available open-source\footnoteref{note1}.
 
 SwitchCrypt uses OpenSSL version 1.1.0h and LibSodium version 1.0.12 for its
 AES-XTS and AES-CTR implementations. Open source ARM NEON optimized
@@ -45,19 +44,21 @@ initially rather than have the drive consist of all zeroes. This is a one-time
 cost paid during initialization and has no tangible effect on performance. SSDs
 that support ISE can accomplish this with minimal wear.}
 
-Finally, as the Freestyle cipher is highly configurable, we implement it in
-three different configurations: a ``fast'' mode with parameters
-\\\texttt{FreestyleFast($R_{min}$=$8$, $R_{max}$=$20$, $H_I$=$4$, $I_C$=$8$)}, a
-``balanced'' mode with parameters \texttt{FreestyleBalanced($R_{min}$=$12$,
-$R_{max}$=$28$, $H_I$=$2$, $I_C$=$10$)}, and a ``secure'' mode with parameters
-\texttt{FreestyleSecure($R_{min}$=$20$, $R_{max}$=$36$, $H_I$=$1$, $I_C$=$12$)}.
+For this research, we select five cipher implementations and develop Generic
+Cipher Interface wrapper implementations for them. They are: ChaCha8 and
+ChaCha20~\cite{ChaCha20} as well as Freestyle~\cite{Freestyle} in three
+different configurations: a ``fast'' mode with parameters
+\texttt{FFast($R_{min}$=$8$,$R_{max}$=$20$,$H_I$=$4$,$I_C$=$8$)}, a ``balanced''
+mode with parameters \texttt{FBalanced($R_{min}$=$12$,
+$R_{max}$=$28$,$H_I$=$2$,$I_C$=$10$)}, and a ``strong'' mode with parameters
+\texttt{FStrong($R_{min}$=$20$,$R_{max}$=$36$,$H_I$=$1$,$I_C$=$12$)}.
 
-Thanks to Freestyle's ciphertext randomization (see \secref{design}), we can
-skip the overhead of tracking, detecting, and handling overwrites when nuggets
-are using it, offsetting the 1.6x to 3.2x performance loss of using Freestyle
-versus ChaCha20~\cite{Freestyle}.
+\PUNT{Thanks to Freestyle's ciphertext randomization, we can counter the
+overhead of tracking, detecting, and handling overwrites when nuggets are using
+it, offsetting the 1.6x to 3.2x performance loss of using Freestyle versus
+ChaCha20~\cite{Freestyle}.
 
-\PUNT{\subsubsection{Implementing Cipher Switching}
+\subsubsection{Implementing Cipher Switching}
 
 A naive implementation is trivial (\eg{execute the chosen strategy on every I/O
 operation}), this navigation must occur with acceptable overhead by preserving

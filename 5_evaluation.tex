@@ -70,7 +70,7 @@ and random I/O workloads. Trends for median hold when looking at tail latencies
 as well. Each line represents one workload. From left to right: 4KB, 512KB, 5MB,
 and 40MB respectively. Each symbol represents one of our ciphers. From left to
 right: ChaCha8, ChaCha20, Freestyle Fast, Freestyle Balanced, and Freestyle
-Secure. As expected, of the ciphers we tested, those with higher security scores
+Strong. As expected, of the ciphers we tested, those with higher security scores
 result in higher latency for I/O operations while ciphers with less desirable
 security properties result in lower latency. The relationship between these
 concerns is not simply linear, however, which exposes a rich security vs
@@ -103,7 +103,7 @@ latency tradeoff between different stream ciphers when completing our sequential
 and random I/O workloads \emph{with cipher switching using the Forward
 strategy}. As with \figref{tradeoff-no-ratios}, each line represents one
 workload and each symbol represents one of our ciphers. From left to right:
-ChaCha8, ChaCha20, Freestyle Fast, Freestyle Balanced, and Freestyle Secure.
+ChaCha8, ChaCha20, Freestyle Fast, Freestyle Balanced, and Freestyle Strong.
 
 After a certain number of write-read I/O operations, a cipher switch is
 initiated and SwitchCrypt begins using the secondary cipher to encrypt and
@@ -125,7 +125,7 @@ reads. This advantage is not enough to make the ratios involving Freestyle
 Balanced or Secure complete faster than the ChaCha ratio variants, however.
 
 We also see very high latency for ratios between Freestyle Fast and Freestyle
-Secure cipher configurations. This is because Freestyle, while avoiding metadata
+Strong cipher configurations. This is because Freestyle, while avoiding metadata
 management overhead, is not length-preserving (so extra write operations must be
 performed), and is generally much slower than the ChaCha variants (see
 \figref{tradeoff-no-ratios}). Doubly invoking Freestyle in a ratio configuration
@@ -188,7 +188,7 @@ SwitchCrypt. We believe SwitchCrypt's design keeps these overheads acceptably
 low in practice (see \secref{usecases}), achieving the desired goal of flexibly
 navigating latency/security tradeoffs for FDE.
 
-\subsection{Revisiting Our Threat Model} \label{subsec:4}
+\PUNT{\subsection{Revisiting Our Threat Model} \label{subsec:4}
 
 The incorporation of cipher switching requires considering each attack in the
 context of each strategy and novel attacks on mixed-cipher nugget states.
@@ -233,4 +233,4 @@ considered secure (\secref{design}).
     encrypted with the lowest scored cipher in the system\\
     \hline\hline
   \end{tabu}
-\end{table}
+\end{table}}
