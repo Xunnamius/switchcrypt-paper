@@ -3,7 +3,7 @@
 The state of the art for securing data at rest, such as the contents of a
 laptop's SSD, is Full Drive Encryption (FDE). Traditional FDE employs a single
 cryptographic cipher to encrypt, decrypt, and authenticate drive contents on the
-fly. Unfortunately, encryption introduces overhead which can drastically impact
+fly. Unfortunately, encryption introduces overhead that drastically impacts
 system performance and total energy consumption. Hence, modern storage systems
 must carefully balance these competing concerns. On the one hand, stronger
 security guarantees come with increased latency and threaten to balloon energy
@@ -12,7 +12,7 @@ increased latency or weaker security guarantees.
 
 FDE implementations such as dm-crypt for Linux and BitLocker for Windows balance
 these concerns with respect to some generic ``common case'' workload, but this
-approach often fails to deliver an optimal outcome for specific workloads.
+approach often fails to deliver an optimal outcome for specific workloads. \hank{add citation for dm-crypt}
 Google's Android OS is a good example. Android supported FDE with the release of
 Android 3.0, yet it was not enabled by default until Android
 6.0~\cite{android-M-mobile-motivation}. Two years prior, Google attempted to

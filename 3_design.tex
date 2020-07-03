@@ -44,7 +44,7 @@ single stream cipher, ChaCha20, to handle overwrites, prevent rollback attacks,
 and limit plaintext length~\cite{StrongBox}. However, they did not envision the
 utility in trading off between concerns at the filesystem or device-mapper
 level, dynamic cipher switching, or protecting against attacks on data ``in
-motion''; the remainder of this section details the novel components that enable
+motion;'' the remainder of this section details the novel components that enable
 this functionality. Specifically: how we quantify the properties traded off
 between configurations (\cref{subsec:quantify}), the Generic Stream Cipher
 Interface and Per-Nugget Metadata components (\cref{subsec:interface}) which
@@ -110,7 +110,7 @@ much more difficult to execute chosen-ciphertext attacks (CCA), key
 re-installation attacks, XOR-based cryptanalysis and other comparison attacks,
 and other confidentiality-violating schemes where the ciphertext is in full
 control of the adversary ~\cite{Freestyle}. This property is useful in cases
-where we cannot ensure that the same key, nonce, and plaintext will never be
+where we cannot prevent the same key, nonce, and plaintext from being
 reused, such as with data ``in motion'' (see the motivational example in
 \secref{motivation}). Ciphers without this property---such as ChaCha20 on which
 prior work is based---are trivially broken when key-nonce-plaintext 3-tuples are
@@ -136,22 +136,33 @@ AES-XTS or ChaCha (e.g. StrongBox, Google's Adiantum, Linux's dm-crypt,
 Microsoft's BitLocker, Apple's FileVault) have storage layouts that hold
 length-preserving output as an invariant, making ciphers that do not exhibit
 this property incompatible with their implementations; yet, ciphertext expansion
-is often (but not always) a necessary side-effect of ciphertext randomization.
+is often (but not always) a necessary side-effect of ciphertext randomization. \hank{split the parentheticals to make it clear which examples apply to AES-XTS and which to ChaCha.}
 
-This is a binary feature in that a cipher either outputs ciphertext of the same
-length as its plaintext input or it does not. A cipher scores either a 0 if it
-\emph{is not} length-preserving in this way or a 1 if the ciphertext is always
-the same length as the plaintext.
+This is a binary feature in that a cipher either outputs ciphertext of
+the same length as its plaintext input or it does not. A cipher scores
+either a 0 if it \emph{is not} length-preserving in this way or a 1 if
+the ciphertext is always the same length as the plaintext. \hank{Would
+  it make sense to have this be a multiplier based on how much longer
+  the ciphertext is?  So if the cipher text is twice as long, the
+  score is 2? I am a little surprised that it is binary which would
+  imply that all increase length by the same amount. If that is true then we should say. }
 
 \subsection{Generic Stream Cipher Interface} \label{subsec:interface}
 
-There are many ciphers we might use with SwitchCrypt, each with various input
-requirements and output considerations. Unlike prior work, SwitchCrypt must be
-able to encrypt and decrypt arbitrary nuggets with arbitrary ciphers at any
-moment with low overhead without worrying about cipher-specific implementation
-details like required inputs (which vary drastically between cipher
-implementations), length of plaintext and potential ciphertext expansion,
-potential cipher-specific metadata storage, and other special conditions.
+There are many ciphers we might use with SwitchCrypt, each with
+various input requirements and output considerations. Unlike prior
+work, SwitchCrypt must be able to encrypt and decrypt arbitrary
+nuggets with arbitrary ciphers at any moment with low overhead without
+worrying about cipher-specific implementation details like required
+inputs (which vary drastically between cipher implementations), length
+of plaintext and potential ciphertext expansion, potential
+cipher-specific metadata storage, and other special conditions.
+\hank{This all feels very abstract.  It would really help to make it
+  concrete with a table or something that shows the different
+  requirements for different ciphers.  Right now the interface is a
+  major claim, but we don't have enough to justify that it is actually
+  a hard problem.  (I know it is, but I mean from a reader/reviewer's
+  perspective.)}
 
 Hence, there is a need for an interface that decouples cipher implementations
 from the encryption/decryption process entirely. Our novel cipher interface
@@ -171,17 +182,21 @@ length starting at that specific offset taken from the beginning of storage
 received, the OS hands SwitchCrypt an offset, a length, and a buffer of
 plaintext and expects that plaintext to be encrypted and committed to storage
 such that the plaintext is later retrievable given that same offset and length
-in a future read request.
+in a future read request. \hank{The lengths are specified as plaintext lengths?}
 
 The Generic Stream Cipher Interface presents the cryptographic driver with a
 single unified encryption/decryption model, laying the groundwork for
 \emph{cipher switching}. The interface consists of two mutually exclusive
 function declarations---only one can exist per wrapper implementation. These
-declarations are defined by lightweight wrapper code that is expected to call
-out to some stream cipher implementation to handle plaintext encryption and
+declarations are defined by lightweight wrapper code that  calls
+out to a stream cipher implementation to handle plaintext encryption and
 ciphertext decryption; once defined, these functions are invoked by SwitchCrypt
 to handle I/O requests. Choosing to define one declaration over another depends
 on a cipher implementation's input requirements and output characteristics.
+
+\hank{Putting my reviewer hat on here, it is not clear to me why we
+  need three differenct levels. This list needs a sentence or two to
+  preface what is going on.}
 
 \begin{enumerate}
    \item \textbf{\texttt{xor\_interface}}\\\texttt{xor\_interface} executes
@@ -219,15 +234,19 @@ on a cipher implementation's input requirements and output characteristics.
    SwitchCrypt must account for not having absolute control over its internal
    data structures during function invocation.
 
-   Implementers must also account for cipher switches that might occur at any
-   moment after or \emph{before} the function is executed by ensuring they do
-   not read in any data from the drive if a perfectly aligned nugget-sized I/O
-   operation is requested. This is because at the point of execution the
-   underlying drive data might be encrypted with an unexpected cipher.
+   Implementers must also account for cipher switches that might occur
+   at any moment after or \emph{before} the function is executed by
+   ensuring they do not read in any data from the drive if a perfectly
+   aligned nugget-sized I/O operation is requested. This is because at
+   the point of execution the underlying drive data might be encrypted
+   with an unexpected cipher. \hank{This phrasing feels weird to me.
+     Aren't we the implementers?  Are we the ones who have to account
+     for this?  It sounds like a drawback, but it is not clear to me
+     what is really going on here.}
 
    This interface is useful for calling out to exotic ciphers like AES-GCM and
-   AES-CTR or AES-XTS and other block ciphers that don't function like stream
-   ciphers. It's also useful when ciphers exhibit ciphertext expansion or are
+   AES-CTR or AES-XTS and other block ciphers that do not function like stream
+   ciphers. It is also useful when ciphers exhibit ciphertext expansion or are
    otherwise non-length-preserving or have additional metadata requirements.
 \end{enumerate}
 
@@ -299,6 +318,7 @@ nuggets are encrypted by each of the $C$ ciphers respectively. For instance,
 were SwitchCrypt initialized using two ciphers ($C = 2$), the drive would be
 partitioned in half; all nuggets in the first region would be encrypted with the
 first cipher while all nuggets in the second would be encrypted with the other.
+\hank{How does this work with the rule that there is only one "active cipher?}
 
 Hence, unlike the Forward strategy, which schedules individual nuggets to be
 re-ciphered at some point in time after the active configuration is switched,
@@ -325,7 +345,7 @@ operations should occur. In this way, the Mirrored strategy represents a form of
 spatial cipher switching because we're switching which configuration we're using
 to read in and process data. For instance, a user could take advantage of this
 along with SSD Instant Secure Erase~\cite{ISE1,ISE2,ISE3} to delete other
-regions thus quickly and securely converging the drive to a single configuration
+regions, and  thus quickly and securely converging the drive to a single configuration
 without losing any data or suffering the egregious performance or battery
 penalty that comes with re-ciphering every nugget.
 
@@ -423,7 +443,7 @@ each cipher, including the ``least desirable cipher''. However, in terms of
 confidentiality, all the ciphers we configured under SwitchCrypt have no known
 practical attacks against them, and in this context the confidentiality
 guarantee of SwitchCrypt can be reduced to the individual confidentiality
-guarantees of the available ciphers used to encrypt nuggets.
+guarantees of the available ciphers used to encrypt nuggets. \hank{This last sentence needs to be rephrased because our motivational example describes a practical attack on existing ciphers that do not use output randomization. }
 
 \subsection{Putting It All Together} \label{subsec:summary}
 
@@ -442,7 +462,7 @@ some master secret. Finally, using the Generic Stream Cipher Interface, we call
 out to the active stream cipher implementation, allowing SwitchCrypt to
 encrypts/decrypts the nugget's contents and commit any updates back to storage.
 All the while, the drive's Freestyle-encrypted contents are being uploaded up to
-our enterprise backup service every so often.
+our enterprise backup service every so often. \hank{Probably need to say that we start with Freestyle to meet all the demands.  I have to be honest and say that even I forgot about that until I reread it here and I am sure that reviewers will be paying much less attention than me.}
 
 When the device enters ``battery saver'' mode, drive backups are paused, the
 energy monitoring software downclocks the CPU, and the OS signals to SwitchCrypt
@@ -460,3 +480,5 @@ cryptographic driver manages encrypting/decrypting data and updating the merkle
 tree and monotonic counter, transaction journal, and keycount store or 2) the
 wrapper code handles updating SwitchCrypt internals directly. Regardless, the
 I/O operation and related metadata is committed to the drive afterwards.
+
+\hank{I feel this part needs one last sentence to tie it all together.  Something about how using switchcrypt the system can now adapt to changing requirements. And maybe a forward reference to the associated case study.}
