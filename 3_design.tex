@@ -132,11 +132,11 @@ rounds per block) to 3 (highest minimum and maximum rounds per block).
 A cipher that exhibits ciphertext expansion is non-length-preserving: it outputs
 more or less ciphertext than was originally input as plaintext. This can cause
 major problems in the FDE context. For instance, cryptosystems that rely on
-AES-XTS or ChaCha (e.g. StrongBox, Google's Adiantum, Linux's dm-crypt,
-Microsoft's BitLocker, Apple's FileVault) have storage layouts that hold
+AES-XTS (e.g. Linux's dm-crypt, Microsoft's BitLocker, Apple's FileVault) or
+ChaCha (e.g. StrongBox, Google's Adiantum) have storage layouts that hold
 length-preserving output as an invariant, making ciphers that do not exhibit
 this property incompatible with their implementations; yet, ciphertext expansion
-is often (but not always) a necessary side-effect of ciphertext randomization. \hank{split the parentheticals to make it clear which examples apply to AES-XTS and which to ChaCha.}
+is often (but not always) a necessary side-effect of ciphertext randomization.
 
 This is a binary feature in that a cipher either outputs ciphertext of
 the same length as its plaintext input or it does not. A cipher scores
@@ -482,3 +482,33 @@ wrapper code handles updating SwitchCrypt internals directly. Regardless, the
 I/O operation and related metadata is committed to the drive afterwards.
 
 \hank{I feel this part needs one last sentence to tie it all together.  Something about how using switchcrypt the system can now adapt to changing requirements. And maybe a forward reference to the associated case study.}
+
+\subsection{SwitchCrypt Implementation} \label{subsec:implementation}
+
+Our SwitchCrypt implementation consists of 9,491 lines of C code; our test suite
+consists of 6,077 lines of C code. All together, our solution is comprised of
+15,568 lines of C code and is publicly available open-source\footnoteref{note1}.
+
+SwitchCrypt uses OpenSSL version 1.1.0h and LibSodium version 1.0.12 for its
+AES-XTS and AES-CTR implementations. Open source ARM NEON optimized
+implementations of ChaCha are provided by Floodyberry~\cite{Floodyberry}. The
+Freestyle cipher reference implementation is from the original Freestyle
+paper~\cite{Freestyle}. The eSTREAM Profile 1 cipher implementations are from
+the open source libestream cryptographic library~\cite{libestream} by Lucas
+Clemente Vella. The Merkle Tree implementation is from the Secure Block
+Device~\cite{SBD}.
+
+We implement SwitchCrypt on top of the BUSE~\cite{BUSE} virtual block device,
+using it as our mock device controller. BUSE is a thin (200 LoC) wrapper around
+the standard Linux Network Block Device (NBD). BUSE allows an operating system
+to transact block I/O requests to and from virtual block devices exposed via
+domain socket.
+
+For this research, we select five cipher implementations and develop Generic
+Cipher Interface wrapper implementations for them. They are: ChaCha8 and
+ChaCha20~\cite{ChaCha20} as well as Freestyle~\cite{Freestyle} in three
+different configurations: a ``fast'' mode with parameters
+\texttt{FFast($R_{min}$=$8$,$R_{max}$=$20$,$H_I$=$4$,$I_C$=$8$)}, a ``balanced''
+mode with parameters \texttt{FBalanced($R_{min}$=$12$,
+$R_{max}$=$28$,$H_I$=$2$,$I_C$=$10$)}, and a ``strong'' mode with parameters
+\texttt{FStrong($R_{min}$=$20$,$R_{max}$=$36$,$H_I$=$1$,$I_C$=$12$)}.
