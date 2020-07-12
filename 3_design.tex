@@ -138,14 +138,15 @@ length-preserving output as an invariant, making ciphers that do not exhibit
 this property incompatible with their implementations; yet, ciphertext expansion
 is often (but not always) a necessary side-effect of ciphertext randomization.
 
-This is a binary feature in that a cipher either outputs ciphertext of
-the same length as its plaintext input or it does not. A cipher scores
-either a 0 if it \emph{is not} length-preserving in this way or a 1 if
-the ciphertext is always the same length as the plaintext. \hank{Would
-  it make sense to have this be a multiplier based on how much longer
-  the ciphertext is?  So if the cipher text is twice as long, the
-  score is 2? I am a little surprised that it is binary which would
-  imply that all increase length by the same amount. If that is true then we should say. }
+Even a single byte of additional length would make a cipher inappropriate for
+use with prior work. Hence, this is a binary feature in that a cipher either
+outputs ciphertext of the same length as its plaintext input or it does not. A
+cipher scores either a 0 if it \emph{is not} length-preserving in this way or a
+1 if the ciphertext is always the same length as the plaintext. \hank{Would it
+make sense to have this be a multiplier based on how much longer the ciphertext
+is?  So if the cipher text is twice as long, the score is 2? I am a little
+surprised that it is binary which would imply that all increase length by the
+same amount. If that is true then we should say. }
 
 \subsection{Generic Stream Cipher Interface} \label{subsec:interface}
 
