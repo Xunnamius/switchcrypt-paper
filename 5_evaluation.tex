@@ -6,7 +6,9 @@ We implement SwitchCrypt and our experiments on a Hardkernel Odroid XU3 ARM
 big.LITTLE system with Samsung Exynos 5422 A15/A7 heterogeneous multi-processing
 quad core CPUs at maximum clock speed, 2 gigabyte LPDDR3 RAM at 933 MHz, and an
 eMMC5.0 HS400 backing store running Ubuntu Trusty 14.04.6 LTS, kernel version
-3.10.106.
+3.10.106. Energy monitoring was provided by the Odroid's integrated INA-231
+power sensors polled every $\approx{260}$ milliseconds (not including
+noise/overhead).
 
 We evaluate SwitchCrypt using a Linux RAM disk (tmpfs). The maximum theoretical
 memory bandwidth for this Odroid model is 14.9GB/s\@. Our observed maximum
@@ -59,32 +61,31 @@ In this section we answer the following questions:
 \begin{figure}[ht]
   \textbf{Baseline Cipher I/O Performance}\par\medskip
   {\input{data/tradeoff-no-ratios.tex}} \caption{Median sequential and random
-  write and then read performance baseline (10 I/O operations repeated 3
-  times).}
+  write and then read performance baseline.}
  \label{fig:tradeoff-no-ratios}
 \end{figure}
 
-\figref{tradeoff-no-ratios} shows the security score versus median normalized
-latency tradeoff between different stream ciphers when completing our sequential
-and random I/O workloads. Trends for median hold when looking at tail latencies
-as well. Each line represents one workload. From left to right: 4KB, 512KB, 5MB,
-and 40MB respectively. Each symbol represents one of our ciphers. From left to
-right: ChaCha8, ChaCha20, Freestyle Fast, Freestyle Balanced, and Freestyle
-Strong. As expected, of the ciphers we tested, those with higher security scores
-result in higher latency for I/O operations while ciphers with less desirable
-security properties result in lower latency. The relationship between these
-concerns is not simply linear, however, which exposes a rich security vs
-latency/energy tradeoff space.
+\figref{tradeoff-no-ratios} shows the relative round count, ciphertext
+randomization, and ciphertext expansion scores versus median normalized latency
+tradeoff between different stream cipher configurations when completing our
+sequential and random I/O workloads. Trends for median hold when looking at tail
+latencies as well. Each line represents one workload: 4KB, 512KB, 5MB, and 40MB
+respectively (see legend). Each symbol represents one of our ciphers: ChaCha8,
+ChaCha20, Freestyle Fast, Freestyle Balanced, and Freestyle Strong. Of the
+ciphers we tested, those with higher round counts and higher ciphertext
+randomization scores resulted in higher latency and increased energy use for I/O
+operations. The relationship between these concerns is not simply linear,
+however, which exposes a rich tradeoff space.
 
-Besides the 4KB workload, the shape of each workload follows a similar
-superlinear latency-vs-security trend, hence we will mostly focus on 40MB and
-4KB workloads going forward. Due to the overhead of metadata management and the
-fast completion time of the 4KB workloads (\ie{little time for amortization of
-overhead}), ChaCha8 and ChaCha20 take longer to complete than the higher scoring
-Freestyle Fast. This advantage is not enough to make Freestyle Balanced or
-Secure complete faster than the ChaCha variants, however.
+Besides the 4KB workload, the shape of each workload follows a similar trend,
+hence we will focus on 40MB and 4KB workloads going forward. Due to the overhead
+of metadata management and the fast completion time of the 4KB workloads
+(\ie{little time for amortization of overhead}), ChaCha8 and ChaCha20 take
+longer to complete than Freestyle Fast. This advantage is not enough to make
+Freestyle Balanced or Secure workloads complete faster than the ChaCha variants,
+however.
 
-Though ChaCha8 is generally faster than ChaCha20, there is some variability in
+Though ChaCha8 is faster than ChaCha20, there is some variability in
 our timing setup when capturing extremely fast events occurring close together
 in time. This is why ChaCha8 sometimes appears with higher latency than ChaCha20
 for normalized 4KB workloads. ChaCha8 is not slower than ChaCha20.
@@ -95,7 +96,8 @@ for normalized 4KB workloads. ChaCha8 is not slower than ChaCha20.
   \textbf{Forward Switching I/O Ratio Performance}\par\medskip
   {\input{data/tradeoff-with-ratios.tex}} \caption{Median sequential and random
   write and then read back performance comparison of Forward switching to
-  baseline.}
+  baseline. Each cluster of 3 dots between configurations represents the 7:3,
+  5:5, and 3:7 primary-vs-secondary I/O ratios described in the text.}
  \label{fig:tradeoff-with-ratios}
 \end{figure}
 
@@ -133,7 +135,7 @@ performed), and is generally much slower than the ChaCha variants (see
 means these penalties are paid more often, ballooning latency.
 
 \begin{figure}[ht]
-  \textbf{Mirrored and Selective Switching I/O Ratio Performance}\par\medskip
+  \textbf{Mirrored/Selective Switching I/O Ratio Performance}\par\medskip
   \centering
   {\input{data/mirrored-selective-baseline.tex}} \caption{Median sequential and
   random write and then read back performance comparison of Mirrored and
