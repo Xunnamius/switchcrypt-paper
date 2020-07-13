@@ -110,8 +110,8 @@ much more difficult to execute chosen-ciphertext attacks (CCA), key
 re-installation attacks, XOR-based cryptanalysis and other comparison attacks,
 and other confidentiality-violating schemes where the ciphertext is in full
 control of the adversary ~\cite{Freestyle}. This property is useful in cases
-where we cannot prevent the same key, nonce, and plaintext from being
-reused, such as with data ``in motion'' (see the motivational example in
+where we cannot prevent the same key, nonce, and plaintext from being reused,
+such as with data ``in motion'' (see the motivational example in
 \secref{motivation}). Ciphers without this property---such as ChaCha20 on which
 prior work is based---are trivially broken when key-nonce-plaintext 3-tuples are
 reused. In StrongBox, this is referred to as an ``overwrite condition'' or
@@ -138,42 +138,44 @@ length-preserving output as an invariant, making ciphers that do not exhibit
 this property incompatible with their implementations; yet, ciphertext expansion
 is often (but not always) a necessary side-effect of ciphertext randomization.
 
-Even a single byte of additional length would make a cipher inappropriate for
-use with prior work. Hence, this is a binary feature in that a cipher either
-outputs ciphertext of the same length as its plaintext input or it does not. A
-cipher scores either a 0 if it \emph{is not} length-preserving in this way or a
-1 if the ciphertext is always the same length as the plaintext. \hank{Would it
-make sense to have this be a multiplier based on how much longer the ciphertext
-is?  So if the cipher text is twice as long, the score is 2? I am a little
-surprised that it is binary which would imply that all increase length by the
-same amount. If that is true then we should say. }
+The ciphers included in our analysis that exhibit ciphertext expansion have an
+overhead of around 1.56\% per plaintext message block~\cite{Freestyle}. Even a
+single byte of additional ciphertext vs plaintext would make a cipher
+inappropriate for use with prior work. Hence, this is a binary feature in that a
+cipher either outputs ciphertext of the same length as its plaintext input or it
+does not. A cipher scores either a 0 if it \emph{is not} length-preserving in
+this way or a 1 if the ciphertext is always the same length as the plaintext.
 
 \subsection{Generic Stream Cipher Interface} \label{subsec:interface}
 
-There are many ciphers we might use with SwitchCrypt, each with
-various input requirements and output considerations. Unlike prior
-work, SwitchCrypt must be able to encrypt and decrypt arbitrary
-nuggets with arbitrary ciphers at any moment with low overhead without
-worrying about cipher-specific implementation details like required
-inputs (which vary drastically between cipher implementations), length
-of plaintext and potential ciphertext expansion, potential
-cipher-specific metadata storage, and other special conditions.
-\hank{This all feels very abstract.  It would really help to make it
-  concrete with a table or something that shows the different
-  requirements for different ciphers.  Right now the interface is a
-  major claim, but we don't have enough to justify that it is actually
-  a hard problem.  (I know it is, but I mean from a reader/reviewer's
-  perspective.)}
+One of the goals of SwitchCrypt is that we might use any stream cipher
+regardless of its implementation details. Yet this is entirely non-trivial.
+There are many cipher implementations that we might use with SwitchCrypt, each
+with unique input requirements and output considerations. For instance, Salsa
+and Chacha implementations require a certain IV and key size and handle
+plaintext input through successive invocations of a single state update
+function~\cite{Floodyberry}. Using OpenSSL's AES implementation in CTR mode
+requires manually tracking the counter state and individual ciphertext blocks
+are retrieved though corresponding function invocations~\cite{OpenSSL}.
+Freestyle's reference implementation requires we calculate the extra space
+necessary per nugget (due to ciphertext expansion) along with
+configuration-dependent minimum and maximum rounds-per-block, hash interval, and
+pepper bits~\cite{Freestyle}. HC-128 and other ciphers have similarly disparate
+requirements.
 
-Hence, there is a need for an interface that decouples cipher implementations
-from the encryption/decryption process entirely. Our novel cipher interface
-allows any stream cipher to be integrated into SwitchCrypt without modifications
-to third-party code, enabling normally incompatible ciphers to encrypt and
-decrypt arbitrary nuggets. The ability for disparate cipher implementations to
-co-exist forms the foundation for SwitchCrypt's ability to move the system
-between different configuration points in our tradeoff space efficiently and
-effectively.
+Unlike prior work, SwitchCrypt must be able to encrypt and decrypt arbitrary
+nuggets \emph{with any of these ciphers} at any moment with low overhead and
+without tight coupling to any specific implementation detail. Hence, there is a
+need for an interface that completely decouples cipher implementations from the
+encryption/decryption process. Our novel cipher interface allows any stream
+cipher to be integrated into SwitchCrypt without modifications to third-party
+code, enabling normally incompatible ciphers to encrypt and decrypt arbitrary
+nuggets. The ability for disparate cipher implementations to co-exist forms the
+foundation for SwitchCrypt's ability to switch the system between different
+cipher configurations in our tradeoff space efficiently and effectively.
 
+To facilitate this, the Generic Stream Cipher Interface presents the
+cryptographic driver with a single unified encryption/decryption model.
 SwitchCrypt receives I/O requests from the operating system at the block device
 level like any other device-mapper. These requests come in the form of either
 reads or writes. When a read request is received, the OS hands SwitchCrypt an
@@ -183,72 +185,40 @@ length starting at that specific offset taken from the beginning of storage
 received, the OS hands SwitchCrypt an offset, a length, and a buffer of
 plaintext and expects that plaintext to be encrypted and committed to storage
 such that the plaintext is later retrievable given that same offset and length
-in a future read request. \hank{The lengths are specified as plaintext lengths?}
-
-The Generic Stream Cipher Interface presents the cryptographic driver with a
-single unified encryption/decryption model, laying the groundwork for
-\emph{cipher switching}. The interface consists of two mutually exclusive
-function declarations---only one can exist per wrapper implementation. These
-declarations are defined by lightweight wrapper code that  calls
-out to a stream cipher implementation to handle plaintext encryption and
-ciphertext decryption; once defined, these functions are invoked by SwitchCrypt
-to handle I/O requests. Choosing to define one declaration over another depends
-on a cipher implementation's input requirements and output characteristics.
-
-\hank{Putting my reviewer hat on here, it is not clear to me why we
-  need three differenct levels. This list needs a sentence or two to
-  preface what is going on.}
+in a future read request. These requests can either be handled together by a
+single function or handled individually as distinct read and write operations,
+each with different tradeoffs.
 
 \begin{enumerate}
    \item \textbf{\texttt{xor\_interface}}\\\texttt{xor\_interface} executes
-   independently of SwitchCrypt internals and is the simplest interface to
-   implement. At this level of abstraction, encryption and decryption are
-   treated as the same operation accomplished with a simple XOR. Implementations
-   receive an integer offset $F$, an integer length $L$, a key buffer $K$
-   corresponding to the current nugget, and an empty $L$-length XOR buffer.
-   SwitchCrypt expects the XOR buffer to be populated with $L$ bytes of
-   keystream output from some stream cipher seeked to offset $F$ with respect to
-   key $K$. The length of the key buffer will always be exactly what the cipher
-   implementation expects, alleviating the burden of key management by
-   implementers; similarly, the XOR buffer will be XOR-ed with the appropriate
-   portion of nugget contents automatically, alleviating the burden of drive
-   access and other tedious calculations by implementers.
-
-   This interface has the lowest implementation overhead and least flexibility
-   when it comes to expected inputs and outputs but cannot be used with
-   ciphertext expanding ciphers or ciphers that must distinguish between
-   decryption and encryption. \\
+   independently of SwitchCrypt internals and treats encryption and decryption
+   as the same operation. Implementations receive an integer offset $F$, an
+   integer length $L$, a key buffer $K$ corresponding to the current nugget, and
+   an empty $L$-length XOR buffer. SwitchCrypt expects the XOR buffer to be
+   populated with $L$ bytes of keystream output from some stream cipher seeked
+   to offset $F$ with respect to key $K$. The length of the key buffer will
+   always be exactly what the cipher implementation expects, alleviating the
+   burden of key management; similarly, the XOR buffer will be XOR-ed with the
+   appropriate portion of nugget contents automatically, alleviating the burden
+   of drive access and other tedious calculations. \\
    \item \textbf{\texttt{read\_interface}} and
    \textbf{\texttt{write\_interface}}\\
    Unlike \texttt{xor\_interface}, encryption and decryption are distinct
    concerns at this abstraction level. \\\texttt{read\_interface} handles
    decryption during reads. \\\texttt{write\_interface} handles encryption
-   during writes. Implementations receive full access to SwitchCrypt internals
-   and can be considered ``closer to the metal'' with fewer features abstracted
-   away. This gives wrapper code complete control over the encryption and
-   decryption process, allowing implementers to bypass parts of the nugget-based
-   drive layout abstraction (i.e. BODY) if necessary. This comes at the cost of
-   1) significantly increased code complexity, as the implementer must perform
-   all I/O manually, distinguish between independent nuggets on the drive,
+   during writes. Implementations receive full access to SwitchCrypt internals,
+   giving wrapper code complete control over the encryption and decryption
+   process and allowing implementers to bypass parts of the nugget-based drive
+   layout abstraction (i.e. BODY) if necessary. This comes at the cost of 1)
+   significantly increased code complexity, as the implementer must perform
+   certain I/O manually, distinguish between independent nuggets on the drive,
    determine what to encrypt or decrypt at what offset and when, when to commit
-   which metadata and where and 2) potentially reduced performance, since
+   which metadata and where and 2) potential performance implications, since
    SwitchCrypt must account for not having absolute control over its internal
-   data structures during function invocation.
-
-   Implementers must also account for cipher switches that might occur
-   at any moment after or \emph{before} the function is executed by
-   ensuring they do not read in any data from the drive if a perfectly
-   aligned nugget-sized I/O operation is requested. This is because at
-   the point of execution the underlying drive data might be encrypted
-   with an unexpected cipher. \hank{This phrasing feels weird to me.
-     Aren't we the implementers?  Are we the ones who have to account
-     for this?  It sounds like a drawback, but it is not clear to me
-     what is really going on here.}
-
-   This interface is useful for calling out to exotic ciphers like AES-GCM and
-   AES-CTR or AES-XTS and other block ciphers that do not function like stream
-   ciphers. It is also useful when ciphers exhibit ciphertext expansion or are
-   otherwise non-length-preserving or have additional metadata requirements.
+   data structures during function invocation. For a cipher like Freestyle,
+   configurations with lower minimum and maximum rounds per block may see a
+   performance improvement here, while configurations with higher minimum and
+   maximum rounds per block may see reduced performance.
 \end{enumerate}
 
 \subsection{Cipher Switching Strategies} \label{subsec:strategies}
@@ -346,9 +316,9 @@ operations should occur. In this way, the Mirrored strategy represents a form of
 spatial cipher switching because we're switching which configuration we're using
 to read in and process data. For instance, a user could take advantage of this
 along with SSD Instant Secure Erase~\cite{ISE1,ISE2,ISE3} to delete other
-regions, and  thus quickly and securely converging the drive to a single configuration
-without losing any data or suffering the egregious performance or battery
-penalty that comes with re-ciphering every nugget.
+regions, and  thus quickly and securely converging the drive to a single
+configuration without losing any data or suffering the egregious performance or
+battery penalty that comes with re-ciphering every nugget.
 
 \subsubsection{Comparing Cipher Switching Strategies}
 
@@ -444,7 +414,9 @@ each cipher, including the ``least desirable cipher''. However, in terms of
 confidentiality, all the ciphers we configured under SwitchCrypt have no known
 practical attacks against them, and in this context the confidentiality
 guarantee of SwitchCrypt can be reduced to the individual confidentiality
-guarantees of the available ciphers used to encrypt nuggets. \hank{This last sentence needs to be rephrased because our motivational example describes a practical attack on existing ciphers that do not use output randomization. }
+guarantees of the available ciphers used to encrypt nuggets. \hank{This last
+sentence needs to be rephrased because our motivational example describes a
+practical attack on existing ciphers that do not use output randomization. }
 
 \subsection{Putting It All Together} \label{subsec:summary}
 
@@ -463,7 +435,10 @@ some master secret. Finally, using the Generic Stream Cipher Interface, we call
 out to the active stream cipher implementation, allowing SwitchCrypt to
 encrypts/decrypts the nugget's contents and commit any updates back to storage.
 All the while, the drive's Freestyle-encrypted contents are being uploaded up to
-our enterprise backup service every so often. \hank{Probably need to say that we start with Freestyle to meet all the demands.  I have to be honest and say that even I forgot about that until I reread it here and I am sure that reviewers will be paying much less attention than me.}
+our enterprise backup service every so often. \hank{Probably need to say that we
+start with Freestyle to meet all the demands.  I have to be honest and say that
+even I forgot about that until I reread it here and I am sure that reviewers
+will be paying much less attention than me.}
 
 When the device enters ``battery saver'' mode, drive backups are paused, the
 energy monitoring software downclocks the CPU, and the OS signals to SwitchCrypt
