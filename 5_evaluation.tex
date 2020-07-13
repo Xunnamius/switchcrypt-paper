@@ -15,29 +15,28 @@ performance differences due to different ciphers.
 
 In each experiment below, we evaluate SwitchCrypt on two high level workloads:
 sequential and random I/O. In both workloads, a number of bytes are written and
-then read (either 4KB, 512KB, 5MB, 40MB) 10 times. Each experiment is repeated
-three times for a total of 240 tests; 30 results per byte size, 120 results per
-workload. Results are accumulated and the median is taken for each byte size.
+then read (either 4KB, 512KB, 5MB, 40MB) 10 times (30 total). Each workload is
+repeated three times for a total of 240 tests; 30 results per byte size, 120
+results per workload. Results are accumulated and the median is taken for each
+byte size.
 
 When evaluating switching strategies, a finer breakdown in workloads is made
-using a pre-selected pair of ciphers we call the \emph{primary cipher} and
-\emph{secondary cipher} in context, yielding a cipher configuration point given
-some switching strategy; a specific \emph{ratio} of those 10 write-read pairs is
-performed using the primary cipher and the remainder with secondary other. These
-ratio workloads test SwitchCrypt's ability to reach configuration points not
-accessible to prior work.
+using a pre-selected pair of ciphers we call the \emph{primary cipher
+configuration} and \emph{secondary cipher configuration}. SwitchCrypt is
+initialized at the primary configuration. Once we trigger a cipher switch,
+SwitchCrypt moves towards the secondary configuration via switching strategy.
+The cipher switch is triggered according to a certain \emph{ratio} of I/O
+operations; for example: given 10 40MB read-write operations, we may write and
+then read back 40MB 3 times using the primary cipher, initiate a cipher switch,
+and then write and then read back 40MB 7 times.
 
 There are three ratios we use to evaluate SwitchCrypt's performance in this
-regard: 1:3, 1:1, and 3:1. Respectively, that is 1 whole file write-read
+regard: 7:3, 5:5, and 3:7. Respectively, that is 7 whole file write-read
 operation in the primary cipher for every 3 whole file write-read operations in
-the secondary cipher (1:3), 1 whole file write-read operation in the primary
+the secondary cipher (7:3), 7 whole file write-read operation in the primary
 cipher for every other whole file write-read operation in the secondary cipher
-(1:1), and 3 whole file write-read operations in the primary cipher for every 1
-whole file write-read operation in the secondary cipher (3:1). The security
-score for each ratio point is calculated as $score$=$score_L + ||score_L -
-score_H|| * r * 0.25)$ where $score_L$ is the lowest security score
-(configuration), $score_H$ is the highest, and $r$ is a number representing the
-ratio; 1:3=3, 1:1=2, and 3:1=1.
+(5:5), and 3 whole file write-read operations in the primary cipher for every 7
+whole file write-read operation in the secondary cipher (3:7).
 
 All experiments are performed with basic Linux I/O commands, bypassing system
 caching.
@@ -60,7 +59,8 @@ In this section we answer the following questions:
 \begin{figure}[ht]
   \textbf{Baseline Cipher I/O Performance}\par\medskip
   {\input{data/tradeoff-no-ratios.tex}} \caption{Median sequential and random
-  read and write performance baseline.}
+  write and then read performance baseline (10 I/O operations repeated 3
+  times).}
  \label{fig:tradeoff-no-ratios}
 \end{figure}
 
@@ -94,7 +94,8 @@ for normalized 4KB workloads. ChaCha8 is not slower than ChaCha20.
 \begin{figure}[ht]
   \textbf{Forward Switching I/O Ratio Performance}\par\medskip
   {\input{data/tradeoff-with-ratios.tex}} \caption{Median sequential and random
-  read and write performance comparison of Forward switching to baseline.}
+  write and then read back performance comparison of Forward switching to
+  baseline.}
  \label{fig:tradeoff-with-ratios}
 \end{figure}
 
@@ -135,8 +136,8 @@ means these penalties are paid more often, ballooning latency.
   \textbf{Mirrored and Selective Switching I/O Ratio Performance}\par\medskip
   \centering
   {\input{data/mirrored-selective-baseline.tex}} \caption{Median sequential and
-  random read and write performance comparison of Mirrored and Selective
-  switching strategies to baseline.}
+  random write and then read back performance comparison of Mirrored and
+  Selective switching strategies to baseline.}
  \label{fig:mirrored-selective-baseline}
 \end{figure}
 

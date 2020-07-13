@@ -1,6 +1,6 @@
-\section{Implementation} \label{sec:implementation} \hank{This section
-  is short enough that I think it should move into a subsection in the
-  previous section.}
+% This section is not included in the paper rendering process and has been
+% punted into the dissertation instead.
+\section{Implementation} \label{sec:implementation}
 
 Our SwitchCrypt implementation consists of 9,491 lines of C code; our test suite
 consists of 6,077 lines of C code. All together, our solution is comprised of
@@ -31,10 +31,9 @@ We use POSIX message queues to indicate intent to switch. A production-ready
 implementation would be greatly simplified by adding an ``intent'' parameter to
 the POSIX \textit{read()} and \textit{write()} system calls, allowing
 SwitchCrypt to more exactly map individual I/O operations to specific areas of
-the drive when spatially switching. We simulate this with IPC. \TODO{This intent
-parameter could also be a security score or something right? You should spell
-out exactly what that intent parameter means and maybe change its name so its
-use is clearer.} \PUNT{This is especially important when considering the
+the drive when spatially switching. We simulate this with IPC. \TODO{You should
+spell out exactly what that intent parameter means and maybe change its name so
+its use is clearer.} \PUNT{This is especially important when considering the
 Selective switching strategy; a production-ready implementation supporting
 Selective switching would need to differentiate between metadata operations
 belonging to the filesystem (should be mirrored across all regions) and actual
