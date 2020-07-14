@@ -52,8 +52,6 @@ In this section we answer the following questions:
  configuration points not accessible with prior work? (\cref{subsec:2})
  \item What is the performance and storage overhead of each cipher switching
  strategy? (\cref{subsec:3})
- \item How does incorporation of cipher switching change the threat analysis
- versus prior work? (\cref{subsec:4})
 \end{enumerate}
 
 \subsection{Switching Strategies Under Various Workloads} \label{subsec:1}
@@ -159,12 +157,11 @@ entire region.
 
 \subsection{Cipher Switching Overhead} \label{subsec:3}
 
-From the results of the previous three experiments, we calculate that Forward
-switching has average overhead at 0.08x/0.10x for 40MB, 5MB and 512KB read/write
-workloads compared to baseline I/O, demonstrating SwitchCrypt's amortization of
-cipher switching costs. Average overhead is\\0.38x/0.44x for 4KB read/write
-workloads when SwitchCrypt is unable to amortize cost. There is no spatial
-overhead with the Forward switching strategy.
+We calculate that Forward switching has average overhead at 0.08x/0.10x for
+40MB, 5MB and 512KB read/write workloads compared to baseline I/O, demonstrating
+SwitchCrypt's amortization of cipher switching costs. Average overhead
+is\\0.38x/0.44x for 4KB read/write workloads when SwitchCrypt is unable to
+amortize cost. There is no spatial overhead with the Forward switching strategy.
 
 Similarly, we calculate that Selective switching has average overhead at 0x/0.3x
 for 40MB, 5MB and 512KB read/write workloads compared to baseline I/O. Average
