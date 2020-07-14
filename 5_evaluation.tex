@@ -17,10 +17,10 @@ performance differences due to different ciphers.
 
 In each experiment below, we evaluate SwitchCrypt on two high level workloads:
 sequential and random I/O. In both workloads, a number of bytes are written and
-then read (either 4KB, 512KB, 5MB, 40MB) 10 times (30 total). Each workload is
-repeated three times for a total of 240 tests; 30 results per byte size, 120
-results per workload. Results are accumulated and the median is taken for each
-byte size.
+then read (either 4KB, 512KB, 5MB, 40MB) 10 times. Each workload is repeated
+three times for a total of 240 tests per cipher (720 runs per cipher
+pair/ratios, explained below); 30 results per byte size, 120 results per
+workload. Results are accumulated and the median is taken for each byte size.
 
 When evaluating switching strategies, a finer breakdown in workloads is made
 using a pre-selected pair of ciphers we call the \emph{primary cipher
@@ -67,15 +67,15 @@ In this section we answer the following questions:
 
 \figref{tradeoff-no-ratios} shows the relative round count, ciphertext
 randomization, and ciphertext expansion scores versus median normalized latency
-tradeoff between different stream cipher configurations when completing our
-sequential and random I/O workloads. Trends for median hold when looking at tail
-latencies as well. Each line represents one workload: 4KB, 512KB, 5MB, and 40MB
-respectively (see legend). Each symbol represents one of our ciphers: ChaCha8,
-ChaCha20, Freestyle Fast, Freestyle Balanced, and Freestyle Strong. Of the
-ciphers we tested, those with higher round counts and higher ciphertext
-randomization scores resulted in higher latency and increased energy use for I/O
-operations. The relationship between these concerns is not simply linear,
-however, which exposes a rich tradeoff space.
+tradeoff between different stream cipher configurations for our sequential and
+random I/O workloads. Trends for median hold when looking at tail latencies as
+well. Each line represents one workload: 4KB, 512KB, 5MB, and 40MB respectively
+(see legend). Each symbol represents one of our ciphers: ChaCha8, ChaCha20,
+Freestyle Fast, Freestyle Balanced, and Freestyle Strong. Of the ciphers we
+tested, those with higher round counts and higher ciphertext randomization
+scores resulted in higher latency and increased energy use for I/O operations.
+The relationship between these concerns is not simply linear, however, which
+exposes a rich tradeoff space.
 
 Besides the 4KB workload, the shape of each workload follows a similar trend,
 hence we will focus on 40MB and 4KB workloads going forward. Due to the overhead
@@ -101,18 +101,15 @@ for normalized 4KB workloads. ChaCha8 is not slower than ChaCha20.
  \label{fig:tradeoff-with-ratios}
 \end{figure}
 
-\figref{tradeoff-with-ratios} shows the security score versus median normalized
-latency tradeoff between different stream ciphers when completing our sequential
-and random I/O workloads \emph{with cipher switching using the Forward
-strategy}. As with \figref{tradeoff-no-ratios}, each line represents one
-workload and each symbol represents one of our ciphers. From left to right:
-ChaCha8, ChaCha20, Freestyle Fast, Freestyle Balanced, and Freestyle Strong.
-
-After a certain number of write-read I/O operations, a cipher switch is
-initiated and SwitchCrypt begins using the secondary cipher to encrypt and
-decrypt data. For each pair of ciphers, this is repeated three times: once at
-every ratio point \emph{between} our static configuration points (\ie{1:3, 1:1,
-and 3:1 described above}).
+\figref{tradeoff-with-ratios} shows the relative round count, ciphertext
+randomization, and ciphertext expansion scores versus median normalized latency
+tradeoff between different stream ciphers for our sequential and random I/O
+workloads with cipher switching using the Forward strategy. After a certain
+number of write-read I/O operations, a cipher switch is initiated and
+SwitchCrypt begins using the secondary cipher to encrypt and decrypt data. For
+each pair of ciphers, this is repeated three times: once at every ratio point
+\emph{between} our static configuration points (\ie{7:3, 5:5, and 3:7 described
+above}).
 
 The point of this experiment is to determine if SwitchCrypt can effectively
 transition the drive between ciphers without devastating performance. For the
@@ -123,16 +120,13 @@ prior work, all with minimal overhead.
 Again, due to the overhead of metadata management for non-Freestyle ciphers (see
 \cref{subsec:implementation}) and the fast completion time of the 4KB workloads
 preventing SwitchCrypt from taking advantage of amortization, ChaCha8 and
-ChaCha20 take longer to complete than the higher scoring Freestyle Fast for 4KB
-reads. This advantage is not enough to make the ratios involving Freestyle
-Balanced or Secure complete faster than the ChaCha ratio variants, however.
-
-We also see very high latency for ratios between Freestyle Fast and Freestyle
-Strong cipher configurations. This is because Freestyle, while avoiding metadata
-management overhead, is not length-preserving (so extra write operations must be
-performed), and is generally much slower than the ChaCha variants (see
-\figref{tradeoff-no-ratios}). Doubly invoking Freestyle in a ratio configuration
-means these penalties are paid more often, ballooning latency.
+ChaCha20 take longer to complete than Freestyle Fast for 4KB reads. We also see
+very high latency for ratios between Freestyle Fast and Freestyle Strong cipher
+configurations. This is because Freestyle is not length-preserving, so extra
+write operations must be performed, and the algorithm itself is generally much
+slower than the ChaCha variants (see \figref{tradeoff-no-ratios}). Doubly
+invoking Freestyle in a ratio configuration means these penalties are paid more
+often.
 
 \begin{figure}[ht]
   \textbf{Mirrored/Selective Switching I/O Ratio Performance}\par\medskip
@@ -151,19 +145,17 @@ For the 40MB, 5MB, and 512KB workloads (40MB is shown), we see that Mirrored and
 Selective \emph{read} workloads and the Selective \emph{write} workload achieve
 parity with the Forward strategy experiments. This makes sense, as most of the
 overhead for Selective and Mirrored reads is determining which part of the drive
-to commit data to. The same applies to Selective writes.
-
-For the 4KB Mirrored and Selective \emph{read} workloads and the Selective
-\emph{write} workload, we see behavior similar to that in
-\figref{tradeoff-with-ratios}, as expected.
+to commit data to. The same applies to Selective writes. For the 4KB Mirrored
+and Selective \emph{read} workloads and the Selective \emph{write} workload, we
+see behavior similar to that in \figref{tradeoff-with-ratios}, as expected.
 
 Mirrored writes across all workloads are very slow. This is to be expected,
 since the data is being mirrored across all areas of the drive. In our
 experiments, the drive can be considered partitioned in half. This overhead is
 most egregious for the 4KB Mirrored write workload. This makes Selective
-preferable to Mirrored; however, Selective can never converge the drive to a
-single cipher configuration or survive the loss of an entire region (see:
-\secref{usecases}).
+preferable to Mirrored. However, it's a tradeoff; Selective cannot quickly
+converge the drive to a single cipher configuration or survive the loss of an
+entire region.
 
 \subsection{Cipher Switching Overhead} \label{subsec:3}
 
@@ -187,9 +179,9 @@ writable space on the drive.
 
 These overhead numbers are the penalty paid for the additional flexibility of
 being able to reach configurations points that are unachievable without
-SwitchCrypt. We believe SwitchCrypt's design keeps these overheads acceptably
-low in practice (see \secref{usecases}), achieving the desired goal of flexibly
-navigating latency/security tradeoffs for FDE.
+SwitchCrypt. SwitchCrypt's design keeps these overheads acceptably low in
+practice, achieving the desired goal of flexibly navigating latency/security
+tradeoffs for FDE.
 
 \PUNT{\subsection{Revisiting Our Threat Model} \label{subsec:4}
 
