@@ -27,18 +27,18 @@ using a pre-selected pair of ciphers we call the \emph{primary cipher
 configuration} and \emph{secondary cipher configuration}. SwitchCrypt is
 initialized at the primary configuration. Once we trigger a cipher switch,
 SwitchCrypt moves towards the secondary configuration via switching strategy.
-The cipher switch is triggered according to a certain \emph{ratio} of I/O
-operations; for example: given 10 40MB read-write operations, we may write and
-then read back 40MB 3 times using the primary cipher, initiate a cipher switch,
-and then write and then read back 40MB 7 times.
 
-There are three ratios we use to evaluate SwitchCrypt's performance in this
-regard: 7:3, 5:5, and 3:7. Respectively, that is 7 whole file write-read
-operation in the primary cipher for every 3 whole file write-read operations in
-the secondary cipher (7:3), 7 whole file write-read operation in the primary
-cipher for every other whole file write-read operation in the secondary cipher
-(5:5), and 3 whole file write-read operations in the primary cipher for every 7
-whole file write-read operation in the secondary cipher (3:7).
+The cipher switch is triggered according to a certain \emph{ratio} of I/O
+operations. For example: given 10 40MB read-write operations, we may write and
+then read back 40MB 3 times using the primary cipher, initiate a cipher switch,
+and then write and then read back (write-read) 40MB 7 times. This would be a 3:7
+ratio. It follows that there are three ratios we use to evaluate SwitchCrypt's
+performance in this regard: 7:3, 5:5, and 3:7. Respectively, that is 7 file
+write-read operation in the primary cipher for every 3 file write-read
+operations in the secondary cipher (7:3), 7 file write-read operation in the
+primary cipher for every other file write-read operation in the secondary cipher
+(5:5), and 3 file write-read operations in the primary cipher for every 7 file
+write-read operation in the secondary cipher (3:7).
 
 All experiments are performed with basic Linux I/O commands, bypassing system
 caching.

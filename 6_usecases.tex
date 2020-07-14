@@ -1,109 +1,115 @@
 \section{SwitchCrypt Case Studies} \label{sec:usecases}
 
-In this section, we provide four case studies and empirical results
-demonstrating the practical utility of cipher switching. We cover a wide range
-of situations, highlighting concerns like configuration convergence
-(\cref{subsec:uc4}), trading off security and writable space
-(\cref{subsec:uc2}), meeting latency goals (\cref{subsec:uc3}), and keeping
-within an energy budget (\cref{subsec:uc1}). We also demonstrate the utility of
-both temporal and spatial switching strategies, exploring the range of
-conditions under which certain strategies are optimal.
+In this section, we provide four case studies demonstrating the practical
+utility of cipher switching. We cover a wide range of situations, highlighting
+concerns like configuration convergence (\cref{subsec:uc4}), trading off
+security and writable space (\cref{subsec:uc2}), meeting latency goals
+(\cref{subsec:uc3}), and keeping within an energy budget (\cref{subsec:uc1}). We
+also demonstrate the utility of both temporal and spatial switching strategies,
+exploring the range of conditions under which certain strategies are optimal.
 
 \subsection{Balancing Security Goals with a Hard Energy Cap} \label{subsec:uc1}
 
-This usecase illustrates that, because latency and energy use are correlated
-among the ciphers we examined, we can exploit that property using temporal
-Forward switching to save our battery. We revisit the motivating example from
-\secref{motivation}, demonstrating that the ability to re-cipher individual
-nuggets allows us to complete our task while staying within our energy budget.
+Here we revisit the motivating example from \secref{motivation}. It illustrates
+that, because latency and energy use are correlated among the ciphers we
+examined, we can exploit that to save battery life when necessary while
+maintaining confidentiality when uploading encrypted backups to our
+enterprise solution.
 
-To simulate a 400MB video download (in parts), we begin sequentially writing 10
-40MB files using the Freestyle Balanced cipher configuration. After 5 seconds,
-the device enters ``battery saver'' mode. We simulate this event by 1)
-underclocking the cores to their lowest frequencies and 2) using
-\texttt{taskset} to transition the SwitchCrypt processes to the energy-efficient
-LITTLE cores. Afterwards, we complete the remaining workload using the ChaCha8
-cipher. We repeat this experiment three times.
+To simulate I/O activity, we begin randomly writing 10 40MB files using the
+Freestyle Balanced cipher configuration over the course of approximately 120-125
+seconds. After 5 seconds, the device enters ``battery saver'' mode, also pausing
+backup uploads. We simulate this event by 1) underclocking the cores to their
+lowest frequencies and 2) using \texttt{taskset} to transition the SwitchCrypt
+processes to the energy-efficient LITTLE cores. After this event, we complete
+the remaining workload using the ChaCha8 cipher. We repeat this experiment three
+times.
 
 \begin{figure}[ht] \textbf{Battery Saver Use Case: Energy-Security Tradeoff vs
    Strict Energy Budget}\par\medskip
    \centering
    {\input{data/usecase-battery.tex}} \caption{Median sequential write total
-   energy use with respect to time and security score with respect to time.}
+   energy use with respect to time with respect to time.}
   \label{fig:usecase-battery}
 \end{figure}
 
-In \figref{usecase-battery}, we see time versus energy used and average security
-score of the drive. At 0 seconds, we begin writing. At 5 seconds, the ``battery
-critical'' event occurs, causing the system to be underclocked. At 120 seconds,
-the system will die. If we blow past our energy ceiling, the system will die.
+In \figref{usecase-battery}, we see time versus energy used. At 0 seconds, we
+begin writing. At 5 seconds, the ``battery saver'' event occurs, causing the
+system to be underclocked. At 120 seconds, the system will die. If we blow past
+our energy ceiling, the system will die.
 
-Our goal is to finish downloading the file before the device dies. We have three
-cipher configuration choices. 1) Favor security and use Freestyle Balanced
-exclusively. Our results show that the device will die before completing the
-download. 2) Favor low energy use with ChaCha8 exclusively. Our results show
-that the device will finish writing early, but we fall below our minimum
-security score constraint. Finally, we have 3) favor security and use Freestyle
-Balanced except when the system enters a low power state, after which the
-storage layer switches to favoring optimal energy use using ChaCha20 via the
-Forward switching strategy. Our results show that, while the system uses
-slightly more power in the short term, we stay within our energy budget and
-finish before the devices dies. Further, when we get our device to a charger,
-SwitchCrypt can converge nuggets back to Freestyle Balanced.
+Our goal is to complete I/O before the device dies. We have three cipher
+configuration choices. 1) Favor security even when backups are paused and use
+Freestyle Balanced exclusively. Our results show that the device will die before
+I/O completes. 2) Favor low energy use even when backups are being uploaded and
+use ChaCha8 exclusively. Our results show that the device will finish writing
+early, but we cannot safely upload backups when nuggets are encrypted using
+ChaCha8. Finally, we have 3) favor security and use Freestyle Balanced when
+uploading backups, and switch to ChaCha8 when the system enters the low power
+state. Our results show that, while the system uses slightly more power in the
+short term, we stay within our energy budget and finish before the devices dies.
+Further, when we get our device to a charger, SwitchCrypt can converge nuggets
+back to Freestyle Balanced and resume uploading backups.
 
 On average, using Forward cipher switching resulted in a 3.3x total energy use
-reduction, allowing us to remain within our energy budget. We note, however,
-that the energy savings is not the point of this experiment. Rather, the lesson
-learned is that SwitchCrypt enables the system to move to the right point in the
-energy/security tradeoff space that the current task can still be accomplished
-before the battery is drained.
+reduction compared to exclusively using Freestyle Balanced, allowing us to
+remain within our energy budget. We note, however, that the energy savings is
+not the point of this experiment. Rather, the lesson learned is that SwitchCrypt
+enables the system to move to the right point in the energy/security tradeoff
+space so that the current task can still be accomplished before the battery is
+drained and without compromising backup security at any point.
 
 \subsection{Variable Security Regions} \label{subsec:uc2}
 
 This usecase illustrates utility of spatial Selective switching to achieve a
-performance win over prior work, where the entire drive is encrypted with a
+performance win over prior work where the entire drive is encrypted with a
 single cipher. We demonstrate \emph{Variable Security Regions} (VSR), where we
 can choose to encrypt select files or portions of files with different keys and
 ciphers below the filesystem level.
 
 Storing classified materials, corporate secrets, etc. require the highest level
-of discretion, yet sensitive information like this can appears within a (much)
+of discretion, yet sensitive information like this can appear within a (much)
 larger amount of data that we value less. But if only a small percentage of the
 data needs the strongest encryption, then only a small percentage of the data
 should have that associated overhead. In this scenario, a user wants to indicate
 one or more regions of a file are more sensitive than the others. For example,
-perhaps banking transaction information is littered throughout a document;
-perhaps passwords and other sensitive information exists within several much
-larger files. Using prior techniques, either all the data would be stored with
-high overhead, the critical data would be stored without sufficient security, or
-the data would have to be split among separate files and managed across
-partitioned stores.
+perhaps banking transaction information is littered throughout a PDF; perhaps
+passwords and other sensitive information exists within several much larger
+files. Using prior techniques, either all the data would be stored with high
+overhead, the critical data would be stored without the mandated cipher type, or
+the data would have to be split among separate files requiring potentially
+complex and error-prone management schemes. SwitchCrypt VSRs allows us to
+sidestep these issues.
 
-We begin by writing 10 5MB and 4KB data (simulating larger and smaller VSR
-files) to unique SwitchCrypt instances using ChaCha8 and again on instances
-using Freestyle Balanced. We repeat this on a SwitchCrypt setup using Selective
-switching with a 3:1 ratio of ChaCha8 nugget I/O operations versus Freestyle
-Balanced operations. We repeat this experiment three times.
+We begin by with 10 5MB and 4KB write-read operations to two
+SwitchCrypt instances: one using ChaCha8 (C8) and the other using Freestyle
+Strong (FS). These results represent I/O without cipher switching where 100\% of
+the data is stored with either high overhead (FS) or using an inappropriate
+cipher (C8). We then use a third SwitchCrypt instance initialized with Selective
+switching and write-read with a 7:3 ratio of ChaCha8 versus Freestyle
+Balanced I/O operations. Here, 30\% of the data is considered sensitive. We
+repeat this experiment three times.
 
 \begin{figure}[ht] \textbf{VSR Use Case: ChaCha8 vs Freestyle Strong Sequential
 4KB, 5MB Performance}\par\medskip
    \centering
    {\input{data/usecase-vsr-bar.tex}} \caption{Median sequential read and write
-   performance comparison of 5MB I/O with 3-to-1 ratio of ChaCha8 nuggets to
-   Freestyle Strong nuggets, respectively.}
+   performance comparison of 4KB, 5MB I/O with 3-to-7 ratio, ChaCha8 vs
+   Freestyle Strong (respectively).}
   \label{fig:usecase-vsr-bar}
 \end{figure}
 
 In \figref{usecase-vsr-bar}, we see the sequential read and write performance of
 4KB and 5MB workloads when nuggets are encrypted exclusively with ChaCha8 or
-Freestyle Balanced. Between them, we see Selective switching 3:1 ratio I/O
+Freestyle Balanced. Between them, we see Selective switching 3:7 ratio I/O
 results.
 
-Our goal is to use VSRs to keep our sensitive data secure while keeping the
-performance and battery life benefits of using a fast cipher for the majority of
-I/O operations. Using SwitchCrypt Selective switching versus prior work results
-in a reduction of 3.1x to 4.8x for read latency and 1.6x to 2.8x for write
-latency, all without compromising the security needs of the most sensitive data.
+Our goal is to use VSRs to keep our sensitive data at the mandated security
+level while keeping the performance and battery life benefits of using a fast
+cipher for the majority of I/O operations. Using SwitchCrypt Selective switching
+versus prior work results in a reduction of 3.1x to 4.8x for read latency and
+1.6x to 2.8x for write latency, all without compromising the security needs of
+the most sensitive data.
 
 \subsection{Responding to End-of-Life Slowdown in SSDs} \label{subsec:uc3}
 
@@ -118,7 +124,7 @@ becomes constrained, I/O performance drops precipitously~\cite{SSDEOL1}. With
 prior work, our strict latency ceiling is violated. However, if SwitchCrypt is
 made aware when the drive is in such a state, we can offset some of the
 performance loss by switching the ciphers of high traffic nuggets to the fastest
-cipher available using Forward switching.
+acceptable cipher available using Forward switching.
 
 We begin by writing 10 40MB files to SwitchCrypt per each cipher as a baseline.
 We then introduce a delay into SwitchCrypt I/O of $20ms$, simulating drive
@@ -152,39 +158,48 @@ of obscure side-channels and back doors (\eg{Dual\_EC\_DRBG~\cite{DualECDRBG}}),
 and access to technology like quantum computers. Suppose a scientist were
 attempting to re-enter her country through a border entry point when she is
 stopped. Further suppose her laptop containing sensitive priceless research data
-is confiscated from her custody. Being a security researcher, she has a chance
-to trigger a remote wipe, where the laptop uses Instant Secure Erase to reset
-its internal storage, permanently destroying all her data. While she certainly
-does not want her data falling into the wrong hands, she cannot afford to lose
-that data either. In such a scenario, it would be useful if, instead of
-destroying the data, the storage layer could switch itself to a more secure
-state as quickly as possible.
+(replicated across multiple SSDs via the SwitchCrypt Mirrored strategy) is
+confiscated from her custody. Being a security researcher, she has a chance to
+trigger a ``remote wipe,'' where the laptop's SSD uses Instant Secure Erase
+(ISE) to ``forget'' the key material used by the black-box FTL/drive
+controller's anti-wear-leveling measures, supposedly rendering all her drives'
+data inaccessible~\cite{ISE1,ISE2,ISE3}.
 
-\begin{figure}[ht] \textbf{Custody Panic Use Case: Security Goals vs
-Time}\par\medskip
+However, while our scientist certainly does not want her data falling into the
+wrong hands, she cannot afford to permanently lose access to that data either,
+which triggering storage-wide ISE would accomplish. In such a scenario, it would
+be useful if she could trigger ISE on all of the mirrored drives except the one
+with the strongest cipher configuration. Our goal, then, is to slow down any
+attacker as much as possible such that, even if they permanently store her
+encrypted data off-site for later attempts at decryption~\cite{NSA-UTAH} with
+exponentially more powerful compute resources and other new technologies, that
+data is more likely to remain irrecoverable. This allows her to use her device
+in her daily life without suffering the egregious performance penalties of
+exclusively using the strongest cipher configuration while also allowing the
+system to instantly converge to the strongest possible state in an emergency.
+
+\begin{figure}[ht] \textbf{Custody Panic Use Case: Security vs Time}\par\medskip
    \centering
-   {\input{data/usecase-custody.tex}} \caption{Actual security score vs security
-   goal with respect to the time and ISE.}
+   {\input{data/usecase-custody.tex}} \caption{Actual security state vs desired
+   security state with respect to the time and ISE.}
   \label{fig:usecase-custody}
 \end{figure}
 
 In \figref{usecase-eol-tradeoff}, we see the system begins at 0 seconds, where
-all data is mirrored across the drive (perhaps consisting of multiple physical
-drives). Both the desired and minimum security score of the drive is 1.5, a
-balance between performance and security. At 6 seconds, custody panic is
-triggered---the desired minimum security score goes to 3, the highest
+all data is mirrored across partitions. Both the desired and minimum security
+state of the drive is 1.5, a balance between performance and security. For
+simplicity, we define "security state" here as the simple sum of two scores:
+\emph{relative round count and ciphertext randomization}. At 6 seconds, custody
+panic is triggered---the desired minimum security state goes to 3, the highest
 possible---at which point the system executes ISE and completely erases the
-drive containing the minimally scored data. ISE is known to be much faster than
-TRIM and completes in as little as 3 seconds~\cite{ISE1,ISE2,ISE3}. Once
-complete, the most secure form of the data is all that remains. The backing
-store has been ``locked down.''
+minimally encrypted partition. ISE, which takes advantage of FTL/drive
+controller level encryption to  is known to be much faster than TRIM and
+completes in as little as 3 seconds~\cite{ISE1,ISE2,ISE3}. Once complete, the
+most secure form of the data is all that remains. The backing store has been
+``locked down.''
 
-Our goal is to lock down the drive, slowing down any attacker as much as
-possible such that, even if they copy and permanently store her data off-site
-for later attempts at decryption with more advanced compute resources and new
-technologies, our researcher's data is some degree more likely to remain
-irrecoverable. We show that, given a device that supports SSD ISE, SwitchCrypt,
-and the Mirrored strategy, we can quickly and practically converge the backing
-store to this locked down state. With prior work, data is either too weakly
-encrypted or the device becomes too slow for daily use (latency ceiling). In
-exchange, we trade off half of our drive's writeable space.
+We show that, given a device that supports SSD ISE, SwitchCrypt, and the
+Mirrored strategy, we can quickly and practically converge the backing store to
+this locked down state. With prior work, data is either encrypted
+inappropriately or the device becomes too slow for daily use (latency ceiling).
+In exchange, we trade off half of our drive's writeable space.

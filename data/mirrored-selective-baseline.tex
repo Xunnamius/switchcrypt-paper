@@ -70,9 +70,9 @@
         legend cell align=left,
         legend style={ column sep=1ex },
         legend entries={
-            {\scriptsize Baseline I/O},
-            {\scriptsize Ratio I/O},
-            {\scriptsize },
+            {\scriptsize Baseline},
+            {\scriptsize Mirrored},
+            {\scriptsize Selective},
             {\scriptsize },
             {\scriptsize },
             {\scriptsize C8},
@@ -91,14 +91,14 @@
         \nextgroupplot[title={40M Mirrored Reads}]
             \addlegendimage{mark=none,red}
             \addlegendimage{mark=otimes,only marks,black}
-            \addlegendimage{only marks,mark=square*,white}
+            \addlegendimage{mark=oplus,only marks,black}
             \addlegendimage{only marks,mark=square*,white}
             \addlegendimage{only marks,mark=square*,white}
             \addlegendimage{only marks,mark=square*,red}
             \addlegendimage{only marks,mark=triangle*,red}
             \addlegendimage{only marks,mark=diamond*,red}
             \addlegendimage{only marks,mark=pentagon*,red}
-            \addlegendimage{only marks,mark=otimes,red}
+            \addlegendimage{only marks,mark=*,red}
             \addplot [thick, red] table [
                 meta=cipher,
                 x=score,
