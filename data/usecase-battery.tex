@@ -45,7 +45,7 @@
         % %major x tick style=transparent,
         %
         ylabel near ticks,
-        ylabel shift={-5mm},
+        ylabel shift={-2.5mm},
         ymajorgrids=true,
         %yticklabels={ 0, 0.5, 1.5, 2 },
         % extra y ticks={1},
@@ -98,7 +98,7 @@
             \draw [dotted] (0, 34) -- (130, 34) node [above of=c1] {\tiny (energy ceiling)};
             \draw [dotted] (120, 0) -- (120, 50) node [right of=c2] {\tiny (battery dies)};
             \draw [dotted] (5, 0) -- (5, 50) node [right of=c3] {\tiny (battery critical)};
-        \nextgroupplot[legend to name={throwaway7}, ylabel={Security Score}, ymin=0, ymax=3, ytick={ 0, 3 }]
+        \nextgroupplot[legend to name={throwaway7}, ylabel={R+R (norm)}, ymin=0, ymax=3, ytick={ 0, 3 }, yticklabels={ 0, 1 }, ylabel shift={-1.5mm}]
             \addplot [thick] table [
                 x=time,
                 y=score,

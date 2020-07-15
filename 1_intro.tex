@@ -10,18 +10,18 @@ security guarantees come with increased latency and threaten to balloon energy
 consumption. On the other, capping total energy consumption requires tolerating
 increased latency or weaker security guarantees.
 
-FDE implementations such as dm-crypt for Linux and BitLocker for Windows balance
-these concerns with respect to some generic ``common case'' workload, but this
-approach often fails to deliver an optimal outcome for specific workloads. \hank{add citation for dm-crypt}
-Google's Android OS is a good example. Android supported FDE with the release of
-Android 3.0, yet it was not enabled by default until Android
-6.0~\cite{android-M-mobile-motivation}. Two years prior, Google attempted to
-roll out FDE by default on Android 5.0 but had to backtrack. In a statement to
-Engadget, Google blamed ``'performance issues on some partner devices' ... for
-the backtracking''~\cite{google-engadget}. At the same time, AnandTech reported
-a ``62.9\% drop in random read performance, a 50.5\% drop in random write
-performance, and a staggering 80.7\% drop in sequential read performance''
-versus Android 5.0 unencrypted storage for various
+FDE implementations such as dm-crypt~\cite{dmcrypt,DmC-Android} for Linux and
+BitLocker for Windows~\cite{bitlocker} balance these concerns with respect to
+some generic ``common case'' workload, but this approach often fails to deliver
+an optimal outcome for specific workloads. Google's Android OS is a good
+example. Android supported FDE with the release of Android 3.0, yet it was not
+enabled by default until Android 6.0~\cite{android-M-mobile-motivation}. Two
+years prior, Google attempted to roll out FDE by default on Android 5.0 but had
+to backtrack. In a statement to Engadget, Google blamed ``'performance issues on
+some partner devices' ... for the backtracking''~\cite{google-engadget}. At the
+same time, AnandTech reported a ``62.9\% drop in random read performance, a
+50.5\% drop in random write performance, and a staggering 80.7\% drop in
+sequential read performance'' versus Android 5.0 unencrypted storage for various
 workloads~\cite{android-M-mobile-motivation-2}.
 
 FDE's impact on drive performance and energy efficiency depends on a multitude

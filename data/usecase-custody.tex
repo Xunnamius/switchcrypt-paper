@@ -53,7 +53,7 @@
         ymajorgrids=false,
         ymin=0, ymax=4,
         ytick={ 0, 1, 1.5, 2, 3, 4 },
-        yticklabels={ 0,,1.5,, 3, \empty },
+        yticklabels={ 0,,0.5,, 1, \empty },
         major y tick style=transparent,
         %yticklabels={ 0, 0.5, 1.5, 2 },
         % extra y ticks={1},
@@ -64,9 +64,9 @@
         legend cell align=center,
         legend style={ column sep=1ex },
         legend entries={%
-            {\scriptsize Mirrored Scores (Without SwitchCrypt)},
+            {\scriptsize Mirrored Scores (no switching)},
             {\scriptsize Desired Minimum Score},
-            {\scriptsize Actual Minimum Score (SwitchCrypt)}
+            {\scriptsize Actual Minimum Score (switching)}
         },
         legend style={
             draw=none,
@@ -77,7 +77,7 @@
     ]
         \nextgroupplot[
             xlabel={\footnotesize Time (s)},
-            ylabel={\footnotesize Security Score},
+            ylabel={\footnotesize R+R (norm)},
             xtick={ 0, 0.3, 0.45, 1 },
             xticklabels={ 0, 6, 9, \ldots },
         ]
@@ -113,7 +113,7 @@
             scatter,
             legend to name={throwaway8},
             xlabel={\footnotesize Latency (normalized)},
-            ylabel={\footnotesize Security Score},
+            ylabel={\footnotesize R+R (norm)},
             xtick={ 0, 1 },
             xticklabels={ 0, 1 },
         ]
