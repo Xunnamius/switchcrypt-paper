@@ -1,0 +1,164 @@
+\documentclass[pageno]{jpaper}
+
+%replace XXX with the submission number you are given from the ASPLOS submission site.
+\newcommand{\asplossubmissionnumber}{XXX}
+
+\usepackage[normalem]{ulem}
+
+\begin{document}
+
+\title{Your Paper Title \\ \textbf{Extended Abstract}}
+
+\date{}
+
+\maketitle
+
+\thispagestyle{empty}
+
+% No abstract needed for the extended abstract
+%\begin{abstract}
+%\end{abstract}
+
+
+
+ASPLOS'21 will be piloting the submission of {\it Extended
+Abstracts}. Your extended abstract — inspired by the model used for
+IEEE Micro Top
+Picks — should be {\it two pages long}, and it will be submitted separately
+from your main paper. The deadline for the extended abstract and the
+full paper will be identical. Except for the page limit, all other
+formatting and anonymity requirements are identical to those for full
+papers. Extended abstracts should be self-contained, though they may
+contain references to the full paper.
+
+We \emph{recommend}---but do not require--- that you use
+the following organization for your abstract. 
+Sections~\ref{sec:motivation} through \ref{sec:key-contributions}
+should be a summary of your full paper. Section~\ref{sec:motivation}
+motivates the paper; Section~\ref{sec:limitations} describes
+limitations of the state of the art, if applicable;
+Section~\ref{sec:key-insights} presents the key new insight or
+insights of the paper; 
+Section~\ref{sec:main-artifacts} presents the main artifacts described
+in the paper;  Section~\ref{sec:key-contributions} summarizes the key
+results and technical contributions of your paper. Finally,
+Section~\ref{sec:why-asplos} should explain why the paper is suitable
+for ASPLOS, and Section~\ref{sec:citation} should state what its
+citation would be for a ten year test-of-time award. In
+Section~\ref{sec:revisions}, you may optionally include a paragraph
+describing how your paper has been revised, if it was previously
+submitted to another conference.
+
+The extended abstracts must be submitted in printable PDF format and should contain a
+{\bf maximum of 2 pages} of single-spaced two-column text, {\bf not
+  including references}.  You may include any number of pages for
+references, but we suggest you limit your bibliography to
+only the most relevant references. The extended
+abstracts should use the same formating as the regular papers. If you are using
+\LaTeX~\cite{lamport94} to typeset your extended abstract, then we suggest that
+you use \href{https://asplos-conference.org/wp-content/uploads/2020/06/asplos21-templates.zip}{this template}.
+If you use a different
+software package to typeset your paper, then please adhere to the
+guidelines given in Table~\ref{table:formatting}.
+
+The \href{ https://asplos-conference.org/wp-content/uploads/2020/06/asplos21-extended-abstract-template.pdf}{sample file} for the
+extended abstract includes guidelines the information your abstract
+should include. 
+
+
+
+The references section of your extended abstract will not count
+towards the two page limit. We suggest you limit your bibliography to
+only the most relevant references~\cite{lamport94}.
+The extended abstract should not have an abstract. Start with Section~\ref{sec:motivation}.
+
+\section{Motivation}
+\label{sec:motivation}
+
+
+\begin{itemize}
+\item What is the problem your work attacks? Be specific.
+\item Why is it an important problem?
+\end{itemize}
+
+\vspace{1em}
+
+\noindent
+Articulate the importance of this problem to the broader ASPLOS
+community, using as little jargon as possible. \emph{Be specific}
+about the problem you are addressing; it should be the one that your
+paper directly addresses.
+
+\section{Limitations of the State of the Art}
+\label{sec:limitations}
+
+\begin{itemize}
+\item What is the state of the art in solving this problem today (if any)?
+\item What are its limits?
+\end{itemize}
+
+\section{Key Insights}
+\label{sec:key-insights}
+
+\begin{itemize}
+\item What are the one or two key new insights in this paper?
+\item How does it advance the state of the art?
+\item What makes it more effective than past approaches?
+\end{itemize}
+
+\section{Main Artifacts}
+\label{sec:main-artifacts}
+
+\begin{itemize}
+\item What are the key artifacts presented in your paper: a
+  methodology, a hardware design, a software algorithm, an
+  optimization or control technique, etc.?
+  \item How were your artifacts implemented and evaluated? 
+\end{itemize}
+
+\section{Key Results and Contributions}
+\label{sec:key-contributions}
+
+\begin{itemize}
+  \item What are the most important \emph{one or two} empirical or theoretical
+    results of this approach?
+  \item What are the contributions that this paper makes to the state of the
+    art? List them in an \texttt{itemize} section. Each contribution should be no more than a few sentences long.
+  \item Clearly describe its advantages over past work, including how it overcomes their limitations.
+\end{itemize}
+
+
+\section{Why ASPLOS}
+\label{sec:why-asplos}
+
+ASPLOS emphasizes multidisciplinary research; explain how this
+  paper emphasizes synergy of \emph{two or more ASPLOS areas}: architecture,
+  programming languages, operating systems, and related areas (broadly
+  interpreted).
+
+\noindent
+If you are unsure whether your paper falls within the scope of ASPLOS,
+please check with the program chairs -- ASPLOS is a broad,
+multidisciplinary conference and encourages new topics.
+
+\section{Citation for Most Influential Paper Award}
+\label{sec:citation}
+
+Provide the citation for your paper if it won the Most Influential
+Paper award. The citations for past winners are available
+\href{https://www.sigarch.org/benefit/awards/acm-sigarch-sigplan-sigops-asplos-influential-paper-award/}{here}.
+
+%  \url{https://rb.gy/hd1hms}).
+
+\section{Revisions}
+\label{sec:revisions}
+
+ \emph{Optional:} Describe how this paper has been revised, if it was previously submitted to another conference.
+
+\pagebreak
+\bibliographystyle{plain}
+\bibliography{references}
+
+
+\end{document}
+

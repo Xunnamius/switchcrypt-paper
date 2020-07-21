@@ -1,46 +1,61 @@
 BIBTEX=bibtex
-PDFLATEX=pdflatex
-GHOSTSCRIPT=\gs
+PDFLATEX=pdflatex -shell-escape
+GHOSTSCRIPT=\gs -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -dEmbedAllFonts=true
 
-TEX-FILES = *.tex
-BIB-FILES = *.bib
-TOP-LEVEL-ROOT = _paper
-CRNAME = dickens-switchcrypt
+TEX-FILES = $(wildcard *.tex)
+BIB-FILES = $(wildcard *.bib)
+FIG-FILES = $(wildcard figs/*.png data/*.tex data/*.dat)
+PAPER = dickens-switchcrypt-paper
+ABSTRACT = dickens-switchcrypt-abstract
 
-all: generate-pdf save-temporary $(CRNAME)
+.PHONY: all generate-paper generate-abstract generate-pdfs generate-pdf save-temporary clean
 
-generate-pdf: ${TEX-FILES} ${BIB-FILES}
+all: generate-pdfs $(PAPER) $(ABSTRACT) save-temporary
+
+generate-paper: ${TEX-FILES} ${BIB-FILES} ${FIG-FILES} jpaper.cls
 	mkdir -p out
-	$(PDFLATEX) -shell-escape ${TOP-LEVEL-ROOT}
-	#$(PDFLATEX) -shell-escape ${TOP-LEVEL-ROOT}
-	$(BIBTEX) ${TOP-LEVEL-ROOT}
-	$(PDFLATEX) -shell-escape ${TOP-LEVEL-ROOT}
-	$(PDFLATEX) -shell-escape ${TOP-LEVEL-ROOT}
+	$(PDFLATEX) _${PAPER}
+	$(BIBTEX) _${PAPER}
+	$(PDFLATEX) _${PAPER}
+	$(PDFLATEX) _${PAPER}
 
-save-temporary: generate-pdf
+generate-abstract: ${TEX-FILES} ${BIB-FILES} ${FIG-FILES} jpaper.cls
 	mkdir -p out
-	if test -e *.gz;  then mv *.gz out;  fi
-	if test -e *.aux; then mv *.aux out; fi
-	if test -e *.blg; then mv *.blg out; fi
-	if test -e *.bbl; then mv *.bbl out; fi
-	if test -e *.out; then mv *.out out; fi
-	if test -e *.log; then mv *.log out; fi
-	if test -e *.xml; then mv *.xml out; fi
-	if test -e *.fls; then mv *.fls out; fi
-	if test -e *.toc; then mv *.toc out; fi
-	if test -e *.lot; then mv *.lot out; fi
-	if test -e *.lof; then mv *.lof out; fi
-	if test -e *.fdb*; then mv *.fdb* out; fi
-	if test -e *.auxlock; then mv *.auxlock out; fi
-	if test -e *blx.bib; then mv *blx.bib out; fi
-	if test -e out/_minted*; then rm -rf out/_minted*; fi
-	if test -e _minted*; then mv -f _minted* out; fi
+	$(PDFLATEX) _${ABSTRACT}
+	$(BIBTEX) _${ABSTRACT}
+	$(BIBTEX) _${ABSTRACT}
+	$(PDFLATEX) _${ABSTRACT}
+	$(PDFLATEX) _${ABSTRACT}
 
-$(CRNAME): $(TOP-LEVEL-ROOT).pdf
-	$(GHOSTSCRIPT) -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -dEmbedAllFonts=true -sOutputFile=$(CRNAME).pdf -f $(TOP-LEVEL-ROOT).pdf
+generate-pdf: generate-pdfs
+generate-pdfs: generate-paper generate-abstract
+
+save-temporary:
+	mkdir -p out
+	find . -name '*.gz' -type f -delete
+	find . -name '*.aux*' -type f -delete
+	find . -name '*.blg' -type f -delete
+	find . -name '*.bbl' -type f -delete
+	find . -name '*.out' -type f -delete
+	find . -name '*.log' -type f -delete
+	find . -name '*.xml' -type f -delete
+	find . -name '*.fls' -type f -delete
+	find . -name '*.toc' -type f -delete
+	find . -name '*.lot' -type f -delete
+	find . -name '*.lof' -type f -delete
+	find . -name '*.fdb*' -type f -delete
+	find . -name '*.blx*' -type f -delete
+	find out -name '_minted*' -type d -delete
+	find . -name '_minted*' -type d -exec mv -f -t out {} +
+
+$(PAPER): _$(PAPER).pdf
+	$(GHOSTSCRIPT) -sOutputFile=$(PAPER).pdf -f _$(PAPER).pdf
+
+$(ABSTRACT): _$(ABSTRACT).pdf
+	$(GHOSTSCRIPT) -sOutputFile=$(ABSTRACT).pdf -f _$(ABSTRACT).pdf
 
 clean:
-	rm -rf *.gz *.aux *.blg *.bbl *.out *.log *.xml *.fls *.toc *.lot *.lof *.fdb* *.auxlock *blx.bib out/_minted* _minted* out
+	rm -rf *.gz *.aux* *.blg *.bbl *.out *.log *.xml *.fls *.toc *.lot *.lof *.fdb* *blx* _minted* out
 	mkdir out
 	touch out/.gitkeep
 
