@@ -8,9 +8,10 @@ FIG-FILES = $(wildcard figs/*.png data/*.tex data/*.dat)
 PAPER = dickens-switchcrypt-paper
 ABSTRACT = dickens-switchcrypt-abstract
 
-.PHONY: all generate-paper generate-abstract generate-pdfs generate-pdf save-temporary clean
+.PHONY: all for-vscode generate-paper generate-abstract generate-pdfs generate-pdf save-temporary clean
 
 all: generate-pdfs $(PAPER) $(ABSTRACT) save-temporary
+for-vscode: generate-pdfs
 
 generate-paper: ${TEX-FILES} ${BIB-FILES} ${FIG-FILES} jpaper.cls
 	mkdir -p out
