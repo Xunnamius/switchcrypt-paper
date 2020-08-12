@@ -113,11 +113,11 @@ re-installation attacks, XOR-based cryptanalysis and other comparison attacks,
 and other confidentiality-violating schemes where the ciphertext is in full
 control of the adversary ~\cite{Freestyle}. This property is useful in cases
 where we cannot prevent the same key, nonce, and plaintext from being reused,
-such as with data ``in motion'' (see the motivational example in
-\secref{motivation}). Ciphers without this property---such as ChaCha20 on which
-prior work is based---are trivially broken when key-nonce-plaintext 3-tuples are
-reused. In StrongBox, this is referred to as an ``overwrite condition'' or
-simply ``overwrite''~\cite{StrongBox}.
+such as with data ``in motion'' (see the motivational example earlier in this
+work). Ciphers without this property---such as ChaCha20 on which prior work is
+based---are trivially broken when key-nonce-plaintext 3-tuples are reused. In
+StrongBox, this is referred to as an ``overwrite condition'' or simply
+``overwrite''~\cite{StrongBox}.
 
 Though there are many ways to achieve ciphertext randomization, the ciphers
 included in our analysis implement it using a random number of rounds for each
@@ -418,23 +418,23 @@ encrypt nuggets.
 
 \subsection{Putting It All Together} \label{subsec:summary}
 
-We revisit the motivating example from \secref{motivation}, where we're using
-Freestyle to ensure secure backups. Initially, I/O requests come down from the
-LFS and are received by the cryptographic driver, which divides the request
-based on which nuggets it touches. For each nugget, the per-nugget metadata is
-consulted to determine with which cipher the nugget is encrypted. If it is
-encrypted with the active cipher configuration (Freestyle), which must be true
-if we have not initiated a cipher switch, the write is handled similarly to
-prior work: encrypted data is read in from the drive, the merkle tree and
-monotonic counter are consulted to ensure the integrity of encrypted data, the
-transaction journal is consulted during write operations so that overwrites are
-handled and pad reuse violations are avoided, and then the keycount store is
-consulted to derive the nugget's unique encryption key from some master secret.
-Finally, using the Generic Stream Cipher Interface, we call out to the
-Freestyle, allowing SwitchCrypt to encrypts/decrypts the nugget's contents and
-commit any updates back to storage. All the while, the drive's
-Freestyle-encrypted contents are being uploaded up to our enterprise backup
-service every so often.
+We revisit the motivating example from earlier in this work, where we're using
+Freestyle to ensure secure backups in an energy-constrained environment.
+Initially, I/O requests come down from the LFS and are received by the
+cryptographic driver, which divides the request based on which nuggets it
+touches. For each nugget, the per-nugget metadata is consulted to determine with
+which cipher the nugget is encrypted. If it is encrypted with the active cipher
+configuration (Freestyle), which must be true if we have not initiated a cipher
+switch, the write is handled similarly to prior work: encrypted data is read in
+from the drive, the merkle tree and monotonic counter are consulted to ensure
+the integrity of encrypted data, the transaction journal is consulted during
+write operations so that overwrites are handled and pad reuse violations are
+avoided, and then the keycount store is consulted to derive the nugget's unique
+encryption key from some master secret. Finally, using the Generic Stream Cipher
+Interface, we call out to the Freestyle, allowing SwitchCrypt to
+encrypts/decrypts the nugget's contents and commit any updates back to storage.
+All the while, the drive's Freestyle-encrypted contents are being uploaded up to
+our enterprise backup service every so often.
 
 When the device enters ``battery saver'' mode, drive backups are paused, the
 energy monitoring software downclocks the CPU, and the OS signals to SwitchCrypt

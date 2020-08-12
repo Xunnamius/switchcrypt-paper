@@ -1,7 +1,5 @@
 \section{Evaluation} \label{sec:evaluation}
 
-\subsection{Experimental Setup}
-
 We implement SwitchCrypt and our experiments on a Hardkernel Odroid XU3 ARM
 big.LITTLE system with Samsung Exynos 5422 A15/A7 heterogeneous multi-processing
 quad core CPUs at maximum clock speed, 2 gigabyte LPDDR3 RAM at 933 MHz, and an
@@ -26,7 +24,7 @@ When evaluating switching strategies, a finer breakdown in workloads is made
 using a pre-selected pair of ciphers we call the \emph{primary cipher
 configuration} and \emph{secondary cipher configuration}. SwitchCrypt is
 initialized at the primary configuration. Once we trigger a cipher switch,
-SwitchCrypt moves towards the secondary configuration via switching strategy.
+SwitchCrypt moves towards the secondary configuration via switching strategy. 
 
 The cipher switch is triggered according to a certain \emph{ratio} of I/O
 operations. For example: given 10 40MB read-write operations, we may write and
@@ -39,6 +37,14 @@ operations in the secondary cipher (7:3), 7 file write-read operation in the
 primary cipher for every other file write-read operation in the secondary cipher
 (5:5), and 3 file write-read operations in the primary cipher for every 7 file
 write-read operation in the secondary cipher (3:7).
+
+To reason about the desirability of cipher configurations, we define the
+\emph{security vector}, R+R, as a vector consisting of a configuration's
+relative rounds (Rounds) quantification and its ciphertext randomization
+(Randomization) quantification defined in \secref{design}. We define the norm
+over this vector as the sum of its components. Hence, we consider a cipher
+configuration ``stronger'' if it has higher ciphertext randomization and uses
+more rounds, i.e. has a higher normed R+R.
 
 All experiments are performed with basic Linux I/O commands, bypassing system
 caching.
@@ -63,17 +69,17 @@ In this section we answer the following questions:
  \label{fig:tradeoff-no-ratios}
 \end{figure}
 
-\figref{tradeoff-no-ratios} shows the relative round count, ciphertext
-randomization, and ciphertext expansion scores versus median normalized latency
+\figref{tradeoff-no-ratios} shows the normalized relative round count and
+ciphertext randomization (normed R+R vector) versus median normalized latency
 tradeoff between different stream cipher configurations for our sequential and
 random I/O workloads. Trends for median hold when looking at tail latencies as
 well. Each line represents one workload: 4KB, 512KB, 5MB, and 40MB respectively
 (see legend). Each symbol represents one of our ciphers: ChaCha8, ChaCha20,
 Freestyle Fast, Freestyle Balanced, and Freestyle Strong. Of the ciphers we
 tested, those with higher round counts and higher ciphertext randomization
-scores resulted in higher latency and increased energy use for I/O operations.
-The relationship between these concerns is not simply linear, however, which
-exposes a rich tradeoff space.
+scores resulted in higher overall latency and increased energy use for I/O
+operations. The relationship between these concerns is not always linear,
+however, which exposes a rich tradeoff space.
 
 Besides the 4KB workload, the shape of each workload follows a similar trend,
 hence we will focus on 40MB and 4KB workloads going forward. Due to the overhead
@@ -99,8 +105,8 @@ for normalized 4KB workloads. ChaCha8 is not slower than ChaCha20.
  \label{fig:tradeoff-with-ratios}
 \end{figure}
 
-\figref{tradeoff-with-ratios} shows the relative round count, ciphertext
-randomization, and ciphertext expansion scores versus median normalized latency
+\figref{tradeoff-with-ratios} shows the normalized relative round count and
+ciphertext randomization (normed R+R vector) versus median normalized latency
 tradeoff between different stream ciphers for our sequential and random I/O
 workloads with cipher switching using the Forward strategy. After a certain
 number of write-read I/O operations, a cipher switch is initiated and
@@ -116,7 +122,7 @@ achieve dynamic security/energy tradeoffs reaching points not accessible with
 prior work, all with minimal overhead.
 
 Again, due to the overhead of metadata management for non-Freestyle ciphers (see
-\cref{subsec:implementation}) and the fast completion time of the 4KB workloads
+\secref{implementation}) and the fast completion time of the 4KB workloads
 preventing SwitchCrypt from taking advantage of amortization, ChaCha8 and
 ChaCha20 take longer to complete than Freestyle Fast for 4KB reads. We also see
 very high latency for ratios between Freestyle Fast and Freestyle Strong cipher
@@ -151,7 +157,7 @@ Mirrored writes across all workloads are very slow. This is to be expected,
 since the data is being mirrored across all areas of the drive. In our
 experiments, the drive can be considered partitioned in half. This overhead is
 most egregious for the 4KB Mirrored write workload. This makes Selective
-preferable to Mirrored. However, it's a tradeoff; Selective cannot quickly
+preferable to Mirrored. However, it is a tradeoff; Selective cannot quickly
 converge the drive to a single cipher configuration or survive the loss of an
 entire region.
 
@@ -179,50 +185,3 @@ being able to reach configurations points that are unachievable without
 SwitchCrypt. SwitchCrypt's design keeps these overheads acceptably low in
 practice, achieving the desired goal of flexibly navigating latency/security
 tradeoffs for FDE.
-
-\PUNT{\subsection{Revisiting Our Threat Model} \label{subsec:4}
-
-The incorporation of cipher switching requires considering each attack in the
-context of each strategy and novel attacks on mixed-cipher nugget states.
-\tblref{security} lists possible attacks and their results. It can be inferred
-from these results and SwitchCrypt's design that SwitchCrypt addresses its
-threat model and maintains confidentiality and integrity guarantees. In the case
-of the final attack, we stress that even the least scored cipher is still
-considered secure (\secref{design}).
-
-\begin{table}[t]
-  \caption{Attacks on SwitchCrypt and their results} \label{tbl:security}
-  \footnotesize
-  \centering
-  \begin{tabu} to \linewidth { | X[l] | X[c] | X[c] | }
-    \hline
-    \textbf{Attack} & \textbf{Result} & \textbf{Explanation} \\
-    \hline\hline
-    Nugget data in drive is mutated out-of-band online & SwitchCrypt immediately
-    fails with exception on successive IO request & Regardless of switching
-    strategy, Merkle Tree check fails on read-in\\
-    \hline
-    Header/cipher metadata in drive is mutated out-of-band online & SwitchCrypt
-    immediately fails with exception on successive IO request & Regardless of
-    switching strategy, Merkle Tree check fails on read-in\\
-    \hline
-    drive is rolled back to a previously consistent state while online &
-    SwitchCrypt immediately fails with exception on successive IO request &
-    Regardless of switching strategy, secure monotonic counter is out of sync
-    with the system\\
-    \hline
-    drive is rolled back to a previously consistent state while offline, secure
-    counter wildly out of sync & SwitchCrypt refuses to mount; allows for force
-    mount with root access & Regardless of switching strategy, secure monotonic
-    counter is out of sync with the system\\
-    \hline
-    Merkle Tree made inconsistent by mutating drive out-of-band while offline,
-    secure counter in sync & SwitchCrypt refuses to mount & Secure monotonic
-    counter is in sync with the system, yet illegal data manipulation occurred\\
-    \hline
-    Nugget accessed out-of-band in mixed-cipher drive & Nugget's cipher may not
-    match active configuration & Worst case, the nugget data is available
-    encrypted with the lowest scored cipher in the system\\
-    \hline\hline
-  \end{tabu}
-\end{table}}

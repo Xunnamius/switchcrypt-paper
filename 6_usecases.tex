@@ -1,16 +1,16 @@
 \section{SwitchCrypt Case Studies} \label{sec:usecases}
 
-In this section, we provide four case studies demonstrating the practical
+In this section, we provide three case studies demonstrating the practical
 utility of cipher switching. We cover a wide range of situations, highlighting
-concerns like configuration convergence (\cref{subsec:uc4}), trading off
-security and writable space (\cref{subsec:uc2}), meeting latency goals
-(\cref{subsec:uc3}), and keeping within an energy budget (\cref{subsec:uc1}). We
-also demonstrate the utility of both temporal and spatial switching strategies,
-exploring the range of conditions under which certain strategies are optimal.
+concerns like meeting latency goals (\cref{subsec:uc3}), trading off security
+and writable space (\cref{subsec:uc2}), and keeping within an energy budget
+(\cref{subsec:uc1}). We also demonstrate the utility of both temporal and
+spatial switching strategies, exploring the range of conditions under which
+certain strategies are optimal.
 
 \subsection{Balancing Security Goals with a Hard Energy Cap} \label{subsec:uc1}
 
-Here we revisit the motivating example from \secref{motivation}. It illustrates
+Here we revisit the motivating example from earlier in this work. It illustrates
 that, because latency and energy use are correlated among the ciphers we
 examined, we can exploit that to save battery life when necessary while
 maintaining confidentiality when uploading encrypted backups to our
@@ -145,61 +145,3 @@ changed, we see increased latency in the delayed workloads.
 Our goal is to remain under the latency ceiling while remaining above the
 security floor. Thanks to Forward switching, accesses to highly trafficked areas
 of the drive can remain performant even during drive end-of-life.
-
-\subsection{Custody Panic: Device Data Under Duress} \label{subsec:uc4}
-
-This usecase illustrates the utility of spatial Mirrored switching to take
-advantage of more energy-efficient high-performance ciphers while retaining the
-ability to quickly converge the entire drive to a single high-security cipher
-leveraging SSD Instant Secure Erase (ISE).
-
-Nation-state and other adversaries have extensive compute resources, knowledge
-of obscure side-channels and back doors (\eg{Dual\_EC\_DRBG~\cite{DualECDRBG}}),
-and access to technology like quantum computers. Suppose a scientist were
-attempting to re-enter her country through a border entry point when she is
-stopped. Further suppose her laptop containing sensitive priceless research data
-(replicated across multiple SSDs via the SwitchCrypt Mirrored strategy) is
-confiscated from her custody. Being a security researcher, she has a chance to
-trigger a ``remote wipe,'' where the laptop's SSD uses Instant Secure Erase
-(ISE) to ``forget'' the key material used by the black-box FTL/drive
-controller's anti-wear-leveling measures, supposedly rendering all her drives'
-data inaccessible~\cite{ISE1,ISE2,ISE3}.
-
-However, while our scientist certainly does not want her data falling into the
-wrong hands, she cannot afford to permanently lose access to that data either,
-which triggering storage-wide ISE would accomplish. In such a scenario, it would
-be useful if she could trigger ISE on all of the mirrored drives except the one
-with the strongest cipher configuration. Our goal, then, is to slow down any
-attacker as much as possible such that, even if they permanently store her
-encrypted data off-site for later attempts at decryption~\cite{NSA-UTAH} with
-exponentially more powerful compute resources and other new technologies, that
-data is more likely to remain irrecoverable. This allows her to use her device
-in her daily life without suffering the egregious performance penalties of
-exclusively using the strongest cipher configuration while also allowing the
-system to instantly converge to the strongest possible state in an emergency.
-
-\begin{figure}[ht] \textbf{Custody Panic Use Case: Security vs Time}\par\medskip
-   \centering
-   {\input{data/usecase-custody.tex}} \caption{Actual security state vs desired
-   security state with respect to the time and ISE.}
-  \label{fig:usecase-custody}
-\end{figure}
-
-In \figref{usecase-eol-tradeoff}, we see the system begins at 0 seconds, where
-all data is mirrored across partitions. Both the desired and minimum security
-state of the drive is 1.5, a balance between performance and security. For
-simplicity, we define "security state" here as the simple sum of two scores:
-\emph{relative round count and ciphertext randomization}. At 6 seconds, custody
-panic is triggered---the desired minimum security state goes to 3, the highest
-possible---at which point the system executes ISE and completely erases the
-minimally encrypted partition. ISE, which takes advantage of FTL/drive
-controller level encryption to  is known to be much faster than TRIM and
-completes in as little as 3 seconds~\cite{ISE1,ISE2,ISE3}. Once complete, the
-most secure form of the data is all that remains. The backing store has been
-``locked down.''
-
-We show that, given a device that supports SSD ISE, SwitchCrypt, and the
-Mirrored strategy, we can quickly and practically converge the backing store to
-this locked down state. With prior work, data is either encrypted
-inappropriately or the device becomes too slow for daily use (latency ceiling).
-In exchange, we trade off half of our drive's writeable space.
