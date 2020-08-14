@@ -65,35 +65,7 @@ security properties, and respecting changing OS energy budgets.
 Hence, any static common-case FDE configuration will sacrifice one concern for
 another, even when it is not optimal to do so for a given workload. But what if
 a system could dynamically transition into a more desirable configuration given
-runtime changes?\\
-\\
-\textbf{Our Contributions}\\
-To realize the goal of dynamically adjusting storage tradeoffs at runtime, we:
-
-\begin{itemize}
-  \item Define a scheme to \emph{quantify} the usefulness of each cipher based
-  on key security properties relevant to FDE in context. Using this scheme, we
-  define a tradeoff space of cipher configurations over competing concerns:
-  total energy use, desirable security properties, read and write performance
-  (latency), total writable space on the drive, and how quickly the contents of
-  the drive can converge to a single encryption configuration.
-
-  \item Introduce a novel design substantively expanding prior FDE work by
-  wholly \emph{decoupling} cipher implementations from the encryption process.
-
-  \item Develop the idea of cipher switching using \emph{switching strategies}
-  to ``re-cipher'' storage units dynamically, allowing us to tradeoff different
-  performance and security properties of various configurations at runtime.
-\end{itemize}
-
-Unifying these contributions, we present SwitchCrypt: a software system that
-navigates the tradeoff space made by balancing competing security and latency
-requirements via cipher switching in space and time. We implement SwitchCrypt
-and three switching strategies---\emph{Forward}, \emph{Selective}, and
-\emph{Mirrored}---to dynamically transition the system between configurations
-using our generic cipher interface. We then study the utility of cipher
-switching through three case studies where latency, energy, and desired security
-properties change over time.
+runtime changes?
 
 In one study, where we require the filesystem to react to a shrinking energy
 budget by switching ciphers, we find that SwitchCrypt achieves up to a 3.3x

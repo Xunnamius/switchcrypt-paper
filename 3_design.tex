@@ -315,7 +315,7 @@ are mirrored into the other regions immediately, so all regions of the drive
 will always be in a consistent state and always share the same data. The active
 configuration determines \emph{where} a read operation should occur. In this
 way, the Mirrored strategy represents a form of spatial cipher switching because
-we're switching which configuration we're using to read in data. A user could
+we are switching which configuration we are using to read in data. A user could
 take advantage of this along with SSD Instant Secure Erase~\cite{ISE1,ISE2,ISE3}
 to delete other regions, thus quickly and securely converging the drive to a
 single configuration without losing any data or suffering the egregious
@@ -418,7 +418,7 @@ encrypt nuggets.
 
 \subsection{Putting It All Together} \label{subsec:summary}
 
-We revisit the motivating example from earlier in this work, where we're using
+We revisit the motivating example from earlier in this work, where we are using
 Freestyle to ensure secure backups in an energy-constrained environment.
 Initially, I/O requests come down from the LFS and are received by the
 cryptographic driver, which divides the request based on which nuggets it
