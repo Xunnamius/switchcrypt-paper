@@ -24,7 +24,7 @@ When evaluating switching strategies, a finer breakdown in workloads is made
 using a pre-selected pair of ciphers we call the \emph{primary cipher
 configuration} and \emph{secondary cipher configuration}. SwitchCrypt is
 initialized at the primary configuration. Once we trigger a cipher switch,
-SwitchCrypt moves towards the secondary configuration via switching strategy. 
+SwitchCrypt moves towards the secondary configuration via switching strategy.
 
 The cipher switch is triggered according to a certain \emph{ratio} of I/O
 operations. For example: given 10 40MB read-write operations, we may write and
@@ -64,8 +64,8 @@ In this section we answer the following questions:
 
 \begin{figure}[ht]
   \textbf{Baseline Cipher I/O Performance}\par\medskip
-  {\input{data/tradeoff-no-ratios.tex}} \caption{Median sequential and random
-  write and then read performance baseline.}
+  {\input{data/tradeoff-no-ratios.tex}} \caption{Median I/O performance
+  baseline.}
  \label{fig:tradeoff-no-ratios}
 \end{figure}
 
@@ -98,10 +98,9 @@ for normalized 4KB workloads. ChaCha8 is not slower than ChaCha20.
 
 \begin{figure}[ht]
   \textbf{Forward Switching I/O Ratio Performance}\par\medskip
-  {\input{data/tradeoff-with-ratios.tex}} \caption{Median sequential and random
-  write and then read back performance comparison of Forward switching to
-  baseline. Each cluster of 3 dots between configurations represents the 7:3,
-  5:5, and 3:7 primary-vs-secondary I/O ratios described in the text.}
+  {\input{data/tradeoff-with-ratios.tex}} \caption{Median I/O performance
+  comparison of Forward switching to baseline. Each cluster of 3 dots represents
+  the 7:3, 5:5, and 3:7 primary-vs-secondary I/O ratios.}
  \label{fig:tradeoff-with-ratios}
 \end{figure}
 
@@ -122,10 +121,10 @@ achieve dynamic security/energy tradeoffs reaching points not accessible with
 prior work, all with minimal overhead.
 
 Again, due to the overhead of metadata management for non-Freestyle ciphers (see
-\secref{implementation}) and the fast completion time of the 4KB workloads
+\cref{subsec:implementation}) and the fast completion time of the 4KB workloads
 preventing SwitchCrypt from taking advantage of amortization, ChaCha8 and
 ChaCha20 take longer to complete than Freestyle Fast for 4KB reads. We also see
-very high latency for ratios between Freestyle Fast and Freestyle Strong cipher
+high latency for ratios between Freestyle Fast and Freestyle Strong cipher
 configurations. This is because Freestyle is not length-preserving, so extra
 write operations must be performed, and the algorithm itself is generally much
 slower than the ChaCha variants (see \figref{tradeoff-no-ratios}). Doubly
@@ -135,9 +134,9 @@ often.
 \begin{figure}[ht]
   \textbf{Mirrored/Selective Switching I/O Ratio Performance}\par\medskip
   \centering
-  {\input{data/mirrored-selective-baseline.tex}} \caption{Median sequential and
-  random write and then read back performance comparison of Mirrored and
-  Selective switching strategies to baseline.}
+  {\input{data/mirrored-selective-baseline.tex}} \caption{Median I/O performance
+  comparison of Mirrored and Selective switching to baseline. Each cluster of 3
+  dots represents the 7:3, 5:5, and 3:7 primary-vs-secondary I/O ratios.}
  \label{fig:mirrored-selective-baseline}
 \end{figure}
 

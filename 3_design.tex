@@ -71,27 +71,26 @@ different combinations of concerns.
    \textbf{Expansion} \\
    \midrule
    ChaCha8         & 0           & 0           & 1           \\
-   ChaCha12        & 0.5         & 0           & 1           \\
+   %ChaCha12        & 0.5         & 0           & 1           \\
    ChaCha20        & 1           & 0           & 1           \\
-   Salsa8          & 0           & 0           & 1           \\
-   Salsa12         & 0.5         & 0           & 1           \\
-   Salsa20         & 1           & 0           & 1           \\
-   HC128           & 0           & 0           & 1           \\
-   HC256           & 1           & 0           & 1           \\
+   % Salsa8          & 0           & 0           & 1           \\
+   % Salsa12         & 0.5         & 0           & 1           \\
+   % Salsa20         & 1           & 0           & 1           \\
+   % HC128           & 0           & 0           & 1           \\
+   % HC256           & 1           & 0           & 1           \\
    Freestyle (F)   & 0           & 2           & 0           \\
    Freestyle (B)   & 0.5         & 2.5         & 0           \\
    Freestyle (S)   & 1           & 3           & 0           \\
 \end{tabular}
-   \caption{Our framework for classifying stream ciphers according to three
-   ideal features: relative round count, ciphertext randomization, and
-   ciphertext expansion.}
+   \caption{The five most interesting ciphers examined in this research, each
+   evaluated using our framework.}
    \label{tbl:security-quant}
  \end{table}
 
 \subsubsection{Relative Rounds (Rounds)}
 
-The ciphers we examine in this paper are all constructed around the notion of
-\emph{rounds}, where a higher number of rounds (and possibly longer key) is
+The ciphers we examine with this research are all constructed around the notion
+of \emph{rounds}, where a higher number of rounds (and possibly longer key) is
 positively correlated with a higher resistance to brute force given no fatal
 related-key or other attacks~\cite{ChaCha-Cryptanalysis}. Hence, this feature
 represents how many rounds a cipher executes relative to other implementations
@@ -113,11 +112,10 @@ re-installation attacks, XOR-based cryptanalysis and other comparison attacks,
 and other confidentiality-violating schemes where the ciphertext is in full
 control of the adversary ~\cite{Freestyle}. This property is useful in cases
 where we cannot prevent the same key, nonce, and plaintext from being reused,
-such as with data ``in motion'' (see the motivational example earlier in this
-work). Ciphers without this property---such as ChaCha20 on which prior work is
-based---are trivially broken when key-nonce-plaintext 3-tuples are reused. In
-StrongBox, this is referred to as an ``overwrite condition'' or simply
-``overwrite''~\cite{StrongBox}.
+such as with data ``in motion'' (see \cref{subsec:uc1}). Ciphers without this
+property---such as ChaCha20 on which prior work is based---are trivially broken
+when key-nonce-plaintext 3-tuples are reused. In StrongBox, this is referred to
+as an ``overwrite condition'' or simply ``overwrite''~\cite{StrongBox}.
 
 Though there are many ways to achieve ciphertext randomization, the ciphers
 included in our analysis implement it using a random number of rounds for each
@@ -158,12 +156,11 @@ and Chacha implementations require a certain IV and key size and handle
 plaintext input through successive invocations of a single state update
 function~\cite{Floodyberry}. Using OpenSSL's AES implementation in CTR mode
 requires manually tracking the counter state and individual ciphertext blocks
-are retrieved though corresponding function invocations~\cite{OpenSSL}.
-Freestyle's reference implementation requires we calculate the extra space
-necessary per nugget (due to ciphertext expansion) along with
-configuration-dependent minimum and maximum rounds-per-block, hash interval, and
-pepper bits~\cite{Freestyle}. HC-128 and other ciphers have similarly disparate
-requirements.
+are retrieved though corresponding function invocations. Freestyle's reference
+implementation requires we calculate the extra space necessary per nugget (due
+to ciphertext expansion) along with configuration-dependent minimum and maximum
+rounds-per-block, hash interval, and pepper bits~\cite{Freestyle}. HC-128 and
+other ciphers have similarly disparate requirements.
 
 Unlike prior work, SwitchCrypt must be able to encrypt and decrypt arbitrary
 nuggets \emph{with any of these ciphers} at any moment with low overhead and
@@ -336,7 +333,7 @@ performance or battery penalty that comes with re-ciphering every nugget.
       Selective & Slower       & High & Faster reads and writes  \\
       \hline
    \end{tabular}
-   \caption{A summary comparison between the three cipher switching strategies.}
+   \caption{A summary comparison between strategies.}
    \label{tbl:strategies-advantages}
 \end{table}
 
@@ -458,7 +455,7 @@ the capability of prior work. See \secref{usecases} for specifics.
 
 Our SwitchCrypt implementation consists of 9,491 lines of C code; our test suite
 consists of 6,077 lines of C code. All together, our solution is comprised of
-15,568 lines of C code and is publicly available open-source\footnoteref{note1}.
+15,568 lines of C code.
 
 SwitchCrypt uses OpenSSL version 1.1.0h and LibSodium version 1.0.12 for its
 AES-XTS and AES-CTR implementations. Open source ARM NEON optimized

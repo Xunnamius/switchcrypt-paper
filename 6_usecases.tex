@@ -1,20 +1,20 @@
 \section{SwitchCrypt Case Studies} \label{sec:usecases}
 
-In this section, we provide three case studies demonstrating the practical
+\PUNT{In this section, we provide three case studies demonstrating the practical
 utility of cipher switching. We cover a wide range of situations, highlighting
 concerns like meeting latency goals (\cref{subsec:uc3}), trading off security
 and writable space (\cref{subsec:uc2}), and keeping within an energy budget
 (\cref{subsec:uc1}). We also demonstrate the utility of both temporal and
 spatial switching strategies, exploring the range of conditions under which
-certain strategies are optimal.
+certain strategies are optimal.}
 
 \subsection{Balancing Security Goals with a Hard Energy Cap} \label{subsec:uc1}
 
-Here we revisit the motivating example from earlier in this work. It illustrates
-that, because latency and energy use are correlated among the ciphers we
-examined, we can exploit that to save battery life when necessary while
-maintaining confidentiality when uploading encrypted backups to our
-enterprise solution.
+Here we revisit the motivating example given in the extended abstract of this
+work. It illustrates that, because latency and energy use are correlated among
+the ciphers we examined, we can switch ciphers to save battery life or to
+maintain confidentiality when uploading encrypted backups to our enterprise
+solution.
 
 To simulate I/O activity, we begin randomly writing 10 40MB files using the
 Freestyle Balanced cipher configuration over the course of approximately 120-125
@@ -25,11 +25,11 @@ processes to the energy-efficient LITTLE cores. After this event, we complete
 the remaining workload using the ChaCha8 cipher. We repeat this experiment three
 times.
 
-\begin{figure}[ht] \textbf{Battery Saver Use Case: Energy-Security Tradeoff vs
-   Strict Energy Budget}\par\medskip
+\begin{figure}[ht] \textbf{Battery Saver: A Strict Energy
+   Budget vs Time}\par\medskip
    \centering
    {\input{data/usecase-battery.tex}} \caption{Median sequential write total
-   energy use with respect to time with respect to time.}
+   energy use over time.}
   \label{fig:usecase-battery}
 \end{figure}
 
@@ -90,12 +90,11 @@ switching and write-read with a 7:3 ratio of ChaCha8 versus Freestyle
 Balanced I/O operations. Here, 30\% of the data is considered sensitive. We
 repeat this experiment three times.
 
-\begin{figure}[ht] \textbf{VSR Use Case: ChaCha8 vs Freestyle Strong Sequential
-4KB, 5MB Performance}\par\medskip
+\begin{figure}[ht] \textbf{VSR: ChaCha8 vs Freestyle Strong Sequential
+4KB, 5MB}\par\medskip
    \centering
-   {\input{data/usecase-vsr-bar.tex}} \caption{Median sequential read and write
-   performance comparison of 4KB, 5MB I/O with 7-to-3 ratio, ChaCha8 vs
-   Freestyle Strong (respectively).}
+   {\input{data/usecase-vsr-bar.tex}} \caption{Median I/O performance comparison
+   of ChaCha8 vs Freestyle Strong 4KB, 5MB I/O with 7-to-3 ratio.}
   \label{fig:usecase-vsr-bar}
 \end{figure}
 
@@ -130,10 +129,9 @@ We begin by writing 10 40MB files to SwitchCrypt per each cipher as a baseline.
 We then introduce a delay into SwitchCrypt I/O of $20ms$, simulating drive
 slowdown, and repeat the experiment three times.
 
-\begin{figure}[ht] \textbf{SSD EoL Use Case: Latency-Security Tradeoff vs
+\begin{figure}[ht] \textbf{SSD EoL: Latency-Security Tradeoff vs
    Goals}\par\medskip {\input{data/usecase-eol-tradeoff.tex}} \caption{Median
-   sequential and random 40MB read and write performance comparison: baseline
-   versus simulated faulty block device.}
+   40MB I/O performance comparison: baseline versus simulated faulty device.}
   \label{fig:usecase-eol-tradeoff}
 \end{figure}
 
