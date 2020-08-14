@@ -464,13 +464,8 @@ Freestyle cipher reference implementation is from the original Freestyle
 paper~\cite{Freestyle}. The eSTREAM Profile 1 cipher implementations are from
 the open source libestream cryptographic library~\cite{libestream} by Lucas
 Clemente Vella. The Merkle Tree implementation is from the Secure Block
-Device~\cite{SBD}.
-
-We implement SwitchCrypt on top of the BUSE~\cite{BUSE} virtual block device,
-using it as our mock device controller. BUSE is a thin (200 LoC) wrapper around
-the standard Linux Network Block Device (NBD). BUSE allows an operating system
-to transact block I/O requests to and from virtual block devices exposed via
-domain socket.
+Device~\cite{SBD}. We implement SwitchCrypt on top of the BUSE~\cite{BUSE}
+virtual block device.
 
 We develop Generic Cipher Interface wrapper implementations for many cipher
 implementations of which we select five for the purposes of this research. They
