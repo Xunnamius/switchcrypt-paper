@@ -64,9 +64,9 @@ security properties, and respecting changing OS energy budgets. Hence, any
 static common-case FDE configuration will sacrifice one concern for another,
 even when it is not optimal to do so for a given workload.
 
-Hence we present SwitchCrypt, a storage layer that can dynamically transition
-into a more desirable configuration given runtime changes. In one case study,
-where we require the filesystem to react to a shrinking energy budget by
+Hence we present SwitchCrypt, a storage layer that can quickly and dynamically
+transition to a more desirable configuration given runtime changes. In one case
+study, where we require the filesystem to react to a shrinking energy budget by
 switching ciphers (\cref{subsec:uc1}), we find that SwitchCrypt achieves up to a
 3.3x total energy use reduction compared to prior static approaches that only
 use the Freestyle stream cipher without switching. In another case, where we
