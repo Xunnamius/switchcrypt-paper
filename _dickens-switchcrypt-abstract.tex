@@ -9,65 +9,87 @@
 
 \thispagestyle{empty}
 
+\hank{Page 1 of this document is an unborken wall of text.  That needs
+  to change.  I suggest either adding a picture or finding subsections
+  you can add, or break the first section into two: do a motivation
+  and a limitations section.  Or do all of these, but this needs to be
+  more digestible and welcoming to readers.}
+
 \section{Motivation: The Limitations of Prior Work}
 \label{sec:motivation}
 
 Recent work on Full Drive Encryption shows that stream ciphers achieve
-significantly improved performance over block ciphers while offering stronger
-security guarantees. However, optimizing for performance often conflicts with
-other key concerns like energy usage and desired security properties. In this
-paper we present SwitchCrypt, a software mechanism that navigates the tradeoff
-space made by balancing competing security and latency requirements via
-\emph{cipher switching} in space or time. Our key insight in achieving
-low-overhead switching is to leverage the overwrite-averse behavior of
-underlying solid-state storage and the per-unit independence of our
-drive/filesystem layout. This allows us to trade throughput for reduced energy
-use and/or certain security properties.
+significantly improved performance over block ciphers while offering
+stronger security guarantees. However, optimizing for performance
+often conflicts with other key concerns like energy usage and desired
+security properties. \hank{Really need citations at the end of each of
+  the first two sentences.  That would always be the case, but even
+  more important here as this will be the only thing reviewed in round
+  1.} This paper presents SwitchCrypt, a software mechanism that
+navigates the tradeoff space made by balancing competing security and
+latency requirements via \emph{cipher switching} in space or time. Our
+key insight in achieving low-overhead switching is leveraging the
+overwrite-averse behavior of underlying solid-state storage and the
+per-unit independence of our drive/filesystem layout. This observation
+coupled with our software mechanisms allow us to trade throughput for
+reduced energy use and/or certain security properties.
 
-As an example: suppose we have an ARM-based ultra-low-voltage netbook provided
-to us by our employer. As this is an enterprise device, our employer requires
-that 1) our drive is fully encrypted at all times and 2) our encrypted data is
-constantly backed up to an offsite system. The industry standard in full drive
-encryption is AES-XTS, so we initialize our drive with it. Given these
-requirements, three primary concerns present themselves.
+As an example: suppose we have a low-voltage netbook provided to us by
+our employer. As this is an enterprise device, our employer requires
+that 1) our drive is fully encrypted at all times and 2) our encrypted
+data is constantly backed up to an offsite system. The industry
+standard in full drive encryption is AES-XTS, so we initialize our
+drive with it. Given these requirements, three primary concerns
+present themselves: (1) Latency, (2) AES assumptions, and (3) power
+source.
 
-First, it is well known that FDE using AES-XTS adds significant latency and
-power overhead to I/O operations, especially on mobile and battery-constrained
-devices~\cite{google-engadget, android-M-mobile-motivation,
-android-M-mobile-motivation-2}. To keep our drive encrypted at all times with
-AES-XTS means we must accept this hit to performance and battery life. Worse, if
-our device does not support hardware accelerated AES, performance can be
-degraded even further; I/O latency can be as high as 3--5x~\cite{StrongBox}.
-Hardware accelerated AES is hardly ubiquitous, and the existence of myriad
-devices that do not support it cannot simply be ignored, hence Google's
-investment in Adiantum---an FDE solution for ``the next billion users'' of
-low-cost devices without support for hardware accelerated AES~\cite{Adiantum}.
+\paragraph*{Latency} it is well known that FDE using AES-XTS adds
+significant latency overhead to I/O operations, especially on mobile
+and low-power devices~\cite{google-engadget,
+  android-M-mobile-motivation, android-M-mobile-motivation-2}. To keep
+our drive encrypted at all times with AES-XTS means we must accept
+this hit to performance. Worse, if our device does not support
+hardware accelerated AES, performance can be degraded even further;
+I/O latency can be as high as 3--5x~\cite{StrongBox}.  Hardware
+accelerated AES is hardly ubiquitous, and the existence of myriad
+devices that do not support it cannot simply be ignored, hence
+Google's investment in Adiantum---an FDE solution for ``the next
+billion users'' of low-cost devices without support for hardware
+accelerated AES~\cite{Adiantum}.
 
-Second, AES-XTS is designed to mitigate threats to drive data ``at rest,'' which
-assumes an attacker cannot access snapshots of our encrypted data nor manipulate
-our data without those manipulations being immediately obvious to us. With
-access to multiple snapshots of a drive's AES-XTS-encrypted contents, an
-attacker can passively glean information about the plaintext over time by
-contrasting those snapshots, leading to confidentiality violations in some
-situations~\cite{XEX, XTS}. Similarly, an attacker that can manipulate encrypted
-bits without drawing our attention will corrupt any eventual plaintext,
-violating data integrity and, in the worst case, influencing the behavior of
-software. Unfortunately, in real life, data rarely remains ``at rest'' in these
-ways. In our example, our employer requires we back up the contents of our drive
-to some offsite backup service; this service will receive periodic snapshots of
-the encrypted state of our drive, violating our ``at rest'' invariant. These
-backups occur at a layer above the drive controller, meaning any encryption
+\paragraph*{AES Assumptions} AES-XTS only mitigates threats to drive
+data ``at rest,'' which assumes an attacker cannot access snapshots of
+our encrypted data nor manipulate it without those manipulations being
+immediately obvious to us. With access to multiple snapshots of a
+drive's AES-XTS-encrypted contents, an attacker can passively glean
+information about the plaintext over time by contrasting those
+snapshots, leading to confidentiality violations in some
+situations~\cite{XEX, XTS}. \hank{The ``in some situations'' really
+  weakens the overall point.  Is tha qualifier really necessary here?
+  If so, it would probably be better to explain those situations and
+  argue that they are common.} Similarly, an attacker that can
+manipulate encrypted bits without drawing our attention will corrupt
+any eventual plaintext, violating data integrity and, in the worst
+case, influencing the behavior of software. \hank{Citation on the
+  previous sentence is necessary.}  Unfortunately, in real life, data
+rarely remains ``at rest'' in these ways. In our example, our employer
+requires we back up the contents of our drive to some offsite backup
+service; this service will receive periodic snapshots of the encrypted
+state of our drive, violating our ``at rest'' invariant. These backups
+occur at a layer above the drive controller, meaning any encryption
 happening at the Flash Translation Layer (FTL) or below is irrelevant.
 
-Third, our system is battery constrained, placing a cap on our energy budget
-that can change at any moment as we transition from line power to battery power
-and back. Our system should respond to these changing requirements without
-violating any other concerns.
+\paragraph{Power Source} Our system is battery constrained, placing a
+cap on our energy budget that can change at any moment as we
+transition from line power to battery power and back. Our system
+should respond to these changing requirements without violating any
+other concerns.
 
-To alleviate the performance concern, we can choose a stream cipher like
-ChaCha20 rather than the AES-XTS block cipher. Using StrongBox, an encryption
-driver built for ChaCha20-based FDE, we can achieve on average a 1.7x speedup
-and a commensurate reduction in energy use~\cite{StrongBox}.
+To alleviate the latency concern, we can choose a stream cipher like
+ChaCha20 rather than the AES-XTS block cipher. Using StrongBox, an
+encryption driver built for ChaCha20-based FDE, we can achieve on
+average a 1.7x speedup and a commensurate reduction in energy
+use~\cite{StrongBox}.
 
 When it comes to the security concern, StrongBox solves both the snapshot and
 integrity problems by 1) never writing data encrypted with the same key to the
@@ -112,17 +134,19 @@ configuration when conserving energy is a top priority, and then switch back to
 the Freestyle configuration when we connect to a charger and backups are
 eventually resumed.
 
-Hence we present SwitchCrypt, a device mapper that can trade off between
-these two configurations and others without compromising security or performance
-or requiring the device be restarted. With prior work, the user must select a
-static operating point in the energy-security-latency space at initialization
-time and hope it is optimal across all workloads and cases. If they choose the
-Freestyle configuration, their device will be slower and battery hungry even
-when they are not backing up. If they choose the more performant ChaCha20
-configuration, they risk confidentiality-violating snapshot comparison attacks.
-SwitchCrypt solves this problem by encrypting data with the high performance
-ChaCha20 when the battery is low and switching to Freestyle when plugged in and
-syncing with the backup service resumes.
+To overcome these limitations, we present SwitchCrypt, a device mapper
+that can trade off between different cipher configurations without
+compromising security or performance or requiring the device be
+restarted. With prior work, the user must select a static operating
+point in the energy-security-latency space at initialization time and
+hope it is optimal across all workloads and use case. If they choose
+the Freestyle configuration, their device will be slower and battery
+hungry even when they are not backing up. If they choose the more
+performant ChaCha20 configuration, they risk confidentiality-violating
+snapshot comparison attacks.  SwitchCrypt solves this problem by
+encrypting data with the high performance ChaCha20 when the battery is
+low and switching to Freestyle when plugged in and syncing with the
+backup service resumes.
 
 \section{Challenges}
 \label{sec:key-challenges}
@@ -138,15 +162,16 @@ which configuration to use, and where to store the output, all with minimal
 overhead. This requires we implement efficient cipher \emph{switching
 strategies}.
 
-\textbf{Quantifying the properties traded off between configurations.} To obtain
-a space of configurations that we might reason about, it is necessary to compare
-certain properties of stream ciphers useful in the FDE context. However,
-different ciphers have a wide range of security properties, performance
-profiles, and output characteristics, including those that randomize their
-outputs and those with non-length-preserving outputs---\ie{the cipher outputs
-more data than it takes in}. To address this, we propose a framework for
-quantitative cipher comparison in the FDE context; we use this framework to
-define our configurations.
+\textbf{Quantifying the properties traded off between ciphers.} To
+obtain a space of configurations that we might reason about, it is
+necessary to compare certain properties of stream ciphers useful in
+the FDE context. However, different ciphers have a wide range of
+security properties, performance profiles, and output characteristics,
+including those that randomize their outputs and those with
+non-length-preserving outputs---\ie{the cipher outputs more data than
+  it takes in}. To address this, we propose a framework for
+quantitative cipher comparison in the FDE context; we use this
+framework to define our configurations.
 
 \textbf{Decoupling ciphers from the encryption process.} To flexibly switch
 between configurations in SwitchCrypt requires a generic cipher interface. This
@@ -199,6 +224,11 @@ using only the Freestyle stream cipher. In another case, where we allow the user
 to manually switch between ChaCha20 and Freestyle stream ciphers dynamically, we
 achieve at minimum a 3.1x reduction in read latency compared to static
 approaches.
+
+
+\hank{I think you need a ``Why ASPLOS'' section here that briefly
+  argues this work is interdisciplinary and at the intersetcion of OS
+  and hardware (and explain why that is true).}
 
 \pagebreak
 \bibliographystyle{plain}
