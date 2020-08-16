@@ -43,18 +43,22 @@ or cannot support hardware accelerated AES. Hence, it has been demonstrated that
 using stream ciphers for FDE is both desirable in a variety of contexts and
 feasible at industry scale.
 
-In this paper, we explore the rich configuration space of stream ciphers beyond
-the narrow scope of previous work. Each cipher comes with a variety of
-performance, energy efficiency, and security properties in the FDE context.
-These ciphers include ChaCha variants with different round counts (e.g.,
-ChaCha8 and ChaCha12)~\cite{ChaCha20}, ciphers with stronger security
-guarantees versus more robust adversaries (e.g., Freestyle~\cite{Freestyle}),
-and other ciphers like SalsaX~\cite{SalsaX}, AES in counter mode
-(AES-CTR)~\cite{AESCTR}, Rabbit~\cite{Rabbit}, Sosemanuk~\cite{Sosemanuk}, etc.
-Given this variety, the cipher configuration providing the least latency
-overhead is almost always different than the configuration providing the most
-desirable security properties, and both may differ from the configuration using
-the least energy or preserving the most free space on the encrypted drive.
+In this paper, we explore the rich configuration space of stream
+ciphers beyond the narrow scope of previous work. Each cipher comes
+with a variety of performance, energy efficiency, and security
+properties in the FDE context.  These ciphers include ChaCha variants
+with different round counts (e.g., ChaCha8 and
+ChaCha12)~\cite{ChaCha20}, ciphers with stronger security guarantees
+versus more robust adversaries (e.g., Freestyle~\cite{Freestyle}), and
+other ciphers like SalsaX~\cite{SalsaX}, AES in counter mode
+(AES-CTR)~\cite{AESCTR}, Rabbit~\cite{Rabbit},
+Sosemanuk~\cite{Sosemanuk}, etc.  Given this variety, the cipher
+configuration providing the least latency overhead is almost always
+different than the configuration providing the most desirable security
+properties, and both may differ from the configuration using the least
+energy or preserving the most free space on the encrypted drive.
+\hank{This is a strong claim, maybe add a parenthetical forward
+  reference to the section that has the data to back this up.}
 
 Further, while cipher choice might be configured statically at compile or boot
 time with respect to some common case in traditional FDE, such configurations
@@ -76,4 +80,39 @@ latency and 1.6x to 2.8x reduction to write latency compared to prior static
 approaches.
 
 \PUNT{We make the SwitchCrypt source publicly available open
-source\footnote{\label{note1}\SystemURI}.}
+  source\footnote{\label{note1}\SystemURI}.} \hank{You should still
+  note that it is publicly available. If you punted this because you
+  can put the link in HotCRP, just have the footnote state that it is
+  available through HotCRP.}
+
+\hank{I have a couple of other high-level notes at this point.
+  \\
+  First, the references seem pretty sparse for a conference these
+  days.  I would guess that the typical paper I review has about 50
+  references.  Consider adding some more citations to PC members who
+  work on security or fileseystems.
+  \\
+  Second, I find the transition from section 1 to section 2 way to
+  abrupt.  We cannot count on paper readers having actually seen the
+  extended abstract.  I think referring to it for the motivational
+  example is fine, becuase if they don't go back and read it, they can
+  still follow.  It might, however, be worth restating the challenges
+  that Section 2 addresses in the beginnig of that section.  Or at
+  least giving an overview of what Section 2 covers.
+  \\
+  Third, our use of both an evaluation and case studies is a little
+  different than what people should expect.  The last paragraph of the
+  intro alerts people that case studies are coming, which is good, but
+  it doesn't talk about the evalution.  It needs a sentence or two to
+  explain what the evaluation accomplishes in the context of the
+  overall paper.  Why should readers pay attention to that part?  What
+  will they learn?
+  \\
+  Finally, the related work is a bit unsatisfying.  That is partly
+  structure and partly length.
+  \\
+  And one meta-level thought: I'm asking you to add stuff here and I
+  know we are at the page limit.  But, my sense is that we will be
+  able to compact this down quite a lot without a whole lot of
+  trouble.  So, right now let's focus on adding all the content that
+  we need and we can worry about length later in the week.  }
