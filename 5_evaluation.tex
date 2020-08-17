@@ -60,6 +60,28 @@ In this section we answer the following questions:
  strategy? (\cref{subsec:3})
 \end{enumerate}
 
+\hank{I like the structure of asking questions that you then answer
+  experimentally.  Right now, though, you are sort of leaving it up to
+  the reader to complete those answers.  Ultimately the conclusion
+  from an evaluation like this should be that the proposed system does
+  something better than prior work.  Again, with my reviewr hat on, I
+  am not sure what I am supposed to conclude from all these results.
+  What I would like to see is something like the following.  First,
+  explicitly answer each of the questions that you asked.  In one
+  sentence, what to the tradeoff spaces look like?  Can you reach
+  points that were not otherwise reachable?  Is the overhead
+  acceptable?  Then, I want to see a summary that tells me that this
+  is a better way to build a FDE system.  Something like: In summary,
+  these results show that SwitchCrypt can reach a wide range of
+  performance and security tradeoffs.  Furthermore, it can reach
+  points in the tradeoff space that were simply unreachable with prior
+  work.  This comes at a cost of just X\% increased overhead compared
+  to existing FDE appraoches (like StrongBox), and at the cost of
+  greatly reduced I/O performance for 4KB operations.  We conclude
+  that any FDE approach (that deals with greater than XXX KB requests)
+  would benefit from the increased flexiblity (with minimal overhead)
+  provided by SwitchCrypt.}
+
 \subsection{Switching Strategies Under Various Workloads} \label{subsec:1}
 
 \begin{figure}[ht]

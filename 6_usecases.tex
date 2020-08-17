@@ -10,20 +10,29 @@ certain strategies are optimal.}
 
 \subsection{Balancing Security Goals with a Hard Energy Cap} \label{subsec:uc1}
 
-Here we revisit the motivating example given in the extended abstract of this
-work. It illustrates that, because latency and energy use are correlated among
-the ciphers we examined, we can switch ciphers to save battery life or to
-maintain confidentiality when uploading encrypted backups to our enterprise
-solution.
+Here we revisit the motivating example given in the extended abstract
+of this work. It illustrates that, because latency and energy use are
+correlated among the ciphers we examined, we can switch ciphers to
+save battery life or to maintain confidentiality when uploading
+encrypted backups to our enterprise solution. \hank{It probably seems
+  small, but you want to avoid saying things like ``we can switch
+  ciphers,'' and say that ``SwitchCrypt allows us to easily swtich
+  ciphters.''  We could do it today at a huge inconvenience, the point
+  is that SwitchCrypt makes it practical.}
 
-To simulate I/O activity, we begin randomly writing 10 40MB files using the
-Freestyle Balanced cipher configuration over the course of approximately 120-125
-seconds. After 5 seconds, the device enters ``battery saver'' mode, also pausing
-backup uploads. We simulate this event by 1) underclocking the cores to their
-lowest frequencies and 2) using \texttt{taskset} to transition the SwitchCrypt
-processes to the energy-efficient LITTLE cores. After this event, we complete
-the remaining workload using the ChaCha8 cipher. We repeat this experiment three
-times.
+To simulate I/O activity, we begin randomly writing 10 40MB files
+using the Freestyle Balanced cipher configuration over the course of
+approximately 120-125 seconds. After 5 seconds, the device enters
+``battery saver'' mode, also pausing backup uploads. We simulate this
+event by 1) underclocking the cores to their lowest frequencies and 2)
+using \texttt{taskset} to transition the SwitchCrypt processes to the
+energy-efficient LITTLE cores. After this event, we complete the
+remaining workload using the ChaCha8 cipher. We repeat this experiment
+three times. \hank{Like above comment, you want to phrase this in
+  terms of SwitchCrypt and concepts you have already defined.  So
+  instead of saying we complete it using ChaCha8, talk about how the
+  OS changes SwitchCrypt's active cipher from FS to CC8, and from that
+  point on...}
 
 \begin{figure}[ht] \textbf{Battery Saver: A Strict Energy
    Budget vs Time}\par\medskip
@@ -51,13 +60,26 @@ short term, we stay within our energy budget and finish before the devices dies.
 Further, when we get our device to a charger, SwitchCrypt can converge nuggets
 back to Freestyle Balanced and resume uploading backups.
 
-On average, using Forward cipher switching resulted in a 3.3x total energy use
-reduction compared to exclusively using Freestyle Balanced, allowing us to
-remain within our energy budget. We note, however, that the energy savings is
-not the point of this experiment. Rather, the lesson learned is that SwitchCrypt
-enables the system to move to the right point in the energy/security tradeoff
-space so that the current task can still be accomplished before the battery is
-drained and without compromising backup security at any point.
+On average, using Forward cipher switching resulted in a 3.3x total
+energy use reduction compared to exclusively using Freestyle Balanced,
+allowing us to remain within our energy budget. We note, however, that
+the energy savings is not the point of this experiment. Rather, the
+lesson learned is that SwitchCrypt enables the system to move to the
+right point in the energy/security tradeoff space so that the current
+task can still be accomplished before the battery is drained and
+without compromising backup security at any point.  \hank{The numbers
+  on these results are amazing, but in the chart it looks like there
+  is hardly any difference between them.  Is there any way to play
+  around with the parameters to get more separation between the
+  curves?  Also, the naming on the chart legend is doing you the worst
+  possible service.  You should have a line labeled ``SwitchCrupt.''
+  Maybe label the other ones Static (ChaCha8) and Static (FS) or
+  something.  You also might label the chart with the key moments, you
+  have battery critical, but there is just one battery dies. Shouldn't
+  it die at different times with SwitchCrupt? MAybe you run the x-axis
+  out so that you can see there is a long period of time where
+  SwitchCrypt keeps going, but the others have died? (Or just FS dies,
+  and jsut use that as the single point of comaprison).}
 
 \subsection{Variable Security Regions} \label{subsec:uc2}
 
@@ -91,10 +113,13 @@ Balanced I/O operations. Here, 30\% of the data is considered sensitive. We
 repeat this experiment three times.
 
 \begin{figure}[ht] \textbf{VSR: ChaCha8 vs Freestyle Strong Sequential
-4KB, 5MB}\par\medskip
-   \centering
-   {\input{data/usecase-vsr-bar.tex}} \caption{Median I/O performance comparison
-   of ChaCha8 vs Freestyle Strong 4KB, 5MB I/O with 7-to-3 ratio.}
+    4KB, 5MB}\par\medskip \centering
+  {\input{data/usecase-vsr-bar.tex}} \caption{Median I/O performance
+    comparison of ChaCha8 vs Freestyle Strong 4KB, 5MB I/O with 7-to-3
+    ratio. \hank{Again, where is switch crupt in this figure?  It
+      should be labeled.  Also, it is not obvious from this figure
+      that switch crypt is actually better than these other
+      approaches.  The figure makes it look like ChaCha is the best.}}
   \label{fig:usecase-vsr-bar}
 \end{figure}
 
@@ -140,6 +165,8 @@ write performance of a 40MB workload when nuggets are encrypted exclusively with
 our choice ciphers. While the latency ceiling and security floor have not
 changed, we see increased latency in the delayed workloads.
 
-Our goal is to remain under the latency ceiling while remaining above the
-security floor. Thanks to Forward switching, accesses to highly trafficked areas
-of the drive can remain performant even during drive end-of-life.
+Our goal is to remain under the latency ceiling while remaining above
+the security floor. Thanks to Forward switching, accesses to highly
+trafficked areas of the drive can remain performant even during drive
+end-of-life.  \hank{The same general comments I made about the other
+  case studies apply here as well.}

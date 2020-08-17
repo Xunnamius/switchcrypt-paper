@@ -20,6 +20,37 @@ controller (e.g. Flash Translation Layer). This is illustrated in
    \caption{Layout of SwitchCrypt's drive layout.} \label{fig:backstore}
 \end{figure}
 
+\hank{The part that is missing here is some kind of motivation for
+  this level of detail.  For most reviewers/readers going into this
+  level of technical detail will be jarring without some kind of
+  high-level explanation of why they should care.  There must be some
+  reason that it is important to understand how the drive is laid out
+  and that the body section is broken down into chumks.  As currently
+  constructed, you have to wade into that detail before you get the
+  reason, and even then it is presented as a reason for StrongBox to
+  do this, not necessarily as a reason that SwitchCrypt should keep
+  it.
+  \\
+  \\
+  So, I want something of the form: The key insight behind SwitchCrypt
+  is achieving low-overhead cipher-switching by exploiting fine-grain
+  tracking and manipulation of the cipher used to encrypt different
+  drive regions.  While existing stream cipher FDE schemes implement
+  much of the required tracking, their design does not accomodate
+  dynamic manipulation.  Therefore, we first review the structure of
+  such an existing approach and then describe how we extend it to add
+  the required functionality for SwitchCrupt.
+  \\
+  \\
+  I am guessing that you can find a way to phrase that more eloquently
+  than I did here, but hopefully you get the high-level idea: tell
+  your readers where you are going so that they will happily join you
+  for the ride.  Then, obviously, if you start it this way, you will
+  need to rephrase parts of the rest of this section given that you
+  have already introduced this high-level goal. Overall, I think that
+  the total text will stay about the same, I just want you to hoist
+  parts of it up to the beginning.}
+
 The drive itself is divided into a \emph{HEAD} section and \emph{BODY} section
 upon initialization, illustrated in \figref{backstore}. The HEAD consists of
 metadata headers written during initialization~\cite{StrongBox} along with the
@@ -39,7 +70,7 @@ overwrites, 2) limit the maximum length of any plaintext input to ciphers, thus
 amortizing the overhead incurred during encryption, and 3) independently and
 efficiently switch the cipher used to encrypt individual nuggets.
 
-Dickens et al. showed how to make nugget-based drive organization secure using a
+Dickens et al. show  how to make nugget-based drive organization secure using a
 single stream cipher, ChaCha20, to handle overwrites, prevent rollback attacks,
 and limit plaintext length~\cite{StrongBox}. However, they did not envision the
 utility in trading off between concerns at the filesystem or device-mapper
@@ -54,15 +85,47 @@ efficiently encrypt nuggets with different ciphers.
 
 \subsection{Quantifying Cipher Security Properties} \label{subsec:quantify}
 
-To reason about when to trade off between the ciphers evaluated in this work, we
-must have a way to compare ciphers' utility in the context of SwitchCrypt FDE.
-However, different ciphers have a wide range of security properties, performance
-profiles, and output characteristics. To address this need, we propose a novel
-evaluation framework (see: \tblref{security-quant}). Our framework classifies
-stream ciphers according to three quantitative features: relative round count,
-ciphertext randomization, and ciphertext expansion. Taken together, these
-features reveal a rich tradeoff space of cipher configurations optimizing for
-different combinations of concerns.
+\hank{There is one major problem with this section: The scores are
+  presented without any methodology for coming up with them (with the
+  exception of length preservation). As with any empiricial results
+  that we would present, our standard should be that any numbers we
+  present are reproducible.  That is to say, any reader should come up
+  with the same scores that we do if they did not see them ahead of
+  time.  For example, there should be a clear reason why Freestyle(B)
+  is a 2.5 on randomization instead of 2.4 or 2.6.  Also there is no
+  cipher listed as 1 for that feature; why?  Why does ChaCha12 get .5
+  for Rounds? Is it really halfway between 8 and 20?  Whatever the
+  reason, that needs to be explained. For expansion, why is it binary
+  instead of something related to how much it expands?  Do you view a
+  theoretical cipher that doubles the length as equivalent to one that
+  increases it by 1.5x?
+  \\
+  \\
+  Also, looking ahead to section 4, you are going to use the scores,
+  and call it the R+R vector. If you like that name, you should
+  introduce it here and make an argument about how you can combine
+  Rounds and Randomization into one coherent metric.  However, this
+  also raises the question of why this section appears to penalize
+  ciphers for expansion, yet that is not captured in this composite
+  score.  Basically, this is another question of methodology where the
+  scoring and comparsions don;t have enough information to be
+  reporoducible. }
+
+
+To reason about when to trade off between the ciphers evaluated in
+this work, we must have a way to compare ciphers' utility in the
+context of SwitchCrypt FDE.  However, different ciphers have a wide
+range of security properties, performance profiles, and output
+characteristics. \hank{To this point in the paper we haven't really
+  listed any of the practical concerns surrounding these security
+  properites.  That makes it a little hard to understand why we need
+  this complicated scoring scheme.} To address this need, we propose a
+novel evaluation framework (see: \tblref{security-quant}). Our
+framework classifies stream ciphers according to three quantitative
+features: relative round count, ciphertext randomization, and
+ciphertext expansion. Taken together, these features reveal a rich
+tradeoff space of cipher configurations optimizing for different
+combinations of concerns.
 
 \begin{table}[ht]
    \begin{tabular}{@{}ccccc@{}}
@@ -82,8 +145,11 @@ different combinations of concerns.
    Freestyle (B)   & 0.5         & 2.5         & 0           \\
    Freestyle (S)   & 1           & 3           & 0           \\
 \end{tabular}
-   \caption{The five most interesting ciphers examined in this research, each
-   evaluated using our framework.}
+\caption{The five most interesting ciphers examined in this research, each
+  evaluated using our framework. 
+  \hank{Why did you take the others out?  I think it is interesting to keep them in.  
+    If you are worried about space, I am sure that we can find 6 more lines of space.  
+    It certainly makes this part seem like more of a contribution because it applies generally.}}
    \label{tbl:security-quant}
  \end{table}
 
@@ -98,10 +164,13 @@ of the same algorithm. For instance: ChaCha8 is a reduced-round version of
 ChaCha12, which is a reduced-round version of ChaCha20, all using the ChaCha
 algorithm~\cite{ChaCha20,ChaCha-Cryptanalysis}.
 
-We limit our analysis to groups of three implementations, each using a different
-number of rounds. In the case of HC-128 and HC-256, we limit our analysis to a
-group of two implementations. Scores range from 0 (least number of rounds
-considered) to 1 (greatest number of rounds considered).
+We limit our analysis to groups of three implementations, each using a
+different number of rounds. In the case of HC-128 and HC-256, we limit
+our analysis to a group of two implementations. Scores range from 0
+(least number of rounds considered) to 1 (greatest number of rounds
+considered). \hank{This text is inconsistent with the table.  Either
+  include all the ciphers in the table (my preference) or don't
+  include ciphers in the text that aren't in the table.}
 
 \subsubsection{Ciphertext Randomization (Randomization)}
 
@@ -117,15 +186,18 @@ property---such as ChaCha20 on which prior work is based---are trivially broken
 when key-nonce-plaintext 3-tuples are reused. In StrongBox, this is referred to
 as an ``overwrite condition'' or simply ``overwrite''~\cite{StrongBox}.
 
-Though there are many ways to achieve ciphertext randomization, the ciphers
-included in our analysis implement it using a random number of rounds for each
-block of the message where the exact number of rounds are unknown to the
-receiver a priori~\cite{Freestyle}. In determining the minimum and maximum
-number of rounds used per block in this non-deterministic mode of operation, we
-can customize the computational burden an attacker must bear by choosing lower
-or higher minimums and maximums. Hence, this is not a binary feature; scores
-range from 0 (no ciphertext randomization) to 1 (lowest minimum and maximum
-rounds per block) to 3 (highest minimum and maximum rounds per block).
+Though there are many ways to achieve ciphertext randomization, the
+ciphers included in our analysis implement it using a random number of
+rounds for each block of the message where the exact number of rounds
+are unknown to the receiver a priori~\cite{Freestyle}. In determining
+the minimum and maximum number of rounds used per block in this
+non-deterministic mode of operation, we can customize the
+computational burden an attacker must bear by choosing lower or higher
+minimums and maximums. Hence, this is not a binary feature; scores
+range from 0 (no ciphertext randomization) to 1 (lowest minimum and
+maximum rounds per block) to 3 (highest minimum and maximum rounds per
+block). \hank{I really puzzled over this and I cannot figure out what
+  a 2.5 means here or how I would get that.}
 
 \subsubsection{Ciphertext Expansion (Expansion)}
 
@@ -147,6 +219,15 @@ does not. A cipher scores either a 0 if it \emph{is not} length-preserving in
 this way or a 1 if the ciphertext is always the same length as the plaintext.
 
 \subsection{Generic Stream Cipher Interface} \label{subsec:interface}
+\hank{Speaking with my reviewer hat on: There is good motivation for
+  the difficulty of working with different stream ciphers, but it is
+  not clear why this interface is a good solution to that challenge.
+  I get the impression that the xor interface is easier to use, while
+  the other one just passes all the complexity to someone else. Also,
+  for naming (assuming I correctly understand the difference between
+  these) it is confusing to have xor (a very low-level operation)
+  correspond to the high-level interface and read/write (high-level
+  operations) correspond to the low-level interface.}
 
 One of the goals of SwitchCrypt is that we might use any stream cipher
 regardless of its implementation details. Yet this is entirely non-trivial.
@@ -162,16 +243,26 @@ to ciphertext expansion) along with configuration-dependent minimum and maximum
 rounds-per-block, hash interval, and pepper bits~\cite{Freestyle}. HC-128 and
 other ciphers have similarly disparate requirements.
 
-Unlike prior work, SwitchCrypt must be able to encrypt and decrypt arbitrary
-nuggets \emph{with any of these ciphers} at any moment with low overhead and
-without tight coupling to any specific implementation detail. Hence, there is a
-need for an interface that completely decouples cipher implementations from the
-encryption/decryption process. Our novel cipher interface allows any stream
-cipher to be integrated into SwitchCrypt without modifications to third-party
-code, enabling normally incompatible ciphers to encrypt and decrypt arbitrary
-nuggets. The ability for disparate cipher implementations to co-exist forms the
-foundation for SwitchCrypt's ability to switch the system between different
-cipher configurations in our tradeoff space efficiently and effectively.
+Unlike prior work, SwitchCrypt must be able to encrypt and decrypt
+arbitrary nuggets \emph{with any of these ciphers} at any moment with
+low overhead and without tight coupling to any specific implementation
+detail. Hence, there is a need for an interface that completely
+decouples cipher implementations from the encryption/decryption
+process. \hank{This sounds good, but I am not sure exactly what it
+  means.  We need to define what decoupling means so that a reader
+  would be able to point to an interface and correctly say whether it
+  is decoupled or not.} Our novel cipher interface allows any stream
+cipher to be integrated into SwitchCrypt without modifications to
+third-party code, enabling normally incompatible ciphers to encrypt
+and decrypt arbitrary nuggets. The ability for disparate cipher
+implementations to co-exist forms the foundation for SwitchCrypt's
+ability to switch the system between different cipher configurations
+in our tradeoff space efficiently and effectively.  \hank{One thing
+  that worries me a little (with reviewr hat on) is that we use two
+  ciphers in this paper and we have two interfaces, one which appears
+  to be appropriate for ChaCha and one for FS.  The appearance is that
+  we did not actually decouple the interface from the cipher but just
+  created two interfaces for the two ciphers.}
 
 To facilitate this, the Generic Stream Cipher Interface presents the
 cryptographic driver with a single unified encryption/decryption model.
@@ -200,25 +291,37 @@ each with different tradeoffs.
    burden of key management; similarly, the XOR buffer will be XOR-ed with the
    appropriate portion of nugget contents automatically, alleviating the burden
    of drive access and other tedious calculations. \\
-   \item \textbf{\texttt{read\_interface}} and
+ \item \textbf{\texttt{read\_interface}} and
    \textbf{\texttt{write\_interface}}\\
-   Unlike \texttt{xor\_interface}, encryption and decryption are distinct
-   concerns at this abstraction level. \\\texttt{read\_interface} handles
-   decryption during reads. \\\texttt{write\_interface} handles encryption
-   during writes. Implementations receive full access to SwitchCrypt internals,
-   giving wrapper code complete control over the encryption and decryption
-   process and allowing implementers to bypass parts of the nugget-based drive
-   layout abstraction (i.e. BODY) if necessary. This comes at the cost of 1)
-   significantly increased code complexity, as the implementer must perform
-   certain I/O manually, distinguish between independent nuggets on the drive,
-   determine what to encrypt or decrypt at what offset and when, when to commit
-   which metadata and where and 2) potential performance implications, since
-   SwitchCrypt must account for not having absolute control over its internal
-   data structures during function invocation. For a cipher like Freestyle,
-   configurations with lower minimum and maximum rounds per block may see a
-   performance improvement here, while configurations with higher minimum and
-   maximum rounds per block may see reduced performance.
+   Unlike \texttt{xor\_interface}, encryption and decryption are
+   distinct concerns at this abstraction level.
+   \\\texttt{read\_interface} handles decryption during reads.
+   \\\texttt{write\_interface} handles encryption during writes.
+   Implementations receive full access to SwitchCrypt internals,
+   giving wrapper code complete control over the encryption and
+   decryption process and allowing implementers to bypass parts of the
+   nugget-based drive layout abstraction (i.e. BODY) if necessary.
+   This comes at the cost of 1) significantly increased code
+   complexity, as the implementer \hank{WHo is the implementer here?}
+   must perform certain I/O manually, distinguish between independent
+   nuggets on the drive, determine what to encrypt or decrypt at what
+   offset and when, when to commit which metadata and where and 2)
+   potential performance implications, since SwitchCrypt must account
+   for not having absolute control over its internal data structures
+   during function invocation. For a cipher like Freestyle,
+   configurations with lower minimum and maximum rounds per block may
+   see a performance improvement here, while configurations with
+   higher minimum and maximum rounds per block may see reduced
+   performance.
 \end{enumerate}
+
+\hank{I have to admit I am confused here.  The beginning of this
+  section goes into detail about how the layout of the body section is
+  important and then there is an interface that completely bypasses
+  it.  So is the layout important or not? The performance implications
+  of the different approaches are entirely unclear to me, while I can
+  take your word for it, I don't really understand when one would be
+  faster than another.}
 
 \subsection{Cipher Switching Strategies} \label{subsec:strategies}
 
@@ -415,23 +518,27 @@ encrypt nuggets.
 
 \subsection{Putting It All Together} \label{subsec:summary}
 
-We revisit the motivating example from earlier in this work, where we are using
-Freestyle to ensure secure backups in an energy-constrained environment.
-Initially, I/O requests come down from the LFS and are received by the
-cryptographic driver, which divides the request based on which nuggets it
-touches. For each nugget, the per-nugget metadata is consulted to determine with
-which cipher the nugget is encrypted. If it is encrypted with the active cipher
-configuration (Freestyle), which must be true if we have not initiated a cipher
-switch, the write is handled similarly to prior work: encrypted data is read in
-from the drive, the merkle tree and monotonic counter are consulted to ensure
-the integrity of encrypted data, the transaction journal is consulted during
-write operations so that overwrites are handled and pad reuse violations are
-avoided, and then the keycount store is consulted to derive the nugget's unique
-encryption key from some master secret. Finally, using the Generic Stream Cipher
-Interface, we call out to the Freestyle, allowing SwitchCrypt to
-encrypts/decrypts the nugget's contents and commit any updates back to storage.
-All the while, the drive's Freestyle-encrypted contents are being uploaded up to
-our enterprise backup service every so often.
+We revisit the motivating example from earlier in this work, where we
+are using Freestyle to ensure secure backups in an energy-constrained
+environment.  Initially, I/O requests come down from the LFS and are
+received by the cryptographic driver, which divides the request based
+on which nuggets it touches. For each nugget, the per-nugget metadata
+is consulted to determine with which cipher the nugget is encrypted.
+If it is encrypted with the active cipher configuration (Freestyle),
+which must be true if we have not initiated a cipher switch, the write
+is handled similarly to prior work: encrypted data is read in from the
+drive, the merkle tree and monotonic counter are consulted to ensure
+the integrity of encrypted data, the transaction journal is consulted
+during write operations so that overwrites are handled and pad reuse
+violations are avoided, and then the keycount store is consulted to
+derive the nugget's unique encryption key from some master secret.
+Finally, using the Generic Stream Cipher Interface, we call out to the
+Freestyle, allowing SwitchCrypt to encrypts/decrypts the nugget's
+contents and commit any updates back to storage.  All the while, the
+drive's Freestyle-encrypted contents are being uploaded up to our
+enterprise backup service every so often. \hank{I really want a
+  clarification in the previous sentence.  There are two interfaces in
+  the Generic Stream Cipher Interface, so which one is called and why?}
 
 When the device enters ``battery saver'' mode, drive backups are paused, the
 energy monitoring software downclocks the CPU, and the OS signals to SwitchCrypt
@@ -467,11 +574,22 @@ Clemente Vella. The Merkle Tree implementation is from the Secure Block
 Device~\cite{SBD}. We implement SwitchCrypt on top of the BUSE~\cite{BUSE}
 virtual block device.
 
-We develop Generic Cipher Interface wrapper implementations for many cipher
-implementations of which we select five for the purposes of this research. They
-are: ChaCha8 and ChaCha20~\cite{ChaCha20} as well as Freestyle~\cite{Freestyle}
-in three different configurations: a ``fast'' mode with parameters
-\texttt{FFast($R_{min}$=$8$,$R_{max}$=$20$,$H_I$=$4$,$I_C$=$8$)}, a ``balanced''
-mode with parameters \texttt{FBalanced($R_{min}$=$12$,
-$R_{max}$=$28$,$H_I$=$2$,$I_C$=$10$)}, and a ``strong'' mode with parameters
+We develop Generic Cipher Interface wrapper implementations for many
+cipher implementations of which we select five for the purposes of
+this research. They are: ChaCha8 and ChaCha20~\cite{ChaCha20} as well
+as Freestyle~\cite{Freestyle} in three different configurations: a
+``fast'' mode with parameters
+\texttt{FFast($R_{min}$=$8$,$R_{max}$=$20$,$H_I$=$4$,$I_C$=$8$)}, a
+``balanced'' mode with parameters \texttt{FBalanced($R_{min}$=$12$,
+  $R_{max}$=$28$,$H_I$=$2$,$I_C$=$10$)}, and a ``strong'' mode with
+parameters
 \texttt{FStrong($R_{min}$=$20$,$R_{max}$=$36$,$H_I$=$1$,$I_C$=$12$)}.
+\hank{AGain, I find it a bit confusing that we propose a generic
+  interface but them have to customize it for the ciphers we use in
+  this paper.  Something feels off here, and I am not sure how to fix
+  it.  It could be that the name of this interface needs to change, or
+  maybe just the description of what it does and who uses it. I want
+  to be very clear that there is no problem with the actual work that
+  has been done.  The problem is that the description of the work
+  leaves unanswered questions about exactly what problems this has
+  solved.}
