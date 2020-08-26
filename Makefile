@@ -7,9 +7,9 @@ BIB-FILES = $(wildcard *.bib)
 FIG-FILES = $(wildcard figs/*.png data/*.tex data/*.dat)
 PAPER = dickens-switchcrypt
 
-.PHONY: all for-vscode generate-paper generate-pdfs generate-pdf save-temporary clean
+.PHONY: all for-vscode generate-paper generate-pdfs generate-pdf clean
 
-all: generate-pdfs $(PAPER) save-temporary
+all: generate-pdfs $(PAPER) clean
 for-vscode: generate-pdfs
 
 generate-paper: ${TEX-FILES} ${BIB-FILES} ${FIG-FILES}
@@ -22,8 +22,10 @@ generate-paper: ${TEX-FILES} ${BIB-FILES} ${FIG-FILES}
 generate-pdf: generate-pdfs
 generate-pdfs: generate-paper
 
-save-temporary:
-	mkdir -p out
+$(PAPER): _$(PAPER).pdf
+	$(GHOSTSCRIPT) -sOutputFile=$(PAPER).pdf -f _$(PAPER).pdf
+
+clean:
 	find . -name '*.gz' -type f -delete
 	find . -name '*.aux*' -type f -delete
 	find . -name '*.blg' -type f -delete
@@ -37,14 +39,5 @@ save-temporary:
 	find . -name '*.lof' -type f -delete
 	find . -name '*.fdb*' -type f -delete
 	find . -name '*.blx*' -type f -delete
-	find out -name '_minted*' -type d -delete
-	find . -name '_minted*' -type d -exec mv -f {} out/. \;
-
-$(PAPER): _$(PAPER).pdf
-	$(GHOSTSCRIPT) -sOutputFile=$(PAPER).pdf -f _$(PAPER).pdf
-
-clean:
-	rm -rf *.gz *.aux* *.blg *.bbl *.out *.log *.xml *.fls *.toc *.lot *.lof *.fdb* *blx* _minted* out
-	mkdir out
-	touch out/.gitkeep
+	find . -maxdepth 1 -name '_minted*' -type d -delete
 
