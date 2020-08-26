@@ -1,7 +1,7 @@
 \documentclass[letterpaper,twocolumn,10pt]{article}
 \usepackage{usenix2019_v3}
 
-\include{macros.tex}
+\input{macros.tex}
 
 % Shrink space between figs and text
 % \setlength{\textfloatsep}{8pt plus 2pt minus 1pt}
@@ -155,8 +155,7 @@
 \newcommand{\GHz}{\,GHz}
 
 %% Project name
-%\newcommand{\SYSTEM}{SwitchCrypt}
-\newcommand{\SystemURI}{https://github.com/ananonrepo2/\sys}%https://github.com/research/SwitchCrypt}
+\newcommand{\SystemURI}{https://github.com/ananonrepo2/\sys{}}%https://github.com/research/SwitchCrypt}
 
 %% Reference parts of the paper
 \newcommand{\figref}[1]{Fig.~\ref{fig:#1}}
@@ -345,7 +344,7 @@
 \begin{document}
 
 %% Title information
-\title{\sys: Navigating Tradeoffs in Stream Cipher Based Full Drive Encryption}
+\title{\sys{}: Navigating Tradeoffs in Stream Cipher Based Full Drive Encryption}
 
 \date{}
 \maketitle
