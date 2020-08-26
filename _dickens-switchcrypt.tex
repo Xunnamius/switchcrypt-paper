@@ -1,10 +1,5 @@
-\documentclass[pageno]{jpaper}
-
-% Replace XXX with the submission number you are given from the ASPLOS submission site.
-\newcommand{\asplossubmissionnumber}{XXX}
-
-% The actual title (used elsewhere)
-\newcommand{\TITLE}{SwitchCrypt: Navigating Tradeoffs in Stream Cipher Based Full Drive Encryption}
+\documentclass[letterpaper,twocolumn,10pt]{article}
+\usepackage{usenix2019_v3}
 
 % Shrink space between figs and text
 % \setlength{\textfloatsep}{8pt plus 2pt minus 1pt}
@@ -344,3 +339,40 @@
 %   % \country{USA}
 % }
 % \email{hankhoffmann@cs.uchicago.edu}
+
+\begin{document}
+
+%% Title information
+\title{SwitchCrypt: Navigating Tradeoffs in Stream Cipher Based Full Drive Encryption}
+
+\date{}
+\maketitle
+
+%% Abstract
+\input{0_abstract}
+
+%% It begins!
+\input{1_intro}
+%\input{2_motivation}
+\input{3_design}
+%\input{4_implementation}
+\input{5_evaluation}
+\input{6_usecases}
+\input{7_related}
+\input{8_conclusion}
+\input{9_acks}
+
+% Uncomment to show all citable references:
+% \cite{*}
+
+%% Start a new page for your references:
+%\clearpage
+\pagebreak
+
+%% Test printing all refs:
+%\nocite{*}
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}

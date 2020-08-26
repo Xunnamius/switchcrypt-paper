@@ -5,31 +5,22 @@ GHOSTSCRIPT=\gs -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -dEmbedAllFonts=true
 TEX-FILES = $(wildcard *.tex)
 BIB-FILES = $(wildcard *.bib)
 FIG-FILES = $(wildcard figs/*.png data/*.tex data/*.dat)
-PAPER = dickens-switchcrypt-paper
-ABSTRACT = dickens-switchcrypt-abstract
+PAPER = dickens-switchcrypt
 
-.PHONY: all for-vscode generate-paper generate-abstract generate-pdfs generate-pdf save-temporary clean
+.PHONY: all for-vscode generate-paper generate-pdfs generate-pdf save-temporary clean
 
-all: generate-pdfs $(PAPER) $(ABSTRACT) save-temporary
+all: generate-pdfs $(PAPER) save-temporary
 for-vscode: generate-pdfs
 
-generate-paper: ${TEX-FILES} ${BIB-FILES} ${FIG-FILES} jpaper.cls
+generate-paper: ${TEX-FILES} ${BIB-FILES} ${FIG-FILES}
 	mkdir -p out
 	$(PDFLATEX) _${PAPER}
 	$(BIBTEX) _${PAPER}
 	$(PDFLATEX) _${PAPER}
 	$(PDFLATEX) _${PAPER}
 
-generate-abstract: ${TEX-FILES} ${BIB-FILES} ${FIG-FILES} jpaper.cls
-	mkdir -p out
-	$(PDFLATEX) _${ABSTRACT}
-	$(BIBTEX) _${ABSTRACT}
-	$(BIBTEX) _${ABSTRACT}
-	$(PDFLATEX) _${ABSTRACT}
-	$(PDFLATEX) _${ABSTRACT}
-
 generate-pdf: generate-pdfs
-generate-pdfs: generate-paper generate-abstract
+generate-pdfs: generate-paper
 
 save-temporary:
 	mkdir -p out
@@ -51,9 +42,6 @@ save-temporary:
 
 $(PAPER): _$(PAPER).pdf
 	$(GHOSTSCRIPT) -sOutputFile=$(PAPER).pdf -f _$(PAPER).pdf
-
-$(ABSTRACT): _$(ABSTRACT).pdf
-	$(GHOSTSCRIPT) -sOutputFile=$(ABSTRACT).pdf -f _$(ABSTRACT).pdf
 
 clean:
 	rm -rf *.gz *.aux* *.blg *.bbl *.out *.log *.xml *.fls *.toc *.lot *.lof *.fdb* *blx* _minted* out
