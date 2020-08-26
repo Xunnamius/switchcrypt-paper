@@ -68,10 +68,10 @@ security properties, and respecting changing OS energy budgets. Hence, any
 static common-case FDE configuration will sacrifice one concern for another,
 even when it is not optimal to do so for a given workload.
 
-Hence we present SwitchCrypt, a storage layer that can quickly and dynamically
+Hence we present \sys, a storage layer that can quickly and dynamically
 transition to a more desirable configuration given runtime changes. In one case
 study, where we require the filesystem to react to a shrinking energy budget by
-switching ciphers (\cref{subsec:uc1}), we find that SwitchCrypt achieves up to a
+switching ciphers (\cref{subsec:uc1}), we find that \sys achieves up to a
 3.3x total energy use reduction compared to prior static approaches that only
 use the Freestyle stream cipher without switching. In another case, where we
 allow the user to manually switch between ChaCha20 and Freestyle stream ciphers
@@ -79,7 +79,7 @@ dynamically (\cref{subsec:uc2}), we achieve a 3.1x to 4.8x reduction to read
 latency and 1.6x to 2.8x reduction to write latency compared to prior static
 approaches.
 
-\PUNT{We make the SwitchCrypt source publicly available open
+\PUNT{We make the \sys source publicly available open
   source\footnote{\label{note1}\SystemURI}.} \hank{You should still
   note that it is publicly available. If you punted this because you
   can put the link in HotCRP, just have the footnote state that it is

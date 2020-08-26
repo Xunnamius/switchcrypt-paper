@@ -1,4 +1,4 @@
-\section{SwitchCrypt Case Studies} \label{sec:usecases}
+\section{\sys Case Studies} \label{sec:usecases}
 
 \PUNT{In this section, we provide three case studies demonstrating the practical
 utility of cipher switching. We cover a wide range of situations, highlighting
@@ -16,22 +16,22 @@ correlated among the ciphers we examined, we can switch ciphers to
 save battery life or to maintain confidentiality when uploading
 encrypted backups to our enterprise solution. \hank{It probably seems
   small, but you want to avoid saying things like ``we can switch
-  ciphers,'' and say that ``SwitchCrypt allows us to easily swtich
+  ciphers,'' and say that ``\sys allows us to easily swtich
   ciphters.''  We could do it today at a huge inconvenience, the point
-  is that SwitchCrypt makes it practical.}
+  is that \sys makes it practical.}
 
 To simulate I/O activity, we begin randomly writing 10 40MB files
 using the Freestyle Balanced cipher configuration over the course of
 approximately 120-125 seconds. After 5 seconds, the device enters
 ``battery saver'' mode, also pausing backup uploads. We simulate this
 event by 1) underclocking the cores to their lowest frequencies and 2)
-using \texttt{taskset} to transition the SwitchCrypt processes to the
+using \texttt{taskset} to transition the \sys processes to the
 energy-efficient LITTLE cores. After this event, we complete the
 remaining workload using the ChaCha8 cipher. We repeat this experiment
 three times. \hank{Like above comment, you want to phrase this in
-  terms of SwitchCrypt and concepts you have already defined.  So
+  terms of \sys and concepts you have already defined.  So
   instead of saying we complete it using ChaCha8, talk about how the
-  OS changes SwitchCrypt's active cipher from FS to CC8, and from that
+  OS changes \sys's active cipher from FS to CC8, and from that
   point on...}
 
 \begin{figure}[ht] \textbf{Battery Saver: A Strict Energy
@@ -57,14 +57,14 @@ ChaCha8. Finally, we have 3) favor security and use Freestyle Balanced when
 uploading backups, and switch to ChaCha8 when the system enters the low power
 state. Our results show that, while the system uses slightly more power in the
 short term, we stay within our energy budget and finish before the devices dies.
-Further, when we get our device to a charger, SwitchCrypt can converge nuggets
+Further, when we get our device to a charger, \sys can converge nuggets
 back to Freestyle Balanced and resume uploading backups.
 
 On average, using Forward cipher switching resulted in a 3.3x total
 energy use reduction compared to exclusively using Freestyle Balanced,
 allowing us to remain within our energy budget. We note, however, that
 the energy savings is not the point of this experiment. Rather, the
-lesson learned is that SwitchCrypt enables the system to move to the
+lesson learned is that \sys enables the system to move to the
 right point in the energy/security tradeoff space so that the current
 task can still be accomplished before the battery is drained and
 without compromising backup security at any point.  \hank{The numbers
@@ -78,7 +78,7 @@ without compromising backup security at any point.  \hank{The numbers
   have battery critical, but there is just one battery dies. Shouldn't
   it die at different times with SwitchCrupt? MAybe you run the x-axis
   out so that you can see there is a long period of time where
-  SwitchCrypt keeps going, but the others have died? (Or just FS dies,
+  \sys keeps going, but the others have died? (Or just FS dies,
   and jsut use that as the single point of comaprison).}
 
 \subsection{Variable Security Regions} \label{subsec:uc2}
@@ -100,14 +100,14 @@ passwords and other sensitive information exists within several much larger
 files. Using prior techniques, either all the data would be stored with high
 overhead, the critical data would be stored without the mandated cipher type, or
 the data would have to be split among separate files requiring potentially
-complex and error-prone management schemes. SwitchCrypt VSRs allows us to
+complex and error-prone management schemes. \sys VSRs allows us to
 sidestep these issues.
 
 We begin by with 10 5MB and 4KB write-read operations to two
-SwitchCrypt instances: one using ChaCha8 (C8) and the other using Freestyle
+\sys instances: one using ChaCha8 (C8) and the other using Freestyle
 Strong (FS). These results represent I/O without cipher switching where 100\% of
 the data is stored with either high overhead (FS) or using an inappropriate
-cipher (C8). We then use a third SwitchCrypt instance initialized with Selective
+cipher (C8). We then use a third \sys instance initialized with Selective
 switching and write-read with a 7:3 ratio of ChaCha8 versus Freestyle
 Balanced I/O operations. Here, 30\% of the data is considered sensitive. We
 repeat this experiment three times.
@@ -130,7 +130,7 @@ results.
 
 Our goal is to use VSRs to keep our sensitive data at the mandated security
 level while keeping the performance and battery life benefits of using a fast
-cipher for the majority of I/O operations. Using SwitchCrypt Selective switching
+cipher for the majority of I/O operations. Using \sys Selective switching
 versus prior work results in a reduction of 3.1x to 4.8x for read latency and
 1.6x to 2.8x for write latency, all without compromising the security needs of
 the most sensitive data.
@@ -145,13 +145,13 @@ which is not possible using prior work.
 
 Due to garbage collection and wear-leveling requirements of SSDs, as free space
 becomes constrained, I/O performance drops precipitously~\cite{SSDEOL1}. With
-prior work, our strict latency ceiling is violated. However, if SwitchCrypt is
+prior work, our strict latency ceiling is violated. However, if \sys is
 made aware when the drive is in such a state, we can offset some of the
 performance loss by switching the ciphers of high traffic nuggets to the fastest
 acceptable cipher available using Forward switching.
 
-We begin by writing 10 40MB files to SwitchCrypt per each cipher as a baseline.
-We then introduce a delay into SwitchCrypt I/O of $20ms$, simulating drive
+We begin by writing 10 40MB files to \sys per each cipher as a baseline.
+We then introduce a delay into \sys I/O of $20ms$, simulating drive
 slowdown, and repeat the experiment three times.
 
 \begin{figure}[ht] \textbf{SSD EoL: Latency-Security Tradeoff vs

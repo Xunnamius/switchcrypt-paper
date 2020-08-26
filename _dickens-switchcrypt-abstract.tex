@@ -25,7 +25,7 @@ often conflicts with other key concerns like energy usage and desired
 security properties. \hank{Really need citations at the end of each of
   the first two sentences.  That would always be the case, but even
   more important here as this will be the only thing reviewed in round
-  1.} This paper presents SwitchCrypt, a software mechanism that
+  1.} This paper presents \sys, a software mechanism that
 navigates the tradeoff space made by balancing competing security and
 latency requirements via \emph{cipher switching} in space or time. Our
 key insight in achieving low-overhead switching is leveraging the
@@ -134,7 +134,7 @@ configuration when conserving energy is a top priority, and then switch back to
 the Freestyle configuration when we connect to a charger and backups are
 eventually resumed.
 
-To overcome these limitations, we present SwitchCrypt, a device mapper
+To overcome these limitations, we present \sys, a device mapper
 that can trade off between different cipher configurations without
 compromising security or performance or requiring the device be
 restarted. With prior work, the user must select a static operating
@@ -143,7 +143,7 @@ hope it is optimal across all workloads and use case. If they choose
 the Freestyle configuration, their device will be slower and battery
 hungry even when they are not backing up. If they choose the more
 performant ChaCha20 configuration, they risk confidentiality-violating
-snapshot comparison attacks.  SwitchCrypt solves this problem by
+snapshot comparison attacks.  \sys solves this problem by
 encrypting data with the high performance ChaCha20 when the battery is
 low and switching to Freestyle when plugged in and syncing with the
 backup service resumes.
@@ -174,7 +174,7 @@ quantitative cipher comparison in the FDE context; we use this
 framework to define our configurations.
 
 \textbf{Decoupling ciphers from the encryption process.} To flexibly switch
-between configurations in SwitchCrypt requires a generic cipher interface. This
+between configurations in \sys requires a generic cipher interface. This
 is challenging given the variety of inputs required by various stream ciphers,
 the existence of non-length-preserving ciphers, and other differences. We
 achieve the required generality by defining independent storage units called
@@ -190,7 +190,7 @@ series of high-level policies we call \textit{cipher switching strategies}.
 These strategies leverage our generic cipher interface and flexible drive layout
 to selectively ``re-cipher'' groups of nuggets, whereby the key and the cipher
 used to encrypt/decrypt a nugget are switched at runtime. These strategies allow
-SwitchCrypt to move from one configuration point to another or even settle on
+\sys to move from one configuration point to another or even settle on
 optimal configurations wholly unachievable with prior work. The challenge here
 is to accomplish this while minimizing overhead.
 
@@ -213,12 +213,12 @@ is to accomplish this while minimizing overhead.
   performance and security properties of various configurations at runtime.
 \end{itemize}
 
-We implement SwitchCrypt and three switching strategies---\emph{Forward},
+We implement \sys and three switching strategies---\emph{Forward},
 \emph{Selective}, and \emph{Mirrored}---to dynamically transition the system
 between configurations using our generic cipher interface. We then study the
 utility of cipher switching through three case studies where latency, energy,
 and desired security properties change over time. In one study, where we require
-the filesystem to react to a shrinking energy budget, we find that SwitchCrypt
+the filesystem to react to a shrinking energy budget, we find that \sys
 achieves up to a 3.3x total energy use reduction compared to a static approach
 using only the Freestyle stream cipher. In another case, where we allow the user
 to manually switch between ChaCha20 and Freestyle stream ciphers dynamically, we

@@ -1,23 +1,23 @@
-\section{SwitchCrypt Design} \label{sec:design}
+\section{\sys Design} \label{sec:design}
 
-\subsection{SwitchCrypt Overview} \label{subsec:overview}
+\subsection{\sys Overview} \label{subsec:overview}
 
 \begin{figure}[ht]
    \centering
    \includegraphics[width=\linewidth]{overview.png}
-   \caption{Overview of the SwitchCrypt construction.} \label{fig:overview}
+   \caption{Overview of the \sys construction.} \label{fig:overview}
 \end{figure}
 
-SwitchCrypt consists of a \emph{Generic Stream Cipher Interface} and
-\emph{Cryptographic Driver}; SwitchCrypt sits between a Log-structured File
+\sys consists of a \emph{Generic Stream Cipher Interface} and
+\emph{Cryptographic Driver}; \sys sits between a Log-structured File
 System (LFS) on the OS, and the underlying drive (backing storage) and device
 controller (e.g. Flash Translation Layer). This is illustrated in
-\figref{overview}, which provides an overview of the SwitchCrypt system design.
+\figref{overview}, which provides an overview of the \sys system design.
 
 \begin{figure}[t]
    \centering
    \includegraphics[width=\linewidth]{backstore.png}
-   \caption{Layout of SwitchCrypt's drive layout.} \label{fig:backstore}
+   \caption{Layout of \sys's drive layout.} \label{fig:backstore}
 \end{figure}
 
 \hank{The part that is missing here is some kind of motivation for
@@ -28,11 +28,11 @@ controller (e.g. Flash Translation Layer). This is illustrated in
   and that the body section is broken down into chumks.  As currently
   constructed, you have to wade into that detail before you get the
   reason, and even then it is presented as a reason for StrongBox to
-  do this, not necessarily as a reason that SwitchCrypt should keep
+  do this, not necessarily as a reason that \sys should keep
   it.
   \\
   \\
-  So, I want something of the form: The key insight behind SwitchCrypt
+  So, I want something of the form: The key insight behind \sys
   is achieving low-overhead cipher-switching by exploiting fine-grain
   tracking and manipulation of the cipher used to encrypt different
   drive regions.  While existing stream cipher FDE schemes implement
@@ -64,7 +64,7 @@ The BODY consists of a series independent same-size logical units called
 blocks. Each nugget is coupled with metadata in the HEAD indicating which cipher
 was used to encrypt the nugget along with any additional ciphertext output; the
 latter allows us to treat any non-length-preserving ciphers as if they were
-length-preserving. SwitchCrypt uses the Keycount Store and Transaction Journal
+length-preserving. \sys uses the Keycount Store and Transaction Journal
 components along with our nugget layout to 1) track, detect, and handle
 overwrites, 2) limit the maximum length of any plaintext input to ciphers, thus
 amortizing the overhead incurred during encryption, and 3) independently and
@@ -114,7 +114,7 @@ efficiently encrypt nuggets with different ciphers.
 
 To reason about when to trade off between the ciphers evaluated in
 this work, we must have a way to compare ciphers' utility in the
-context of SwitchCrypt FDE.  However, different ciphers have a wide
+context of \sys FDE.  However, different ciphers have a wide
 range of security properties, performance profiles, and output
 characteristics. \hank{To this point in the paper we haven't really
   listed any of the practical concerns surrounding these security
@@ -229,9 +229,9 @@ this way or a 1 if the ciphertext is always the same length as the plaintext.
   correspond to the high-level interface and read/write (high-level
   operations) correspond to the low-level interface.}
 
-One of the goals of SwitchCrypt is that we might use any stream cipher
+One of the goals of \sys is that we might use any stream cipher
 regardless of its implementation details. Yet this is entirely non-trivial.
-There are many cipher implementations that we might use with SwitchCrypt, each
+There are many cipher implementations that we might use with \sys, each
 with unique input requirements and output considerations. For instance, Salsa
 and Chacha implementations require a certain IV and key size and handle
 plaintext input through successive invocations of a single state update
@@ -243,7 +243,7 @@ to ciphertext expansion) along with configuration-dependent minimum and maximum
 rounds-per-block, hash interval, and pepper bits~\cite{Freestyle}. HC-128 and
 other ciphers have similarly disparate requirements.
 
-Unlike prior work, SwitchCrypt must be able to encrypt and decrypt
+Unlike prior work, \sys must be able to encrypt and decrypt
 arbitrary nuggets \emph{with any of these ciphers} at any moment with
 low overhead and without tight coupling to any specific implementation
 detail. Hence, there is a need for an interface that completely
@@ -252,10 +252,10 @@ process. \hank{This sounds good, but I am not sure exactly what it
   means.  We need to define what decoupling means so that a reader
   would be able to point to an interface and correctly say whether it
   is decoupled or not.} Our novel cipher interface allows any stream
-cipher to be integrated into SwitchCrypt without modifications to
+cipher to be integrated into \sys without modifications to
 third-party code, enabling normally incompatible ciphers to encrypt
 and decrypt arbitrary nuggets. The ability for disparate cipher
-implementations to co-exist forms the foundation for SwitchCrypt's
+implementations to co-exist forms the foundation for \sys's
 ability to switch the system between different cipher configurations
 in our tradeoff space efficiently and effectively.  \hank{One thing
   that worries me a little (with reviewr hat on) is that we use two
@@ -266,13 +266,13 @@ in our tradeoff space efficiently and effectively.  \hank{One thing
 
 To facilitate this, the Generic Stream Cipher Interface presents the
 cryptographic driver with a single unified encryption/decryption model.
-SwitchCrypt receives I/O requests from the operating system at the block device
+\sys receives I/O requests from the operating system at the block device
 level like any other device-mapper. These requests come in the form of either
-reads or writes. When a read request is received, the OS hands SwitchCrypt an
+reads or writes. When a read request is received, the OS hands \sys an
 offset and a length and expects a response with plaintext of that specific
 length starting at that specific offset taken from the beginning of storage
 (i.e. the BODY section; see \figref{backstore}). When a write request is
-received, the OS hands SwitchCrypt an offset, a length, and a buffer of
+received, the OS hands \sys an offset, a length, and a buffer of
 plaintext and expects that plaintext to be encrypted and committed to storage
 such that the plaintext is later retrievable given that same offset and length
 in a future read request. These requests can either be handled together by a
@@ -281,10 +281,10 @@ each with different tradeoffs.
 
 \begin{enumerate}
    \item \textbf{\texttt{xor\_interface}}\\\texttt{xor\_interface} executes
-   independently of SwitchCrypt internals and treats encryption and decryption
+   independently of \sys internals and treats encryption and decryption
    as the same operation. Implementations receive an integer offset $F$, an
    integer length $L$, a key buffer $K$ corresponding to the current nugget, and
-   an empty $L$-length XOR buffer. SwitchCrypt expects the XOR buffer to be
+   an empty $L$-length XOR buffer. \sys expects the XOR buffer to be
    populated with $L$ bytes of keystream output from some stream cipher seeked
    to offset $F$ with respect to key $K$. The length of the key buffer will
    always be exactly what the cipher implementation expects, alleviating the
@@ -297,7 +297,7 @@ each with different tradeoffs.
    distinct concerns at this abstraction level.
    \\\texttt{read\_interface} handles decryption during reads.
    \\\texttt{write\_interface} handles encryption during writes.
-   Implementations receive full access to SwitchCrypt internals,
+   Implementations receive full access to \sys internals,
    giving wrapper code complete control over the encryption and
    decryption process and allowing implementers to bypass parts of the
    nugget-based drive layout abstraction (i.e. BODY) if necessary.
@@ -306,7 +306,7 @@ each with different tradeoffs.
    must perform certain I/O manually, distinguish between independent
    nuggets on the drive, determine what to encrypt or decrypt at what
    offset and when, when to commit which metadata and where and 2)
-   potential performance implications, since SwitchCrypt must account
+   potential performance implications, since \sys must account
    for not having absolute control over its internal data structures
    during function invocation. For a cipher like Freestyle,
    configurations with lower minimum and maximum rounds per block may
@@ -330,7 +330,7 @@ co-exist on the same drive. However, at any moment, there is only a single
 \emph{active cipher configuration} (henceforth \emph{active configuration}). The
 active configuration is used to encrypt nugget contents. When a cipher switch is
 triggered, a different configuration becomes the active configuration. At this
-point, SwitchCrypt must determine \emph{when} to re-cipher a nugget and
+point, \sys must determine \emph{when} to re-cipher a nugget and
 \emph{where} to store the output on the drive. ``Re-ciphering'' here means using
 an inactive configuration to decrypt a nugget's contents and using the active
 configuration to re-cipher it. Depending on the use case, it may make the most
@@ -367,27 +367,27 @@ the nugget is accessed normally during I/O until the active configuration is
 switched again.
 
 \PUNT{There are several forms the Forward strategy might take. The default and
-most intuitive is \emph{0-forward}, in which SwitchCrypt immediately transitions
+most intuitive is \emph{0-forward}, in which \sys immediately transitions
 individual nuggets encountered during I/O to the active configuration if they
 are not using it. Over time, if various I/O operations end up touching every
 nugget in the drive, the encrypted contents of every nugget will become
 decryptable with the currently active configuration.
 
 The Forward strategy might also take the form of \emph{N-forward}, where
-SwitchCrypt attempts to take advantage of spatial sequential locality to
+\sys attempts to take advantage of spatial sequential locality to
 transition whole sets of nuggets into the active configuration. We can trivially
 expand the forward strategy to encompass the entire drive by selecting $N$ equal
-to the total number of nuggets managed by SwitchCrypt. This would have the
+to the total number of nuggets managed by \sys. This would have the
 overhead of re-ciphering large swaths of the drive upon every I/O operation
 where a nugget encrypted with the inactive configuration is encountered. Of
 course, this has the same dire implications for performance as simply
 re-initializing the entire system or encrypted container with the new cipher.}
 
-\textbf{Selective Switching Strategy.} When SwitchCrypt is initialized with the
+\textbf{Selective Switching Strategy.} When \sys is initialized with the
 Selective strategy, the drive is partitioned into $C$ regions where $C$
 represents the total number of available ciphers in the system; each regions'
 nuggets are encrypted by each of the $C$ ciphers respectively. For instance,
-were SwitchCrypt initialized using two ciphers ($C = 2$), the drive would be
+were \sys initialized using two ciphers ($C = 2$), the drive would be
 partitioned in half; all nuggets in the first region would be encrypted with the
 first cipher while all nuggets in the second would be encrypted with the other.
 
@@ -405,7 +405,7 @@ characteristics, managing them as distinct virtual drives or transparently
 reading/writing bytes to different security regions on the same drive.
 
 \textbf{Mirrored Switching Strategy.} Similar to the Selective strategy, when
-SwitchCrypt is initialized with the Mirrored strategy, the drive is partitioned
+\sys is initialized with the Mirrored strategy, the drive is partitioned
 into $C$ regions where $C$ represents the total number of available ciphers in
 the system; each regions' nuggets are encrypted by each of the $C$ ciphers
 respectively.
@@ -512,7 +512,7 @@ the Forward strategy, this implies data may at any time be encrypted using the
 ``least desirable cipher''. For the Mirrored and Selective strategies, the drive
 is partitioned into regions where nuggets are guaranteed to be encrypted with
 each cipher, including the ``least desirable cipher''. However, in terms of
-confidentiality, the confidentiality guarantee of SwitchCrypt can be reduced to
+confidentiality, the confidentiality guarantee of \sys can be reduced to
 the individual confidentiality guarantees of the available ciphers used to
 encrypt nuggets.
 
@@ -533,7 +533,7 @@ during write operations so that overwrites are handled and pad reuse
 violations are avoided, and then the keycount store is consulted to
 derive the nugget's unique encryption key from some master secret.
 Finally, using the Generic Stream Cipher Interface, we call out to the
-Freestyle, allowing SwitchCrypt to encrypts/decrypts the nugget's
+Freestyle, allowing \sys to encrypts/decrypts the nugget's
 contents and commit any updates back to storage.  All the while, the
 drive's Freestyle-encrypted contents are being uploaded up to our
 enterprise backup service every so often. \hank{I really want a
@@ -541,11 +541,11 @@ enterprise backup service every so often. \hank{I really want a
   the Generic Stream Cipher Interface, so which one is called and why?}
 
 When the device enters ``battery saver'' mode, drive backups are paused, the
-energy monitoring software downclocks the CPU, and the OS signals to SwitchCrypt
+energy monitoring software downclocks the CPU, and the OS signals to \sys
 that a more energy-efficient cipher (ChaCha20) should be used until we return to
-a non-curtailed energy budget. SwitchCrypt sets ChaCha20 as the active cipher
+a non-curtailed energy budget. \sys sets ChaCha20 as the active cipher
 configuration. Now, when the cryptographic driver divides I/O requests into each
-affected nugget, the per-nugget metadata shows SwitchCrypt that each nugget is
+affected nugget, the per-nugget metadata shows \sys that each nugget is
 encrypted using a cipher that is not the active configuration. This triggers the
 re-ciphering code path. Since we are using the Forward switching strategy in
 this example, nugget data is immediately decrypted by calling out to the
@@ -555,23 +555,23 @@ the cryptographic driver manages encrypting/decrypting data and updating the
 merkle tree and monotonic counter, transaction journal, and keycount store as
 the I/O operation and related metadata is committed to the drive afterwards.
 
-Now, thanks to SwitchCrypt, the system can adapt to changing requirements beyond
+Now, thanks to \sys, the system can adapt to changing requirements beyond
 the capability of prior work. See \secref{usecases} for specifics.
 
-\subsection{SwitchCrypt Implementation} \label{subsec:implementation}
+\subsection{\sys Implementation} \label{subsec:implementation}
 
-Our SwitchCrypt implementation consists of 9,491 lines of C code; our test suite
+Our \sys implementation consists of 9,491 lines of C code; our test suite
 consists of 6,077 lines of C code. All together, our solution is comprised of
 15,568 lines of C code.
 
-SwitchCrypt uses OpenSSL version 1.1.0h and LibSodium version 1.0.12 for its
+\sys uses OpenSSL version 1.1.0h and LibSodium version 1.0.12 for its
 AES-XTS and AES-CTR implementations. Open source ARM NEON optimized
 implementations of ChaCha are provided by Floodyberry~\cite{Floodyberry}. The
 Freestyle cipher reference implementation is from the original Freestyle
 paper~\cite{Freestyle}. The eSTREAM Profile 1 cipher implementations are from
 the open source libestream cryptographic library~\cite{libestream} by Lucas
 Clemente Vella. The Merkle Tree implementation is from the Secure Block
-Device~\cite{SBD}. We implement SwitchCrypt on top of the BUSE~\cite{BUSE}
+Device~\cite{SBD}. We implement \sys on top of the BUSE~\cite{BUSE}
 virtual block device.
 
 We develop Generic Cipher Interface wrapper implementations for many

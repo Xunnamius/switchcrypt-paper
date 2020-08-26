@@ -10,7 +10,7 @@ stream cipher in a binary additive (XOR) mode leveraging LFS overwrite-averse
 behavior to prevent overwrites (StrongBox~\cite{StrongBox}).
 
 Unlike StrongBox and other work, which focuses on optimizing performance despite
-re-ciphering due to overwrites, SwitchCrypt maintains overwrite protections
+re-ciphering due to overwrites, \sys maintains overwrite protections
 while abstracting the idea of re-ciphering nuggets out into cipher switching;
 instead of myopically pursuing a performance win, we can pursue energy/battery
 and security wins as well.
@@ -21,7 +21,7 @@ HaleemEtAl, LiOmiecinski, Merkel4, Merkle3}. Goodman et al. introduced
 selectively decreasing the security of some data to save
 energy~\cite{ScalableSecurity}. However, their approach is designed for
 communication and only considered iteration/round count, thus it did not
-anticipate the need for SwitchCrypt's generic interface, switching strategies,
+anticipate the need for \sys's generic interface, switching strategies,
 or quantification framework. Wolter and Reinecke study approaches to quantifying
 security in several contexts~\cite{WolterReinecke}. This study anticipates the
 value of dynamically switching ciphers but proposes no mechanisms to enable this
