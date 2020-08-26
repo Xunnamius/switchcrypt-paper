@@ -14,4 +14,3 @@ _*.pdf
 *blx*
 _minted*
 out/
-!out/.gitkeep
