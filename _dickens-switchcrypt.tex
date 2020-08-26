@@ -1,10 +1,7 @@
-\documentclass[pageno]{jpaper}
+\documentclass[letterpaper,twocolumn,10pt]{article}
+\usepackage{usenix2019_v3}
 
-% Replace XXX with the submission number you are given from the ASPLOS submission site.
-\newcommand{\asplossubmissionnumber}{XXX}
-
-% The actual title (used elsewhere)
-\newcommand{\TITLE}{SwitchCrypt: Navigating Tradeoffs in Stream Cipher Based Full Drive Encryption}
+\input{macros.tex}
 
 % Shrink space between figs and text
 % \setlength{\textfloatsep}{8pt plus 2pt minus 1pt}
@@ -158,8 +155,7 @@
 \newcommand{\GHz}{\,GHz}
 
 %% Project name
-%\newcommand{\SYSTEM}{SwitchCrypt}
-\newcommand{\SystemURI}{https://github.com/ananonrepo2/SwitchCrypt}%https://github.com/research/SwitchCrypt}
+\newcommand{\SystemURI}{https://github.com/ananonrepo2/\sys{}}%https://github.com/research/SwitchCrypt}
 
 %% Reference parts of the paper
 \newcommand{\figref}[1]{Fig.~\ref{fig:#1}}
@@ -344,3 +340,40 @@
 %   % \country{USA}
 % }
 % \email{hankhoffmann@cs.uchicago.edu}
+
+\begin{document}
+
+%% Title information
+\title{\sys{}: Navigating Tradeoffs in Stream Cipher Based Full Drive Encryption}
+
+\date{}
+\maketitle
+
+%% Abstract
+\input{~abstract}
+
+%% It begins!
+\input{~intro}
+\input{~motivation}
+\input{~design}
+%\input{~implementation}
+\input{~evaluation}
+\input{~usecases}
+\input{~related}
+\input{~conclusion}
+\input{~acks}
+
+% Uncomment to show all citable references:
+% \cite{*}
+
+%% Start a new page for your references:
+%\clearpage
+\pagebreak
+
+%% Test printing all refs:
+%\nocite{*}
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}
