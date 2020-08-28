@@ -1,0 +1,129 @@
+
+The benefits of choosing one cipher over another might include: 1)
+improved performance (\ie{overall reduction in FDE overhead}), 2) reduced energy
+use, 3) more useful security guarantees, and 4) the ability to encrypt devices
+that would otherwise be too slow or energy-inefficient to support FDE.
+
+
+
+
+
+
+On the one hand, stronger
+security guarantees come with increased latency and threaten to balloon energy
+consumption. On the other, capping total energy consumption requires tolerating
+increased latency or weaker security guarantees.
+
+
+
+
+% SEcurity model: (maybe add to the implementation section)  \sysB
+
+When it comes to the security concern, StrongBox solves both the snapshot and
+integrity problems by 1) never writing data encrypted with the same key to the
+same location and 2) tracking drive state using a Merkle tree and monotonic
+counter supported by trusted hardware to prevent rollbacks. This ensures data
+manipulations cannot occur and guarantees confidentiality even when snapshots
+are compared regardless of the stream cipher used. Unfortunately, restoring from
+a backup necessitates a forced rollback of drive state, potentially opening us
+back up to confidentiality-violating snapshot comparison
+attacks~\cite{StrongBox}.
+
+
+
+To truly address the security concern requires a cipher with an additional
+security property: \emph{ciphertext randomization}. Without ciphertext
+randomization, an attacker can map plaintexts to their ciphertext counterparts
+during snapshot comparison, especially if they can predict what might be written
+to certain drive regions. However, with ciphertext randomization, a cipher will
+output a different ``random'' ciphertext even when given the same key, nonce,
+and plaintext; this means, even after a forced rollback of system state and/or
+legitimate restoration from a backup, comparing future writes is no longer
+violates confidentiality because each snapshot will always consist of different
+ciphertext regardless of the plaintext being encrypted or the state of the
+drive. Using Freestyle~\cite{Freestyle}, a ChaCha20-based stream cipher that
+supports ciphertext randomization, we can guarantee data confidentiality in this
+way. So, we switch from StrongBox to an encryption driver that supports
+Freestyle.
+
+Unfortunately, like AES-XTS, Freestyle has significant overhead compared to the
+original ChaCha20. In exchange for stronger security properties, Freestyle is up
+to 1.6x slower than ChaCha20, uses more energy, has a higher initialization
+cost, and expands the ciphertext which reduces total writeable drive
+space~\cite{Freestyle}.
+
+
+
+
+
+Further complicating matters is our final concern: a constrained energy budget.
+Our example system is battery constrained. Even if we accepted trading off
+performance, drive space, and energy for security in some situations, in other
+situations we might prioritize reducing total energy use. For example, when we
+trigger ``battery saver'' mode, we expect our device to conserve as much energy
+as possible. It would be ideal if our device could pause backups and the
+encryption driver could switch from the ciphertext-randomizing Freestyle
+configuration back to our high performance energy-efficient ChaCha20
+configuration when conserving energy is a top priority, and then switch back to
+the Freestyle configuration when we connect to a charger and backups are
+eventually resumed.
+
+In this paper we present SwitchCrypt, a device mapper that can trade off between
+these two configurations and others without compromising security or performance
+or requiring the device be restarted. With prior work, the user must select a
+static operating point in the energy-security-latency space at initialization
+time and hope it is optimal across all workloads and cases. If they choose the
+Freestyle configuration, their device will be slower and battery hungry even
+when they are not backing up. If they choose the more performant ChaCha20
+configuration, they risk confidentiality-violating snapshot comparison attacks.
+SwitchCrypt solves this problem by encrypting data with the high performance
+ChaCha20 when the battery is low and switching to Freestyle when plugged in and
+syncing with the backup service resumes.
+
+
+
+
+\subsection{Key Challenges} % ---- put it in the implementation section
+
+To trade off between different cipher configurations, we must address three key
+challenges. First, we must determine what cipher configurations are most
+desirable in which contexts and why. This requires we \emph{quantify} the
+desirable properties of these configurations. Second, we must have some way to
+encrypt independent storage units with any one of these configurations. This
+requires we \emph{decouple} cipher implementations from the encryption process
+used in prior work. Third, we need to determine when to re-encrypt those units,
+which configuration to use, and where to store the output, all with minimal
+overhead. This requires we implement efficient cipher \emph{switching
+strategies}.
+
+\textbf{Quantifying the properties traded off between configurations.} To obtain
+a space of configurations that we might reason about, it is necessary to compare
+certain properties of stream ciphers useful in the FDE context. However,
+different ciphers have a wide range of security properties, performance
+profiles, and output characteristics, including those that randomize their
+outputs and those with non-length-preserving outputs---\ie{the cipher outputs
+more data than it takes in}. To address this, we propose a framework for
+quantitative cipher comparison in the FDE context; we use this framework to
+define our configurations.
+
+\textbf{Decoupling ciphers from the encryption process.} To flexibly switch
+between configurations in SwitchCrypt requires a generic cipher interface. This
+is challenging given the variety of inputs required by various stream ciphers,
+the existence of non-length-preserving ciphers, and other differences. We
+achieve the required generality by defining independent storage units called
+\emph{nuggets}; we borrow this terminology from prior work (see
+\cite{StrongBox}) to easily differentiate our logical blocks (nuggets) from
+physical drive and other storage blocks. And since they are independent, we can
+use our interface to select any configuration to encrypt or decrypt any nugget
+at any point.
+
+\textbf{Implementing efficient switching strategies.} Finally, to determine when
+to switch a nugget's cipher and to where we commit the output, we implement a
+series of high-level policies we call \textit{cipher switching strategies}.
+These strategies leverage our generic cipher interface and flexible drive layout
+to selectively ``re-cipher'' groups of nuggets, whereby the key and the cipher
+used to encrypt/decrypt a nugget are switched at runtime. These strategies allow
+SwitchCrypt to move from one configuration point to another or even settle on
+optimal configurations wholly unachievable with prior work. The challenge here
+is to accomplish this while minimizing overhead.
+
