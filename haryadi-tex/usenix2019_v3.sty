@@ -74,6 +74,9 @@
 % italic--- you must use {\rm } around the actual author names to get
 % them in roman.
 %
+
+\if 0
+
 \def\maketitle{\par
  \begingroup
    \renewcommand\thefootnote{\fnsymbol{footnote}}%
@@ -123,3 +126,4 @@
 %
 \def\section{\@startsection {section}{1}{\z@}{-3.5ex plus-1ex minus
     -.2ex}{2.3ex plus.2ex}{\reset@font\large\bf}}
+\fi
