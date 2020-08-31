@@ -3,6 +3,20 @@
 % ===========================================================================
 \subsection{Quantifying Cipher Security Properties} \label{subsec:quantify}
 
+
+\textbf{Quantifying the properties traded off between configurations.} To obtain
+a space of configurations that we might reason about, it is necessary to compare
+certain properties of stream ciphers useful in the FDE context. However,
+different ciphers have a wide range of security properties, performance
+profiles, and output characteristics, including those that randomize their
+outputs and those with non-length-preserving outputs---\ie{the cipher outputs
+more data than it takes in}. To address this, we propose a framework for
+quantitative cipher comparison in the FDE context; we use this framework to
+define our configurations.
+
+
+
+
 To reason about when to trade off between the ciphers evaluated in this work, we
 must have a way to compare ciphers' utility in the context of SwitchCrypt FDE.
 However, different ciphers have a wide range of security properties, performance

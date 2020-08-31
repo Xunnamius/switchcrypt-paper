@@ -2,6 +2,20 @@
 
 \subsection{Cipher Switching Strategies} \label{subsec:strategies}
 
+
+
+\textbf{Implementing efficient switching strategies.} Finally, to determine when
+to switch a nugget's cipher and to where we commit the output, we implement a
+series of high-level policies we call \textit{cipher switching strategies}.
+These strategies leverage our generic cipher interface and flexible drive layout
+to selectively ``re-cipher'' groups of nuggets, whereby the key and the cipher
+used to encrypt/decrypt a nugget are switched at runtime. These strategies allow
+SwitchCrypt to move from one configuration point to another or even settle on
+optimal configurations wholly unachievable with prior work. The challenge here
+is to accomplish this while minimizing overhead.
+
+
+% when and where
 The Generic Stream Cipher Interface allows many differently ciphered nuggets to
 co-exist on the same drive. However, at any moment, there is only a single
 \emph{active cipher configuration} (henceforth \emph{active configuration}). The
@@ -14,6 +28,7 @@ configuration to re-cipher it. Depending on the use case, it may make the most
 sense to re-cipher a nugget immediately, or eventually, or to maintain several
 areas of differently-ciphered nuggets concurrently.
 
+% varying cases 
 A naive approach would switch every nugget in BODY to the active configuration
 immediately, but the latency and energy cost would be unacceptable. Hence, a
 more strategic approach is necessary. We satisfy this need with our \emph{cipher
@@ -23,13 +38,16 @@ life and without compromising security. This is thanks to the nugget-based drive
 layout, which limits the churn of cipher switching operations to relatively
 small regions of ciphertext on the drive.
 
+% temporal switching
 Determining \emph{when} to target a nugget for re-ciphering we call
 \emph{temporal switching}, for which we propose the \emph{Forward} switching
 strategy. Determining \emph{where}---in which storage region and across which
 nuggets---to output ciphertext we call \emph{spatial switching}, for which we
 propose the \emph{Mirrored} and \emph{Selective} switching strategies.
 
-\textbf{Forward Switching Strategy.} When a nugget is encountered during I/O
+
+
+\mysub{Forward Switching Strategy.} When a nugget is encountered during I/O
 that was encrypted using something other than the active configuration, the
 Forward strategy dictates that this nugget be re-ciphered immediately. If a
 particular nugget encrypted with an inactive configuration is never encountered

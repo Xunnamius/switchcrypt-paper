@@ -88,51 +88,66 @@ syncing with the backup service resumes.
 
 \subsection{Key Challenges} % ---- put it in the implementation section
 
-To trade off between different cipher configurations, we must address three key
-challenges. First, we must determine what cipher configurations are most
-desirable in which contexts and why. This requires we \emph{quantify} the
-desirable properties of these configurations. Second, we must have some way to
-encrypt independent storage units with any one of these configurations. This
-requires we \emph{decouple} cipher implementations from the encryption process
-used in prior work. Third, we need to determine when to re-encrypt those units,
-which configuration to use, and where to store the output, all with minimal
-overhead. This requires we implement efficient cipher \emph{switching
-strategies}.
 
-\textbf{Quantifying the properties traded off between configurations.} To obtain
-a space of configurations that we might reason about, it is necessary to compare
-certain properties of stream ciphers useful in the FDE context. However,
-different ciphers have a wide range of security properties, performance
-profiles, and output characteristics, including those that randomize their
-outputs and those with non-length-preserving outputs---\ie{the cipher outputs
-more data than it takes in}. To address this, we propose a framework for
-quantitative cipher comparison in the FDE context; we use this framework to
-define our configurations.
 
-\textbf{Decoupling ciphers from the encryption process.} To flexibly switch
-between configurations in SwitchCrypt requires a generic cipher interface. This
-is challenging given the variety of inputs required by various stream ciphers,
-the existence of non-length-preserving ciphers, and other differences. We
-achieve the required generality by defining independent storage units called
-\emph{nuggets}; we borrow this terminology from prior work (see
-\cite{StrongBox}) to easily differentiate our logical blocks (nuggets) from
-physical drive and other storage blocks. And since they are independent, we can
-use our interface to select any configuration to encrypt or decrypt any nugget
-at any point.
 
-\textbf{Implementing efficient switching strategies.} Finally, to determine when
-to switch a nugget's cipher and to where we commit the output, we implement a
-series of high-level policies we call \textit{cipher switching strategies}.
-These strategies leverage our generic cipher interface and flexible drive layout
-to selectively ``re-cipher'' groups of nuggets, whereby the key and the cipher
-used to encrypt/decrypt a nugget are switched at runtime. These strategies allow
-SwitchCrypt to move from one configuration point to another or even settle on
-optimal configurations wholly unachievable with prior work. The challenge here
-is to accomplish this while minimizing overhead.
 
 
 
 % =================================================================================
 % =================================================================================
 % =================================================================================
+
+\subsection{Strong Box Dependencies}
+
+
+
+% dependent on StrongBox
+
+Other than StrongBox, other implementations such as \xxx \hsg{any?} that has the
+same components above can be reused. 
+
+
+The drive itself is divided into a \emph{HEAD} section and \emph{BODY} section
+upon initialization, illustrated in \figref{backstore}. The HEAD consists of
+metadata headers written during initialization~\cite{StrongBox} along with the
+\emph{Keycount Store}, \emph{Transaction Journal}, \emph{Rekeying Journal}, and
+\emph{Per-Nugget Metadata}, each drive-backed. 
+
+These components are used by the
+\emph{Cryptographic Driver} together with the \emph{Cipher Switching Strategy}
+implementations to enable efficient per-unit cipher switching.
+
+The BODY consists of a series independent same-size logical units called
+\emph{nuggets}. A nugget consists of one or more contiguous physical drive
+blocks. Each nugget is coupled with metadata in the HEAD indicating which cipher
+was used to encrypt the nugget along with any additional ciphertext output; the
+latter allows us to treat any non-length-preserving ciphers as if they were
+length-preserving. 
+
+SwitchCrypt uses the Keycount Store and Transaction Journal
+components along with our nugget layout to 1) track, detect, and handle
+overwrites, 2) limit the maximum length of any plaintext input to ciphers, thus
+amortizing the overhead incurred during encryption, and 3) independently and
+efficiently switch the cipher used to encrypt individual nuggets.
+
+StrongBox.
+
+
+Dickens et al. showed how to make nugget-based drive organization secure using a
+single stream cipher, ChaCha20, to handle overwrites, prevent rollback attacks,
+and limit plaintext length~\cite{StrongBox}. 
+
+
+However, they did not envision the
+utility in trading off between concerns at the filesystem or device-mapper
+level, dynamic cipher switching, or protecting against attacks on data ``in
+motion;'' the remainder of this section details the novel components that enable
+this functionality. Specifically: how we quantify the properties traded off
+between configurations (\cref{subsec:quantify}), the Generic Stream Cipher
+Interface and Per-Nugget Metadata components (\cref{subsec:interface}) which
+decouple cipher implementations from the encryption process, and our Cipher
+Switching Strategy implementations (\cref{subsec:strategies}) used to
+efficiently encrypt nuggets with different ciphers.
+
 

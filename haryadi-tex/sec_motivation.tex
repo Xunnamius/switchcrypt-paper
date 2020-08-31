@@ -57,26 +57,35 @@ battery power and back.  Our system should respond to these changing
 requirements without violating any other concerns.
 
 
+
 % =======================================================
 \subsection{Recent Advancements}
 
-As mentioned before, there have been major advancements in the FDE
+In this paper we categorize two types of FDE: {\em block} and {\em stream} chipers.
+Block chipers were a defacto solution for storage while stream chipers
+were prevalent in networking \hsg{true??}.  Their main differences are
+\hsg{fill here, 1 or 2 sentences}.
+% ............
+There have been major advancements in the FDE
 technology that distances away from the slow block cipher technology and
 successfully implements stream chipers full device encryption
 \cite{hbsh-citation???, Adiantum, StrongBox} even without hardware
-accelerated encryption.  There are two technological shifts that enable
-this confidential, high-performance storage with stream ciphers.  First,
-devices today commonly employ solid-state storage with Flash Translation
-Layers (FTL), which operate similarly to Log-structured File Systems (LFS)
-\cite{21, 22, 27-fromStrongBox}.  The out-of-place writes nature of FTL or
-LFS-like storage allows the overwrite-heavy stream chipers to be
-efficiently implemented (\eg, ChaCha with F2FS or LogFS performs \xxx
-times better than with ext4 \cite{StrongBox}).  Second, mobile devices now
-support trusted hardware, such as Trusted Execution Environments (TEE)
-\cite{24, 29-fromStrongBox} and secure storage areas
-\cite{10-fromStrongBox} which means the drive encryption module has access
-to persistent, monotonically increasing counters that can be used to
-prevent rollback attacks when overwrites do occur.
+accelerated encryption.  
+
+
+There are two technological shifts that enable this confidential,
+high-performance storage with stream ciphers.  First, devices today
+commonly employ solid-state storage with Flash Translation Layers (FTL),
+which operate similarly to Log-structured File Systems (LFS) \cite{21, 22,
+  27-fromStrongBox}.  The no inplace update nature of FTL or LFS-like
+storage allows the overwrite-heavy stream chipers to be efficiently
+implemented (\eg, ChaCha with F2FS or LogFS performs \xxx times better
+than with ext4 \cite{StrongBox}).  Second, mobile devices now support
+trusted hardware, such as Trusted Execution Environments (TEE) \cite{24,
+  29-fromStrongBox} and secure storage areas \cite{10-fromStrongBox} which
+means the drive encryption module has access to persistent, monotonically
+increasing counters that can be used to prevent rollback attacks when
+overwrites do occur.
 
 
 % =======================================================

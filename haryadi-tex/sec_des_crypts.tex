@@ -3,6 +3,20 @@
 
 \subsection{Generic Stream Cipher Interface} \label{subsec:interface}
 
+
+\textbf{Decoupling ciphers from the encryption process.} To flexibly switch
+between configurations in SwitchCrypt requires a generic cipher interface. This
+is challenging given the variety of inputs required by various stream ciphers,
+the existence of non-length-preserving ciphers, and other differences. We
+achieve the required generality by defining independent storage units called
+\emph{nuggets}; we borrow this terminology from prior work (see
+\cite{StrongBox}) to easily differentiate our logical blocks (nuggets) from
+physical drive and other storage blocks. And since they are independent, we can
+use our interface to select any configuration to encrypt or decrypt any nugget
+at any point.
+
+
+
 One of the goals of SwitchCrypt is that we might use any stream cipher
 regardless of its implementation details. Yet this is entirely non-trivial.
 There are many cipher implementations that we might use with SwitchCrypt, each
@@ -75,3 +89,5 @@ each with different tradeoffs.
    performance improvement here, while configurations with higher minimum and
    maximum rounds per block may see reduced performance.
 \end{enumerate}
+
+\hsg{still need to talk today with Bernard .. what really is happening here.}
