@@ -2,44 +2,34 @@
 
 \section{Implementation} \label{subsec:implementation}
 
-Our SwitchCrypt implementation consists of 9,491 lines of C code; our test suite
-consists of 6,077 lines of C code. All together, our solution is comprised of
-15,568 lines of C code and is publicly available open-source\footnoteref{note1}.
+% 9,491
 
-SwitchCrypt uses OpenSSL version 1.1.0h and LibSodium version 1.0.12 for its
-AES-XTS and AES-CTR implementations. Open source ARM NEON optimized
-implementations of ChaCha are provided by Floodyberry~\cite{Floodyberry}. The
-Freestyle cipher reference implementation is from the original Freestyle
-paper~\cite{Freestyle}. The eSTREAM Profile 1 cipher implementations are from
-the open source libestream cryptographic library~\cite{libestream} by Lucas
-Clemente Vella. The Merkle Tree implementation is from the Secure Block
-Device~\cite{SBD}.
 
-We implement SwitchCrypt on top of the BUSE~\cite{BUSE} virtual block device,
-using it as our mock device controller. BUSE is a thin (200 LoC) wrapper around
-the standard Linux Network Block Device (NBD). BUSE allows an operating system
-to transact block I/O requests to and from virtual block devices exposed via
-domain socket.
 
-We develop Generic Cipher Interface wrapper implementations for many cipher
-implementations of which we select five for the purposes of this research. They
-are: ChaCha8 and ChaCha20~\cite{ChaCha20} as well as Freestyle~\cite{Freestyle}
-in three different configurations: a ``fast'' mode with parameters
-\texttt{FFast($R_{min}$=$8$,$R_{max}$=$20$,$H_I$=$4$,$I_C$=$8$)}, a ``balanced''
-mode with parameters \texttt{FBalanced($R_{min}$=$12$,
-$R_{max}$=$28$,$H_I$=$2$,$I_C$=$10$)}, and a ``strong'' mode with parameters
+Our \sys implementation consists of \locTotal lines of C code (excluding
+StrongBox components that we re-use as is).  To ensure high quality code,
+we also wrote \locTest lines of ttest suite.  All will be made open source
+to the public.  We currently deploy \sys on top of the BUSE virtual block
+device~\cite{BUSE} as our mock device controller.  BUSE is a thin (200
+LoC) wrapper around the standard Linux Network Block Device (NBD).  BUSE
+allows an operating system to transact block I/O requests to and from
+virtual block devices exposed via domain socket.
+
+For the ciphers we suport, we select five types of ciphers for the purpose
+of this research: ChaCha8 and ChaCha20~\cite{ChaCha20},
+Freestyle~\cite{Freestyle} in three different configurations: a ``fast''
+mode with parameters
+\texttt{FFast($R_{min}$=$8$,$R_{max}$=$20$,$H_I$=$4$,$I_C$=$8$)}, a
+``balanced'' mode with parameters \texttt{FBalanced($R_{min}$=$12$,
+  $R_{max}$=$28$,$H_I$=$2$,$I_C$=$10$)}, and a ``strong'' mode with
+parameters
 \texttt{FStrong($R_{min}$=$20$,$R_{max}$=$36$,$H_I$=$1$,$I_C$=$12$)}.
+%
+\hsg{how about AES-XTRS and AES-CTR, and eSTREAM?? how should I reconcile
+these ``5'' ciphers with more of the ciphers listed in Table \ref{tab-impl}.
+I thought you support more than five??}
+%
+Table \ref{tab-impl} shows the source of the cipher code that we use, but
+as mentioned in Section \ref{design-crypts-pls-fix-this}, they must be
+repackaged with the \sysB interface.
 
-
-
-
-For performance reasons, \sys recommends a log-based file
-system such as F2FS, \xxx, or \xxx, which are commonly used for flash
-devices.  The reason for this is that supporting streaming chipers is more
-efficient in storage systems with no in-place updates, as mentioned in the
-literature \cite{x, x}.  
-\sys is a software solution, however the same logic can be adopted
-to storage devices in the future, especially flash devices. 
-For example, the no in-place update of the FTL nature will help stream chipers
-be performance while at the same time users can use other in-place update file systems
-such as ext4, btrfs. 

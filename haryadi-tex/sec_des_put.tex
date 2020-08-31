@@ -96,6 +96,21 @@ switching should be performed and when.  For example, for the battery-life scena
 We provide more in the case studies section.
 
 
+% ------------------------------------------------------------------------
+\mysub{Generality}
+%
+\sys can be seen as a drop-in replacement for the popular Linux
+\ts{dm-crypt} layer (encryption driver).  For performance reasons, just
+like StrongBox, \sys recommends a log-based file system such as F2FS,
+\xxx, or \xxx, which are commonly used for flash devices.  The reason for
+this is that supporting streaming chipers is more efficient in storage
+systems with no in-place updates.  \sys is a software solution, however
+the same logic can be adopted to storage devices in the future, especially
+flash devices.  For example, the no in-place update of the FTL nature will
+help stream chipers be performance while at the same time users can use
+other popular in-place update file systems such as ext4, btrfs, and xfs.
+
+
 
 % -------------------------------------------------------------------------
 \mysub{Switching modes pros/cons.}
