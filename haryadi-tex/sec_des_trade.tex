@@ -4,55 +4,38 @@
 \subsection{Quantifying Cipher Security Properties} \label{subsec:quantify}
 
 
-\textbf{Quantifying the properties traded off between configurations.} To obtain
-a space of configurations that we might reason about, it is necessary to compare
-certain properties of stream ciphers useful in the FDE context. However,
-different ciphers have a wide range of security properties, performance
-profiles, and output characteristics, including those that randomize their
-outputs and those with non-length-preserving outputs---\ie{the cipher outputs
-more data than it takes in}. To address this, we propose a framework for
-quantitative cipher comparison in the FDE context; we use this framework to
-define our configurations.
 
 
-
-
+% background 
 To reason about when to trade off between the ciphers evaluated in this work, we
 must have a way to compare ciphers' utility in the context of SwitchCrypt FDE.
-However, different ciphers have a wide range of security properties, performance
-profiles, and output characteristics. To address this need, we propose a novel
+To obtain a space of configurations that we might reason about, it is
+necessary to compare certain properties of stream ciphers useful in the
+FDE context. However, different ciphers have a wide range of security
+properties, performance profiles, and output characteristics, including
+those that randomize their outputs and those with non-length-preserving
+outputs---\ie{the cipher outputs more data than it takes in}. To address
+this, we propose a framework for quantitative cipher comparison in the FDE
+context; we use this framework to define our configurations.
+% combine with the first paragraph above
+To address this need, we propose a novel
 evaluation framework (see: \tblref{security-quant}). Our framework classifies
 stream ciphers according to three quantitative features: relative round count,
 ciphertext randomization, and ciphertext expansion. Taken together, these
 features reveal a rich tradeoff space of cipher configurations optimizing for
 different combinations of concerns.
 
-\begin{table}[ht]
-   \begin{tabular}{@{}ccccc@{}}
-   \toprule
-   \textbf{Cipher} & \textbf{Rounds} & \textbf{Randomization} &
-   \textbf{Expansion} \\
-   \midrule
-   ChaCha8         & 0           & 0           & 1           \\
-   ChaCha12        & 0.5         & 0           & 1           \\
-   ChaCha20        & 1           & 0           & 1           \\
-   Salsa8          & 0           & 0           & 1           \\
-   Salsa12         & 0.5         & 0           & 1           \\
-   Salsa20         & 1           & 0           & 1           \\
-   HC128           & 0           & 0           & 1           \\
-   HC256           & 1           & 0           & 1           \\
-   Freestyle (F)   & 0           & 2           & 0           \\
-   Freestyle (B)   & 0.5         & 2.5         & 0           \\
-   Freestyle (S)   & 1           & 3           & 0           \\
-\end{tabular}
-   \caption{Our framework for classifying stream ciphers according to three
-   ideal features: relative round count, ciphertext randomization, and
-   ciphertext expansion.}
-   \label{tbl:security-quant}
- \end{table}
 
-\subsubsection{Relative Rounds (Rounds)}
+Table \ref{tab-tracde} .........
+We limit our analysis to groups of three implementations, each using a different
+number of rounds. In the case of HC-128 and HC-256, we limit our analysis to a
+group of two implementations. Scores range from 0 (least number of rounds
+considered) to 1 (greatest number of rounds considered).
 
+\input{tab-trade}
+
+% ----------------------------------------------------------
+\mysub{Relative Rounds (Rounds)}
 The ciphers we examine in this paper are all constructed around the notion of
 \emph{rounds}, where a higher number of rounds (and possibly longer key) is
 positively correlated with a higher resistance to brute force given no fatal
@@ -62,13 +45,9 @@ of the same algorithm. For instance: ChaCha8 is a reduced-round version of
 ChaCha12, which is a reduced-round version of ChaCha20, all using the ChaCha
 algorithm~\cite{ChaCha20,ChaCha-Cryptanalysis}.
 
-We limit our analysis to groups of three implementations, each using a different
-number of rounds. In the case of HC-128 and HC-256, we limit our analysis to a
-group of two implementations. Scores range from 0 (least number of rounds
-considered) to 1 (greatest number of rounds considered).
 
-\subsubsection{Ciphertext Randomization (Randomization)}
-
+% ----------------------------------------------------------
+\mysub{Ciphertext Randomization (Randomization)}
 A cipher with ciphertext randomization generates different ciphertexts
 non-deterministically given the same key, nonce, and plaintext. This makes it
 much more difficult to execute chosen-ciphertext attacks (CCA), key
@@ -92,8 +71,8 @@ or higher minimums and maximums. Hence, this is not a binary feature; scores
 range from 0 (no ciphertext randomization) to 1 (lowest minimum and maximum
 rounds per block) to 3 (highest minimum and maximum rounds per block).
 
-\subsubsection{Ciphertext Expansion (Expansion)}
-
+% ----------------------------------------------------------
+\mysub{Ciphertext Expansion (Expansion)}
 A cipher that exhibits ciphertext expansion is non-length-preserving: it outputs
 more or less ciphertext than was originally input as plaintext. This can cause
 major problems in the FDE context. For instance, cryptosystems that rely on
@@ -110,3 +89,10 @@ inappropriate for use with prior work. Hence, this is a binary feature in that a
 cipher either outputs ciphertext of the same length as its plaintext input or it
 does not. A cipher scores either a 0 if it \emph{is not} length-preserving in
 this way or a 1 if the ciphertext is always the same length as the plaintext.
+
+
+
+\hsg{So at the end how do we use this? what are these for?
+we need to give some examples here, or perhaps already covered in case studies
+in later sections??}
+

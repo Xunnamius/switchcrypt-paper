@@ -2,105 +2,109 @@
 
 \subsection{Putting It All Together} \label{subsec:summary}
 
-We revisit the motivating example from earlier in this work, where we're using
-Freestyle to ensure secure backups in an energy-constrained environment.
-Initially, I/O requests come down from the LFS and are received by the
-cryptographic driver, which divides the request based on which nuggets it
-touches. For each nugget, the per-nugget metadata is consulted to determine with
-which cipher the nugget is encrypted. If it is encrypted with the active cipher
-configuration (Freestyle), which must be true if we have not initiated a cipher
-switch, the write is handled similarly to prior work: encrypted data is read in
-from the drive, the merkle tree and monotonic counter are consulted to ensure
-the integrity of encrypted data, the transaction journal is consulted during
-write operations so that overwrites are handled and pad reuse violations are
-avoided, and then the keycount store is consulted to derive the nugget's unique
-encryption key from some master secret. Finally, using the Generic Stream Cipher
-Interface, we call out to the Freestyle, allowing SwitchCrypt to
-encrypts/decrypts the nugget's contents and commit any updates back to storage.
-All the while, the drive's Freestyle-encrypted contents are being uploaded up to
-our enterprise backup service every so often.
-
-When the device enters ``battery saver'' mode, drive backups are paused, the
-energy monitoring software downclocks the CPU, and the OS signals to SwitchCrypt
-that a more energy-efficient cipher (ChaCha20) should be used until we return to
-a non-curtailed energy budget. SwitchCrypt sets ChaCha20 as the active cipher
-configuration. Now, when the cryptographic driver divides I/O requests into each
-affected nugget, the per-nugget metadata shows SwitchCrypt that each nugget is
-encrypted using a cipher that is not the active configuration. This triggers the
-re-ciphering code path. Since we are using the Forward switching strategy in
-this example, nugget data is immediately decrypted by calling out to the
-inactive configuration through the Generic Stream Cipher Interface, after which
-the nugget is re-ciphered by calling out to the active configuration. Finally,
-the cryptographic driver manages encrypting/decrypting data and updating the
-merkle tree and monotonic counter, transaction journal, and keycount store as
-the I/O operation and related metadata is committed to the drive afterwards.
-
-Now, thanks to SwitchCrypt, the system can adapt to changing requirements beyond
-the capability of prior work. See \secref{usecases} for specifics.
+After describing the three main contributions, now we discuss
+other details surrounding the three main components.
 
 
-case studies...
-maybe move to case studies?
+% ----------------------------------------- secure metadata
+\mysub{Secure metadata management}
+%
+The focus of this paper is to implement mechanisms and policies to perform
+flexible switching of cipher configurations that can be built on top of
+existing block-level encryption module (aka. ``encryption driver'') that
+already provides the management of the encryption data structures.  There
+were a couple of open-source choices to start with such as Linux
+\ts{dm-crypt} \cite{x}, \ts{cryptsetup} \cite{x},
+% X: https://gitlab.com/cryptsetup/cryptsetup
+\ts{cryptmount} \cite{y}, 
+% x: https://sourceforge.net/projects/cryptmount/,
+or StrongBox \cite{x},
+% x: https://github.com/strongbox/strongbox
+\hsg{please double check i'm correct}.  We decided to build atop StrongBox
+because it already implements stream ciphers such as ChaCha which is more
+secure than block cipher. 
 
-basically show ``when'' to switch.
+\sys depends on several data structure management provided in StrongBox,
+such as its 
+%
+transcation and rekeying journal (for never writing data
+encrypted with the same key to the same location, hence avoiding pad reuse
+violations), 
+%
+Merkle tree (for tracking the drive state such as
+\hsg{explain a bit more}), 
+%
+monotonic counter (on a trusted hardware to
+prevent rollbacks), 
+%
+keycount store (to derive the nugget's unique
+encryption key from some master secret and limit the maximum length of any
+plaintext input to ciphers), and 
+%
+per-nugget metadata (to store cipher-specific extra metadata
+\hsg{true??}).  Every drive partition also has a ``head'' area that
+indicates which cipher is currently active.
+
+While we reuse some of the components, all of these are tightly integrated
+to the ciphers that they implemented (specifically ChaCha, and \xxx).  We
+had to untangle this, hence the contribution in the \sysB component where
+we now expose more structured interfaces allowing cipher implementors to
+natly build the metadata management of their cipher algorithm around the
+interfaces.  More specifically, out of all the five \hsg{true??} StrongBox
+components above, only \xxx can be reused as is, while the rest needs to
+be modularized and rewritten.
 
 
+% -------------------------------------------------------------------------
+\mysub{Threat model under switching}
 
 
+% confidentialitity
+In terms of {\em confidentiality}, an adversary should not be able to reveal
+any information about encrypted plaintext without the proper key.  As with
+prior works, encryption is achieved via a binary additive approach: cipher
+output (keystream) is combined with plaintext nugget contents using XOR,
+with metadata to track writes and ensure that pad reuse never occurs
+during overwrites and that the system can recover from crashes into a
+secure state.
+% data integrity
+In terms of {\em data integrity}, an adversary should not be able to
+tamper with ciphertext and it go unnoticed. Nugget integrity is tracked by
+StrongBox's in-memory Merkle tree (see \cite[Section \xxx]{StrongBox} for
+further details).
 
-Secure storage:
-StrongBox implementation.
-
-see junk.tex
-
-
-
-Crash consistent??????
-guarantee?
-if crash in the middle?
-
-
-
-% ============================================
-
-\subsubsection{Threat Model for Cipher Switching Strategies}
-
-This is thanks to the nugget-based drive
-layout, which limits the churn of cipher switching operations to relatively
-small regions of ciphertext on the drive.
-
-The primary concern facing any FDE solution is that of confidentiality. An
-adversary should not be able to reveal any information about encrypted plaintext
-without the proper key. As with prior work, encryption is achieved via a binary
-additive approach: cipher output (keystream) is combined with plaintext nugget
-contents using XOR, with metadata to track writes and ensure that pad reuse
-never occurs during overwrites and that the system can recover from crashes into
-a secure state. Another concern is data integrity: an adversary should not be
-able to tamper with ciphertext and it go unnoticed. Nugget integrity is tracked
-by an in-memory Merkle tree. See the threat model addressed by Dickens et
-al.~\cite{StrongBox} for further details.
-
-Switching strategies add an additional security concern not addressed by prior
-work: even if we initiate a ``cipher switch,'' there may still be data on the
-drive that was encrypted with an inactive configuration. Is this a problem? For
-the Forward strategy, this implies data may at any time be encrypted using the
-``least desirable cipher''. For the Mirrored and Selective strategies, the drive
-is partitioned into regions where nuggets are guaranteed to be encrypted with
-each cipher, including the ``least desirable cipher''. However, in terms of
-confidentiality, the confidentiality guarantee of SwitchCrypt can be reduced to
-the individual confidentiality guarantees of the available ciphers used to
-encrypt nuggets.
+Switching strategies add an additional security concern not addressed by
+prior work: even if we initiate a ``cipher switch,'' there may still be
+data on the drive that was encrypted with an inactive configuration. Is
+this a problem? For the Forward strategy, this implies data may at any
+time be encrypted using the ``least desirable cipher''. For the Mirrored
+and Selective strategies, the drive is partitioned into regions where
+nuggets are guaranteed to be encrypted with each cipher, including the
+``least desirable cipher''. However, in terms of confidentiality, the
+confidentiality guarantee of SwitchCrypt can be reduced to the individual
+confidentiality guarantees of the available ciphers used to encrypt
+nuggets. \hsg{need to double check that this statement is still true,
+  after I already rewrite the design section.}
 
 
 
-% =================================================
+% ------------------------------------------------------------------------
+\mysub{Higher-level integration}
+\sys expects a higher-level integration/policy that will tell \sys what kind of
+switching should be performed and when.  For example, for the battery-life scenario,
+\sys expects that the OS battery saver application will trigger the forward switching.
+We provide more in the case studies section.
 
-\subsubsection{Comparing Cipher Switching Strategies}
-
-\hsg{DO WE STILL NEED THIS DISCUSSION.
-THE FACT that the modes above are about case studies???}
 
 
+% -------------------------------------------------------------------------
+\mysub{Switching modes pros/cons.}
+%
+\hsg{DO WE STILL NEED THIS DISCUSSION? convergence, waste, performance, etc.
+THE FACT that the modes above are about case studies???
+so it's known that there is no single best scenario.}
+
+\if 0
 
 \input{tab-switch2}
 
@@ -156,3 +160,4 @@ should be encrypted differently without wasting drive space. See
 \secref{usecases} for specific scenarios that demonstrate these differences in
 practice.
 
+\fi

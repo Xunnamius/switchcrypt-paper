@@ -17,8 +17,21 @@ physical drive and other storage blocks. And since they are independent, we can
 use our interface to select any configuration to encrypt or decrypt any nugget
 at any point.
 
+... and interface for \sysB.  Comes with an interface.
 
+\hsg{what do you exactly mean by: \\
+- ``implementation detail''  \\
+- ``cipher implementations''  \\
+- the ``encryption/decryption process'' \\
+- ``modification to third party code'' \\
+- ``allows any stream cipher to be integrated to \sys'' \\
+- what is the ``cryptographic driver'' \\
+- ``interface'' -- interface between what and what?  between the OS and \sys?
+  between \sys and the cipher configuration? who calls the xorInterface, read/writeInterface? \\
+- ``\sys internals'' \\
+}
 
+% challenge, input, output
 One of the goals of SwitchCrypt is that we might use any stream cipher
 regardless of its implementation details. Yet this is entirely non-trivial.
 There are many cipher implementations that we might use with SwitchCrypt, each
@@ -34,9 +47,13 @@ configuration-dependent minimum and maximum rounds-per-block, hash interval, and
 pepper bits~\cite{Freestyle}. HC-128 and other ciphers have similarly disparate
 requirements.
 
+
+\hsg{need a figure to show what's going on}
+
+% the goals
 Unlike prior work, SwitchCrypt must be able to encrypt and decrypt arbitrary
 nuggets \emph{with any of these ciphers} at any moment with low overhead and
-without tight coupling to any specific implementation detail. Hence, there is a
+without tight coupling to any specific implementation detail.  Hence, there is a
 need for an interface that completely decouples cipher implementations from the
 encryption/decryption process. Our novel cipher interface allows any stream
 cipher to be integrated into SwitchCrypt without modifications to third-party
@@ -45,6 +62,7 @@ nuggets. The ability for disparate cipher implementations to co-exist forms the
 foundation for SwitchCrypt's ability to switch the system between different
 cipher configurations in our tradeoff space efficiently and effectively.
 
+% single enc/dec model, the OS has one way to talk to \sys 
 To facilitate this, the Generic Stream Cipher Interface presents the
 cryptographic driver with a single unified encryption/decryption model.
 SwitchCrypt receives I/O requests from the operating system at the block device
@@ -60,36 +78,44 @@ in a future read request. These requests can either be handled together by a
 single function or handled individually as distinct read and write operations,
 each with different tradeoffs.
 
-\begin{enumerate}
-   \item \textbf{\texttt{xor\_interface}}\\\texttt{xor\_interface} executes
-   independently of SwitchCrypt internals and treats encryption and decryption
-   as the same operation. Implementations receive an integer offset $F$, an
-   integer length $L$, a key buffer $K$ corresponding to the current nugget, and
-   an empty $L$-length XOR buffer. SwitchCrypt expects the XOR buffer to be
-   populated with $L$ bytes of keystream output from some stream cipher seeked
-   to offset $F$ with respect to key $K$. The length of the key buffer will
-   always be exactly what the cipher implementation expects, alleviating the
-   burden of key management; similarly, the XOR buffer will be XOR-ed with the
-   appropriate portion of nugget contents automatically, alleviating the burden
-   of drive access and other tedious calculations. \\
-   \item \textbf{\texttt{read\_interface}} and
-   \textbf{\texttt{write\_interface}}\\
-   Unlike \texttt{xor\_interface}, encryption and decryption are distinct
-   concerns at this abstraction level. \\\texttt{read\_interface} handles
-   decryption during reads. \\\texttt{write\_interface} handles encryption
-   during writes. Implementations receive full access to SwitchCrypt internals,
-   giving wrapper code complete control over the encryption and decryption
-   process and allowing implementers to bypass parts of the nugget-based drive
-   layout abstraction (i.e. BODY) if necessary. This comes at the cost of 1)
-   significantly increased code complexity, as the implementer must perform
-   certain I/O manually, distinguish between independent nuggets on the drive,
-   determine what to encrypt or decrypt at what offset and when, when to commit
-   which metadata and where and 2) potential performance implications, since
-   SwitchCrypt must account for not having absolute control over its internal
-   data structures during function invocation. For a cipher like Freestyle,
-   configurations with lower minimum and maximum rounds per block may see a
-   performance improvement here, while configurations with higher minimum and
-   maximum rounds per block may see reduced performance.
-\end{enumerate}
 
-\hsg{still need to talk today with Bernard .. what really is happening here.}
+\mysub{\texttt{xor\_interface}} executes independently of SwitchCrypt
+internals and treats encryption and decryption as the same
+operation. Implementations receive an integer offset $F$, an integer
+length $L$, a key buffer $K$ corresponding to the current nugget, and an
+empty $L$-length XOR buffer. SwitchCrypt expects the XOR buffer to be
+populated with $L$ bytes of keystream output from some stream cipher
+seeked to offset $F$ with respect to key $K$. The length of the key buffer
+will always be exactly what the cipher implementation expects, alleviating
+the burden of key management; similarly, the XOR buffer will be XOR-ed
+with the appropriate portion of nugget contents automatically, alleviating
+the burden of drive access and other tedious calculations.
+
+
+
+\mysub{\texttt{read\_interface} and \texttt{write\_interface}} Unlike
+\texttt{xor\_interface}, encryption and decryption are distinct concerns
+at this abstraction level. \\\texttt{read\_interface} handles decryption
+during reads. \\\texttt{write\_interface} handles encryption during
+writes. Implementations receive full access to SwitchCrypt internals,
+giving wrapper code complete control over the encryption and decryption
+process and allowing implementers to bypass parts of the nugget-based
+drive layout abstraction (i.e. BODY) if necessary. This comes at the cost
+of 1) significantly increased code complexity, as the implementer must
+perform certain I/O manually, distinguish between independent nuggets on
+the drive, determine what to encrypt or decrypt at what offset and when,
+when to commit which metadata and where and 2) potential performance
+implications, since SwitchCrypt must account for not having absolute
+control over its internal data structures during function invocation. For
+a cipher like Freestyle, configurations with lower minimum and maximum
+rounds per block may see a performance improvement here, while
+configurations with higher minimum and maximum rounds per block may see
+reduced performance.
+
+\hsg{more examples needed here}
+And then with this interface, we have implemented, 
+each in \xxx-\xxx LOC without the core cipher algorithm.
+
+
+
+

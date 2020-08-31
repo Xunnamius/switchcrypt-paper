@@ -8,6 +8,63 @@ and writable space (\cref{subsec:uc2}), and keeping within an energy budget
 spatial switching strategies, exploring the range of conditions under which
 certain strategies are optimal.
 
+
+
+\hsg{what is the purpose of this paragraph? again just to show we need to switch?
+I moved this from an earlier section}
+To truly address the security concern requires a cipher with an additional
+security property: \emph{ciphertext randomization}. Without ciphertext
+randomization, an attacker can map plaintexts to their ciphertext counterparts
+during snapshot comparison, especially if they can predict what might be written
+to certain drive regions. However, with ciphertext randomization, a cipher will
+output a different ``random'' ciphertext even when given the same key, nonce,
+and plaintext; this means, even after a forced rollback of system state and/or
+legitimate restoration from a backup, comparing future writes is no longer
+violates confidentiality because each snapshot will always consist of different
+ciphertext regardless of the plaintext being encrypted or the state of the
+drive. Using Freestyle~\cite{Freestyle}, a ChaCha20-based stream cipher that
+supports ciphertext randomization, we can guarantee data confidentiality in this
+way. So, we switch from StrongBox to an encryption driver that supports
+Freestyle.
+
+
+
+\hsg{from putting it all together}
+We revisit the motivating example from earlier in this work, where we're using
+Freestyle to ensure secure backups in an energy-constrained environment.
+Initially, I/O requests come down from the LFS and are received by the
+cryptographic driver, which divides the request based on which nuggets it
+touches. For each nugget, the per-nugget metadata is consulted to determine with
+which cipher the nugget is encrypted. If it is encrypted with the active cipher
+configuration (Freestyle), which must be true if we have not initiated a cipher
+switch, the write is handled similarly to prior work: encrypted data is read in
+from the drive, the merkle tree and monotonic counter are consulted to ensure
+the integrity of encrypted data, the transaction journal is consulted during
+write operations so that overwrites are handled and pad reuse violations are
+avoided, and then the keycount store is consulted to derive the nugget's unique
+encryption key from some master secret. Finally, using the Generic Stream Cipher
+Interface, we call out to the Freestyle, allowing SwitchCrypt to
+encrypts/decrypts the nugget's contents and commit any updates back to storage.
+All the while, the drive's Freestyle-encrypted contents are being uploaded up to
+our enterprise backup service every so often.
+
+\hsg{from putting it all together}
+When the device enters ``battery saver'' mode, drive backups are paused, the
+energy monitoring software downclocks the CPU, and the OS signals to SwitchCrypt
+that a more energy-efficient cipher (ChaCha20) should be used until we return to
+a non-curtailed energy budget. SwitchCrypt sets ChaCha20 as the active cipher
+configuration. Now, when the cryptographic driver divides I/O requests into each
+affected nugget, the per-nugget metadata shows SwitchCrypt that each nugget is
+encrypted using a cipher that is not the active configuration. This triggers the
+re-ciphering code path. Since we are using the Forward switching strategy in
+this example, nugget data is immediately decrypted by calling out to the
+inactive configuration through the Generic Stream Cipher Interface, after which
+the nugget is re-ciphered by calling out to the active configuration. Finally,
+the cryptographic driver manages encrypting/decrypting data and updating the
+merkle tree and monotonic counter, transaction journal, and keycount store as
+the I/O operation and related metadata is committed to the drive afterwards.
+
+
 \subsection{Balancing Security Goals with a Hard Energy Cap} \label{subsec:uc1}
 
 Here we revisit the motivating example from earlier in this work. It illustrates
