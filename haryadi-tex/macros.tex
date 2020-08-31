@@ -21,9 +21,12 @@
 \def \numConfigs {15\xspace}
 
 \newcounter{hsgcounter}
-\newcommand{\hsg}[1]{{\footnotesize
-\textbf{\textcolor{red}{(HSG$_{\arabic{hsgcounter}}$: #1)}}}
-\stepcounter{hsgcounter}}
+\newcommand{\hsg}[1]{{\footnotesize\textbf{\textcolor{red}{(HSG$_{\arabic{hsgcounter}}$: #1)}}}\stepcounter{hsgcounter}}
+% \newcommand{\hsg}[1]{}
+
+
+\def \cone {$C_1$\xspace}
+\def \ctwo {$C_2$\xspace}
 
 
 \newcommand{\vminfive}{\vspace{-5pt}}

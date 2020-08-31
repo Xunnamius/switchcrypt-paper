@@ -1,91 +1,162 @@
 
 
-\subsection{Cipher Switching Strategies} \label{subsec:strategies}
-
-
-
-\textbf{Implementing efficient switching strategies.} Finally, to determine when
-to switch a nugget's cipher and to where we commit the output, we implement a
-series of high-level policies we call \textit{cipher switching strategies}.
-These strategies leverage our generic cipher interface and flexible drive layout
-to selectively ``re-cipher'' groups of nuggets, whereby the key and the cipher
-used to encrypt/decrypt a nugget are switched at runtime. These strategies allow
-SwitchCrypt to move from one configuration point to another or even settle on
-optimal configurations wholly unachievable with prior work. The challenge here
-is to accomplish this while minimizing overhead.
+\subsection{\sysA: Cipher Switching Models} 
+\label{subsec:strategies}
 
 
 % when and where
-The Generic Stream Cipher Interface allows many differently ciphered nuggets to
-co-exist on the same drive. However, at any moment, there is only a single
-\emph{active cipher configuration} (henceforth \emph{active configuration}). The
-active configuration is used to encrypt nugget contents. When a cipher switch is
-triggered, a different configuration becomes the active configuration. At this
-point, SwitchCrypt must determine \emph{when} to re-cipher a nugget and
-\emph{where} to store the output on the drive. ``Re-ciphering'' here means using
-an inactive configuration to decrypt a nugget's contents and using the active
-configuration to re-cipher it. Depending on the use case, it may make the most
-sense to re-cipher a nugget immediately, or eventually, or to maintain several
-areas of differently-ciphered nuggets concurrently.
+Just like typical storage devices, at any moment, there is only {\em one active} cipher
+configuration (henceforth ``active configuration'').  However, with \sysA, we
+provide a small temporal and spatial flexibility that allows movement
+from one configuration point to another or even settle on optimal
+configurations wholly unachievable with prior work.  When a cipher switch
+is triggered, a different configuration becomes the active configuration,
+and ``rechipering'' must be done --- using the just-inactived
+configuration to decrypt a nugget's contents and using the active
+configuration to re-cipher it.
 
-% varying cases 
-A naive approach would switch every nugget in BODY to the active configuration
-immediately, but the latency and energy cost would be unacceptable. Hence, a
-more strategic approach is necessary. We satisfy this need with our \emph{cipher
-switching strategies}. These novel strategies allow for nuggets to be
-re-ciphered in a variety of cases with minimal impact on performance and battery
-life and without compromising security. This is thanks to the nugget-based drive
-layout, which limits the churn of cipher switching operations to relatively
-small regions of ciphertext on the drive.
-
-% temporal switching
-Determining \emph{when} to target a nugget for re-ciphering we call
-\emph{temporal switching}, for which we propose the \emph{Forward} switching
-strategy. Determining \emph{where}---in which storage region and across which
-nuggets---to output ciphertext we call \emph{spatial switching}, for which we
-propose the \emph{Mirrored} and \emph{Selective} switching strategies.
+% challenge
+The challenge here is to accomplish this while minimizing overhead.  A
+naive approach would switch every nugget in the device to the active
+configuration immediately, but the latency and energy cost would be
+unacceptable.  Hence, a more strategic approach is to provide different
+switching models that allow higher-level policies to choose; for example,
+depending on the use case, it may make the most sense to re-cipher a
+nugget immediately, or eventually, or to maintain several areas of
+differently-ciphered nuggets concurrently.  The different models allow for
+nuggets to be re-ciphered in a variety of cases with minimal impact on
+performance and battery life and without compromising security.  We
+introduce three switching strategies: temporal, mirrored, and selective.
+The first one forms a temporal switching while the latter two form a
+spatial switching, as explained below and summarized in Table
+\ref{tab-switch1}.
 
 
+\input{tab-switch1}
 
-\mysub{Forward Switching Strategy.} When a nugget is encountered during I/O
-that was encrypted using something other than the active configuration, the
-Forward strategy dictates that this nugget be re-ciphered immediately. If a
-particular nugget encrypted with an inactive configuration is never encountered
-during I/O, it is never re-ciphered and remains on the drive in its original
-state. In this way, the Forward strategy represents a form of temporal cipher
-switching.
 
-Rather than re-cipher the entire drive every time the active configuration
-changes, this strategy limits the performance impact of cipher switching to
-individual nuggets. The expense of re-ciphering is paid only once, after which
-the nugget is accessed normally during I/O until the active configuration is
-switched again.
+\hsg{If I explain things wrong here, go ahead fix it. This is
+based on my best understanding of our conversation.
+Also, discuss with Hank if we should just name ``Forward''
+with ``Temporal''.}
 
-\PUNT{There are several forms the Forward strategy might take. The default and
-most intuitive is \emph{0-forward}, in which SwitchCrypt immediately transitions
-individual nuggets encountered during I/O to the active configuration if they
-are not using it. Over time, if various I/O operations end up touching every
-nugget in the drive, the encrypted contents of every nugget will become
-decryptable with the currently active configuration.
+% ---------------------------------- forward switching
 
-The Forward strategy might also take the form of \emph{N-forward}, where
-SwitchCrypt attempts to take advantage of spatial sequential locality to
-transition whole sets of nuggets into the active configuration. We can trivially
-expand the forward strategy to encompass the entire drive by selecting $N$ equal
-to the total number of nuggets managed by SwitchCrypt. This would have the
-overhead of re-ciphering large swaths of the drive upon every I/O operation
-where a nugget encrypted with the inactive configuration is encountered. Of
-course, this has the same dire implications for performance as simply
-re-initializing the entire system or encrypted container with the new cipher.}
+\mysub{Forward switching.}  The first type of cipher switching we support
+is for the battery-life example where we want to switch from cipher
+``\cone'', a highly-secure, energy-expensive cipher to cipher ``\ctwo,''
+less-secure but more energy-efficient one.  This mode can be enabled with
+a battery-saving mode (the higher-level policy) supported by the OS.
 
-\textbf{Selective Switching Strategy.} When SwitchCrypt is initialized with the
+Table \ref{tab-switch1} summarizes what happens during the switch.  For new
+incoming writes, the data will be ciphered with \ctwo.  Later on, when the
+temporal switching ends, the data will remain ciphered with \ctwo
+\hsg{correct?}.  The reason we don't recipher it back to \cone in the future
+is that the files might be just a temporary file (\eg, movie download)
+that is only read once.  However, if the data is read again in the future
+when \cone is active again (\eg, for backing up to the cloud), the data will
+then reciphered to \cone.
+%
+For read operations, if the existing data (ciphered with \cone) is read
+during the switch, the data will be reciphered to \ctwo.  The reason behind
+this is that reciphering to \ctwo is not expensive, and better to be done on
+demand on the first read (during the switching) than later. 
+%
+In general, forward switching limits the performance impact of cipher
+switching to individual nuggets being accessed.  The data at rest
+(ciphered with \cone) that is never accessed during the switch remains in
+its original state.
+
+
+
+% variants
+We note that there can be variants to the forward switching mode. The
+above concept favors performance.  Another variant that can be support
+that favors stronger security can be done this way: For writes, the moment
+the switch back from \ctwo to \cone happens, the new data that was ciphered
+with \ctwo is quickly ciphered to \cone.  To do this, we need to do more
+recording, while the one we proposed above can be done on demand (when the
+data is read in the future).
+%
+Another variant for the read operations can also be done as follows: the
+data will {\em not} be reciphered on the first read.  The intuition is
+that forward switching only happens temporarily (while the battery is
+low), hence data being read might only be read once and stay in the
+memory.  However, if the data is read the second time (during the temporal
+period), the data is reciphered to \ctwo.
+%
+These and other possible variants can be left for future work.  So far, we
+find our version of forward switching suits a common battery-life
+scenario.
+
+
+
+
+% --------------------------------------------------------------------
+
+\mysub{Mirrored Switching.}  Next, we consider a different scenario where
+``\cone'' is a recently-attacked and vulnerable encryption and ``\ctwo''
+is a newly recommended cipher that's just been added to \sys's latest
+kernel/module upgrade.  Let us imagine a server-side storage operator who wants to switch
+from \cone to \ctwo without any server downtime.  To achieve this, \sys
+since the beginning will partition the drive into 2 regions.  That is, to
+support a full-drive cipher switch (supportec by the block layer and
+without application/file system modification), we must pay the space cost
+to anticipate such a switch in the future.  In this mode, we must add the
+``migration'' period to reflect the transition window from \cone to \ctwo.
+
+\hsg{I kind of change a bit how this mode should perform.  To me the
+  previous method -- that partitions the device with C regions, it's a
+  showstopper.  Imagine if you support C=10, are you saying that now we
+  lose 90\% of the space for user data, and we keep them all
+  mirroring(??).  That's a no no.  Also the case study here is about
+  switching to a better cipher; so you cannot anticipate way before what
+  kind of new cipher you'll transition into.  Also, talk to Hank if
+  another name like ``Full/Migration/??'' Switching is a better one--
+  because we're only mirroring during the migration.}
+
+During the migration, as summarized in Table \ref{tab-switch1}, all write
+operations that hit the \cone's region will be mirrored to the \ctwo's
+region.  At the same time, the data in \cone's region is reciphered
+incrementally to \ctwo's region.  Still during the migration, read
+operations will be served by the original state (\cone's region) until the
+full switch happens.  This is essentially similar to VM migration
+\cite{google-live-vm-migration-nsdi}.  After the whole migration
+completes, to fully secure-erase the previous region, one can use a
+mechanism such as SSD Instant Secure Erase~\cite{ISE1,ISE2,ISE3}, thus
+quickly and securely converging the drive to a single configuration
+without losing any data or suffering the egregious performance or battery
+penalty that comes with re-ciphering every nugget.
+
+% ------------------------------------------------------------------------------
+
+\mysub{Selective Switching.} 
+
+
+\hsg{I have a hard time reading this, considering that we want to map the case study
+of select files that we encrypt differently, \eg, encrypt legal files
+in a more secure eway.  I think that case study doesn't really match selective switching,
+and actually I'm lost on the best example for selective switching.
+The reason is that if we want to say: we allow selective switching by allowing certain
+files to be configured different ways, then it means we should allow multiple
+configurations to be active at the same time. 
+Now we could still have only one configuration that is active, but what that means is that
+while I read the legal files, reading other files must be queued inside the \sys layer, because
+\sys only has one active  configuration.  So this will reduce the performance.
+If we want to make a scenario like this, we need to know why it is fundamentally impossible/hard
+to allow multiple cipher configurations to be active at the same time. }
+
+
+\hsg{also, need to talk to Bernard, whether dividing up the partitions is really fundemental
+because of the way metadata/transcation journal is managed???}
+
+When SwitchCrypt is initialized with the
 Selective strategy, the drive is partitioned into $C$ regions where $C$
 represents the total number of available ciphers in the system; each regions'
 nuggets are encrypted by each of the $C$ ciphers respectively. For instance,
 were SwitchCrypt initialized using two ciphers ($C = 2$), the drive would be
 partitioned in half; all nuggets in the first region would be encrypted with the
 first cipher while all nuggets in the second would be encrypted with the other.
-
 
 When using this strategy, the active cipher determines which partition we
 ``select'' for I/O operations. Hence, unlike the Forward strategy, which
@@ -99,114 +170,4 @@ instance, set up regions with different security properties and performance
 characteristics, managing them as distinct virtual drives or transparently
 reading/writing bytes to different security regions on the same drive.
 
-\textbf{Mirrored Switching Strategy.} Similar to the Selective strategy, when
-SwitchCrypt is initialized with the Mirrored strategy, the drive is partitioned
-into $C$ regions where $C$ represents the total number of available ciphers in
-the system; each regions' nuggets are encrypted by each of the $C$ ciphers
-respectively.
 
-However, unlike the Selective strategy, all write operations that hit one region
-are mirrored into the other regions immediately, so all regions of the drive
-will always be in a consistent state and always share the same data. The active
-configuration determines \emph{where} a read operation should occur. In this
-way, the Mirrored strategy represents a form of spatial cipher switching because
-we're switching which configuration we're using to read in data. A user could
-take advantage of this along with SSD Instant Secure Erase~\cite{ISE1,ISE2,ISE3}
-to delete other regions, thus quickly and securely converging the drive to a
-single configuration without losing any data or suffering the egregious
-performance or battery penalty that comes with re-ciphering every nugget.
-
-\subsubsection{Comparing Cipher Switching Strategies}
-
-\begin{table}[ht]
-   \begin{tabular}{@{}|c|c|c|C{25mm}|@{}}
-      \toprule
-      \textbf{Strategy} & \textbf{Convergence} & \textbf{Waste} &
-      \textbf{Performance} \\
-      \midrule
-      Forward   & Slower       & None & Faster reads and writes unless switching
-      \\\hline
-      Mirrored  & Nearly instant & High & Faster reads; slower writes \\
-      \hline
-      Selective & Slower       & High & Faster reads and writes  \\
-      \hline
-   \end{tabular}
-   \caption{A summary comparison between the three cipher switching strategies.}
-   \label{tbl:strategies-advantages}
-\end{table}
-
-\tblref{strategies-advantages} summarizes the higher level tradeoffs between the
-three cipher switching strategies.
-
-\textbf{Convergence.} Depending on the use case, the ability to quickly converge
-the entire drive to a single cipher configuration without losing data is very
-useful (see: \secref{usecases}). The near-instantaneous ``just forget the key''
-nature of SSD Instant Secure Erase (ISE) implementations on modern
-SSDs~\cite{ISE1,ISE2,ISE3} makes this a very fast process for the Mirrored
-strategy. The Forward strategy is slow to converge compared to Mirrored since,
-in the worse case, every nugget on the drive will require re-ciphering. The
-Selective strategy is similarly slow to converge since entire regions of nuggets
-must be moved and re-ciphered to prevent data loss; those regions could be
-destroyed without moving data around using ISE too, which would be very fast,
-but unlike Mirrored some data would be lost forever.
-
-\textbf{Waste.} Unlike the other two strategies, using the Forward strategy does
-not reduce the total usable space on the drive by the end-user, ciphertext
-expansion notwithstanding. We refer to this as ``waste''. The Forward strategy
-is not wasteful in this way because it allows differently-ciphered nuggets to
-co-exist contiguously on the drive without special partitions. Since the
-Mirrored and Selective strategies require partitioning the drive into some
-number of regions---where the writeable size reported back to the OS is some
-function of region size---there is a necessary reduction in usable space.
-
-\textbf{Performance.} The Selective and Mirrored strategies can read data from
-the drive with low overhead, reaching performance parity with prior work,
-because they never have to deal with on-demand re-ciphering. This is because
-switching ciphers using these two strategies amounts to offsetting the read
-index so that it lands in the proper BODY partition on the drive, which has
-little overhead. The Forward strategy also reads with low overhead except in the
-case where a nugget was not encrypted with the active configuration. This
-triggers re-ciphering on-demand, which can be costly if the workload constantly
-touches unique nuggets and is small enough that cost is not amortized.
-
-The Selective strategy also writes with low overhead because, like with reads,
-an index offset is the only requirement. The Mirrored strategy, on the other
-hand, can be up to two times slower for writes (when $C = 2$) compared to
-baseline. Each additional region ($C > 2$) compounds the write penalty depending
-on the workload. This is because each write is mirrored across \emph{all}
-regions. As with reads, the Forward strategy writes with low overhead except in
-the case where a nugget was not encrypted with the active configuration. This
-triggers re-ciphering on-demand, which can be costly if the workload touches
-unique nuggets and is small enough that cost is not amortized.\\
-
-With these tradeoffs in mind: Mirrored is ideal when the drive must converge
-quickly, write performance is not a primary concern, and drive space is
-abundant; Selective is ideal when different data should be encrypted differently
-and drive space is abundant; and Forward is ideal when some subset of nuggets
-should be encrypted differently without wasting drive space. See
-\secref{usecases} for specific scenarios that demonstrate these differences in
-practice.
-
-\subsubsection{Threat Model for Cipher Switching Strategies}
-
-The primary concern facing any FDE solution is that of confidentiality. An
-adversary should not be able to reveal any information about encrypted plaintext
-without the proper key. As with prior work, encryption is achieved via a binary
-additive approach: cipher output (keystream) is combined with plaintext nugget
-contents using XOR, with metadata to track writes and ensure that pad reuse
-never occurs during overwrites and that the system can recover from crashes into
-a secure state. Another concern is data integrity: an adversary should not be
-able to tamper with ciphertext and it go unnoticed. Nugget integrity is tracked
-by an in-memory Merkle tree. See the threat model addressed by Dickens et
-al.~\cite{StrongBox} for further details.
-
-Switching strategies add an additional security concern not addressed by prior
-work: even if we initiate a ``cipher switch,'' there may still be data on the
-drive that was encrypted with an inactive configuration. Is this a problem? For
-the Forward strategy, this implies data may at any time be encrypted using the
-``least desirable cipher''. For the Mirrored and Selective strategies, the drive
-is partitioned into regions where nuggets are guaranteed to be encrypted with
-each cipher, including the ``least desirable cipher''. However, in terms of
-confidentiality, the confidentiality guarantee of SwitchCrypt can be reduced to
-the individual confidentiality guarantees of the available ciphers used to
-encrypt nuggets.

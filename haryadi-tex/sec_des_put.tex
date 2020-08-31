@@ -53,3 +53,106 @@ StrongBox implementation.
 
 see junk.tex
 
+
+
+Crash consistent??????
+guarantee?
+if crash in the middle?
+
+
+
+% ============================================
+
+\subsubsection{Threat Model for Cipher Switching Strategies}
+
+This is thanks to the nugget-based drive
+layout, which limits the churn of cipher switching operations to relatively
+small regions of ciphertext on the drive.
+
+The primary concern facing any FDE solution is that of confidentiality. An
+adversary should not be able to reveal any information about encrypted plaintext
+without the proper key. As with prior work, encryption is achieved via a binary
+additive approach: cipher output (keystream) is combined with plaintext nugget
+contents using XOR, with metadata to track writes and ensure that pad reuse
+never occurs during overwrites and that the system can recover from crashes into
+a secure state. Another concern is data integrity: an adversary should not be
+able to tamper with ciphertext and it go unnoticed. Nugget integrity is tracked
+by an in-memory Merkle tree. See the threat model addressed by Dickens et
+al.~\cite{StrongBox} for further details.
+
+Switching strategies add an additional security concern not addressed by prior
+work: even if we initiate a ``cipher switch,'' there may still be data on the
+drive that was encrypted with an inactive configuration. Is this a problem? For
+the Forward strategy, this implies data may at any time be encrypted using the
+``least desirable cipher''. For the Mirrored and Selective strategies, the drive
+is partitioned into regions where nuggets are guaranteed to be encrypted with
+each cipher, including the ``least desirable cipher''. However, in terms of
+confidentiality, the confidentiality guarantee of SwitchCrypt can be reduced to
+the individual confidentiality guarantees of the available ciphers used to
+encrypt nuggets.
+
+
+
+% =================================================
+
+\subsubsection{Comparing Cipher Switching Strategies}
+
+\hsg{DO WE STILL NEED THIS DISCUSSION.
+THE FACT that the modes above are about case studies???}
+
+
+
+\input{tab-switch2}
+
+\tblref{tab-switch2} summarizes the higher level tradeoffs between the
+three cipher switching strategies.
+
+\textbf{Convergence.} Depending on the use case, the ability to quickly converge
+the entire drive to a single cipher configuration without losing data is very
+useful (see: \secref{usecases}). The near-instantaneous ``just forget the key''
+nature of SSD Instant Secure Erase (ISE) implementations on modern
+SSDs~\cite{ISE1,ISE2,ISE3} makes this a very fast process for the Mirrored
+strategy. The Forward strategy is slow to converge compared to Mirrored since,
+in the worse case, every nugget on the drive will require re-ciphering. The
+Selective strategy is similarly slow to converge since entire regions of nuggets
+must be moved and re-ciphered to prevent data loss; those regions could be
+destroyed without moving data around using ISE too, which would be very fast,
+but unlike Mirrored some data would be lost forever.
+
+\textbf{Waste.} Unlike the other two strategies, using the Forward strategy does
+not reduce the total usable space on the drive by the end-user, ciphertext
+expansion notwithstanding. We refer to this as ``waste''. The Forward strategy
+is not wasteful in this way because it allows differently-ciphered nuggets to
+co-exist contiguously on the drive without special partitions. Since the
+Mirrored and Selective strategies require partitioning the drive into some
+number of regions---where the writeable size reported back to the OS is some
+function of region size---there is a necessary reduction in usable space.
+
+\textbf{Performance.} The Selective and Mirrored strategies can read data from
+the drive with low overhead, reaching performance parity with prior work,
+because they never have to deal with on-demand re-ciphering. This is because
+switching ciphers using these two strategies amounts to offsetting the read
+index so that it lands in the proper BODY partition on the drive, which has
+little overhead. The Forward strategy also reads with low overhead except in the
+case where a nugget was not encrypted with the active configuration. This
+triggers re-ciphering on-demand, which can be costly if the workload constantly
+touches unique nuggets and is small enough that cost is not amortized.
+
+The Selective strategy also writes with low overhead because, like with reads,
+an index offset is the only requirement. The Mirrored strategy, on the other
+hand, can be up to two times slower for writes (when $C = 2$) compared to
+baseline. Each additional region ($C > 2$) compounds the write penalty depending
+on the workload. This is because each write is mirrored across \emph{all}
+regions. As with reads, the Forward strategy writes with low overhead except in
+the case where a nugget was not encrypted with the active configuration. This
+triggers re-ciphering on-demand, which can be costly if the workload touches
+unique nuggets and is small enough that cost is not amortized.\\
+
+With these tradeoffs in mind: Mirrored is ideal when the drive must converge
+quickly, write performance is not a primary concern, and drive space is
+abundant; Selective is ideal when different data should be encrypted differently
+and drive space is abundant; and Forward is ideal when some subset of nuggets
+should be encrypted differently without wasting drive space. See
+\secref{usecases} for specific scenarios that demonstrate these differences in
+practice.
+
