@@ -147,6 +147,22 @@ allow multiple ciphers activated per drive volume.
 \mysub{Selective Switching.} 
 
 
+Storing classified materials, corporate secrets, etc. require the highest level
+of discretion, yet sensitive information like this can appear within a (much)
+larger amount of data that we value less. 
+
+
+For example,
+perhaps banking transaction information is littered throughout a PDF; perhaps
+passwords and other sensitive information exists within several much larger
+files. Using prior techniques, either all the data would be stored with high
+overhead, the critical data would be stored without the mandated cipher type, or
+the data would have to be split among separate files requiring potentially
+complex and error-prone management schemes. SwitchCrypt VSRs allows us to
+sidestep these issues.
+
+
+
 \hsg{I have a hard time reading this, considering that we want to map the case study
 of select files that we encrypt differently, \eg, encrypt legal files
 in a more secure eway.  I think that case study doesn't really match selective switching,
@@ -184,4 +200,6 @@ instance, set up regions with different security properties and performance
 characteristics, managing them as distinct virtual drives or transparently
 reading/writing bytes to different security regions on the same drive.
 
+
+IO Differentiation is not new. 
 

@@ -136,55 +136,40 @@ of the drive can remain performant even during drive end-of-life.}
 
 
 % ================================================================
-\subsection{Variable Security Regions} \label{subsec:uc2}
+\subsection{Select Data Encryption} \label{subsec:uc2}
 
-\hsg{here here here}
-
-This usecase illustrates utility of spatial Selective switching to achieve a
-performance win over prior work where the entire drive is encrypted with a
-single cipher. We demonstrate \emph{Variable Security Regions} (VSR), where we
-can choose to encrypt select files or portions of files with different keys and
-ciphers below the filesystem level.
 
 % background
-Storing classified materials, corporate secrets, etc. require the highest level
-of discretion, yet sensitive information like this can appear within a (much)
-larger amount of data that we value less. But if only a small percentage of the
-data needs the strongest encryption, then only a small percentage of the data
-should have that associated overhead. In this scenario, a user wants to indicate
-one or more regions of a file are more sensitive than the others. For example,
-perhaps banking transaction information is littered throughout a PDF; perhaps
-passwords and other sensitive information exists within several much larger
-files. Using prior techniques, either all the data would be stored with high
-overhead, the critical data would be stored without the mandated cipher type, or
-the data would have to be split among separate files requiring potentially
-complex and error-prone management schemes. SwitchCrypt VSRs allows us to
-sidestep these issues.
+This usecase illustrates utility of selective switching to achieve a
+performance win---if only a small percentage of the data needs the
+strongest encryption, then only a small percentage of the data should have
+that associated overhead, while the rest can use a minimalist encryption.
+As mentioned before, this feature requires users to annotate certain files
+with a special tag via file system calls, which would then be stored in
+the inode.  Because the \sys layer is file oblivious, every block I/O
+through the \sys layer will be labeled with the corresponding cipher.
 
-% setup 
-We begin by with 10 5MB and 4KB write-read operations to two
-SwitchCrypt instances: one using ChaCha8 (C8) and the other using Freestyle
-Strong (FreeStr). These results represent I/O without cipher switching where 100\% of
-the data is stored with either high overhead (FS) or using an inappropriate
-cipher (C8). We then use a third SwitchCrypt instance initialized with Selective
-switching and write-read with a 7:3 ratio of ChaCha8 versus Freestyle
-Balanced I/O operations. Here, 30\% of the data is considered sensitive. We
-repeat this experiment three times.
+% setup
+We begin by with 10 5MB and 4KB write-read operations to two \sys drive
+instances: one using ChaCha8 and the other using Freestyle Strong.  They
+represent two extreme where ChaCha8 is a low-latency cipher and Freestyle
+Strong exhibits a very high overhead.  We then run another \sys instance
+with a 7:3 ratio where 30\% of the data considered highly sensitive uses
+Freestyle Strong.
+
 
 \input{fig-usecase3}
 
 % outcome
-In \figref{usecase-vsr-bar}, we see the sequential read and write performance of
-4KB and 5MB workloads when nuggets are encrypted exclusively with ChaCha8 or
-Freestyle Balanced. Between them, we see Selective switching 7:3 ratio I/O
-results.
-
-Our goal is to use VSRs to keep our sensitive data at the mandated security
-level while keeping the performance and battery life benefits of using a fast
-cipher for the majority of I/O operations. Using SwitchCrypt Selective switching
-versus prior work results in a reduction of 3.1x to 4.8x for read latency and
-1.6x to 2.8x for write latency, all without compromising the security needs of
-the most sensitive data.
+The left-side and right-side bars in \figref{usecase-vsr-bar} show the two
+extremes; ChaCha8 exhibits a low latency, consistently less than 1 second
+across the workloads, while Freestyle Strong exhibits 5 to 20 second
+latency depending on the workload.  The selective switching (middle bars)
+shows a reduction of 3.1x to 4.8x for read latency and 1.6x to 2.8x for
+write latency, all without compromising the security needs of the most
+sensitive data.  Thus, selective switching keeps our sensitive data at the
+mandated security level while keeping the performance (and also battery
+life) benefits of using a fast cipher for the majority of I/O operations.
 
 
 
