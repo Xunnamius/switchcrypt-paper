@@ -4,6 +4,12 @@
 \label{subsec:strategies}
 
 
+\hsg{If I explain things wrong here, go ahead fix it. This is
+based on my best understanding of our conversation.
+Also, discuss with Hank if we should just name ``Forward''
+with ``Temporal''.}
+
+
 % when and where
 Just like typical storage devices, at any moment, there is only {\em one active} cipher
 configuration (henceforth ``active configuration'').  However, with \sysA, we
@@ -35,10 +41,6 @@ spatial switching, as explained below and summarized in Table
 \input{tab-switch1}
 
 
-\hsg{If I explain things wrong here, go ahead fix it. This is
-based on my best understanding of our conversation.
-Also, discuss with Hank if we should just name ``Forward''
-with ``Temporal''.}
 
 % ---------------------------------- forward switching
 
@@ -106,16 +108,6 @@ to anticipate such a switch in the future.  In this mode, we must add the
 ``migration'' period to reflect the transition window from \cone to \ctwo.
 
 
-\hsg{I kind of change a bit how this mode should perform.  To me the
-  previous method -- that partitions the device with C regions, it's a
-  showstopper.  Imagine if you support C=10, are you saying that now we
-  lose 90\% of the space for user data, and we keep them all
-  mirroring(??).  That's a no no.  Also the case study here is about
-  switching to a better cipher; so you cannot anticipate way before what
-  kind of new cipher you'll transition into.  Also, talk to Hank if
-  another name like ``Full/Migration/??'' Switching is a better one--
-  because we're only mirroring during the migration.}
-
 During the migration, as summarized in Table \ref{tab-switch1}, all write
 operations that hit the \cone's region will be mirrored to the \ctwo's
 region.  At the same time, the data in \cone's region is reciphered
@@ -160,22 +152,6 @@ overhead, the critical data would be stored without the mandated cipher type, or
 the data would have to be split among separate files requiring potentially
 complex and error-prone management schemes. SwitchCrypt VSRs allows us to
 sidestep these issues.
-
-
-
-\hsg{I have a hard time reading this, considering that we want to map the case study
-of select files that we encrypt differently, \eg, encrypt legal files
-in a more secure eway.  I think that case study doesn't really match selective switching,
-and actually I'm lost on the best example for selective switching.
-The reason is that if we want to say: we allow selective switching by allowing certain
-files to be configured different ways, then it means we should allow multiple
-configurations to be active at the same time. 
-Now we could still have only one configuration that is active, but what that means is that
-while I read the legal files, reading other files must be queued inside the \sys layer, because
-\sys only has one active  configuration.  So this will reduce the performance.
-If we want to make a scenario like this, we need to know why it is fundamentally impossible/hard
-to allow multiple cipher configurations to be active at the same time. }
-
 
 \hsg{also, need to talk to Bernard, whether dividing up the partitions is really fundemental
 because of the way metadata/transcation journal is managed???}
