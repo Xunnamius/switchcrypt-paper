@@ -1,4 +1,4 @@
-# StrongBox-SwitchCrypt Paper
+# StrongBox-SwitchCrypt (Officially: FlexCrypt) Paper
 
 Here be dragons!
 
@@ -28,9 +28,3 @@ Other Makefile commands:
 `generate-paper` - Used to generate the paper only  
 `generate-pdfs` - Used to generate the paper and any other artifacts (like an extended abstract)  
 `generate-pdf` - Alias for `generate-pdfs`
-
-
-
-
-..
-hg test

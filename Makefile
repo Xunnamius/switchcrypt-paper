@@ -4,8 +4,8 @@ GHOSTSCRIPT=\gs -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -dEmbedAllFonts=true
 
 TEX-FILES = $(wildcard *.tex)
 BIB-FILES = $(wildcard *.bib)
-FIG-FILES = $(wildcard figs/*.png data/*.tex data/*.dat)
-PAPER = dickens-switchcrypt
+FIG-FILES = $(wildcard graphics/*.png data/*.tex data/*.dat)
+PAPER = dickens-flexcrypt
 
 .PHONY: all for-vscode generate-paper generate-pdfs generate-pdf clean
 

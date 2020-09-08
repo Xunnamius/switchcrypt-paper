@@ -8,7 +8,7 @@ our mock device controller. BUSE is a thin (200 LoC) wrapper around the standard
 Linux Network Block Device (NBD). BUSE allows an operating system to transact
 block I/O requests to and from virtual block devices exposed via domain socket.
 
-\input{tab-impl}
+\input{graphics/tbl-impl}
 
 For the ciphers we support, we select five types of ciphers for the purpose of
 this research: ChaCha8 and ChaCha20~\cite{ChaCha20}, Freestyle~\cite{Freestyle}
@@ -18,10 +18,10 @@ mode with parameters \texttt{FBalanced($R_{min}$=$12$,
 $R_{max}$=$28$,$H_I$=$2$,$I_C$=$10$)}, and a ``strong'' mode with parameters
 \texttt{FStrong($R_{min}$=$20$,$R_{max}$=$36$,$H_I$=$1$,$I_C$=$12$)}. \hsg{how
 about AES-XTRS and AES-CTR, and eSTREAM?? how should I reconcile these ``5''
-ciphers with more of the ciphers listed in Table \ref{tab-impl}. I thought you
+ciphers with more of the ciphers listed in Table \tblref{impl}. I thought you
 support more than five??}
 
-Table \ref{tab-impl} shows the source of the cipher code that we use, but as
+Table \tblref{impl} shows the source of the cipher code that we use, but as
 mentioned in Section \ref{design-crypts-pls-fix-this}, they must be repackaged
 with the \sysB interface.
 

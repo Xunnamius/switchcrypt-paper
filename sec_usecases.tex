@@ -19,7 +19,7 @@ battery saver mode is on, the device will switch to a more energy-efficient
 cipher, ChaCha8 (``\ctwo''), and at the same time pausing the backup upload to
 the cloud momentarily (\eg, the company does not want files to be saved in the
 cloud without \cone encryption. Our goal is to complete I/Os as much as we can
-before the device dies. 
+before the device dies.
 
 % About: setup
 To simulate I/O activity, we begin randomly writing 10 40MB files using the
@@ -34,8 +34,8 @@ seconds.  we switch to ChaCha8. But why the FB+ChaCha line is still going up?
 Why it doesn't flat out like the ChaCha line?? and why do even need to show the
 ChaCha8 only line?}
 
-\input{fig-usecase1} \hsg{we should exlude ChaCha8 only, unless you have a major
-point here}
+\input{graphics/fig-usecase1} \hsg{we should exlude ChaCha8 only, unless you have a
+major point here}
 
 % About: result
 \figref{usecase-battery} shows the time versus energy used. At 0 seconds, we
@@ -80,7 +80,7 @@ when the drive is in such a state, we can offset some of the performance loss by
 switching the ciphers of high traffic nuggets to the fastest acceptable cipher
 available using forward switching.
 
-\input{fig-usecase2}
+\input{graphics/fig-usecase2}
 
 To show this, we begin by writing 10 40MB files per each cipher as a baseline.
 \hsg{I don't understand ``per each cipher''} We then introduce a delay of $20ms$
@@ -124,7 +124,7 @@ represent two extreme where ChaCha8 is a low-latency cipher and Freestyle Strong
 exhibits a very high overhead.  We then run another \sys instance with a 7:3
 ratio where 30\% of the data considered highly sensitive uses Freestyle Strong.
 
-\input{fig-usecase3}
+\input{graphics/fig-usecase3}
 
 % About: outcome
 The left-side and right-side bars in \figref{usecase-vsr-bar} show the two
@@ -141,7 +141,7 @@ majority of I/O operations.
 % ===============================
 \subsection{No-Downtime Encryption Upgrade}\label{subsec:uc4}
 
-\input{fig-usecase4}
+\input{graphics/fig-usecase4}
 
 In \figref{usecase4} \TODO{finish sentence}. \hsg{we must have a short case
 study here. Otherwise no point of talking about mirrored switch}.
