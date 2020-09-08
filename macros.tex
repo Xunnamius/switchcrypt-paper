@@ -1,1 +1,99 @@
-\newcommand{\sys}{SwitchCrypt}
+\def \sys {\textsc{FlexCrypt}\xspace}
+
+\def \sysA {\textsc{flexswitch}\xspace} \def \sysB {\textsc{flexapi}\xspace}
+\def \sysC {\textsc{flextrade}\xspace}
+
+\def \encA {\textsc{cryptA}\xspace} \def \encB {\textsc{cryptB}\xspace} \def
+\encC {\textsc{cryptC}\xspace}
+
+\def \locTotal {get-count\xspace} %9,491
+\def \locTest {get-count\xspace}  %6,077
+
+\def \numCiphers {7\xspace} \def \numConfigs {15\xspace}
+
+\newcounter{hsgcounter}
+\newcommand{\hsg}[1]{{\footnotesize\textbf{\textcolor{red}{(HSG$_{\arabic{hsgcounter}}$:
+#1)}}}\stepcounter{hsgcounter}}
+% \newcommand{\hsg}[1]{}
+
+\def \cone {$C_1$\xspace} \def \ctwo {$C_2$\xspace}
+
+\newcommand{\vminfive}{\vspace{-5pt}} \newcommand{\vminten}{\vspace{-10pt}}
+\newcommand{\vminfifteen}{\vspace{-15pt}}
+\newcommand{\vmintwenty}{\vspace{-20pt}}
+
+\newcommand{\vtwenty}{\vspace{20pt}} \newcommand{\vfifteen}{\vspace{15pt}}
+\newcommand{\vten}{\vspace{10pt}} \newcommand{\vfive}{\vspace{5pt}}
+\newcommand{\vthree}{\vspace{3pt}}
+
+\newcommand{\xxxreset}{\setcounter{Xcounter}{1}}
+\newcommand{\xxx}{{\footnotesize \textcolor{red}{\textbf{xxx}}}~}
+
+\newcommand{\xxxinfig}{\textcolor{red}{\textbf{xx}}} % cannot use counter
+
+\newcommand{\etal}{\textit{et al.}}
+\newcommand{\etc}{etc.}
+\def \th {$^{th}$}
+
+\newcommand{\mysub}[1]{\vfive \textbf{#1}}
+
+\newcommand{\mycaption}[3]{\caption{
+\label{#1}
+{\bf #2. } {\small #3}}}
+
+\newcommand{\emptypage}{\newpage}
+
+\newcommand{\ts}[1]{{\tt{\small#1}}}
+
+%% Shortcuts
+\newcommand{\ie}{\textit{i.e., }} \newcommand{\eg}{\textit{e.g., }}
+\newcommand{\CC}{C\nolinebreak\hspace{-.05em}\raisebox{.5ex}{\tiny\bf
++}\nolinebreak\hspace{-.10em}\raisebox{.5ex}{\tiny\bf +}}
+
+%% Units
+\newcommand{\us}{\,$\mu$s}
+\newcommand{\ms}{\,ms}
+\newcommand{\KB}{\,KB}
+\newcommand{\MB}{\,MB}
+\newcommand{\GB}{\,GB}
+\newcommand{\MHz}{\,MHz}
+\newcommand{\GHz}{\,GHz}
+
+%% Project name
+\newcommand{\SystemURI}{https://github.com/ananonrepo2/\sys{}}%https://github.com/research/\sys}
+
+%% Reference parts of the paper \newcommand{\figref}[1]{Fig.~\ref{fig:#1}}
+\newcommand{\figref}[1]{Figure~\ref{fig:#1}}
+\newcommand{\figsref}[2]{Figures~\ref{fig:#1} and~\ref{fig:#2}}
+\newcommand{\figrref}[2]{Figures~\ref{fig:#1}--\ref{fig:#2}}
+\newcommand{\secref}[1]{Section~\ref{sec:#1}}
+\newcommand{\secsref}[2]{Sections~\ref{sec:#1} and~\ref{sec:#2}}
+\newcommand{\eqnref}[1]{Eqn.~\ref{eqn:#1}}
+\newcommand{\eqnsref}[2]{Equations~\ref{eqn:#1} and~\ref{eqn:#2}}
+\newcommand{\eqnrref}[2]{Equations~\ref{eqn:#1}--\ref{eqn:#2}}
+\newcommand{\insref}[1]{Instruction~\ref{ins:#1}}
+\newcommand{\tblref}[1]{Table~\ref{tbl:#1}}
+\newcommand{\appref}[1]{Appendix~\ref{app:#1}}
+\newcommand{\algoref}[1]{Algorithm~\ref{algo:#1}}
+
+\makeatletter
+\newcommand\footnoteref[1]{\protected@xdef\@thefnmark{\ref{#1}}\@footnotemark}
+\makeatother
+
+%% Math
+\newcommand{\argmin}{\arg\!\min}
+\newcommand{\argmax}{\arg\!\max}
+\newcommand{\minimize}{minimize}
+\newcommand{\optimize}{optimize}
+\newcommand{\ceil}[1]{\lceil #1 \rceil}
+\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+\newcommand{\st}{s.t.}
+
+%% Custom
+\newcommand{\PUNT}[1]{}
+\newcommand{\TODO}[1]{\textcolor{gray}{\textbf{\ [TODO:\ #1]\ }}}
+\newcommand{\FIX}[1]{\textcolor{red}{\textbf{\ [FIX:\ #1]\ }}}
+\newcommand{\hank}[1]{\textcolor{purple}{(Hank: #1)}}
+
+%% For algorithms
+\newcommand{\LineComment}[1]{\Statex \hfill\textit{#1}}

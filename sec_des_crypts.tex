@@ -1,0 +1,113 @@
+\subsection{Generic Stream Cipher Interface}\label{subsec:interface}
+
+\textbf{Decoupling ciphers from the encryption process.} To flexibly switch
+between configurations in \sys requires a generic cipher interface. This is
+challenging given the variety of inputs required by various stream ciphers, the
+existence of non-length-preserving ciphers, and other differences. We achieve
+the required generality by defining independent storage units called
+\emph{nuggets}; we borrow this terminology from prior work (see
+\cite{StrongBox}) to easily differentiate our logical blocks (nuggets) from
+physical drive and other storage blocks. And since they are independent, we can
+use our interface to select any configuration to encrypt or decrypt any nugget
+at any point.
+
+... and interface for \sysB. Comes with an interface.
+
+\hsg{what do you exactly mean by: \\
+- ``implementation detail'' \\
+- ``cipher implementations'' \\
+- the ``encryption/decryption process'' \\
+- ``modification to third party code'' \\
+- ``allows any stream cipher to be integrated to \sys'' \\
+- what is the ``cryptographic driver'' \\
+- ``interface'' -- interface between what and what? between the OS and \sys?
+  between \sys and the cipher configuration? who calls the xorInterface,
+  read/writeInterface? \\
+- ``\sys internals'' \\
+}
+
+% About: challenge, input, output
+One of the goals of \sys is that we might use any stream cipher regardless of
+its implementation details. Yet this is entirely non-trivial. There are many
+cipher implementations that we might use with \sys, each with unique input
+requirements and output considerations. For instance, Salsa and Chacha
+implementations require a certain IV and key size and handle plaintext input
+through successive invocations of a single state update
+function~\cite{Floodyberry}. Using OpenSSL's AES implementation in CTR mode
+requires manually tracking the counter state and individual ciphertext blocks
+are retrieved though corresponding function invocations~\cite{OpenSSL}.
+Freestyle's reference implementation requires we calculate the extra space
+necessary per nugget (due to ciphertext expansion) along with
+configuration-dependent minimum and maximum rounds-per-block, hash interval, and
+pepper bits~\cite{Freestyle}. HC-128 and other ciphers have similarly disparate
+requirements.
+
+
+\hsg{need a figure to show what's going on}
+
+% About: the goals
+Unlike prior work, \sys must be able to encrypt and decrypt arbitrary nuggets
+\emph{with any of these ciphers} at any moment with low overhead and without
+tight coupling to any specific implementation detail. Hence, there is a need for
+an interface that completely decouples cipher implementations from the
+encryption/decryption process. Our novel cipher interface allows any stream
+cipher to be integrated into \sys without modifications to third-party code,
+enabling normally incompatible ciphers to encrypt and decrypt arbitrary nuggets.
+The ability for disparate cipher implementations to co-exist forms the
+foundation for \sys's ability to switch the system between different cipher
+configurations in our tradeoff space efficiently and effectively.
+
+% About: single enc/dec model, the OS has one way to talk to \sys
+To facilitate this, the Generic Stream Cipher Interface presents the
+cryptographic driver with a single unified encryption/decryption model. \sys
+receives I/O requests from the operating system at the block device level like
+any other device-mapper. These requests come in the form of either reads or
+writes. When a read request is received, the OS hands \sys an offset and a
+length and expects a response with plaintext of that specific length starting at
+that specific offset taken from the beginning of storage (i.e. the BODY section;
+see \figref{backstore}). When a write request is received, the OS hands \sys an
+offset, a length, and a buffer of plaintext and expects that plaintext to be
+encrypted and committed to storage such that the plaintext is later retrievable
+given that same offset and length in a future read request. These requests can
+either be handled together by a single function or handled individually as
+distinct read and write operations, each with different tradeoffs.
+
+% ---------------------------------- xor interface
+
+\mysub{\texttt{xor\_interface}} executes independently of \sys internals and
+treats encryption and decryption as the same operation. Implementations receive
+an integer offset $F$, an integer length $L$, a key buffer $K$ corresponding to
+the current nugget, and an empty $L$-length XOR buffer. \sys expects the XOR
+buffer to be populated with $L$ bytes of keystream output from some stream
+cipher seeked to offset $F$ with respect to key $K$. The length of the key
+buffer will always be exactly what the cipher implementation expects,
+alleviating the burden of key management; similarly, the XOR buffer will be
+XOR-ed with the appropriate portion of nugget contents automatically,
+alleviating the burden of drive access and other tedious calculations.
+
+% ---------------------------------- read/write interface
+
+\mysub{\texttt{read\_interface} and \texttt{write\_interface}} Unlike
+\texttt{xor\_interface}, encryption and decryption are distinct concerns at this
+abstraction level. \\\texttt{read\_interface} handles decryption during reads.
+\\\texttt{write\_interface} handles encryption during writes. Implementations
+receive full access to \sys internals, giving wrapper code complete control over
+the encryption and decryption process and allowing implementers to bypass parts
+of the nugget-based drive layout abstraction (i.e. BODY) if necessary. This
+comes at the cost of 1) significantly increased code complexity, as the
+implementer must perform certain I/O manually, distinguish between independent
+nuggets on the drive, determine what to encrypt or decrypt at what offset and
+when, when to commit which metadata and where and 2) potential performance
+implications, since \sys must account for not having absolute control over its
+internal data structures during function invocation. For a cipher like
+Freestyle, configurations with lower minimum and maximum rounds per block may
+see a performance improvement here, while configurations with higher minimum and
+maximum rounds per block may see reduced performance.
+
+And then with this interface, we have implemented \hsg{examples of cipher
+wrappers implemented needed here}, each in \xxx-\xxx LOC without the core cipher
+algorithm.
+
+
+
+

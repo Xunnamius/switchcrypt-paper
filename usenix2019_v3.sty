@@ -26,6 +26,9 @@
 \usepackage[utf8]{inputenc}
 \usepackage{pslatex}
 
+\usepackage{alltt} % haryadi add
+ 
+
 % appearance
 \usepackage[kerning,spacing]{microtype} % more compact and arguably nicer
 \usepackage{flushend} % make cols in last page equal in size
@@ -74,6 +77,9 @@
 % italic--- you must use {\rm } around the actual author names to get
 % them in roman.
 %
+
+\if 0
+
 \def\maketitle{\par
  \begingroup
    \renewcommand\thefootnote{\fnsymbol{footnote}}%
@@ -93,19 +99,21 @@
 
 \def\@maketitle{\newpage
  \vbox to 2.5in{
- \vspace*{\fill}
- \vskip 2em
+\vspace*{\fill} % space between ??
+% \vskip 2em  % space between ??
+\vskip 0em 
  \begin{center}%
   {\Large\bf \@title \par}%
-  \vskip 0.375in minus 0.300in
+%  \vskip 0.375in minus 0.300in  % space between
+\vskip 0em
   {\large\it
    \lineskip .5em
    \begin{tabular}[t]{c}\@author
    \end{tabular}\par}%
  \end{center}%
  \par
- \vspace*{\fill}
-% \vskip 1.5em
+\vspace*{\fill}
+% \vskip 1.5em  % space between??
  }
 }
 
@@ -121,3 +129,4 @@
 %
 \def\section{\@startsection {section}{1}{\z@}{-3.5ex plus-1ex minus
     -.2ex}{2.3ex plus.2ex}{\reset@font\large\bf}}
+\fi

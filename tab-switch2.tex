@@ -1,0 +1,22 @@
+\begin{table}[t]
+    \small
+    \center
+    \begin{tabular}{@{}c|c|c|C{25mm}@{}}
+        \textbf{Strategy} & \textbf{Convergence} & \textbf{Waste} & \textbf{Performance} \\
+        \midrule
+        Forward   & Slower         & None & Faster reads and writes unless switching
+        \\\hline
+        Mirrored  & Nearly instant & High & Faster reads; slower writes \\
+        \hline
+        Selective & Slower         & High & Faster reads and writes  \\
+    \end{tabular}
+
+    \mycaption{tab-switch2}{Cipher switching pros/cons}{A summary comparison
+    between the three cipher switching strategies, as explained in Section
+    \ref{x}.}
+\end{table}
+
+
+
+
+

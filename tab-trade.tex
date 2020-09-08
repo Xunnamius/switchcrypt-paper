@@ -1,0 +1,25 @@
+\begin{table}[t]
+    \center
+    \small
+    \begin{tabular}{@{}c|cccc@{}}
+        \textbf{Cipher} & \textbf{Rounds} & \textbf{Randomization} & \textbf{Expansion} \\
+        \midrule
+        ChaCha8         & 0           & 0           & 1           \\
+        ChaCha12        & 0.5         & 0           & 1           \\
+        ChaCha20        & 1           & 0           & 1           \\
+        Salsa8          & 0           & 0           & 1           \\
+        Salsa12         & 0.5         & 0           & 1           \\
+        Salsa20         & 1           & 0           & 1           \\
+        HC128           & 0           & 0           & 1           \\
+        HC256           & 1           & 0           & 1           \\
+        Freestyle (F)   & 0           & 2           & 0           \\
+        Freestyle (B)   & 0.5         & 2.5         & 0           \\
+        Freestyle (S)   & 1           & 3           & 0           \\
+    \end{tabular}
+
+    \mycaption{tab-trade}{Quantifying ciphers}{Our framework for classifying
+    stream ciphers according to three ideal features: relative round count,
+    ciphertext randomization, and ciphertext expansion, as discussed in Section
+    \ref{x}.}
+    \label{tbl:security-quant}
+\end{table}

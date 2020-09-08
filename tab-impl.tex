@@ -1,0 +1,22 @@
+\begin{table}[t]
+    \begin{center}
+        \small
+        \centering
+        \begin{tabular}{l|l}
+            \hline
+            {\bf Cipher} & {\bf Source} \\
+            \hline
+            AES & OpenSSL 1.1.0h \cite{x} and LibSodium 1.0.12 \cite{x} \\
+            ChaCha for ARM NEON~\cite{Floodyberry} \\
+            Freestyle & Freestyle~\cite{Freestyle} \\
+            eSTREAM Profile 1 & libestream cryptographic library~\cite{libestream} \\
+        \end{tabular}
+    \end{center}
+
+    \mycaption{tab-impl}{Cipher code}{The table shows the origin of the cipher
+    code that we use but have to be repackaged in \sys.}
+\end{table}
+
+% ------------- floating: \begin{floatingtable}[r]{ % note the open curly
+% bracket \begin{tabular}{...} \end{tabular}....} % note the closed bracket here
+% \mycaption{fig-pass}{x}{x.} \end{floatingtable}

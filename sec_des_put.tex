@@ -1,0 +1,78 @@
+\subsection{Putting It All Together}\label{subsec:summary}
+
+After describing the three main contributions, now we discuss other details
+surrounding the three main components.
+
+% ---------------------------------- metadata
+
+\mysub{Secure metadata management.} The focus of this paper is to implement
+mechanisms and policies to perform flexible switching of cipher configurations
+that can be built on top of existing block-level encryption module (aka.
+``encryption driver'') that already provides the management of the encryption
+data structures. There were a couple of open-source choices to start with such
+as Linux dm-crypt \cite{x}, a-second-one \cite{y}, or StrongBox
+\cite{StrongBox}. We decided to build atop StrongBox because it already
+implements stream ciphers such as ChaCha which is more secure than block cipher.
+
+\sys depends on several data structure management provided in StrongBox, such as
+its transaction and rekeying journals (for never writing data encrypted with the
+same key to the same location, hence avoiding pad reuse violations), Merkle tree
+(for tracking the drive state such as \hsg{explain a bit more}), monotonic
+counter (on a trusted hardware to prevent rollbacks), keycount store (to derive
+the nugget's unique encryption key from some master secret and limit the maximum
+length of any plaintext input to ciphers), and per-nugget metadata (to store
+cipher-specific extra metadata \hsg{true??}). Every drive partition also has a
+``head'' area that indicates which cipher is currently active.
+
+While we reuse some of the components, all of these are tightly integrated to
+the ciphers that they implemented (specifically ChaCha, and \xxx). We had to
+untangle this, hence the contribution in the \sysB component where we now expose
+more structured interfaces allowing cipher implementors to easily build the
+metadata management of their cipher algorithm around the interfaces. More
+specifically, out of all the five \hsg{true??} StrongBox components above, only
+\xxx can be reused as is, while the rest needs to be modularized and rewritten.
+
+% ---------------------------------- security
+
+\mysub{Threat model under switching.} In terms of {\em confidentiality}, an
+adversary should not be able to reveal any information about encrypted plaintext
+without the proper key. As with prior works, encryption is achieved via a binary
+additive approach: cipher output (keystream) is combined with plaintext nugget
+contents using XOR, with metadata to track writes and ensure that pad reuse
+never occurs during overwrites and that the system can recover from crashes into
+a secure state.
+
+In terms of {\em data integrity}, an adversary should not be able to tamper with
+ciphertext and it go unnoticed. Nugget integrity is tracked by StrongBox's
+in-memory Merkle tree (see \cite[Section \xxx]{StrongBox} for further details).
+
+Switching strategies add an additional security concern not addressed by prior
+work: even if we initiate a ``cipher switch,'' there may still be data on the
+drive that was encrypted with an inactive configuration. Is this a problem? For
+the Forward strategy, this implies data may at any time be encrypted using the
+``least desirable cipher''. For the Mirrored and Selective strategies, the drive
+is partitioned into regions where nuggets are guaranteed to be encrypted with
+each cipher, including the ``least desirable cipher''. However, in terms of
+confidentiality, the confidentiality guarantee of \sys can be reduced to the
+individual confidentiality guarantees of the available ciphers used to encrypt
+nuggets. \hsg{need to double check that this statement is still true, after I
+already rewrite the design section.}
+
+% ---------------------------------- integration
+\mysub{Higher-level integration.} \sys expects a higher-level integration/policy
+that will tell \sys what kind of switching should be performed and when. For
+example, for the battery-life scenario, \sys expects that the OS battery saver
+application will trigger the forward switching. We provide more in the case
+studies section.
+
+% ---------------------------------- generality
+\mysub{Generality.} \sys can be seen as a drop-in replacement for the popular
+Linux dm-crypt layer (encryption driver). For performance reasons, just like
+StrongBox, \sys recommends a log-based file system such as F2FS, \xxx, or \xxx,
+which are commonly used for flash devices. The reason for this is that
+supporting streaming ciphers is more efficient in storage systems with no
+in-place updates. \sys is a software solution, however the same logic can be
+adopted to storage devices in the future, especially flash devices. For example,
+the no in-place update of the FTL nature will help stream ciphers be performance
+while at the same time users can use other popular in-place update file systems
+such as ext4, btrfs, and xfs.

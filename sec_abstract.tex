@@ -1,24 +1,23 @@
-\begin{abstract}
+\begin{abstract}\TODO{this section}
 
-Recent work on Full Drive Encryption shows that stream ciphers achieve
+\PUNT{ Recent work on Full Drive Encryption shows that stream ciphers achieve
 significantly improved performance over block ciphers while offering stronger
 security guarantees. However, optimizing for performance often conflicts with
 other key concerns like energy usage and desired security properties. In this
-paper we present SwitchCrypt, a software mechanism that navigates the tradeoff
-space made by balancing competing security and latency requirements via
-\emph{cipher switching} in space or time. Our key insight in achieving
-low-overhead switching is to leverage the overwrite-averse, append-mostly
-behavior of underlying solid-state storage to trade throughput for reduced
-energy use and/or certain security properties. We implement SwitchCrypt on an
-ARM big.LITTLE mobile processor and test its performance under the popular F2FS
-file system. We provide empirical results demonstrating the conditions under
-which different switching strategies are optimal through the exploration of
-three case studies. In one study, where we require the filesystem to react to a
-shrinking energy budget by switching ciphers, we find that SwitchCrypt achieves
-up to a 3.3x total energy use reduction compared to a static approach using only
-the Freestyle stream cipher. In another case, where we allow the user to
-manually switch between ChaCha20 and Freestyle stream ciphers dynamically, we
-achieve a 1.6x to 4.8x reduction in I/O latency compared to prior static
-approaches.
+paper we present \sys, a software mechanism that navigates the tradeoff space
+made by balancing competing security and latency requirements via \emph{cipher
+switching} in space or time. Our key insight in achieving low-overhead switching
+is to leverage the overwrite-averse, append-mostly behavior of underlying
+solid-state storage to trade throughput for reduced energy use and/or certain
+security properties. We implement \sys on an ARM big.LITTLE mobile processor and
+test its performance under the popular F2FS file system. We provide empirical
+results demonstrating the conditions under which different switching strategies
+are optimal through the exploration of three case studies. In one study, where
+we require the filesystem to react to a shrinking energy budget by switching
+ciphers, we find that \sys achieves up to a 3.3x total energy use reduction
+compared to a static approach using only the Freestyle stream cipher. In another
+case, where we allow the user to manually switch between ChaCha20 and Freestyle
+stream ciphers dynamically, we achieve a 1.6x to 4.8x reduction in I/O latency
+compared to prior static approaches.}
 
-\end{abstract}
+\end{abstract}\vten

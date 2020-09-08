@@ -53,12 +53,14 @@ qq: qqw
 
 qqw:
 	latex _${PAPER}
-	bibtex -min-crossrefs=100 main
 	latex _${PAPER}
+	bibtex -min-crossrefs=100 _${PAPER}
 	latex _${PAPER}
 
 x:
 	xdvi -bg white _${PAPER}.dvi &
+
+
 
 
 

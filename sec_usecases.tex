@@ -1,147 +1,147 @@
-\section{SwitchCrypt Case Studies} \label{sec:usecases}
+\section{Case Studies}\label{sec:usecases}
 
-In this section, we provide three case studies demonstrating the practical
-utility of cipher switching. We cover a wide range of situations, highlighting
-concerns like meeting latency goals (\cref{subsec:uc3}), trading off security
-and writable space (\cref{subsec:uc2}), and keeping within an energy budget
-(\cref{subsec:uc1}). We also demonstrate the utility of both temporal and
-spatial switching strategies, exploring the range of conditions under which
-certain strategies are optimal.
+In this section, we provide four\xxx case studies demonstrating the practical
+utility of heterogenous FDE not achievable with prior work. We cover a wide
+range of situations, highlighting concerns like meeting latency goals, trading
+off security and writable space, and keeping within an energy budget, all
+demonstrating the utility of both temporal and spatial switching strategies. All
+experiments are repeated multiple times.
 
-\subsection{Balancing Security Goals with a Hard Energy Cap} \label{subsec:uc1}
 
-Here we revisit the motivating example from earlier in this work. It illustrates
-that, because latency and energy use are correlated among the ciphers we
-examined, we can exploit that to save battery life when necessary while
-maintaining confidentiality when uploading encrypted backups to our
-enterprise solution.
+% ===========================================================
+\subsection{Battery Saver Mode}\label{subsec:uc1}
 
+% About: motivation
+In this first case study, we revisit the motivational example.  Here, the mobile
+device is ``forced'' to locally encrypt files with Freestyle Balanced Cipher
+(``\cone'') for safely backing up the file to the backend cloud, but when the
+battery saver mode is on, the device will switch to a more energy-efficient
+cipher, ChaCha8 (``\ctwo''), and at the same time pausing the backup upload to
+the cloud momentarily (\eg, the company does not want files to be saved in the
+cloud without \cone encryption. Our goal is to complete I/Os as much as we can
+before the device dies. 
+
+% About: setup
 To simulate I/O activity, we begin randomly writing 10 40MB files using the
-Freestyle Balanced cipher configuration over the course of approximately 120-125
-seconds. After 5 seconds, the device enters ``battery saver'' mode, also pausing
-backup uploads. We simulate this event by 1) underclocking the cores to their
-lowest frequencies and 2) using \texttt{taskset} to transition the SwitchCrypt
-processes to the energy-efficient LITTLE cores. After this event, we complete
-the remaining workload using the ChaCha8 cipher. We repeat this experiment three
-times.
+Freestyle Balanced cipher for 2 minutes.  After the first 5 seconds, the device
+enters ``battery saver'' mode, which we simulate by underclocking the cores to
+their lowest frequencies and using \texttt{taskset} to transition \sys processes
+to the energy-efficient LITTLE cores.  In this low battery mode, \sys switches
+to the ChaCha8 cipher.
 
-\begin{figure}[ht] \textbf{Battery Saver Use Case: Energy-Security Tradeoff vs
-   Strict Energy Budget}\par\medskip
-   \centering
-   {\input{data/usecase-battery.tex}} \caption{Median sequential write total
-   energy use with respect to time with respect to time.}
-  \label{fig:usecase-battery}
-\end{figure}
+\hsg{I dont' understand Figure \figref{usecase-battery}. You said after 5
+seconds.  we switch to ChaCha8. But why the FB+ChaCha line is still going up?
+Why it doesn't flat out like the ChaCha line?? and why do even need to show the
+ChaCha8 only line?}
 
-In \figref{usecase-battery}, we see time versus energy used. At 0 seconds, we
+\input{fig-usecase1} \hsg{we should exlude ChaCha8 only, unless you have a major
+point here}
+
+% About: result
+\figref{usecase-battery} shows the time versus energy used. At 0 seconds, we
 begin writing. At 5 seconds, the ``battery saver'' event occurs, causing the
 system to be underclocked. At 120 seconds, the system will die. If we blow past
-our energy ceiling, the system will die.
+our energy ceiling, the system will die. The figure shows two lines:
+%
+{\bf (1)} {\em Freestyle Balanced only}, that favors security even when backups
+are paused;  the device dies before the I/Os complete.
+%
+{\bf (2)} {\em Freestyle Balanced $+$ ChaCha8}, that performs the switch when
+the system enters the low power state. Our results show that, while the system
+uses slightly more power in the short term, we stay within our energy budget and
+finish before the devices dies.
+%
+When we get the device to a charger (not shown), the cloud backup is enabled
+again and when the nuggets are read, \sys automatically converges them back to
+Freestyle Balanced.
 
-Our goal is to complete I/O before the device dies. We have three cipher
-configuration choices. 1) Favor security even when backups are paused and use
-Freestyle Balanced exclusively. Our results show that the device will die before
-I/O completes. 2) Favor low energy use even when backups are being uploaded and
-use ChaCha8 exclusively. Our results show that the device will finish writing
-early, but we cannot safely upload backups when nuggets are encrypted using
-ChaCha8. Finally, we have 3) favor security and use Freestyle Balanced when
-uploading backups, and switch to ChaCha8 when the system enters the low power
-state. Our results show that, while the system uses slightly more power in the
-short term, we stay within our energy budget and finish before the devices dies.
-Further, when we get our device to a charger, SwitchCrypt can converge nuggets
-back to Freestyle Balanced and resume uploading backups.
+% About: overall result
+On average, using forward switching resulted in a 3.3x total energy reduction
+compared to exclusively using Freestyle Balanced, allowing us to remain within
+our energy budget. \hsg{I don't see this 3.3x in the graph. Did you accidentally
+label the lines incorrectly?}.  We note, however, that the energy savings is not
+the point of this experiment. Rather, the lesson learned is that \sys enables
+the system to move to the right point in the energy/security tradeoff space so
+that the current task can still be accomplished before the battery is drained
+and without compromising backup security at any point.
 
-On average, using Forward cipher switching resulted in a 3.3x total energy use
-reduction compared to exclusively using Freestyle Balanced, allowing us to
-remain within our energy budget. We note, however, that the energy savings is
-not the point of this experiment. Rather, the lesson learned is that SwitchCrypt
-enables the system to move to the right point in the energy/security tradeoff
-space so that the current task can still be accomplished before the battery is
-drained and without compromising backup security at any point.
 
-\subsection{Variable Security Regions} \label{subsec:uc2}
+% ===============================
+\subsection{End-of-Life Device Slowdown}\label{subsec:uc3}
 
-This usecase illustrates utility of spatial Selective switching to achieve a
-performance win over prior work where the entire drive is encrypted with a
-single cipher. We demonstrate \emph{Variable Security Regions} (VSR), where we
-can choose to encrypt select files or portions of files with different keys and
-ciphers below the filesystem level.
+Another usecase of forward switching is for offsetting the debilitating decline
+in performance when storage devices such as SSDs reach end-of-life (EoL); due to
+garbage collection and wear-leveling requirements of SSDs, as free space becomes
+constrained, I/O performance drops precipitously~\cite{SSDEOL1}.  Let us suppose
+in this case, the system running on the dying SSDs have a strict latency budget
+(as long as meeting some minimum security requirements).  The strict latency
+ceiling can be violated if the device latency increases.  If \sys is made aware
+when the drive is in such a state, we can offset some of the performance loss by
+switching the ciphers of high traffic nuggets to the fastest acceptable cipher
+available using forward switching.
 
-Storing classified materials, corporate secrets, etc. require the highest level
-of discretion, yet sensitive information like this can appear within a (much)
-larger amount of data that we value less. But if only a small percentage of the
-data needs the strongest encryption, then only a small percentage of the data
-should have that associated overhead. In this scenario, a user wants to indicate
-one or more regions of a file are more sensitive than the others. For example,
-perhaps banking transaction information is littered throughout a PDF; perhaps
-passwords and other sensitive information exists within several much larger
-files. Using prior techniques, either all the data would be stored with high
-overhead, the critical data would be stored without the mandated cipher type, or
-the data would have to be split among separate files requiring potentially
-complex and error-prone management schemes. SwitchCrypt VSRs allows us to
-sidestep these issues.
+\input{fig-usecase2}
 
-We begin by with 10 5MB and 4KB write-read operations to two
-SwitchCrypt instances: one using ChaCha8 (C8) and the other using Freestyle
-Strong (FS). These results represent I/O without cipher switching where 100\% of
-the data is stored with either high overhead (FS) or using an inappropriate
-cipher (C8). We then use a third SwitchCrypt instance initialized with Selective
-switching and write-read with a 7:3 ratio of ChaCha8 versus Freestyle
-Balanced I/O operations. Here, 30\% of the data is considered sensitive. We
-repeat this experiment three times.
+To show this, we begin by writing 10 40MB files per each cipher as a baseline.
+\hsg{I don't understand ``per each cipher''} We then introduce a delay of $20ms$
+simulating drive slowdown. \hsg{Where do you get ``20ms'' from?  that's such a
+high latency. Any citation you can use here to back that up},
+% --------------------------------------------------
+\hsg{These sentences below are non informative. You should help reviewers walk
+through the graph. I don't even understand what the x-axis in the Figure means.
+The best way to describe a figure, is describe the x-axis and then y-axis, and
+then pick two extreme points in the graph, and describe those points, what the
+values mean, so that reviewers can really understand them. if reviewers
+understand two extreme points, then they will undersstand the rest. Please redo
+the sentences.}
+% --------------------------------------------------
+\sout{In \figref{usecase-eol-tradeoff}, we see the sequential and random read
+and write performance of a 40MB workload when nuggets are encrypted exclusively
+with our choice ciphers. While the latency ceiling and security floor have not
+changed, we see increased latency in the delayed workloads. Our goal is to
+remain under the latency ceiling while remaining above the security floor.
+Thanks to Forward switching, accesses to highly trafficked areas of the drive
+can remain performant even during drive end-of-life.}
 
-\begin{figure}[ht] \textbf{VSR Use Case: ChaCha8 vs Freestyle Strong Sequential
-4KB, 5MB Performance}\par\medskip
-   \centering
-   {\input{data/usecase-vsr-bar.tex}} \caption{Median sequential read and write
-   performance comparison of 4KB, 5MB I/O with 7-to-3 ratio, ChaCha8 vs
-   Freestyle Strong (respectively).}
-  \label{fig:usecase-vsr-bar}
-\end{figure}
 
-In \figref{usecase-vsr-bar}, we see the sequential read and write performance of
-4KB and 5MB workloads when nuggets are encrypted exclusively with ChaCha8 or
-Freestyle Balanced. Between them, we see Selective switching 7:3 ratio I/O
-results.
+% ================================================================
+\subsection{Select Data Encryption}\label{subsec:uc2}
 
-Our goal is to use VSRs to keep our sensitive data at the mandated security
-level while keeping the performance and battery life benefits of using a fast
-cipher for the majority of I/O operations. Using SwitchCrypt Selective switching
-versus prior work results in a reduction of 3.1x to 4.8x for read latency and
-1.6x to 2.8x for write latency, all without compromising the security needs of
-the most sensitive data.
+% About: background
+This usecase illustrates utility of selective switching to achieve a performance
+win---if only a small percentage of the data needs the strongest encryption,
+then only a small percentage of the data should have that associated overhead,
+while the rest can use a minimalist encryption. As mentioned before, this
+feature requires users to annotate certain files with a special tag via file
+system calls, which would then be stored in the inode.  Because the \sys layer
+is file oblivious, every block I/O through the \sys layer will be labeled with
+the corresponding cipher.
 
-\subsection{Responding to End-of-Life Slowdown in SSDs} \label{subsec:uc3}
+% About: setup
+We begin by with 10 5MB and 4KB write-read operations to two \sys drive
+instances: one using ChaCha8 and the other using Freestyle Strong.  They
+represent two extreme where ChaCha8 is a low-latency cipher and Freestyle Strong
+exhibits a very high overhead.  We then run another \sys instance with a 7:3
+ratio where 30\% of the data considered highly sensitive uses Freestyle Strong.
 
-This usecase illustrates using temporal Forward switching to offset the
-debilitating decline in performance when SSDs reach end-of-life
-(EoL)~\cite{SSDEOL1}. We demonstrate the utility of such a system to dynamically
-stay within a strict latency budget while meeting minimum security requirements,
-which is not possible using prior work.
+\input{fig-usecase3}
 
-Due to garbage collection and wear-leveling requirements of SSDs, as free space
-becomes constrained, I/O performance drops precipitously~\cite{SSDEOL1}. With
-prior work, our strict latency ceiling is violated. However, if SwitchCrypt is
-made aware when the drive is in such a state, we can offset some of the
-performance loss by switching the ciphers of high traffic nuggets to the fastest
-acceptable cipher available using Forward switching.
+% About: outcome
+The left-side and right-side bars in \figref{usecase-vsr-bar} show the two
+extremes; ChaCha8 exhibits a low latency, consistently less than 1 second across
+the workloads, while Freestyle Strong exhibits 5 to 20 second latency depending
+on the workload.  The selective switching (middle bars) shows a reduction of
+3.1x to 4.8x for read latency and 1.6x to 2.8x for write latency, all without
+compromising the security needs of the most sensitive data.  Thus, selective
+switching keeps our sensitive data at the mandated security level while keeping
+the performance (and also battery life) benefits of using a fast cipher for the
+majority of I/O operations.
 
-We begin by writing 10 40MB files to SwitchCrypt per each cipher as a baseline.
-We then introduce a delay into SwitchCrypt I/O of $20ms$, simulating drive
-slowdown, and repeat the experiment three times.
 
-\begin{figure}[ht] \textbf{SSD EoL Use Case: Latency-Security Tradeoff vs
-   Goals}\par\medskip {\input{data/usecase-eol-tradeoff.tex}} \caption{Median
-   sequential and random 40MB read and write performance comparison: baseline
-   versus simulated faulty block device.}
-  \label{fig:usecase-eol-tradeoff}
-\end{figure}
+% ===============================
+\subsection{No-Downtime Encryption Upgrade}\label{subsec:uc4}
 
-In \figref{usecase-eol-tradeoff}, we see the sequential and random read and
-write performance of a 40MB workload when nuggets are encrypted exclusively with
-our choice ciphers. While the latency ceiling and security floor have not
-changed, we see increased latency in the delayed workloads.
+\input{fig-usecase4}
 
-Our goal is to remain under the latency ceiling while remaining above the
-security floor. Thanks to Forward switching, accesses to highly trafficked areas
-of the drive can remain performant even during drive end-of-life.
+In \figref{usecase4} \TODO{finish sentence}. \hsg{we must have a short case
+study here. Otherwise no point of talking about mirrored switch}.
