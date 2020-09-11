@@ -36,7 +36,7 @@ workloads~\cite{android-M-mobile-motivation-2}.
 % About: recent advancements
 Fortunately, in the last two years there have been significant advancements in
 Full Drive Encryption; specifically, the slow AES block cipher can be replaced
-with fast {\em stream} ciphers like ChaCha20. For instance, constructions like
+with fast {\em stream} ciphers like \encB. For instance, constructions like
 Google's HBSH (hash, block cipher, stream cipher, hash)/Adiantum~\cite{Adiantum}
 and StrongBox~\cite{StrongBox} bring stream cipher based FDE to devices that do
 not or cannot support hardware accelerated AES, generally providing improved
@@ -77,7 +77,7 @@ be be viewed as a key configuration parameter as opposed to a static choice at
 format or boot time. As a result, \sys enables the storage system to adapt to
 changes that arise at runtime, including: resource availability and environment,
 desired security properties, and the OS's energy budget. This empowers users to
-perform cipher switching in space and time (\eg, more secure files and temporal
+perform cipher switching in space and time (\eg more secure files and temporal
 switching), allowing the system to navigate the tradeoff space made by balancing
 competing security and latency requirements. \sys is composed primarily of three
 components that realize these benefits. These represent the three main
@@ -92,7 +92,7 @@ switching models define what the I/O layer should do upon the ongoing read/write
 I/Os during the switching. These three switching models are motivated by real
 case studies. For examples, Forward switching is motivated by the battery case
 study above; Selective switching is motivated by cases where users desire to
-have certain files (\eg, legal documents) stored more securely than others; and
+have certain files (\eg legal documents) stored more securely than others; and
 Mirrored switching is motivated by scenarios where system administrators want to
 change ciphers with zero downtime and without re-initializing the filesystem or
 device mapper.
@@ -101,7 +101,7 @@ device mapper.
 Second, to support the switching models above, we implement \sysB, a block-level
 module that contains encryption implementations (``crypts'') that have been
 restructured to support switching. Prior works encrypts targets with a single
-cipher---\ie, homogeneous FDE---where the choice of cipher implementation is
+cipher---\ie homogeneous FDE---where the choice of cipher implementation is
 integrated into the file/block layer system directly~\cite{StrongBox, dmcrypt}.
 The key challenge with supporting homogeneous FDE---where multiple ciphers
 coexist on the same storage system---is that different ciphers take disparate

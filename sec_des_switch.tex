@@ -38,9 +38,9 @@ Table \tblref{switch1} summarizes what happens during the switch. For new
 incoming writes, the data will be ciphered with \ctwo. Later on, when the
 temporal switching ends, the data will remain ciphered with \ctwo
 \hsg{correct?}. The reason we don't re-cipher it back to \cone in the future is
-that the files might be just a temporary file (\eg, movie download) that is only
+that the files might be just a temporary file (\eg movie download) that is only
 read once. However, if the data is read again in the future when \cone is active
-again (\eg, for backing up to the cloud), the data will then re-ciphered to
+again (\eg for backing up to the cloud), the data will then re-ciphered to
 \cone. For read operations, if the existing data (ciphered with \cone) is read
 during the switch, the data will be re-ciphered to \ctwo. The reason behind this
 is that re-ciphering to \ctwo is not expensive, and better to be done on demand
