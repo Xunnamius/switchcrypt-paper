@@ -48,7 +48,7 @@ re-keying operation when using stream cipher based FDE.
 
 % About: the need flexibility
 Traditionally, FDE at the block level requires enciphering drive contents {\em
-homogenously} (with a single cipher), but these advancements reveal a new
+homogeneously} (with a single cipher), but these advancements reveal a new
 opportunity: storage systems that operate beyond the rigid constraints of prior
 work to support flexible {\em heterogeneous} FDE. Yet we find no storage system
 or OS that can support such a feature. To see where this might be useful,
@@ -59,7 +59,7 @@ significant amount of energy when executing. Further suppose this device enters
 a critical battery state and the user wishes to conserve as much energy as
 possible. It would be beneficial if an energy-aware storage system could also
 enter a battery saving state. With heterogeneous FDE, such a flexible
-configuration is now achievable: such a system can temporarily switch the
+configuration is now achievable: such a system can temporarily switch out the
 battery-heavy \encA for the extremely energy efficient \encB when accessing
 data. Since data encrypted with \encB is not suitable for cloud backups, we
 pause cloud backups until we leave the critical battery state and switch ciphers
@@ -72,57 +72,62 @@ We present \sys, the {\em first} storage system to provide block level kernel
 support for heterogeneous FDE to the best of our knowledge. As FDE's impact on
 drive performance and energy efficiency depends on a multitude of choices,
 different ciphers expose different performance and energy efficiency
-characteristics. \sys allows cipher choice to be be viewed as a key
-configuration parameter, as opposed to a static choice at format or boot time.
-\sys allows the storage system to adapt to changes that arise at runtime,
-including changes in resource availability or environment, desired security
-properties, and respecting changing OS energy budgets. \sys allows users to
+characteristics. By supporting heterogeneous FDE, \sys permits cipher choice to
+be be viewed as a key configuration parameter as opposed to a static choice at
+format or boot time. As a result, \sys enables the storage system to adapt to
+changes that arise at runtime, including: resource availability and environment,
+desired security properties, and the OS's energy budget. This empowers users to
 perform cipher switching in space and time (\eg, more secure files and temporal
-switching). \sys allows the software system to navigate the tradeoff space made
-by balancing competing security and latency requirements. \hsg{This is where we
-list all the benefits; try not to be redundant} To achieve all these benefits,
-\sys comes with three important elements, representing the three main
-contributions of the paper.
+switching), allowing the system to navigate the tradeoff space made by balancing
+competing security and latency requirements. \sys is composed primarily of three
+components that realize these benefits. These represent the three main
+contributions of this work.
 
 % About: switching strategies
-First, we introduce \sysA, a kernel configuration that exposes three types of
-switching models: {\em forward}, {\em selective} and {\em mirrored}, to
-``re-cipher'' storage units dynamically, allowing us to tradeoff different
+First, we introduce \sysA, a kernel configuration that exposes three switching
+models: {\em Forward}, {\em Selective} and {\em Mirrored}. Switching allows us
+to ``re-cipher'' storage units dynamically, allowing us to tradeoff different
 performance and security properties of various configurations at runtime. These
 switching models define what the I/O layer should do upon the ongoing read/write
-I/Os during the switching. These three switching models are motivated from real
-case studies. For examples, forward switching is motivated from the battery case
-study above; selective switching is motivated from cases where users desire to
-have certain files (\eg, legal documents) much more secure than the others; and
-mirrored switching is motivated for server-side cases that would like to perform
-``encryption upgrade'' without zero downtime.
+I/Os during the switching. These three switching models are motivated by real
+case studies. For examples, Forward switching is motivated by the battery case
+study above; Selective switching is motivated by cases where users desire to
+have certain files (\eg, legal documents) stored more securely than others; and
+Mirrored switching is motivated by scenarios where system administrators want to
+change ciphers with zero downtime and without re-initializing the filesystem or
+device mapper.
 
 % About: crypts
 Second, to support the switching models above, we implement \sysB, a block-level
 module that contains encryption implementations (``crypts'') that have been
-restructured to support switching. Prior works mainly implement one cipher
-choice and the implementation is very much integrated with the file/block layer
-\cite{StrongBox, any-other-works-like-this?}. The key challenge to support
-multiple ciphers is that different ciphers take different inputs and produce
-different type of outputs. For examples, \encA requires nonce input, \encB
-config(??\xxx) and \encC sector info and \encC outputs streams while the others
-output \xxx. Thus, we introduce a novel design substantively expanding prior FDE
-work by wholly decoupling cipher implementations from the encryption process. In
-\sysB, we wrote hooks that manages the required input values and the output
-format of different ciphers.
+restructured to support switching. Prior works encrypts targets with a single
+cipher---\ie, homogeneous FDE---where the choice of cipher implementation is
+integrated into the file/block layer system directly~\cite{StrongBox, dmcrypt}.
+The key challenge with supporting homogeneous FDE---where multiple ciphers
+coexist on the same storage system---is that different ciphers take disparate
+inputs and produce disparate outputs. For example: \encB's implementation
+requires a key and nonce, \encA's additionally requires configuration for output
+randomization, and \encC's instead requires plaintext and sector information. At
+the same time, \encA and \encB's implementations output a keystream that needs
+to be XORed with the plaintext to yield the ciphertext while \encC outputs the
+ciphertext directly. Thus, we introduce a novel design substantively expanding
+prior FDE work by wholly decoupling cipher implementations from the encryption
+process. In \sysB, we write hooks that effectively normalize the inputs and
+outputs required when switching between ciphers.
 
 % About: tradeoffs
-Finally, we initiate \sysC, a scheme that attempts to {\em quantify} the
-tradeoffs in the the rich configuration space of stream ciphers. Using this
-scheme, we define a tradeoff space of cipher configurations over competing
-concerns: total energy use, desirable security properties, read and write
-performance (latency), total writable space on the drive, and how quickly the
-contents of the drive can converge to a single encryption configuration. \sysC
-helps users in understanding their cipher choices as they come with a variety of
-performance, energy efficiency, and security properties in the FDE context.
+Finally, we present \sysC, a scheme that attempts to {\em quantify} the
+tradeoffs in the the rich configuration space of stream ciphers made available
+by the above. Using this scheme, we define a tradeoff space of cipher
+configurations over competing concerns: total energy use, desirable security
+properties, read and write performance (latency), total writable space on the
+drive, and how quickly the contents of the drive can converge to a single
+encryption configuration. \sysC helps users in understanding their cipher
+choices as they come with a variety of performance, energy efficiency, and
+security properties in the FDE context.
 
 % About: evaluation
-We performed a comprehensive evaluation in several ways.
+We conclude with a comprehensive evaluation of \sys.
 %
 First, we show that \sys successfully supports a wide variety of ciphers;
 specifically we have integrated {\em \numCiphers ciphers} and a total of {\em
