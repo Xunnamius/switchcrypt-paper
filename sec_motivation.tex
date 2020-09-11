@@ -24,10 +24,6 @@ our device does not support hardware accelerated AES (which is hardly
 ubiquitous) performance can be degraded even further; I/O latency can be as high
 as 3--5x~\cite{StrongBox}.
 
-% As myriad devices do not support it cannot simply be ignored, hence Google's
-% investment in Adiantum---an FDE solution for ``the next billion users'' of
-% low-cost devices without support for hardware accelerated AES~\cite{Adiantum}.
-
 Second, AES-XTS is designed to mitigate threats to drive data ``at rest,'' which
 assumes an attacker cannot access snapshots of our encrypted data nor manipulate
 our data without those manipulations being immediately obvious to us. However,

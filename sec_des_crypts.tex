@@ -64,7 +64,7 @@ receives I/O requests from the operating system at the block device level like
 any other device-mapper. These requests come in the form of either reads or
 writes. When a read request is received, the OS hands \sys an offset and a
 length and expects a response with plaintext of that specific length starting at
-that specific offset taken from the beginning of storage (i.e. the BODY section;
+that specific offset taken from the beginning of storage (\ie the BODY section;
 see \figref{backstore}). When a write request is received, the OS hands \sys an
 offset, a length, and a buffer of plaintext and expects that plaintext to be
 encrypted and committed to storage such that the plaintext is later retrievable
@@ -93,15 +93,15 @@ abstraction level. \\\texttt{read\_interface} handles decryption during reads.
 \\\texttt{write\_interface} handles encryption during writes. Implementations
 receive full access to \sys internals, giving wrapper code complete control over
 the encryption and decryption process and allowing implementers to bypass parts
-of the nugget-based drive layout abstraction (i.e. BODY) if necessary. This
-comes at the cost of 1) significantly increased code complexity, as the
-implementer must perform certain I/O manually, distinguish between independent
-nuggets on the drive, determine what to encrypt or decrypt at what offset and
-when, when to commit which metadata and where and 2) potential performance
-implications, since \sys must account for not having absolute control over its
-internal data structures during function invocation. For a cipher like
-Freestyle, configurations with lower minimum and maximum rounds per block may
-see a performance improvement here, while configurations with higher minimum and
+of the nugget-based drive layout abstraction (\ie BODY) if necessary. This comes
+at the cost of 1) significantly increased code complexity, as the implementer
+must perform certain I/O manually, distinguish between independent nuggets on
+the drive, determine what to encrypt or decrypt at what offset and when, when to
+commit which metadata and where and 2) potential performance implications, since
+\sys must account for not having absolute control over its internal data
+structures during function invocation. For a cipher like Freestyle,
+configurations with lower minimum and maximum rounds per block may see a
+performance improvement here, while configurations with higher minimum and
 maximum rounds per block may see reduced performance.
 
 And then with this interface, we have implemented \hsg{examples of cipher
