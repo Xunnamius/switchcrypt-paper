@@ -136,14 +136,15 @@ First, we show that \sys successfully supports a wide variety of ciphers;
 specifically we have integrated {\em \numCiphers ciphers} and a total of {\em
 \numConfigs cipher configurations} into \sys in \locTotal as a kernel block
 module (will be open-sourced), and can act as an off-the-shelf replacement for
-dm-crypt. The ciphers are ChaCha8 and ChaCha12~\cite{ChaCha20},
-Freestyle~\cite{Freestyle}), SalsaX~\cite{SalsaX}, AES in counter mode
-(AES-CTR)~\cite{AESCTR}, Rabbit~\cite{Rabbit}, Sosemanuk~\cite{Sosemanuk}, \xxx.
+dm-crypt. The ciphers are ChaCha~\cite{ChaCha20}, Freestyle~\cite{Freestyle},
+Salsa~\cite{SalsaX}, AES in counter mode (AES-CTR)~\cite{AESCTR},
+Rabbit~\cite{Rabbit}, Sosemanuk~\cite{Sosemanuk}, HC-128~\cite{HC128}.
 %
 Second, we showcase the benefits of \sys with experiments illustrating three
-real-world case studies (battery low case, file-level protections, and no
-downtime) and show the performance/energy tradeoffs.
+real-world case studies (\ie storage system responds to critical battery state,
+filesystem-agnostic file-level encryption, and downtime avoidance) and show the
+performance/energy tradeoffs.
 %
-Finally, we perform several benchmarking to show the performance and \xxx of the
-individual ciphers and the switching overhead of the three switching models we
-provide \hsg{???}.
+Finally, we perform several benchmarks to demonstrate the flexibility and
+performance of the individual ciphers and show the switching overhead of the
+three switching models we provide.
