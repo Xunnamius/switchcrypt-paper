@@ -11,8 +11,8 @@ filesystems4, filesystems5, filesystems6, filesystems7}; network storage and
 cloud storage \cite{network1, network2, network3, network4, network5, network6,
 network7, network8, network9, network10, network11, network12, network13,
 network14, network15, network16}, de-duplication and secure erasure
-\cite{erase1, erase2, erase3}; kernels, databases, and other software
-\cite{software1, software2, software3, software4}; and many more.
+\cite{erase1, erase2, erase3}; as well as kernels, databases, and other software
+\cite{software1, software2, software3, software4}.
 
 % About: FDE with AES is bad
 For local storage, the state of the art for securing data at rest---such as the
@@ -68,31 +68,34 @@ again---saving even more energy.
 % OUR SOLUTION
 
 % About: the system and the benefits
-We present \sys, the {\em first} storage system to provide block level kernel
-support for heterogeneous FDE to the best of our knowledge. As FDE's impact on
-drive performance and energy efficiency depends on a multitude of choices,
-different ciphers expose different performance and energy efficiency
-characteristics. By supporting heterogeneous FDE, \sys permits cipher choice to
-be be viewed as a key configuration parameter as opposed to a static choice at
-format or boot time. As a result, \sys enables the storage system to adapt to
-changes that arise at runtime, including: resource availability and environment,
-desired security properties, and the OS's energy budget. This empowers users to
-perform cipher switching in space and time (\eg more secure files and temporal
-switching), allowing the system to navigate the tradeoff space made by balancing
-competing security and latency requirements. \sys is composed primarily of three
-components that realize these benefits. These represent the three main
-contributions of this work.
+We present \sys, to the best of our knowledge the {\em first} storage
+system to provide block level kernel support for heterogeneous FDE. As
+FDE's impact on drive performance and energy efficiency depends on a
+multitude of choices, different ciphers expose different performance
+and energy efficiency characteristics. By supporting heterogeneous
+FDE, \sys permits cipher choice to be be viewed as a dynamically
+configurable parameter as opposed to a static choice made at format or
+boot time. As a result, \sys enables the storage system to adapt to
+changes that arise at runtime, including: resource availability and
+environment, desired security properties, and the OS's energy budget.
+This empowers users to perform cipher switching in space and time (\eg
+using more secure storage for more sensitive files, and/or
+dynamically switching between ciphers for one file), allowing the
+system to navigate the tradeoff space made by balancing competing
+security and latency requirements.  \sys is composed primarily of
+three components that realize these benefits. These represent the
+three main contributions of this work.
 
 % About: switching strategies
 First, we introduce \sysA, a kernel configuration that exposes three switching
-models: {\em Forward}, {\em Selective} and {\em Mirrored}. Switching allows us
-to ``re-cipher'' storage units dynamically, allowing us to tradeoff different
+models: {\em Forward}, {\em Selective} and {\em Mirrored}. Switching allows  us
+to ``re-cipher'' storage units dynamically, enabling us to tradeoff different
 performance and security properties of various configurations at runtime. These
 switching models define what the I/O layer should do upon the ongoing read/write
 I/Os during the switching. These three switching models are motivated by real
 case studies. For examples, Forward switching is motivated by the battery case
-study above; Selective switching is motivated by cases where users desire to
-have certain files (\eg legal documents) stored more securely than others; and
+study above; Selective switching is motivated by cases where users require
+certain files (\eg legal documents) to be stored more securely than others; and
 Mirrored switching is motivated by scenarios where system administrators want to
 change ciphers with zero downtime and without re-initializing the filesystem or
 device mapper.
@@ -100,10 +103,10 @@ device mapper.
 % About: crypts
 Second, to support the switching models above, we implement \sysB, a block-level
 module that contains encryption implementations (``crypts'') that have been
-restructured to support switching. Prior works encrypts targets with a single
+restructured to support switching. Prior work encrypts targets with a single
 cipher---\ie homogeneous FDE---where the choice of cipher implementation is
 integrated into the file/block layer system directly~\cite{StrongBox, dmcrypt}.
-The key challenge with supporting homogeneous FDE---where multiple ciphers
+The key challenge with supporting heterogeneous FDE---where multiple ciphers
 coexist on the same storage system---is that different ciphers take disparate
 inputs and produce disparate outputs. For example: \encB's implementation
 requires a key and nonce, \encA's additionally requires configuration for output
@@ -124,7 +127,7 @@ properties, read and write performance (latency), total writable space on the
 drive, and how quickly the contents of the drive can converge to a single
 encryption configuration. \sysC helps users in understanding their cipher
 choices as they come with a variety of performance, energy efficiency, and
-security properties in the FDE context.
+security properties in the FDE context. 
 
 % About: evaluation
 We conclude with a comprehensive evaluation of \sys.
