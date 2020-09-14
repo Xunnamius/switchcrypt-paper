@@ -1,7 +1,7 @@
 \section{Background and Motivation}\label{sec:motivation}
 
-We provide some case studies that motivate our work and background materials
-about implementation of stream cipher on log-structured file systems.
+We provide \numCases case studies that motivate our work and background
+materials about implementation of stream cipher on log-structured file systems.
 
 
 % =======================================================
@@ -55,15 +55,14 @@ StrongBox} even without hardware accelerated encryption.
 There are two technological shifts that enable this confidential,
 high-performance storage with stream ciphers. First, devices today commonly
 employ solid-state storage with Flash Translation Layers (FTL), which operate
-similarly to Log-structured File Systems (LFS) \cite{21, 22, 27-fromStrongBox}.
-The no in-place update nature of FTL or LFS-like storage allows the
-overwrite-heavy stream ciphers to be efficiently implemented (\eg ChaCha with
-F2FS or LogFS performs \xxx times better than with ext4 \cite{StrongBox}).
-Second, mobile devices now support trusted hardware, such as Trusted Execution
-Environments (TEE) \cite{24, 29-fromStrongBox} and secure storage areas
-\cite{10-fromStrongBox} which means the drive encryption module has access to
-persistent, monotonically increasing counters that can be used to prevent
-rollback attacks when overwrites do occur.
+similarly to Log-structured File Systems (LFS) \cite{LFS, F2FS, NILFS}. The no
+in-place update nature of FTL or LFS-like storage allows the overwrite-heavy
+stream ciphers to be efficiently implemented (\eg ChaCha with F2FS performs \xxx
+times better than with ext4 \cite{StrongBox}). Second, mobile devices now
+support trusted hardware, such as Trusted Execution Environments (TEE)
+\cite{TrustZone, TEE} and secure storage areas \cite{eMMC-standard} which means
+the drive encryption module has access to persistent, monotonically increasing
+counters that can be used to prevent rollback attacks when overwrites do occur.
 
 
 % =======================================================
@@ -73,7 +72,7 @@ As the recent advancements show that many different ciphers can be implemented
 in efficient manner, this opens up an opportunity for the storage layer to
 support a wide variety of encryption technologies. Clearly, many case studies
 show that there is no one-size-fits-all encryption, and some flexibility is
-demanded. Below we present three real-world case studies.
+demanded. Below we present \numCases real-world case studies.
 
 {\em Battery-life saver.} In the example above, in certain situations, the user
 might want to prioritize reducing the total energy use. For example, while in

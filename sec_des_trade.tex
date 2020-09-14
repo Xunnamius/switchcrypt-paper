@@ -1,4 +1,5 @@
-\subsection{Quantifying Cipher Security Properties}\label{subsec:quantify}
+\subsection{\sysC: Quantifying Cipher Security
+Properties}\label{subsec:des-trade}
 
 % About: background
 To reason about when to trade off between the ciphers evaluated in this work, we
@@ -11,14 +12,13 @@ outputs and those with non-length-preserving outputs---\ie{the cipher outputs
 more data than it takes in}. To address this, we propose a framework for
 quantitative cipher comparison in the FDE context; we use this framework to
 define our configurations. \TODO{Combine what follows with what precedes.} To
-address this need, we propose a novel evaluation framework (see:
-\tblref{security-quant}). Our framework classifies stream ciphers according to
-three quantitative features: relative round count, ciphertext randomization, and
-ciphertext expansion. Taken together, these features reveal a rich tradeoff
-space of cipher configurations optimizing for different combinations of
-concerns.
+address this need, we propose a novel evaluation framework. Our framework
+classifies stream ciphers according to three quantitative features: relative
+round count, ciphertext randomization, and ciphertext expansion. Taken together,
+these features reveal a rich tradeoff space of cipher configurations optimizing
+for different combinations of concerns.
 
-Table \tblref{trade} \TODO{explanation}. We limit our analysis to groups of
+Table \cref{tbl:trade} \TODO{explanation}. We limit our analysis to groups of
 three implementations, each using a different number of rounds. In the case of
 HC-128 and HC-256, we limit our analysis to a group of two implementations.
 Scores range from 0 (least number of rounds considered) to 1 (greatest number of

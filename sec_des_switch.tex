@@ -1,4 +1,4 @@
-\subsection{\sysA: Cipher Switching Models}\label{subsec:strategies}
+\subsection{\sysA: Cipher Switching Models}\label{subsec:des-switch}
 
 % About: when and where
 Just like typical storage devices, at any moment, there is only {\em one active}
@@ -22,9 +22,9 @@ different models allow for nuggets to be re-ciphered in a variety of cases with
 minimal impact on performance and battery life and without compromising
 security. We introduce three switching strategies: temporal, mirrored, and
 selective. The first one forms a temporal switching while the latter two form a
-spatial switching, as explained below and summarized in Table \tblref{switch1}.
+spatial switching, as explained below and summarized in Table \cref{tbl:switch}.
 
-\input{graphics/tbl-switch1}
+\input{graphics/tbl-switch}
 
 % ---------------------------------- forward switching
 
@@ -34,7 +34,7 @@ highly-secure, energy-expensive cipher to cipher ``\ctwo,'' less-secure but more
 energy-efficient one. This mode can be enabled with a battery-saving mode (the
 higher-level policy) supported by the OS.
 
-Table \tblref{switch1} summarizes what happens during the switch. For new
+Table \cref{tbl:switch} summarizes what happens during the switch. For new
 incoming writes, the data will be ciphered with \ctwo. Later on, when the
 temporal switching ends, the data will remain ciphered with \ctwo
 \hsg{correct?}. The reason we don't re-cipher it back to \cone in the future is
@@ -79,7 +79,7 @@ application/file system modification), we must pay the space cost to anticipate
 such a switch in the future. In this mode, we must add the ``migration'' period
 to reflect the transition window from \cone to \ctwo.
 
-During the migration, as summarized in Table \tblref{switch1}, all write
+During the migration, as summarized in Table \cref{tbl:switch}, all write
 operations that hit the \cone's region will be mirrored to the \ctwo's region.
 At the same time, the data in \cone's region is re-ciphered incrementally to
 \ctwo's region. Still during the migration, read operations will be served by
@@ -112,7 +112,7 @@ PDF; perhaps passwords and other sensitive information exists within several
 much larger files. Using prior techniques, either all the data would be stored
 with high overhead, the critical data would be stored without the mandated
 cipher type, or the data would have to be split among separate files requiring
-potentially complex and error-prone management schemes. \sys VSRs allows us to
+potentially complex and error-prone management schemes. \sys allows us to
 sidestep these issues.
 
 \hsg{also, need to talk to Bernard, whether dividing up the partitions is really

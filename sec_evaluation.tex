@@ -1,4 +1,4 @@
-\section{Evaluation}\label{sec:evaluation}
+\section{Evaluation}\label{sec:eval}
 
 We implement \sys and our experiments on a Hardkernel Odroid XU3 ARM big.LITTLE
 system with Samsung Exynos 5422 A15/A7 heterogeneous multi-processing quad core
@@ -40,7 +40,7 @@ write-read operation in the secondary cipher (3:7).
 To reason about the desirability of cipher configurations, we define the
 \emph{security vector}, R+R, as a vector consisting of a configuration's
 relative rounds (Rounds) quantification and its ciphertext randomization
-(Randomization) quantification defined in \secref{design}. We define the norm
+(Randomization) quantification defined in \cref{sec:des}. We define the norm
 over this vector as the sum of its components. Hence, we consider a cipher
 configuration ``stronger'' if it has higher ciphertext randomization and uses
 more rounds, \ie has a higher normed R+R.
@@ -52,25 +52,21 @@ In this section we answer the following questions:
 
 \begin{enumerate}
   \item What shape does the cipher configuration tradeoff space take under our
-  workloads? (\cref{subsec:1})
+  workloads? (\cref{subsec:eval-baseline})
   \item Can \sys achieve dynamic security/energy tradeoffs by reaching
-  configuration points not accessible with prior work? (\cref{subsec:2})
+  configuration points not accessible with prior work?
+  (\cref{subsec:eval-dynamic})
   \item What is the performance and storage overhead of each cipher switching
-  strategy? (\cref{subsec:3})
+  strategy? (\cref{subsec:eval-overhead})
 \end{enumerate}
 
 
 % =======================================================
-\subsection{Switching Strategies Under Various Workloads}\label{subsec:1}
+\subsection{Switching Strategies Under Workloads}\label{subsec:eval-baseline}
 
-\begin{figure}[ht]
-  \textbf{Baseline Cipher I/O Performance}\par\medskip
-  {\input{data/tradeoff-no-ratios}}
-  \caption{Median sequential and random write and then read performance baseline.}
-  \label{fig:tradeoff-no-ratios}
-\end{figure}
+\input{graphics/fig-eval-baseline}
 
-\figref{tradeoff-no-ratios} shows the normalized relative round count and
+\cref{fig:eval-baseline} shows the normalized relative round count and
 ciphertext randomization (normed R+R vector) versus median normalized latency
 tradeoff between different stream cipher configurations for our sequential and
 random I/O workloads. Trends for median hold when looking at tail latencies as
@@ -97,25 +93,18 @@ normalized 4KB workloads. ChaCha8 is not slower than ChaCha20.
 
 
 % =======================================================
-\subsection{Reaching Between Static Configuration Points}\label{subsec:2}
+\subsection{Reaching Between Static Configurations}\label{subsec:eval-dynamic}
 
-\begin{figure}[ht]
-  \textbf{Forward Switching I/O Ratio Performance}\par\medskip
-  {\input{data/tradeoff-with-ratios}} \caption{Median sequential and random
-  write and then read back performance comparison of Forward switching to
-  baseline. Each cluster of 3 dots between configurations represents the 7:3,
-  5:5, and 3:7 primary-vs-secondary I/O ratios described in the text.}
-  \label{fig:tradeoff-with-ratios}
-\end{figure}
+\input{graphics/fig-eval-forward}
 
-\figref{tradeoff-with-ratios} shows the normalized relative round count and
-ciphertext randomization (normed R+R vector) versus median normalized latency
-tradeoff between different stream ciphers for our sequential and random I/O
-workloads with cipher switching using the Forward strategy. After a certain
-number of write-read I/O operations, a cipher switch is initiated and \sys
-begins using the secondary cipher to encrypt and decrypt data. For each pair of
-ciphers, this is repeated three times: once at every ratio point \emph{between}
-our static configuration points (\ie{7:3, 5:5, and 3:7 described above}).
+\cref{fig:eval-forward} shows the normalized relative round count and ciphertext
+randomization (normed R+R vector) versus median normalized latency tradeoff
+between different stream ciphers for our sequential and random I/O workloads
+with cipher switching using the Forward strategy. After a certain number of
+write-read I/O operations, a cipher switch is initiated and \sys begins using
+the secondary cipher to encrypt and decrypt data. For each pair of ciphers, this
+is repeated three times: once at every ratio point \emph{between} our static
+configuration points (\ie{7:3, 5:5, and 3:7 described above}).
 
 The point of this experiment is to determine if \sys can effectively transition
 the drive between ciphers without devastating performance. For the 40MB, 5MB,
@@ -124,28 +113,19 @@ security/energy tradeoffs reaching points not accessible with prior work, all
 with minimal overhead.
 
 Again, due to the overhead of metadata management for non-Freestyle ciphers (see
-\secref{implementation}) and the fast completion time of the 4KB workloads
-preventing \sys from taking advantage of amortization, ChaCha8 and ChaCha20 take
-longer to complete than Freestyle Fast for 4KB reads. We also see very high
-latency for ratios between Freestyle Fast and Freestyle Strong cipher
-configurations. This is because Freestyle is not length-preserving, so extra
-write operations must be performed, and the algorithm itself is generally much
-slower than the ChaCha variants (see \figref{tradeoff-no-ratios}). Doubly
-invoking Freestyle in a ratio configuration means these penalties are paid more
-often.
+\cref{sec:impl}) and the fast completion time of the 4KB workloads preventing
+\sys from taking advantage of amortization, ChaCha8 and ChaCha20 take longer to
+complete than Freestyle Fast for 4KB reads. We also see very high latency for
+ratios between Freestyle Fast and Freestyle Strong cipher configurations. This
+is because Freestyle is not length-preserving, so extra write operations must be
+performed, and the algorithm itself is generally much slower than the ChaCha
+variants (see \cref{fig:eval-baseline}). Doubly invoking Freestyle in a ratio
+configuration means these penalties are paid more often.
 
-\begin{figure}[ht]
-  \textbf{Mirrored/Selective Switching I/O Ratio Performance}\par\medskip
-  \centering
-  {\input{data/mirrored-selective-baseline}} \caption{Median sequential and
-  random write and then read back performance comparison of Mirrored and
-  Selective switching strategies to baseline.}
- \label{fig:mirrored-selective-baseline}
-\end{figure}
+\input{graphics/fig-eval-ms}
 
-\figref{mirrored-selective-baseline} show the performance of the Mirrored and
-Selective strategies with the same configuration of ratios as
-\figref{tradeoff-with-ratios}.
+\cref{fig:eval-ms} show the performance of the Mirrored and Selective strategies
+with the same configuration of ratios as \cref{fig:eval-forward}.
 
 For the 40MB, 5MB, and 512KB workloads (40MB is shown), we see that Mirrored and
 Selective \emph{read} workloads and the Selective \emph{write} workload achieve
@@ -153,7 +133,7 @@ parity with the Forward strategy experiments. This makes sense, as most of the
 overhead for Selective and Mirrored reads is determining which part of the drive
 to commit data to. The same applies to Selective writes. For the 4KB Mirrored
 and Selective \emph{read} workloads and the Selective \emph{write} workload, we
-see behavior similar to that in \figref{tradeoff-with-ratios}, as expected.
+see behavior similar to that in \cref{fig:eval-forward}, as expected.
 
 Mirrored writes across all workloads are very slow. This is to be expected,
 since the data is being mirrored across all areas of the drive. In our
@@ -165,7 +145,7 @@ entire region.
 
 
 % =======================================================
-\subsection{Cipher Switching Overhead}\label{subsec:3}
+\subsection{Cipher Switching Overhead}\label{subsec:eval-overhead}
 
 We calculate that Forward switching has average overhead at 0.08x/0.10x for
 40MB, 5MB and 512KB read/write workloads compared to baseline I/O, demonstrating

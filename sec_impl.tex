@@ -1,12 +1,13 @@
-\section{Implementation}\label{subsec:implementation}
+\section{Implementation}\label{sec:impl}
 
 Our \sys implementation consists of \locTotal lines of C code (excluding
 StrongBox components we re-use as is). To ensure high quality code, we also
-wrote a \locTest line test suite. Our implementation is available open-source.
-We deploy \sys on top of the BUSE virtual block device~\cite{BUSE} as our mock
-device controller. BUSE is a thin (200 LoC) wrapper around the standard Linux
-Network Block Device (NBD), allowing our system to transact block layer requests
-in user space, reducing implementation complexity.
+wrote a \locTest line test suite. Our implementation is available open
+source~\footnoteref{ftn:foss}. We deploy \sys on top of the BUSE virtual block
+device~\cite{BUSE} as our mock device controller. BUSE is a thin (200 LoC)
+wrapper around the standard Linux Network Block Device (NBD), allowing our
+system to transact block layer requests in user space, reducing implementation
+complexity.
 
 \input{graphics/tbl-impl}
 
@@ -18,6 +19,6 @@ mode with parameters \texttt{FBalanced($R_{min}$=$12$,
 $R_{max}$=$28$,$H_I$=$2$,$I_C$=$10$)}, and a ``strong'' mode with parameters
 \texttt{FStrong($R_{min}$=$20$,$R_{max}$=$36$,$H_I$=$1$,$I_C$=$12$)}.
 
-Table \tblref{impl} shows the cipher implementations we use (repackaged with the
-\sysB interface; see \subsecref{interface}).
+Table \cref{tbl:impl} shows the cipher implementations we use (repackaged with
+\sysB; see \cref{subsec:des-crypts}).
 

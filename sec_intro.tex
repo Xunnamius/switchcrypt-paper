@@ -68,22 +68,20 @@ again---saving even more energy.
 % OUR SOLUTION
 
 % About: the system and the benefits
-We present \sys, to the best of our knowledge the {\em first} storage
-system to provide block level kernel support for heterogeneous FDE. As
-FDE's impact on drive performance and energy efficiency depends on a
-multitude of choices, different ciphers expose different performance
-and energy efficiency characteristics. By supporting heterogeneous
-FDE, \sys permits cipher choice to be be viewed as a dynamically
-configurable parameter as opposed to a static choice made at format or
-boot time. As a result, \sys enables the storage system to adapt to
-changes that arise at runtime, including: resource availability and
-environment, desired security properties, and the OS's energy budget.
-This empowers users to perform cipher switching in space and time (\eg
-using more secure storage for more sensitive files, and/or
-dynamically switching between ciphers for one file), allowing the
-system to navigate the tradeoff space made by balancing competing
-security and latency requirements.  \sys is composed primarily of
-three components that realize these benefits. These represent the
+We present \sys, to the best of our knowledge the {\em first} storage system to
+provide block level kernel support for heterogeneous FDE. As FDE's impact on
+drive performance and energy efficiency depends on a multitude of choices,
+different ciphers expose different performance and energy efficiency
+characteristics. By supporting heterogeneous FDE, \sys permits cipher choice to
+be be viewed as a dynamically configurable parameter as opposed to a static
+choice made at format or boot time. As a result, \sys enables the storage system
+to adapt to changes that arise at runtime, including: resource availability and
+environment, desired security properties, and the OS's energy budget. This
+empowers users to perform cipher switching in space and time (\eg using more
+secure storage for more sensitive files, and/or dynamically switching between
+ciphers for one file), allowing the system to navigate the tradeoff space made
+by balancing competing security and latency requirements.  \sys is composed
+primarily of three components that realize these benefits. These represent the
 three main contributions of this work.
 
 % About: switching strategies
@@ -134,16 +132,17 @@ We conclude with a comprehensive evaluation of \sys.
 %
 First, we show that \sys successfully supports a wide variety of ciphers;
 specifically we have integrated {\em \numCiphers ciphers} and a total of {\em
-\numConfigs cipher configurations} into \sys in \locTotal as a kernel block
-module (will be open-sourced), and can act as an off-the-shelf replacement for
-dm-crypt. The ciphers are ChaCha~\cite{ChaCha20}, Freestyle~\cite{Freestyle},
-Salsa~\cite{SalsaX}, AES in counter mode (AES-CTR)~\cite{AESCTR},
-Rabbit~\cite{Rabbit}, Sosemanuk~\cite{Sosemanuk}, HC-128~\cite{HC128}.
+\numConfigs cipher configurations} into \sys in \locTotal lines of code as a
+kernel block module~\footnote{\label{ftn:foss}\sys source: \sysURI}, and can act
+as an off-the-shelf replacement for dm-crypt. The ciphers are
+ChaCha~\cite{ChaCha20}, Freestyle~\cite{Freestyle}, Salsa~\cite{SalsaX}, AES in
+counter mode (AES-CTR)~\cite{AESCTR}, Rabbit~\cite{Rabbit},
+Sosemanuk~\cite{Sosemanuk}, HC-128~\cite{HC128}.
 %
-Second, we showcase the benefits of \sys with experiments illustrating three
+Second, we showcase the benefits of \sys with experiments illustrating \numCases
 real-world case studies (\ie storage system responds to critical battery state,
-filesystem-agnostic file-level encryption, and downtime avoidance) and show the
-performance/energy tradeoffs.
+filesystem-agnostic file-level encryption, and datacenter downtime avoidance)
+and show the performance/energy tradeoffs.
 %
 Finally, we perform several benchmarks to demonstrate the flexibility and
 performance of the individual ciphers and show the switching overhead of the

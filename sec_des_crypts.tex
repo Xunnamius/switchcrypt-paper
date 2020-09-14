@@ -1,4 +1,4 @@
-\subsection{Generic Stream Cipher Interface}\label{subsec:interface}
+\subsection{\sysB: Generic Cipher Interface}\label{subsec:des-crypts}
 
 \textbf{Decoupling ciphers from the encryption process.} To flexibly switch
 between configurations in \sys requires a generic cipher interface. This is
@@ -14,6 +14,7 @@ at any point.
 ... and interface for \sysB. Comes with an interface.
 
 \hsg{what do you exactly mean by: \\
+- ``crypts'' needs to be a thing? \\
 - ``implementation detail'' \\
 - ``cipher implementations'' \\
 - the ``encryption/decryption process'' \\
@@ -64,13 +65,13 @@ receives I/O requests from the operating system at the block device level like
 any other device-mapper. These requests come in the form of either reads or
 writes. When a read request is received, the OS hands \sys an offset and a
 length and expects a response with plaintext of that specific length starting at
-that specific offset taken from the beginning of storage (\ie the BODY section;
-see \figref{backstore}). When a write request is received, the OS hands \sys an
-offset, a length, and a buffer of plaintext and expects that plaintext to be
-encrypted and committed to storage such that the plaintext is later retrievable
-given that same offset and length in a future read request. These requests can
-either be handled together by a single function or handled individually as
-distinct read and write operations, each with different tradeoffs.
+that specific offset taken from the beginning of storage. When a write request
+is received, the OS hands \sys an offset, a length, and a buffer of plaintext
+and expects that plaintext to be encrypted and committed to storage such that
+the plaintext is later retrievable given that same offset and length in a future
+read request. These requests can either be handled together by a single function
+or handled individually as distinct read and write operations, each with
+different tradeoffs.
 
 % ---------------------------------- xor interface
 

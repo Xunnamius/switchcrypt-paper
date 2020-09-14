@@ -1,4 +1,4 @@
-\subsection{Putting It All Together}\label{subsec:summary}
+\subsection{Putting It All Together}\label{subsec:des-summary}
 
 After describing the three main contributions, now we discuss other details
 surrounding the three main components.
@@ -9,10 +9,11 @@ surrounding the three main components.
 mechanisms and policies to perform flexible switching of cipher configurations
 that can be built on top of existing block-level encryption module (aka.
 ``encryption driver'') that already provides the management of the encryption
-data structures. There were a couple of open-source choices to start with such
-as Linux dm-crypt \cite{x}, a-second-one \cite{y}, or StrongBox
-\cite{StrongBox}. We decided to build atop StrongBox because it already
-implements stream ciphers such as ChaCha which is more secure than block cipher.
+data structures. There were a couple of open source choices to start with such
+as Linux encryption device mapper~\cite{dmcrypt,DmC-Android}, encryption-ready
+F2FS filesystem~\cite{F2FS}, or StrongBox \cite{StrongBox}. We decided to build
+atop StrongBox because it already implements stream ciphers such as ChaCha which
+is more secure than block cipher.
 
 \sys depends on several data structure management provided in StrongBox, such as
 its transaction and rekeying journals (for never writing data encrypted with the
@@ -44,7 +45,7 @@ a secure state.
 
 In terms of {\em data integrity}, an adversary should not be able to tamper with
 ciphertext and it go unnoticed. Nugget integrity is tracked by StrongBox's
-in-memory Merkle tree (see \cite[Section \xxx]{StrongBox} for further details).
+in-memory Merkle tree~\cite{StrongBox}.
 
 Switching strategies add an additional security concern not addressed by prior
 work: even if we initiate a ``cipher switch,'' there may still be data on the

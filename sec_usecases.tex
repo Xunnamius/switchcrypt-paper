@@ -1,6 +1,6 @@
 \section{Case Studies}\label{sec:usecases}
 
-In this section, we provide four\xxx case studies demonstrating the practical
+In this section, we provide \numCases case studies demonstrating the practical
 utility of heterogeneous FDE not achievable with prior work. We cover a wide
 range of situations, highlighting concerns like meeting latency goals, trading
 off security and writable space, and keeping within an energy budget, all
@@ -9,10 +9,10 @@ experiments are repeated multiple times.
 
 
 % ===========================================================
-\subsection{Battery Saver Mode}\label{subsec:uc1}
+\subsection{Battery Saver Mode}\label{subsec:usecase-battery}
 
 % About: motivation
-In this first case study, we revisit the motivational example.  Here, the mobile
+In this first case study, we revisit the motivational example. Here, the mobile
 device is ``forced'' to locally encrypt files with Freestyle Balanced Cipher
 (``\cone'') for safely backing up the file to the backend cloud, but when the
 battery saver mode is on, the device will switch to a more energy-efficient
@@ -23,28 +23,28 @@ before the device dies.
 
 % About: setup
 To simulate I/O activity, we begin randomly writing 10 40MB files using the
-Freestyle Balanced cipher for 2 minutes.  After the first 5 seconds, the device
+Freestyle Balanced cipher for 2 minutes. After the first 5 seconds, the device
 enters ``battery saver'' mode, which we simulate by underclocking the cores to
 their lowest frequencies and using \texttt{taskset} to transition \sys processes
-to the energy-efficient LITTLE cores.  In this low battery mode, \sys switches
-to the ChaCha8 cipher.
+to the energy-efficient LITTLE cores. In this low battery mode, \sys switches to
+the ChaCha8 cipher.
 
-\hsg{I dont' understand Figure \figref{usecase-battery}. You said after 5
-seconds.  we switch to ChaCha8. But why the FB+ChaCha line is still going up?
-Why it doesn't flat out like the ChaCha line?? and why do even need to show the
-ChaCha8 only line?}
+\hsg{I don't understand \cref{fig:usecase-battery}. You said after 5 seconds. we
+switch to ChaCha8. But why the FB+ChaCha line is still going up? Why it doesn't
+flat out like the ChaCha line?? and why do even need to show the ChaCha8 only
+line?}
 
-\input{graphics/fig-usecase1} \hsg{we should exlude ChaCha8 only, unless you have a
-major point here}
+\input{graphics/fig-usecase-battery} \hsg{we should exlude ChaCha8 only, unless
+you have a major point here}
 
 % About: result
-\figref{usecase-battery} shows the time versus energy used. At 0 seconds, we
+\cref{fig:usecase-battery} shows the time versus energy used. At 0 seconds, we
 begin writing. At 5 seconds, the ``battery saver'' event occurs, causing the
 system to be underclocked. At 120 seconds, the system will die. If we blow past
 our energy ceiling, the system will die. The figure shows two lines:
 %
 {\bf (1)} {\em Freestyle Balanced only}, that favors security even when backups
-are paused;  the device dies before the I/Os complete.
+are paused; the device dies before the I/Os complete.
 %
 {\bf (2)} {\em Freestyle Balanced $+$ ChaCha8}, that performs the switch when
 the system enters the low power state. Our results show that, while the system
@@ -59,89 +59,51 @@ Freestyle Balanced.
 On average, using forward switching resulted in a 3.3x total energy reduction
 compared to exclusively using Freestyle Balanced, allowing us to remain within
 our energy budget. \hsg{I don't see this 3.3x in the graph. Did you accidentally
-label the lines incorrectly?}.  We note, however, that the energy savings is not
+label the lines incorrectly?}. We note, however, that the energy savings is not
 the point of this experiment. Rather, the lesson learned is that \sys enables
 the system to move to the right point in the energy/security tradeoff space so
 that the current task can still be accomplished before the battery is drained
 and without compromising backup security at any point.
 
 
-% ===============================
-\subsection{End-of-Life Device Slowdown}\label{subsec:uc3}
-
-Another usecase of forward switching is for offsetting the debilitating decline
-in performance when storage devices such as SSDs reach end-of-life (EoL); due to
-garbage collection and wear-leveling requirements of SSDs, as free space becomes
-constrained, I/O performance drops precipitously~\cite{SSDEOL1}.  Let us suppose
-in this case, the system running on the dying SSDs have a strict latency budget
-(as long as meeting some minimum security requirements).  The strict latency
-ceiling can be violated if the device latency increases.  If \sys is made aware
-when the drive is in such a state, we can offset some of the performance loss by
-switching the ciphers of high traffic nuggets to the fastest acceptable cipher
-available using forward switching.
-
-\input{graphics/fig-usecase2}
-
-To show this, we begin by writing 10 40MB files per each cipher as a baseline.
-\hsg{I don't understand ``per each cipher''} We then introduce a delay of $20ms$
-simulating drive slowdown. \hsg{Where do you get ``20ms'' from?  that's such a
-high latency. Any citation you can use here to back that up},
-% --------------------------------------------------
-\hsg{These sentences below are non informative. You should help reviewers walk
-through the graph. I don't even understand what the x-axis in the Figure means.
-The best way to describe a figure, is describe the x-axis and then y-axis, and
-then pick two extreme points in the graph, and describe those points, what the
-values mean, so that reviewers can really understand them. if reviewers
-understand two extreme points, then they will undersstand the rest. Please redo
-the sentences.}
-% --------------------------------------------------
-\sout{In \figref{usecase-eol-tradeoff}, we see the sequential and random read
-and write performance of a 40MB workload when nuggets are encrypted exclusively
-with our choice ciphers. While the latency ceiling and security floor have not
-changed, we see increased latency in the delayed workloads. Our goal is to
-remain under the latency ceiling while remaining above the security floor.
-Thanks to Forward switching, accesses to highly trafficked areas of the drive
-can remain performant even during drive end-of-life.}
-
-
 % ================================================================
-\subsection{Select Data Encryption}\label{subsec:uc2}
+\subsection{Select Data Encryption}\label{subsec:usecase-agnostic}
 
 % About: background
-This usecase illustrates utility of selective switching to achieve a performance
-win---if only a small percentage of the data needs the strongest encryption,
-then only a small percentage of the data should have that associated overhead,
-while the rest can use a minimalist encryption. As mentioned before, this
-feature requires users to annotate certain files with a special tag via file
-system calls, which would then be stored in the inode.  Because the \sys layer
-is file oblivious, every block I/O through the \sys layer will be labeled with
-the corresponding cipher.
+This use case illustrates utility of selective switching to achieve a
+performance win---if only a small percentage of the data needs the strongest
+encryption, then only a small percentage of the data should have that associated
+overhead, while the rest can use a minimalist encryption. As mentioned before,
+this feature requires users to annotate certain files with a special tag via
+file system calls, which would then be stored in the inode. Because the \sys
+layer is file oblivious, every block I/O through the \sys layer will be labeled
+with the corresponding cipher.
 
 % About: setup
 We begin by with 10 5MB and 4KB write-read operations to two \sys drive
-instances: one using ChaCha8 and the other using Freestyle Strong.  They
+instances: one using ChaCha8 and the other using Freestyle Strong. They
 represent two extreme where ChaCha8 is a low-latency cipher and Freestyle Strong
-exhibits a very high overhead.  We then run another \sys instance with a 7:3
+exhibits a very high overhead. We then run another \sys instance with a 7:3
 ratio where 30\% of the data considered highly sensitive uses Freestyle Strong.
 
-\input{graphics/fig-usecase3}
+\input{graphics/fig-usecase-agnostic}
 
 % About: outcome
-The left-side and right-side bars in \figref{usecase-vsr-bar} show the two
+The left-side and right-side bars in \cref{fig:usecase-agnostic} show the two
 extremes; ChaCha8 exhibits a low latency, consistently less than 1 second across
 the workloads, while Freestyle Strong exhibits 5 to 20 second latency depending
-on the workload.  The selective switching (middle bars) shows a reduction of
-3.1x to 4.8x for read latency and 1.6x to 2.8x for write latency, all without
-compromising the security needs of the most sensitive data.  Thus, selective
+on the workload. The selective switching (middle bars) shows a reduction of 3.1x
+to 4.8x for read latency and 1.6x to 2.8x for write latency, all without
+compromising the security needs of the most sensitive data. Thus, selective
 switching keeps our sensitive data at the mandated security level while keeping
 the performance (and also battery life) benefits of using a fast cipher for the
 majority of I/O operations.
 
 
 % ===============================
-\subsection{No-Downtime Encryption Upgrade}\label{subsec:uc4}
+\subsection{No-Downtime Encryption Upgrade}\label{subsec:usecase-upgrade}
 
-\input{graphics/fig-usecase4}
+\input{graphics/fig-usecase-upgrade}
 
-In \figref{usecase4} \TODO{finish sentence}. \hsg{we must have a short case
-study here. Otherwise no point of talking about mirrored switch}.
+In \cref{fig:usecase-upgrade} \TODO{finish sentence}. \hsg{we must have a short
+case study here. Otherwise no point of talking about mirrored switch}.
