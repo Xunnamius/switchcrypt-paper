@@ -12,9 +12,9 @@ The major issue with FDE is its homogeneous nature; users must commit to one FDE
 storage configuration at initialization time~\cite{dmcrypt}. Suppose we have an
 ultra-low-voltage netbook provided by our employer who requires that the drive
 is fully encrypted at all times and is constantly backed up to an offsite
-system. Given that the FDE industry standard is AES-XTS, we initialize our drive
-with it. Here, three primary concerns present themselves: performance,
-vulnerability and inflexibility.
+system. Given that the FDE industry standard is AES-XTS, we consider
+initializing our drive with it. At this point, three primary concerns present
+themselves: performance, vulnerability and inflexibility.
 
 First, it is well known that AES-XTS adds significant latency and power overhead
 to I/O operations, especially on mobile and battery-constrained
@@ -23,7 +23,8 @@ android-M-mobile-motivation-2}. As this scenario requires the drive encrypted at
 all times, we must accept this hit to performance and battery life. Worse, if
 our device does not support hardware accelerated AES (which is hardly
 ubiquitous) performance can be degraded even further; I/O latency can be as high
-as 3--5x~\cite{StrongBox}.
+as 3--5x~\cite{StrongBox}. There are faster more energy-efficient stream ciphers
+we might consider instead.
 
 Second, AES-XTS is designed to mitigate threats to drive data ``at rest,'' which
 assumes an attacker cannot access snapshots of our encrypted data nor manipulate
@@ -33,8 +34,8 @@ vulnerability---an attacker can passively glean information about the plaintext
 over time by contrasting those snapshots, leading to confidentiality violations
 in some situations~\cite{XEX, XTS}. Unfortunately, the backups required by this
 scenario function as snapshots for an attacker. There are ciphertext randomizing
-stream ciphers we can use that can be safely backed up, but they're known to
-perform poorly like AES-XTS.
+stream ciphers we can use that can be safely backed up, but they're known to add
+latency and power overhead like AES-XTS.
 
 Third, our device is battery constrained, placing a cap on our energy budget
 that can change at any moment as we transition from line power to battery power
@@ -46,31 +47,34 @@ including reducing energy use when the OS wants to conserve power (i.e.
 % =======================================================
 \subsection{Recent Advancements}
 
-In this paper we categorize two types of FDE: {\em block} and {\em stream}
-ciphers. Block ciphers were a defacto solution for storage while stream ciphers
-were prevalent in networking \hsg{true??}. Their main differences are \hsg{fill
-here, 1 or 2 sentences}. There have been major advancements in the FDE
-technology that distances away from the slow block cipher technology and
-successfully implements stream ciphers full device encryption \cite{Adiantum,
-StrongBox} even without hardware accelerated encryption.
+Broadly speaking, an FDE storage system can be implemented in two ways: using
+{\em block} ciphers or using {\em stream} ciphers. Block ciphers were the de
+facto solution for storage while stream ciphers were prevalent in networking and
+elsewhere. The relevant difference: encryption using a stream cipher is simpler
+and thus faster than a block cipher, especially in software; however, stream
+ciphers have their own non-trivial problems (\ie rollback attacks and
+overwrites) and are hence not a drop-in replacement for block
+ciphers~\cite{StrongBox}. There have been major advancements in the FDE
+technology that moves us away from slower block ciphers and towards the adoption
+of faster stream cipher based FDE~\cite{Adiantum, StrongBox}.
 
-There are two technological shifts that enable this confidential,
-high-performance storage with stream ciphers. First, devices today commonly
-employ solid-state storage with Flash Translation Layers (FTL), which operate
-similarly to Log-structured File Systems (LFS) \cite{LFS, F2FS, NILFS}. The no
-in-place update nature of FTL or LFS-like storage allows the overwrite-heavy
-stream ciphers to be efficiently implemented (\eg ChaCha with F2FS performs \xxx
-times better than with ext4 \cite{StrongBox}). Second, mobile devices now
-support trusted hardware, such as Trusted Execution Environments (TEE)
-\cite{TrustZone, TEE} and secure storage areas \cite{eMMC-standard} which means
-the drive encryption module has access to persistent, monotonically increasing
-counters that can be used to prevent rollback attacks when overwrites do occur.
+There are two technological shifts that enable secure, high-performance storage
+with stream ciphers. First, devices today commonly employ solid-state storage
+with Flash Translation Layers (FTL), which operate similarly to Log-structured
+File Systems (LFS)~\cite{LFS, F2FS, NILFS}. The no in-place update
+``overwrite-averse'' nature of FTL and LFS-like storage allows stream cipher
+based FDE to be efficiently implemented (\eg ChaCha with F2FS performs on
+average $1.72$× better than ext4~\cite{StrongBox}). Second, mobile devices now
+support trusted hardware, such as Trusted Execution Environments
+(TEE)~\cite{TrustZone, TEE} and secure storage areas~\cite{eMMC-standard}, which
+means the system has access to persistent, monotonically increasing counters
+that can be used to prevent rollback attacks when overwrites do occur.
 
 
 % =======================================================
 \subsection{No One-Size-Fits-All Case Studies}
 
-As the recent advancements show that many different ciphers can be implemented
+As recent advancements show that stream cipher based FDE can be implemented
 in efficient manner, this opens up an opportunity for the storage layer to
 support a wide variety of encryption technologies. Clearly, many case studies
 show that there is no one-size-fits-all encryption, and some flexibility is
