@@ -26,8 +26,8 @@ To simulate I/O activity, we begin randomly writing 10 40MB files using the
 Freestyle Balanced cipher for 2 minutes. After the first 5 seconds, the device
 enters ``battery saver'' mode, which we simulate by underclocking the cores to
 their lowest frequencies and using \texttt{taskset} to transition \sys processes
-to the energy-efficient LITTLE cores. In this low battery mode, \sys switches to
-the ChaCha8 cipher.
+to the energy-efficient LITTLE cores. In this ``battery saver'' mode, \sys
+switches to the ChaCha8 cipher.
 
 \hsg{I don't understand \cref{fig:usecase-battery}. You said after 5 seconds. we
 switch to ChaCha8. But why the FB+ChaCha line is still going up? Why it doesn't

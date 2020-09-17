@@ -11,8 +11,8 @@ motivate our work.
 The major issue with FDE is its homogeneous nature; users must commit to one FDE
 storage configuration at initialization time~\cite{dmcrypt}. Suppose we have an
 ultra-low-voltage netbook provided by our employer who requires that the drive
-is fully encrypted at all times and is constantly backed up to an offsite
-system. Given that the FDE industry standard is AES-XTS, we consider
+is 1) fully encrypted at all times and 2) backed up to an offsite system
+whenever possible. Given that the FDE industry standard is AES-XTS, we consider
 initializing our drive with it. At this point, three primary concerns present
 themselves: performance, vulnerability and inflexibility.
 
@@ -23,25 +23,25 @@ android-M-mobile-motivation-2}. As this scenario requires the drive encrypted at
 all times, we must accept this hit to performance and battery life. Worse, if
 our device does not support hardware accelerated AES (which is hardly
 ubiquitous) performance can be degraded even further; I/O latency can be as high
-as 3--5x~\cite{StrongBox}. There are faster more energy-efficient stream ciphers
-we might consider instead.
+as 3--5x~\cite{StrongBox}. There are {\em faster more energy-efficient} stream
+ciphers we might consider instead.
 
 Second, AES-XTS is designed to mitigate threats to drive data ``at rest,'' which
 assumes an attacker cannot access snapshots of our encrypted data nor manipulate
-our data without those manipulations being immediately obvious to us. However,
-access to multiple snapshots of a drive's AES-XTS-encrypted contents presents a
-vulnerability---an attacker can passively glean information about the plaintext
+our data without those manipulations being immediately obvious to us. Access to
+multiple snapshots of a drive's AES-XTS-encrypted contents presents a
+vulnerability: an attacker can passively glean information about the plaintext
 over time by contrasting those snapshots, leading to confidentiality violations
 in some situations~\cite{XEX, XTS}. Unfortunately, the backups required by this
-scenario function as snapshots for an attacker. There are ciphertext randomizing
-stream ciphers we can use that can be safely backed up, but they're known to add
-latency and power overhead like AES-XTS.
+scenario function as snapshots for an attacker. There are {\em ciphertext
+randomizing} stream ciphers we can use that can be safely backed up, but they're
+known to add latency and power overhead like AES-XTS~\cite{Freestyle}.
 
 Third, our device is battery constrained, placing a cap on our energy budget
 that can change at any moment as we transition from line power to battery power
 and back. Our storage system should respond to these changing requirements,
-including reducing energy use when the OS wants to conserve power (i.e.
-``battery saver'' functionality), all without violating any other concerns.
+including reducing energy use when the user wants to conserve power (i.e.
+``battery saver mode''), all without violating any other concerns.
 
 
 % =======================================================
@@ -74,20 +74,25 @@ that can be used to prevent rollback attacks when overwrites do occur.
 % =======================================================
 \subsection{No One-Size-Fits-All Case Studies}
 
-As recent advancements show that stream cipher based FDE can be implemented
-in efficient manner, this opens up an opportunity for the storage layer to
-support a wide variety of encryption technologies. Clearly, many case studies
-show that there is no one-size-fits-all encryption, and some flexibility is
-demanded. Below we present \numCases real-world case studies.
+Recent advancements demonstrate that stream cipher based FDE can be implemented
+in efficient manner, which opens up an opportunity for the storage layer to
+support multiple encryption technologies in various modes and configurations.
+For instance, such a system could switch from using an energy-inefficient but
+backup-safe cipher to an energy-efficient cipher to save battery life when
+entering battery saver mode and later switch back (and resume uploading backups)
+after leaving of battery saver mode. Clearly, there is no one-size-fits-all
+encryption solution and some flexibility is demanded. Below we present \numCases
+such case studies.
 
-{\em Battery-life saver.} In the example above, in certain situations, the user
-might want to prioritize reducing the total energy use. For example, while in
-battery low mode, the kernel now switches to a more energy-efficient encryption
-and pauses the offline cloud backup momentarily. Users might be willing to
-accept this tradeoff and violate the ``backup at all time'' rule, knowing that
-within a few hours the user will have access to power (no difference from
-internet connection problem). This case study is pervasive \cite{hackernews-???,
-many-more??}.
+{\em ``Battery saver'' mode.} In situations like the netbook example above, the
+user might want to prioritize reducing the total energy use when the battery is
+low. While in this ``battery saver mode,'' it would be beneficial if the storage
+system could switch to a more energy-efficient cipher and pause the cloud backup
+momentarily. A user would be willing to accept this tradeoff knowing that within
+a few hours they will have access to power and could resume uploads when the
+storage system switches back, which is no different from an internet connection
+problem. This case is pervasive~\cite{battery-saver1, battery-saver2,
+battery-saver3, battery-saver4, battery-saver5}.
 
 {\em Cipher upgrade without downtime.} From mobile devices, we now turn to
 server-side storage that often require encryption upgrade \cite{some-citations}.

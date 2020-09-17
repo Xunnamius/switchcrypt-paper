@@ -29,7 +29,7 @@ spatial switching, as explained below and summarized in Table \cref{tbl:switch}.
 % ---------------------------------- forward switching
 
 \mysub{Forward switching.} The first type of cipher switching we support is for
-the battery-life example where we want to switch from cipher ``\cone'', a
+the battery-saving example where we want to switch from cipher ``\cone'', a
 highly-secure, energy-expensive cipher to cipher ``\ctwo,'' less-secure but more
 energy-efficient one. This mode can be enabled with a battery-saving mode (the
 higher-level policy) supported by the OS.
@@ -37,7 +37,7 @@ higher-level policy) supported by the OS.
 Table \cref{tbl:switch} summarizes what happens during the switch. For new
 incoming writes, the data will be ciphered with \ctwo. Later on, when the
 temporal switching ends, the data will remain ciphered with \ctwo
-\hsg{correct?}. The reason we don't re-cipher it back to \cone in the future is
+\hsg{correct?}. The reason we do not re-cipher it back to \cone in the future is
 that the files might be just a temporary file (\eg movie download) that is only
 read once. However, if the data is read again in the future when \cone is active
 again (\eg for backing up to the cloud), the data will then re-ciphered to
@@ -63,14 +63,14 @@ data being read might only be read once and stay in the memory. However, if the
 data is read the second time (during the temporal period), the data is
 re-ciphered to \ctwo. These and other possible variants can be left for future
 work. So far, we find our version of forward switching suits a common
-battery-life scenario.
+battery-saving scenario.
 
 
 % ---------------------------------- mirrored switching
 
 \mysub{Mirrored Switching.} Next, we consider a different scenario where
 ``\cone'' is a recently-attacked and vulnerable encryption and ``\ctwo'' is a
-newly recommended cipher that's just been added to \sys's latest kernel/module
+newly recommended cipher that is just been added to \sys's latest kernel/module
 upgrade. Let us imagine a server-side storage operator who wants to switch from
 \cone to \ctwo without any server downtime. To achieve this, \sys since the
 beginning will partition the drive into 2 regions. That is, to support a
@@ -94,7 +94,7 @@ comes with re-ciphering every nugget.
 We would like to note that it is fundamentally hard to have two cipher
 configurations enabled on the same drive. There are two reasons. First,
 ..\hsg{anything about data structures, such as the extra space of teh nugget?
-Let's put more technical matters here, so reviewers can appreciate why we have
+Let us put more technical matters here, so reviewers can appreciate why we have
 to crude partition the drive like this.} Second, after the migration the
 previous region might need to be securely erased; here, not overlapping the two
 regions would make things more straightforward for erase secure. We are not
