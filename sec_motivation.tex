@@ -1,19 +1,20 @@
 \section{Background and Motivation}\label{sec:motivation}
 
 In this section we discuss recent advancements and limitations in stream cipher
-based FDE, then provide \numCases case studies that motivate our work.
+based Full Drive Encryption (FDE), then provide \numCases case studies that
+motivate our work.
 
 
 % =======================================================
-\subsection{The Static FDE Problem}
+\subsection{The Homogeneous FDE Problem}
 
-The major issue with full drive encryption (FDE) is its static nature; users
-must commit one FDE configuration without much flexibility. Let us suppose we
-have an ARM-based ultra-low-voltage netbook provided to us by our employer who
-requires that the drive is fully encrypted at all times and is constantly backed
-up to an offsite system. Given that the FDE industry standard is AES-XTS, we
-initialize our drive with it. Here, three primary concerns present themselves:
-performance, vulnerability and inflexibility.
+The major issue with FDE is its homogeneous nature; users must commit to one FDE
+storage configuration at initialization time~\cite{dmcrypt}. Suppose we have an
+ultra-low-voltage netbook provided by our employer who requires that the drive
+is fully encrypted at all times and is constantly backed up to an offsite
+system. Given that the FDE industry standard is AES-XTS, we initialize our drive
+with it. Here, three primary concerns present themselves: performance,
+vulnerability and inflexibility.
 
 First, it is well known that AES-XTS adds significant latency and power overhead
 to I/O operations, especially on mobile and battery-constrained
@@ -30,14 +31,16 @@ our data without those manipulations being immediately obvious to us. However,
 access to multiple snapshots of a drive's AES-XTS-encrypted contents presents a
 vulnerability---an attacker can passively glean information about the plaintext
 over time by contrasting those snapshots, leading to confidentiality violations
-in some situations~\cite{XEX, XTS}. In this case, we might want to employ a
-strong encryption solution such as stream ciphers, but they are known to perform
-worst in many file systems.
+in some situations~\cite{XEX, XTS}. Unfortunately, the backups required by this
+scenario function as snapshots for an attacker. There are ciphertext randomizing
+stream ciphers we can use that can be safely backed up, but they're known to
+perform poorly like AES-XTS.
 
-Third, our system is battery constrained, placing a cap on our energy budget
+Third, our device is battery constrained, placing a cap on our energy budget
 that can change at any moment as we transition from line power to battery power
-and back. Our system should respond to these changing requirements without
-violating any other concerns.
+and back. Our storage system should respond to these changing requirements,
+including reducing energy use when the OS wants to conserve power (i.e.
+``battery saver'' functionality), all without violating any other concerns.
 
 
 % =======================================================
@@ -96,4 +99,3 @@ certain files that traverse the Internet or wireless connection in particular,
 should be encryption with a more secure way. Example of those files include
 government documents \cite{citation-to-this-example}, credit card information
 \cite{a}, \xxx \cite{a, b, c}.
-
