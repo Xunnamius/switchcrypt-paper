@@ -26,11 +26,11 @@ must address three key challenges:
 \item We must allow arbitrary cipher implementations to be easily integrated
   into \sys. This is non-trivial, however, as different ciphers and encryption
   modes require different inputs, generate disparate outputs, and are often
-  tightly coupled to the storage/encryption layer
-  itself~\cite{dmcrypt,DmC-Android}. For this, we introduce the \sysB
-  (\cref{subsec:des-crypts}) component where we decouple cipher implementations
-  from the core encryption algorithm by providing wrapper interfaces that allows
-  different encryption algorithms (``crypts'') to co-exist in the storage layer.
+  tightly coupled to the storage/encryption layer itself. For this, we introduce
+  the \sysB (\cref{subsec:des-crypts}) component where we decouple cipher
+  implementations from the core encryption algorithm by providing wrapper
+  interfaces that allows different encryption algorithms (``crypts'') to
+  co-exist in the storage layer.
 
 \item We must help users understand the tradeoffs of different cipher
   configurations, hence we introduce \sysC (\cref{subsec:des-trade}), a method
