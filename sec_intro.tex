@@ -86,7 +86,7 @@ three main contributions of this work.
 
 % About: switching strategies
 First, we introduce \sysA, a kernel configuration that exposes three switching
-models: {\em Forward}, {\em Selective} and {\em Mirrored}. Switching allows  us
+models: {\em Forward}, {\em Selective} and {\em Mirrored}. Switching allows us
 to ``re-cipher'' storage units dynamically, enabling us to tradeoff different
 performance and security properties of various configurations at runtime. These
 switching models define what the I/O layer should do upon the ongoing read/write
@@ -99,22 +99,23 @@ change ciphers with zero downtime and without re-initializing the filesystem or
 device mapper.
 
 % About: crypts
-Second, to support the switching models above, we implement \sysB, a block-level
-module that contains encryption implementations (``crypts'') that have been
-restructured to support switching. Prior work encrypts targets with a single
-cipher---\ie homogeneous FDE---where the choice of cipher implementation is
-integrated into the file/block layer system directly~\cite{StrongBox, dmcrypt}.
-The key challenge with supporting heterogeneous FDE---where multiple ciphers
-coexist on the same storage system---is that different ciphers take disparate
-inputs and produce disparate outputs. For example: \encB's implementation
-requires a key and nonce, \encA's additionally requires configuration for output
-randomization, and \encC's instead requires plaintext and sector information. At
-the same time, \encA and \encB's implementations output a keystream that needs
-to be XORed with the plaintext to yield the ciphertext while \encC outputs the
-ciphertext directly. Thus, we introduce a novel design substantively expanding
-prior FDE work by wholly decoupling cipher implementations from the encryption
-process. In \sysB, we write hooks that effectively normalize the inputs and
-outputs required when switching between ciphers.
+Second, to support the switching models above, we implement \sysB, a block layer
+kernel module that contains encryption implementations (``crypts'') that have
+been restructured to support switching. Prior work encrypts targets with a
+single cipher---\ie homogeneous FDE---where the choice of cipher implementation
+is integrated into the file/block layer system directly~\cite{StrongBox,
+dmcrypt}. The key challenge with supporting heterogeneous FDE---where multiple
+ciphers coexist on the same storage system---is that different ciphers take
+disparate inputs and produce disparate outputs. For example: \encB's
+implementation requires a key and nonce, \encA's additionally requires
+configuration for output randomization, and \encC's instead requires plaintext
+and sector information. At the same time, \encA and \encB's implementations
+output a keystream that needs to be XORed with the plaintext to yield the
+ciphertext while \encC outputs the ciphertext directly. Thus, we introduce a
+novel design substantively expanding prior FDE work by wholly decoupling cipher
+implementations from the encryption process. In \sysB, we write hooks that
+effectively normalize the inputs and outputs required when switching between
+ciphers.
 
 % About: tradeoffs
 Finally, we present \sysC, a scheme that attempts to {\em quantify} the
