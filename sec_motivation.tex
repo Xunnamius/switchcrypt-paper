@@ -95,12 +95,11 @@ problem. This case is pervasive~\cite{battery-saver1, battery-saver2,
 battery-saver3, battery-saver4, battery-saver5}.
 
 {\em Cipher upgrade without downtime.} From mobile devices, we now turn to
-server-side storage that often require encryption upgrade \cite{some-citations}.
-A server provider might decide to completely upgrade from a encryption
-technology that has been broken into a stronger encryption technology. Ideally
-during the switch, the server still can continuously serves users without any
+server-side storage. A server provider might decide to completely upgrade from
+one encryption technology (\eg that has been broken) to another. Ideally, during
+the switch the server would maintain its service-level agreements without any
 downtime. However, without kernel-level support, the server provider must write
-an application level software that performs the whole switching operation and
+application-level software that performs the whole switching operation and
 manually redirects users to the appropriate files.
 
 {\em Select files.} Learning from the wireless literature, it is advocated that
