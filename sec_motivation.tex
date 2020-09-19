@@ -72,7 +72,7 @@ with stream ciphers. First, devices today commonly employ solid-state storage
 with Flash Translation Layers (FTL), which operate similarly to Log-structured
 File Systems (LFS)~\cite{LFS, F2FS, NILFS}. The no in-place update
 ``overwrite-averse'' nature of FTL and LFS-like storage allows stream cipher
-based FDE to be efficiently implemented (\eg ChaCha with F2FS performs on
+based FDE to be efficiently implemented (\eg ChaCha20 with F2FS performs on
 average $1.72$× better than ext4~\cite{StrongBox}). Second, mobile devices now
 support trusted hardware, such as Trusted Execution Environments
 (TEE)~\cite{TrustZone, TEE} and secure storage areas~\cite{eMMC-standard}, which
@@ -114,14 +114,13 @@ must write application-level software that performs the whole switching
 operation and manually redirects users to the appropriate files. It would be
 beneficial if this could be handled entirely at the storage layer instead.
 
-{\em Scalable encryption.} Learning from the wireless literature, it is accepted
-that wireless systems are subject to variable transmission rates and data
-quality requirements when transacting blocks consisting of both high- and
-low-priority data that should be encrypted differently~\cite{ScalableSecurity}.
-\hank{I got really confused by the previous sentence.  I think that just needs to be rewritten because I am not clear what lesson we are supposed to be learning from wireless.  Is it that some data is transmitted with lower expected loss than others?  If so, I think that can be worded much more clearly.}
-It would be beneficial if our storage system handled the heterogeneous
-block-by-block ``scalable'' nature of our encryption requirement. Examples of
-data with variable encryption requirements include corporate and government
-documents where information is routinely classified and/or redacted, credit card
-information in a shopping transaction~\cite{ScalableSecurity}, and file-level
+{\em Scalable encryption.} It is known that systems communicating over the
+internet transact both high- and low-priority data that should be encrypted
+differently~\cite{ScalableSecurity}; this data is often bundled together in the
+same transaction. It would be beneficial if our storage system could take
+advantage of the heterogeneous block-by-block ``scalable'' nature of such an
+encryption requirement to reduce latency and conserve energy. Examples of data
+with variable encryption requirements include corporate and government documents
+where information is routinely classified/redacted, credit card or information
+in a shopping transaction~\cite{ScalableSecurity}, and directory or file-level
 encryption transparent to the filesystem.
