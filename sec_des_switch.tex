@@ -25,48 +25,50 @@ spatial switching as explained below and summarized in \cref{tbl:switch}.
 
 \input{graphics/tbl-switch}
 
-% ---------------------------------- forward switching
+% ---------------------------------- Forward switching
 
 \mysub{Forward switching.} In the case of the battery saver mode example, we
 want to switch from cipher ``\cone'', a highly-secure, energy-expensive cipher
-to cipher ``\ctwo,'' a less-secure but more energy-efficient cipher; however, to
-truly save energy, {\em we only want to switch nuggets that are touched during
-I/O}. This switching model would be enabled as part of a higher-level policy
-enacted by the OS or user.
+to cipher ``\ctwo,'' a less-secure but more energy-efficient cipher. However,
+for efficiency, {\em we only switch nuggets on demand}, \ie that are touched
+during I/O. This switching model would be enabled as part of a higher-level
+policy (\ie battery saver mode) enacted by the OS or user.
 
-Table \cref{tbl:switch} summarizes what happens during the switch. For new
-incoming writes, the data will be ciphered with \ctwo. Later on, when the
-Forward switching ends, the data will remain ciphered with \ctwo. The reason we
-do not re-cipher it back to \cone in the future is that the files might be just
-a temporary file (\eg movie download) that is only read once. However, if the
-data is read again in the future when \cone is active again (\eg for backing up
-to the cloud), the data will then re-ciphered to \cone. For read operations, if
-the existing data (ciphered with \cone) is read during the switch, the data will
-be re-ciphered to \ctwo. The reason behind this is that re-ciphering to \ctwo is
-not expensive, and better to be done on demand on the first read (during the
-switching) than later. In general, forward switching limits the performance
-impact of cipher switching to individual nuggets being accessed. The data at
-rest (ciphered with \cone) that is never accessed during the switch remains in
-its original state.
+Table \cref{tbl:switch} summarizes what happens immediately after the active
+cipher is switched to \ctwo. For nugget-sized writes, new data is ciphered with
+\ctwo and committed as normal. For intra-nugget writes, the nugget is first
+decrypted using \cone and then re-ciphered using \ctwo with the new data
+included. The new nugget is then committed as normal. Re-ciphering only occurs
+when necessary; once a nugget is ciphered with \ctwo, no further switching is
+required. For reads, we consider the first, second, and nth read accesses. On
+the first read, the nugget is decrypted using \cone and the data returned. If
+that same nugget is read a second time, it is re-ciphered with \ctwo before the
+data is returned. On subsequent reads, the nugget is decrypted with \ctwo and
+read as normal.
+
+Later, for instance when battery saver mode is turned off and \cone becomes the
+active cipher again, nuggets are not automatically re-ciphered as, again, that
+would be inefficient. Nuggets will be re-ciphered on demand using the converse
+of the process described above. In general, Forward switching limits the
+performance and battery impact of cipher switching to the individual nuggets
+being accessed. The data at rest (ciphered with \cone) that is never accessed
+during the switch remains in its original state.
 
 % About: variants
-We note that there can be variants to the forward switching mode. The above
-concept favors performance. Another variant that can be support that favors
-stronger security can be done this way: For writes, the moment the switch back
-from \ctwo to \cone happens, the new data that was ciphered with \ctwo is
-quickly ciphered to \cone. To do this, we need to do more recording, while the
-one we proposed above can be done on demand (when the data is read in the
-future). Another variant for the read operations can also be done as follows:
-the data will {\em not} be re-ciphered on the first read. The intuition is that
-forward switching only happens temporarily (while the battery is low), hence
-data being read might only be read once and stay in the memory. However, if the
-data is read the second time (during the temporal period), the data is
-re-ciphered to \ctwo. These and other possible variants can be left for future
-work. So far, we find our version of forward switching suits a common
-battery-saving scenario.
+We note that there can be variants to the Forward switching mode. For instance,
+a variation on read operations: we consider the first, second, and nth read
+accesses distinctly. On the first read, the nugget is decrypted using \cone and
+the data returned. Only if that same nugget is read a second time is it
+re-ciphered with \ctwo before the data is returned. On subsequent reads, the
+nugget is decrypted with \ctwo and read as normal. The intuition is that Forward
+switching only happens temporarily (\eg while the battery is low), hence data
+being read might only be read once and stay in memory. However, if the nugget is
+read the second time, then the data is re-ciphered to \ctwo. This and other
+possible variants are left for future work. So far, we find our version of
+Forward switching suits a common battery-saving scenario.
 
 
-% ---------------------------------- mirrored switching
+% ---------------------------------- Mirrored switching
 
 \mysub{Mirrored Switching.} Next, we consider a different scenario where
 ``\cone'' is a recently-attacked and vulnerable encryption and ``\ctwo'' is a
@@ -101,7 +103,7 @@ regions would make things more straightforward for erase secure. We are not
 aware of any solution that allow multiple ciphers activated per drive volume.
 
 
-% ---------------------------------- selective switching
+% ---------------------------------- Selective switching
 
 \mysub{Selective Switching.} Storing classified materials, corporate secrets,
 etc. require the highest level of discretion, yet sensitive information like
