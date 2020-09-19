@@ -41,11 +41,9 @@ ciphered with \ctwo and committed as normal. For intra-nugget writes, the nugget
 is first decrypted using \cone and then re-ciphered using \ctwo with the new
 data included. The new nugget is then committed as normal. Re-ciphering only
 occurs when necessary; once a nugget is ciphered with \ctwo, no further
-switching is required. For reads, we consider the first, second, and nth read
-accesses. On the first read, the nugget is decrypted using \cone and the data
-returned. If that same nugget is read a second time, it is re-ciphered with
-\ctwo before the data is returned. On subsequent reads, the nugget is decrypted
-with \ctwo and read as normal.
+switching is required. For reads, the nugget is decrypted using \cone, it is
+re-ciphered with \ctwo, and then the data is returned. On subsequent reads, the
+nugget is decrypted with \ctwo and read as normal.
 
 Later, when battery saver mode is turned off and \cone becomes the active cipher
 again, nuggets are not automatically re-ciphered as, again, that would be

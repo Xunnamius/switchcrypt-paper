@@ -4,7 +4,10 @@
         \centering
         \begin{tabular}{lll}
                             & {\bf Read} & {\bf Write} \\\hline
-            {\bf Forward}   & 1st read: $D_{C_1}$                & $E_{C_2}$ (only if necessary) \\
+            {\bf Forward}   & 1st read: $D_{C_1}$ then $E_{C_2}$ & $E_{C_2}$ (only if necessary) \\
+                            & Nth read: $D_{C_2}$                & \\
+                            & Or variant version:                & \\
+                            & 1st read: $D_{C_1}$                & \\
                             & 2nd read: $D_{C_1}$ then $E_{C_2}$ & \\
                             & Nth read: $D_{C_2}$                & \\
             \hline
