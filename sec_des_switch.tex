@@ -27,26 +27,27 @@ spatial switching as explained below and summarized in \cref{tbl:switch}.
 
 % ---------------------------------- forward switching
 
-\mysub{Forward switching.} The first type of cipher switching we support is for
-the battery-saving example where we want to switch from cipher ``\cone'', a
-highly-secure, energy-expensive cipher to cipher ``\ctwo,'' less-secure but more
-energy-efficient one. This can be enabled with a battery-saving mode (the
-higher-level policy) supported by the OS.
+\mysub{Forward switching.} In the case of the battery saver mode example, we
+want to switch from cipher ``\cone'', a highly-secure, energy-expensive cipher
+to cipher ``\ctwo,'' a less-secure but more energy-efficient cipher; however, to
+truly save energy, {\em we only want to switch nuggets that are touched during
+I/O}. This switching model would be enabled as part of a higher-level policy
+enacted by the OS or user.
 
 Table \cref{tbl:switch} summarizes what happens during the switch. For new
 incoming writes, the data will be ciphered with \ctwo. Later on, when the
-temporal switching ends, the data will remain ciphered with \ctwo
-\hsg{correct?}. The reason we do not re-cipher it back to \cone in the future is
-that the files might be just a temporary file (\eg movie download) that is only
-read once. However, if the data is read again in the future when \cone is active
-again (\eg for backing up to the cloud), the data will then re-ciphered to
-\cone. For read operations, if the existing data (ciphered with \cone) is read
-during the switch, the data will be re-ciphered to \ctwo. The reason behind this
-is that re-ciphering to \ctwo is not expensive, and better to be done on demand
-on the first read (during the switching) than later. In general, forward
-switching limits the performance impact of cipher switching to individual
-nuggets being accessed. The data at rest (ciphered with \cone) that is never
-accessed during the switch remains in its original state.
+Forward switching ends, the data will remain ciphered with \ctwo. The reason we
+do not re-cipher it back to \cone in the future is that the files might be just
+a temporary file (\eg movie download) that is only read once. However, if the
+data is read again in the future when \cone is active again (\eg for backing up
+to the cloud), the data will then re-ciphered to \cone. For read operations, if
+the existing data (ciphered with \cone) is read during the switch, the data will
+be re-ciphered to \ctwo. The reason behind this is that re-ciphering to \ctwo is
+not expensive, and better to be done on demand on the first read (during the
+switching) than later. In general, forward switching limits the performance
+impact of cipher switching to individual nuggets being accessed. The data at
+rest (ciphered with \cone) that is never accessed during the switch remains in
+its original state.
 
 % About: variants
 We note that there can be variants to the forward switching mode. The above
