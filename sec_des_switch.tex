@@ -1,27 +1,26 @@
 \subsection{\sysA: Cipher Switching Models}\label{subsec:des-switch}
 
 % About: when and where
-Just like typical storage devices, at any moment, there is only {\em one active}
-cipher configuration (henceforth ``active configuration''). However, with \sysA,
-we provide a small temporal and spatial flexibility that allows movement from
-one configuration point to another or even settle on optimal configurations
-wholly unachievable with prior work. When a cipher switch is triggered, a
-different configuration becomes the active configuration, and ``re-ciphering''
-must be done --- using the just-deactivated configuration to decrypt a nugget's
-contents and using the active configuration to re-cipher it.
+Though not a technical limitation, it is helpful to think of \sys as having a
+single {\em active cipher configuration} among several available. With \sysA,
+our storage system has the flexibility to switch from one cipher
+configuration to another, or even settle on optimal configurations
+unachievable with prior work. When a cipher switch is triggered, a different
+configuration becomes the active configuration, and ``re-ciphering'' must be
+done, \ie using the deactivated configuration to decrypt a nugget's contents
+and using the active configuration to re-cipher it.
 
 % About: challenge
-The challenge here is to accomplish this while minimizing overhead. A naive
-approach would switch every nugget in the device to the active configuration
+The challenge here is to accomplish re-ciphering while minimizing overhead. A
+naive approach would switch every nugget to the active configuration
 immediately, but the latency and energy cost would be unacceptable. Hence, a
-more strategic approach is to provide different switching models that allow
-higher-level policies to choose; for example, depending on the use case, it may
-make the most sense to re-cipher a nugget immediately, or eventually, or to
-maintain several areas of differently-ciphered nuggets concurrently. The
-different models allow for nuggets to be re-ciphered in a variety of cases with
-minimal impact on performance and battery life and without compromising
-security. We introduce three switching strategies: temporal, mirrored, and
-selective. The first one forms a temporal switching while the latter two form a
+more strategic approach is to choose the switching model that is best for a
+given use case; for example, it may make the most sense to re-cipher a nugget
+immediately, or eventually, or to maintain several areas of differently-ciphered
+(heterogeneous) nuggets concurrently. Our models allow for nuggets to be
+re-ciphered in a variety of cases with minimal impact on performance and battery
+life and without compromising security. They are: Forward, Mirrored, and
+Selective. Forward  temporal switching while the latter two form a
 spatial switching, as explained below and summarized in Table \cref{tbl:switch}.
 
 \input{graphics/tbl-switch}
