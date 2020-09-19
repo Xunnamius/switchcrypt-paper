@@ -29,12 +29,12 @@ must address three key challenges:
   tightly coupled to the storage/encryption layer itself. For this, we introduce
   the \sysB (\cref{subsec:des-crypts}) component where we decouple cipher
   implementations from the core encryption algorithm by providing wrapper
-  interfaces that allows different encryption algorithms (``crypts'') to
+  interfaces that allow different encryption algorithms (``crypts'') to
   co-exist in the storage layer.
 
 \item We must help users understand the tradeoffs of different cipher
   configurations, hence we introduce \sysC (\cref{subsec:des-trade}), a method
-  that attempts to quantify the desirable properties of different cipher
+  that quantifies the desirable properties of different cipher
   configurations using several metrics such as the round count, ciphertext
   randomization, and ciphertext expansion cost.
 

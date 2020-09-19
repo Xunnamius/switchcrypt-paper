@@ -26,12 +26,14 @@ is summarized in \cref{tbl:switch}.
 
 % ---------------------------------- Forward switching
 
-\mysub{Forward switching.} In the case of the battery saver mode example, we
-want to switch from cipher ``\cone'', a highly-secure, energy-expensive cipher
-to cipher ``\ctwo,'' a less-secure but more energy-efficient cipher. However,
-for efficiency, {\em we only switch nuggets on demand}, \ie that are touched
-during I/O. This switching model would be enabled as part of a higher-level
-policy (\ie battery saver mode) enacted by the OS or user.
+\mysub{Forward switching.} In the case of the battery saver mode
+example, we want to switch from cipher ``\cone'', a highly-secure,
+energy-expensive cipher to cipher ``\ctwo,'' a less-secure but more
+energy-efficient cipher. However, for efficiency, {\em we only switch
+nuggets on demand}; \ie we change those nuggets that are touched
+during I/O. This switching model would be enabled as part of a
+higher-level policy (\ie battery saver mode) enacted by the OS or
+user.
 
 Table \cref{tbl:switch} summarizes what happens on I/Os immediately after the
 active cipher is switched to \ctwo. For nugget-sized writes, new data is
