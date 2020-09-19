@@ -46,16 +46,16 @@ that same nugget is read a second time, it is re-ciphered with \ctwo before the
 data is returned. On subsequent reads, the nugget is decrypted with \ctwo and
 read as normal.
 
-Later, for instance when battery saver mode is turned off and \cone becomes the
-active cipher again, nuggets are not automatically re-ciphered as, again, that
-would be inefficient. Nuggets will be re-ciphered on demand using the converse
-of the process described above. In general, Forward switching limits the
-performance and battery impact of cipher switching to the individual nuggets
-being accessed. The data at rest (ciphered with \cone) that is never accessed
-during the switch remains in its original state.
+Later, when battery saver mode is turned off and \cone becomes the active cipher
+again, nuggets are not automatically re-ciphered as, again, that would be
+inefficient. Nuggets will be re-ciphered on demand using the converse of the
+process described above. In general, Forward switching limits the performance
+and battery impact of cipher switching to the individual nuggets being accessed.
+The data at rest (ciphered with \cone) that is never accessed during the switch
+remains in its original state.
 
 % About: variants
-We note that there can be variants to the Forward switching mode. For instance,
+We note that there can be variants to the Forward switching model. For instance,
 a variation on read operations: we consider the first, second, and nth read
 accesses distinctly. On the first read, the nugget is decrypted using \cone and
 the data returned. Only if that same nugget is read a second time is it
@@ -70,55 +70,44 @@ Forward switching suits a common battery-saving scenario.
 
 % ---------------------------------- Mirrored switching
 
-\mysub{Mirrored Switching.} Next, we consider a different scenario where
-``\cone'' is a recently-attacked and vulnerable encryption and ``\ctwo'' is a
-newly recommended cipher that is just been added to \sys's latest kernel/module
-upgrade. Let us imagine a server-side storage operator who wants to switch from
-\cone to \ctwo without any server downtime. To achieve this, \sys since the
-beginning will partition the drive into 2 regions. That is, to support a
-full-drive cipher switch (supported by the block layer and without
-application/file system modification), we must pay the space cost to anticipate
-such a switch in the future. In this mode, we must add the ``migration'' period
-to reflect the transition window from \cone to \ctwo.
+\mysub{Mirrored switching.} Next, we consider a different scenario where
+``\cone'' is a cipher that has been superseded by ``\ctwo'', a newly recommended
+cipher that has just been added to \sys's latest kernel/module upgrade. Let us
+imagine a datacenter storage operator who wants to upgrade from \cone to \ctwo
+without any service interruptions. Anticipating this, our operator partitions
+available storage into two regions. That is, to support a full-drive cipher
+switch supported by the block layer and without application/file system
+modification, we must pay the space cost to anticipate such a switch.
 
 During the migration, as summarized in Table \cref{tbl:switch}, all write
-operations that hit the \cone's region will be mirrored to the \ctwo's region.
-At the same time, the data in \cone's region is re-ciphered incrementally to
-\ctwo's region. Still during the migration, read operations will be served by
-the original state (\cone's region) until the full switch happens. This is
-essentially similar to VM live migration \cite{live-vm-migration}. After
-the whole migration completes, to fully secure-erase the previous region, one
-can use a mechanism such as SSD Instant/Secure Erase~\cite{ISE1,ISE2,ISE3}, thus
-quickly and securely converging the drive to a single configuration without
-losing any data or suffering the egregious performance or battery penalty that
-comes with re-ciphering every nugget.
+operations that hit \cone's region will be mirrored to \ctwo's region.
+Meanwhile, in the background, the data in \cone's region is incrementally
+re-ciphered and written to \ctwo's region. Until the migration is complete, read
+operations will be served by \cone's region. This is very similar to VM live
+migration \cite{live-vm-migration}. After the migration completes, one can use a
+mechanism such as SSD Instant/Secure Erase~\cite{ISE1,ISE2,ISE3} to securely
+erase the previous storage region's data.
 
-We would like to note that it is fundamentally hard to have two cipher
-configurations enabled on the same drive. There are two reasons. First,
-..\hsg{anything about data structures, such as the extra space of teh nugget?
-Let us put more technical matters here, so reviewers can appreciate why we have
-to crude partition the drive like this.} Second, after the migration the
-previous region might need to be securely erased; here, not overlapping the two
-regions would make things more straightforward for erase secure. We are not
-aware of any solution that allow multiple ciphers activated per drive volume.
+In general, Mirrored switching allows us to converge storage state to a single
+cipher configuration without losing any data, suffering outages or downtime, or
+violating any critical service-level agreements. We note that, after the
+migration, the previous region's data needs to be securely erased to complete
+the upgrade; here, not overlapping the two regions makes Instant/Secure Erase
+straightforward~\cite{ISE1,ISE2}.
 
 
 % ---------------------------------- Selective switching
 
-\mysub{Selective Switching.} Storing classified materials, corporate secrets,
+\mysub{Selective switching.} Storing classified materials, corporate secrets,
 etc. require the highest level of discretion, yet sensitive information like
-this can appear within a (much) larger amount of data that we value less.
-
-For example, perhaps banking transaction information is littered throughout a
-PDF; perhaps passwords and other sensitive information exists within several
-much larger files. Using prior techniques, either all the data would be stored
-with high overhead, the critical data would be stored without the mandated
-cipher type, or the data would have to be split among separate files requiring
+this can appear within a (much) larger amount of data that we value less. For
+example, perhaps banking transaction information is littered throughout a PDF;
+perhaps passwords and other sensitive information exists within several much
+larger files. Using prior techniques, either all the data would be stored with
+high overhead, the critical data would be stored without the mandated cipher
+type, or the data would have to be split among separate files requiring
 potentially complex and error-prone management schemes. \sys allows us to
 sidestep these issues.
-
-\hsg{also, need to talk to Bernard, whether dividing up the partitions is really
-fundemental because of the way metadata/transcation journal is managed???}
 
 When \sys is initialized with the Selective strategy, the drive is partitioned
 into $C$ regions where $C$ represents the total number of available ciphers in
