@@ -1,31 +1,30 @@
 \begin{table}[t]
     \begin{center}
-        \scriptsize
+        \small
         \centering
-        \begin{verbatim}
-            // Change this with a real table, use paragraph
-            // style for cell content (I assume you know how)
-                      Read                   Write
-            ---------------------------------------------------
-            Forward   Not-ciphered           Ciphered with B,
-                      if 1st read            Re-ciphered on demand
-                      Re-ciphered with B on  in the future when
-                      2nd read               A is active again
-            ---------------------------------------------------
-            Mirrored  Read from the prev     Duplicated both
-                      cipher's region if     in the prev and
-                      during migration.      new regions until
-                      Read from the new      migration completes
-                      region if migration
-                      completes
-            ---------------------------------------------------
-        \end{verbatim}
+        \begin{tabular}{lll}
+                            & {\bf Read} & {\bf Write} \\\hline
+            {\bf Forward}   & 1st read: $D_{\alpha}$                  & $E_{\beta}$ (only if necessary) \\
+                            & 2nd read: $D_{\alpha}$ then $E_{\beta}$ & \\
+                            & Nth read: $D_{\beta}$                   & \\
+            \hline
+            {\bf Mirrored}  & When migrating: $D_{\alpha}$ & I/O is duplicated: \\
+                            & from $\alpha$'s region       & $E_{\alpha}$ to $\alpha$'s region \\
+                            & After migrating: $D_{\beta}$ & and $E_{\beta}$ to $\beta$'s region \\
+                            & from $\beta$'s region        & \\
+            \hline
+            {\bf Selective} & Encrypted with $\alpha$: $D_{\alpha}$ & Should use $\alpha$: $E_{\alpha}$ \\
+                            & Encrypted with $\beta$: $D_{\beta}$   & Should use $\beta$: $E_{\beta}$ \\
+            \hline
+        \end{tabular}
     \end{center}
 
-    \mycaption{tbl:switch}{Re-ciphering/switching modes}{The table explains for
-    every mode what happens on I/Os when the switch happens from cipher A to
-    cipher B. ``Read'' means read of existing data during the switch. ``Write''
-    means new.}
+    \mycaption{tbl:switch}{Switching Models and Re-ciphering}{This table
+    summarizes for each switching model what happens on I/Os to a nugget when
+    \sys switches from cipher $\alpha$ to cipher $\beta$ (see
+    \cref{subsec:des-switch}). ``Read'' denotes returning data during the
+    switch. ``Write'' denotes committing new data. $E_X$ denotes encryption (\ie
+    re-ciphering) and $D_X$ denotes decryption using cipher $X$.}
 \end{table}
 
 % ------------- floating: \begin{floatingtable}[r]{ % note the open curly

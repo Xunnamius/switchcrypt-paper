@@ -3,25 +3,25 @@
 % About: when and where
 Though not a technical limitation, it is helpful to think of \sys as having a
 single {\em active cipher configuration} among several available. With \sysA,
-our storage system has the flexibility to switch from one cipher
-configuration to another, or even settle on optimal configurations
-unachievable with prior work. When a cipher switch is triggered, a different
-configuration becomes the active configuration, and ``re-ciphering'' must be
-done, \ie using the deactivated configuration to decrypt a nugget's contents
-and using the active configuration to re-cipher it.
+our storage system has the flexibility to switch from one cipher configuration
+to another, or even employ multiple configurations in a way unachievable with
+prior work. When a cipher switch is triggered, a different configuration becomes
+the active configuration, and ``re-ciphering'' must be done, \ie using the
+deactivated configuration to decrypt a nugget's contents and using the active
+configuration to re-cipher it.
 
 % About: challenge
 The challenge here is to accomplish re-ciphering while minimizing overhead. A
 naive approach would switch every nugget to the active configuration
 immediately, but the latency and energy cost would be unacceptable. Hence, a
-more strategic approach is to choose the switching model that is best for a
-given use case; for example, it may make the most sense to re-cipher a nugget
-immediately, or eventually, or to maintain several areas of differently-ciphered
-(heterogeneous) nuggets concurrently. Our models allow for nuggets to be
-re-ciphered in a variety of cases with minimal impact on performance and battery
-life and without compromising security. They are: Forward, Mirrored, and
-Selective. Forward  temporal switching while the latter two form a
-spatial switching, as explained below and summarized in Table \cref{tbl:switch}.
+more strategic approach is is necessary. For example, depending on the use case,
+it may make the most sense to re-cipher a nugget immediately, or eventually, or
+to maintain several areas of differently-ciphered nuggets concurrently. Our
+models allow for nuggets to be re-ciphered in a variety of cases with minimal
+impact on performance and battery life and without compromising security; they
+are: Forward, Mirrored, and Selective. The Forward model represents a form of
+temporal switching while the Mirrored and Selective models represent forms of
+spatial switching as explained below and summarized in \cref{tbl:switch}.
 
 \input{graphics/tbl-switch}
 
