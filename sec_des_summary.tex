@@ -50,7 +50,7 @@ in-memory Merkle tree~\cite{StrongBox}.
 Switching strategies add an additional security concern not addressed by prior
 work: even if we initiate a ``cipher switch,'' there may still be data on the
 drive that was encrypted with an inactive configuration. Is this a problem? For
-the Forward strategy, this implies data may at any time be encrypted using the
+the Forward model, this implies data may at any time be encrypted using the
 ``least desirable cipher''. For the Mirrored and Selective strategies, the drive
 is partitioned into regions where nuggets are guaranteed to be encrypted with
 each cipher, including the ``least desirable cipher''. However, in terms of

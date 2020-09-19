@@ -23,7 +23,7 @@ When evaluating switching strategies, a finer breakdown in workloads is made
 using a pre-selected pair of ciphers we call the \emph{primary cipher
 configuration} and \emph{secondary cipher configuration}. \sys is initialized at
 the primary configuration. Once we trigger a cipher switch, \sys moves towards
-the secondary configuration via switching strategy.
+the secondary configuration via switching model.
 
 The cipher switch is triggered according to a certain \emph{ratio} of I/O
 operations. For example: given 10 40MB read-write operations, we may write and
@@ -57,7 +57,7 @@ In this section we answer the following questions:
   configuration points not accessible with prior work?
   (\cref{subsec:eval-dynamic})
   \item What is the performance and storage overhead of each cipher switching
-  strategy? (\cref{subsec:eval-overhead})
+  model? (\cref{subsec:eval-overhead})
 \end{enumerate}
 
 
@@ -100,7 +100,7 @@ normalized 4KB workloads. ChaCha8 is not slower than ChaCha20.
 \cref{fig:eval-forward} shows the normalized relative round count and ciphertext
 randomization (normed R+R vector) versus median normalized latency tradeoff
 between different stream ciphers for our sequential and random I/O workloads
-with cipher switching using the Forward strategy. After a certain number of
+with cipher switching using the Forward model. After a certain number of
 write-read I/O operations, a cipher switch is initiated and \sys begins using
 the secondary cipher to encrypt and decrypt data. For each pair of ciphers, this
 is repeated three times: once at every ratio point \emph{between} our static
@@ -129,7 +129,7 @@ with the same configuration of ratios as \cref{fig:eval-forward}.
 
 For the 40MB, 5MB, and 512KB workloads (40MB is shown), we see that Mirrored and
 Selective \emph{read} workloads and the Selective \emph{write} workload achieve
-parity with the Forward strategy experiments. This makes sense, as most of the
+parity with the Forward model experiments. This makes sense, as most of the
 overhead for Selective and Mirrored reads is determining which part of the drive
 to commit data to. The same applies to Selective writes. For the 4KB Mirrored
 and Selective \emph{read} workloads and the Selective \emph{write} workload, we
@@ -151,7 +151,7 @@ We calculate that Forward switching has average overhead at 0.08x/0.10x for
 40MB, 5MB and 512KB read/write workloads compared to baseline I/O, demonstrating
 \sys's amortization of cipher switching costs. Average overhead is\\0.38x/0.44x
 for 4KB read/write workloads when \sys is unable to amortize cost. There is no
-spatial overhead with the Forward switching strategy.
+spatial overhead with the Forward switching model.
 
 Similarly, we calculate that Selective switching has average overhead at 0x/0.3x
 for 40MB, 5MB and 512KB read/write workloads compared to baseline I/O. Average

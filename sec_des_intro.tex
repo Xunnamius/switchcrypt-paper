@@ -4,13 +4,13 @@
 \sys is a block layer kernel module that can replace other state-of-the-art
 block-level encryption technologies such as the popular dm-crypt. \sys does not
 require any modification in the application and, when using the Selective
-switching model, only a small modification in the file system layer to expose
-the inode-block mapping. The choice to implement \sys at the block layer is
-important to ensure the core logic of file systems does not have to be modified
-and that all metadata is encrypted and protected. Just like any other encryption
-technology, \sys must have a unit of encryption/decryption. In this paper we
-call that unit a ``nugget,'' which can be configured as one or more sequential
-blocks.
+switching model, only a small modification in the file system layer to include
+cipher choice in writes to the block layer. The choice to implement \sys at the
+block layer (as dm-crypt~\cite{dmcrypt} does) is important to ensure the core
+logic of file systems does not have to be modified and that all metadata is
+encrypted and protected. Just like any other encryption technology, \sys must
+have a unit of encryption/decryption. In this paper we call that unit a
+``nugget,'' which can be configured as one or more sequential blocks.
 
 To provide kernel support for heterogeneous FDE and live cipher switching, we
 must address three key challenges:

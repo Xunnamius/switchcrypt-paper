@@ -19,9 +19,8 @@ it may make the most sense to re-cipher a nugget immediately, or eventually, or
 to maintain several areas of differently-ciphered nuggets concurrently. Our
 models allow for nuggets to be re-ciphered in a variety of cases with minimal
 impact on performance and battery life and without compromising security; they
-are: Forward, Mirrored, and Selective. The Forward model represents a form of
-temporal switching while the Mirrored and Selective models represent forms of
-spatial switching as explained below and summarized in \cref{tbl:switch}.
+are: Forward, Mirrored, and Selective. How \sys reacts to I/Os under each model
+is summarized in \cref{tbl:switch}.
 
 \input{graphics/tbl-switch}
 
@@ -34,17 +33,17 @@ for efficiency, {\em we only switch nuggets on demand}, \ie that are touched
 during I/O. This switching model would be enabled as part of a higher-level
 policy (\ie battery saver mode) enacted by the OS or user.
 
-Table \cref{tbl:switch} summarizes what happens immediately after the active
-cipher is switched to \ctwo. For nugget-sized writes, new data is ciphered with
-\ctwo and committed as normal. For intra-nugget writes, the nugget is first
-decrypted using \cone and then re-ciphered using \ctwo with the new data
-included. The new nugget is then committed as normal. Re-ciphering only occurs
-when necessary; once a nugget is ciphered with \ctwo, no further switching is
-required. For reads, we consider the first, second, and nth read accesses. On
-the first read, the nugget is decrypted using \cone and the data returned. If
-that same nugget is read a second time, it is re-ciphered with \ctwo before the
-data is returned. On subsequent reads, the nugget is decrypted with \ctwo and
-read as normal.
+Table \cref{tbl:switch} summarizes what happens on I/Os immediately after the
+active cipher is switched to \ctwo. For nugget-sized writes, new data is
+ciphered with \ctwo and committed as normal. For intra-nugget writes, the nugget
+is first decrypted using \cone and then re-ciphered using \ctwo with the new
+data included. The new nugget is then committed as normal. Re-ciphering only
+occurs when necessary; once a nugget is ciphered with \ctwo, no further
+switching is required. For reads, we consider the first, second, and nth read
+accesses. On the first read, the nugget is decrypted using \cone and the data
+returned. If that same nugget is read a second time, it is re-ciphered with
+\ctwo before the data is returned. On subsequent reads, the nugget is decrypted
+with \ctwo and read as normal.
 
 Later, when battery saver mode is turned off and \cone becomes the active cipher
 again, nuggets are not automatically re-ciphered as, again, that would be
@@ -88,44 +87,45 @@ migration \cite{live-vm-migration}. After the migration completes, one can use a
 mechanism such as SSD Instant/Secure Erase~\cite{ISE1,ISE2,ISE3} to securely
 erase the previous storage region's data.
 
-In general, Mirrored switching allows us to converge storage state to a single
-cipher configuration without losing any data, suffering outages or downtime, or
-violating any critical service-level agreements. We note that, after the
-migration, the previous region's data needs to be securely erased to complete
-the upgrade; here, not overlapping the two regions makes Instant/Secure Erase
-straightforward~\cite{ISE1,ISE2}.
+In general, Mirrored switching allows us to converge a drive volume to a single
+cipher configuration without losing any data, suffering outages or downtime,
+requiring onerous manual effort, or violating any critical service-level
+agreements. We note that, after the migration, the previous region's data needs
+to be securely erased to complete the upgrade; here, not overlapping the two
+regions makes Instant/Secure Erase straightforward~\cite{ISE1,ISE2}.
 
 
 % ---------------------------------- Selective switching
 
-\mysub{Selective switching.} Storing classified materials, corporate secrets,
-etc. require the highest level of discretion, yet sensitive information like
-this can appear within a (much) larger amount of data that we value less. For
-example, perhaps banking transaction information is littered throughout a PDF;
-perhaps passwords and other sensitive information exists within several much
-larger files. Using prior techniques, either all the data would be stored with
-high overhead, the critical data would be stored without the mandated cipher
-type, or the data would have to be split among separate files requiring
-potentially complex and error-prone management schemes. \sys allows us to
-sidestep these issues.
+\mysub{Selective switching.} Finally, we consider the case of ``scalable
+encryption.'' The key insight lies in recognizing that, when storing classified
+materials, corporate secrets, intellectual property, and other information that
+requires the highest level of discretion, such sensitive information often
+appears within a (much) larger amount of data that is valued less. For example,
+perhaps banking transaction information is littered throughout a PDF; perhaps
+passwords and other sensitive information exists within several much larger log
+files. Using prior techniques, either all the data would be stored with
+high-overhead cipher, the critical data would be stored without the mandated
+cipher type, or the data would have to be split among separate files requiring a
+complex and potentially error-prone encryption management scheme.
 
-When \sys is initialized with the Selective strategy, the drive is partitioned
-into $C$ regions where $C$ represents the total number of available ciphers in
-the system; each regions' nuggets are encrypted by each of the $C$ ciphers
-respectively. For instance, were \sys initialized using two ciphers ($C = 2$),
-the drive would be partitioned in half; all nuggets in the first region would be
-encrypted with the first cipher while all nuggets in the second would be
-encrypted with the other.
+\sys allows us to sidestep these issues by supporting heterogeneous FDE, \ie
+encrypting different nuggets with different cipher configurations in the same
+drive volume and even the same file. With Forward switching, we toggled nuggets
+between two cipher configurations to trade off battery life and security; with
+Selective switching, we want to select a specific cipher configuration each time
+we encrypt a nugget to trade off performance and security.
 
-When using this strategy, the active cipher determines which partition we
-``select'' for I/O operations. Hence, unlike the Forward strategy, which
-schedules individual nuggets to be re-ciphered at some point in time after the
-active configuration is switched, the Selective strategy allows the wider system
-to indicate \emph{where} on the drive a read or write operation should occur. In
-this way, the Selective strategy represents a form of spatial cipher switching
-where different regions of the drive can store differently-ciphered nuggets
-independently and concurrently. A user could take advantage of this to, for
-instance, set up regions with different security properties and performance
-characteristics, managing them as distinct virtual drives or transparently
-reading/writing bytes to different security regions on the same drive. IO
-Differentiation is not new.
+Table \cref{tbl:switch} summarizes what happens on I/Os when \sys is initialized
+using the Selective model with two available cipher configurations: the
+high-overhead high-security \cone and the low-overhead reduced-security \ctwo.
+Suppose we have a multi-gigabyte corporate document that needs to be continually
+disseminated to and consumed by multiple parties. On writes, we want certain
+high priority secrets in this document to be available to only a subset of
+receivers, so we should use our powerful but resource-intensive \cone to encrypt
+nuggets containing these secrets. On the other hand, the remainder of
+surrounding nuggets should use the more performant \ctwo, allowing other parties
+to interact with the low-priority data (perhaps on a lightweight mobile device)
+without experiencing degraded storage performance. On reads, \sys uses its own
+metadata to automatically determine which cipher configuration to use for
+decryption.
