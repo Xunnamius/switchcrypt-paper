@@ -4,24 +4,24 @@
         \centering
         \begin{tabular}{lll}
                             & {\bf Read} & {\bf Write} \\\hline
-            {\bf Forward}   & 1st read: $D_{\alpha}$                  & $E_{\beta}$ (only if necessary) \\
-                            & 2nd read: $D_{\alpha}$ then $E_{\beta}$ & \\
-                            & Nth read: $D_{\beta}$                   & \\
+            {\bf Forward}   & 1st read: $D_{C_1}$                & $E_{C_2}$ (only if necessary) \\
+                            & 2nd read: $D_{C_1}$ then $E_{C_2}$ & \\
+                            & Nth read: $D_{C_2}$                & \\
             \hline
-            {\bf Mirrored}  & When migrating: $D_{\alpha}$ & I/O is duplicated: \\
-                            & from $\alpha$'s region       & $E_{\alpha}$ to $\alpha$'s region \\
-                            & After migrating: $D_{\beta}$ & and $E_{\beta}$ to $\beta$'s region \\
-                            & from $\beta$'s region        & \\
+            {\bf Mirrored}  & When migrating: $D_{C_1}$  & I/O is duplicated: \\
+                            & from \cone's region        & $E_{C_1}$ to \cone's region \\
+                            & After migrating: $D_{C_2}$ & and $E_{C_2}$ to \ctwo's region \\
+                            & from \ctwo's region        & \\
             \hline
-            {\bf Selective} & Encrypted with $\alpha$: $D_{\alpha}$ & Should use $\alpha$: $E_{\alpha}$ \\
-                            & Encrypted with $\beta$: $D_{\beta}$   & Should use $\beta$: $E_{\beta}$ \\
+            {\bf Selective} & Encrypted with \cone: $D_{C_1}$ & Should use \cone: $E_{C_1}$ \\
+                            & Encrypted with \ctwo: $D_{C_2}$ & Should use \ctwo: $E_{C_2}$ \\
             \hline
         \end{tabular}
     \end{center}
 
     \mycaption{tbl:switch}{Switching Models and Re-ciphering}{This table
     summarizes for each switching model what happens on I/Os to a nugget when
-    \sys switches from cipher $\alpha$ to cipher $\beta$ (see
+    \sys switches from cipher \cone to cipher \ctwo (see
     \cref{subsec:des-switch}). ``Read'' denotes returning data during the
     switch. ``Write'' denotes committing new data. $E_X$ denotes encryption (\ie
     re-ciphering) and $D_X$ denotes decryption using cipher $X$.}
