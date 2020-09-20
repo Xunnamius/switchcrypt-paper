@@ -1,37 +1,36 @@
 \subsection{Putting It All Together}\label{subsec:des-summary}
 
-After describing the three main contributions, now we discuss other details
-surrounding the three main components.
+Here we discuss other details surrounding our three main contributions.
 
 % ---------------------------------- metadata
 
-\mysub{Secure metadata management.} The focus of this paper is to implement
-mechanisms and policies to perform flexible switching of cipher configurations
-that can be built on top of existing block-level encryption module (aka.
-``encryption driver'') that already provides the management of the encryption
-data structures. There were a couple of open source choices to start with such
-as Linux encryption device mapper~\cite{dmcrypt,DmC-Android}, encryption-ready
-F2FS filesystem~\cite{F2FS}, or StrongBox \cite{StrongBox}. We decided to build
-atop StrongBox because it already implements stream ciphers such as ChaCha and
-already employs a nugget-based drive layout.
+\mysub{Secure metadata management.} The focus of this work is to implement
+mechanisms and policies to perform flexible switching of cipher configurations.
+These configurations are built atop an existing block-level encryption module
+(or ``encryption driver'') that manages our data structures and provides
+cryptographic support. There were several open source choices for an encryption
+driver: Linux's encryption device mapper~\cite{dmcrypt,DmC-Android},
+encryption-ready F2FS filesystem~\cite{F2FS}, or StrongBox~\cite{StrongBox}. We
+decided to build \sys atop StrongBox because it already implements stream cipher
+based FDE and employs a nugget-based drive layout.
 
-\sys depends on several data structure management provided in StrongBox, such as
-its transaction and rekeying journals (for never writing data encrypted with the
-same key to the same location, hence avoiding pad reuse violations), Merkle tree
-(for tracking the drive state such as \hsg{explain a bit more}), monotonic
-counter (on a trusted hardware to prevent rollbacks), keycount store (to derive
-the nugget's unique encryption key from some master secret and limit the maximum
-length of any plaintext input to ciphers), and per-nugget metadata (to store
-cipher-specific extra metadata \hsg{true??}). Every drive partition also has a
-``head'' area that indicates which cipher is currently active.
+\sys depends on the data structure management provided by StrongBox, such as its
+{\em transaction} and {\em rekeying journals} to avoid overwrite
+violations~\cite{StrongBox}, {\em Merkle tree} to avoid rollback and related
+attacks~\cite{StrongBox}, {\em monotonic counter} on a trusted hardware to
+prevent rollbacks, {\em keycount store} to derive unique encryption keys, and
+{\em per-nugget metadata} to store cipher-specific metadata (useful for
+ciphertext-expanding ciphers). Every \sys volume also has a ``head'' area that
+stores implementation-wide data like the master encryption key or which cipher
+is currently active.
 
-While we reuse some of the components, all of these are tightly integrated to
-the ciphers that they implemented (specifically ChaCha, and \xxx). We had to
-untangle this, hence the contribution in the \sysB component where we now expose
-more structured interfaces allowing cipher implementors to easily build the
-metadata management of their cipher algorithm around the interfaces. More
-specifically, out of all the five \hsg{true??} StrongBox components above, only
-\xxx can be reused as is, while the rest needs to be modularized and rewritten.
+While we reuse some StrongBox components, all of these are tightly integrated to
+with a special ChaCha20 implementation. We had to untangle this, hence the \sysB
+contribution, where we expose structured interfaces allowing cipher implementors
+to easily build crypts from any off-the-shelf stream cipher implementation.
+Specifically, of the six StrongBox components listed above, only the keycount
+store and monotonic counter can be reused as is; the others were rewritten to
+support \sysA and \sysB.
 
 % ---------------------------------- security
 
@@ -56,8 +55,7 @@ is partitioned into regions where nuggets are guaranteed to be encrypted with
 each cipher, including the ``least desirable cipher''. However, in terms of
 confidentiality, the confidentiality guarantee of \sys can be reduced to the
 individual confidentiality guarantees of the available ciphers used to encrypt
-nuggets. \hsg{need to double check that this statement is still true, after I
-already rewrite the design section.}
+nuggets.
 
 % ---------------------------------- integration
 \mysub{Higher-level integration.} \sys expects a higher-level integration/policy
