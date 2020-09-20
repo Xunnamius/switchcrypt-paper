@@ -1,4 +1,4 @@
-\subsection{\sysB: Generic Cipher Interface}\label{subsec:des-crypts}
+\subsection{\sysB: Cipher Wrapper Interface}\label{subsec:des-crypts}
 
 % About: challenge, input, output
 One of the goals of \sys is that we might use any stream cipher regardless of
@@ -21,7 +21,7 @@ nuggets \emph{with any of these ciphers} at any moment with low overhead and
 without tight coupling to any specific implementation detail. Hence, we must
 abstract away these input and output requirements by decoupling cipher
 implementations from the core encryption process. We present \sysB, a collection
-of interfaces that allow implementors to write light (50-200 LOC) wrapper
+of interfaces that allow implementors to write light (<100 LOC) wrapper
 functions around cipher implementations without modifications to third-party
 code; we call these wrapped ciphers {\em crypts}. Crypts present \sys with a
 uniform encryption and decryption interface for each cipher, enabling normally
@@ -60,15 +60,15 @@ and other tedious calculations.
 
 {\bf \texttt{read\_interface}} and {\bf \texttt{write\_interface}}, on the other
 hand, treat encryption and decryption as distinct concerns.
-\\\texttt{read\_interface} handles decryption during reads.
-\\\texttt{write\_interface} handles encryption and re-ciphering during writes.
-Crypts receive full access to \sys internals, giving wrapper code complete
-control over the encryption and decryption process and allowing implementers to
-bypass parts of the nugget-based storage layout if necessary. This comes at the
-cost of increased code complexity and potential performance implications, since
-\sys must account for not having absolute control over its internal data
-structures during function invocation.
+\texttt{read\_interface} handles decryption and re-ciphering during reads.
+\texttt{write\_interface} handles encryption and re-ciphering during writes.
+Crypts receive full access to \sys internals, giving wrapper code deep hooks
+into the encryption and decryption process and allowing implementers to bypass
+parts of the nugget-based storage layout if necessary. This comes at the cost of
+increased code complexity and potential performance implications, since \sys
+must account for not having absolute control over its internal data structures
+when using this crypt.
 
-For this work we have implemented \numConfigs crypts (\eg for ChaCha20,
-Freestyle, AES-CTR, AES-XTS, Rabbit, Sosemanuk), each in 50-200 LOC without the
-core cipher algorithm.
+For this work we have implemented \numConfigs crypts using \numCiphers
+ciphers---ChaCha, Freestyle, AES-CTR, AES-XTS, Rabbit, Sosemanuk, HC-128---each
+in under 100 LOC (excluding the cipher algorithm itself).
