@@ -3,29 +3,7 @@
 \textbf{Decoupling ciphers from the encryption process.} To flexibly switch
 between configurations in \sys requires a generic cipher interface. This is
 challenging given the variety of inputs required by various stream ciphers, the
-existence of non-length-preserving ciphers, and other differences. We achieve
-the required generality by defining independent storage units called
-\emph{nuggets}; we borrow this terminology from prior work (see
-\cite{StrongBox}) to easily differentiate our logical blocks (nuggets) from
-physical drive and other storage blocks. And since they are independent, we can
-use our interface to select any configuration to encrypt or decrypt any nugget
-at any point.
-
-... and interface for \sysB. Comes with an interface.
-
-\hsg{what do you exactly mean by: \\
-- ``crypts'' needs to be a thing? \\
-- ``implementation detail'' \\
-- ``cipher implementations'' \\
-- the ``encryption/decryption process'' \\
-- ``modification to third party code'' \\
-- ``allows any stream cipher to be integrated to \sys'' \\
-- what is the ``cryptographic driver'' \\
-- ``interface'' -- interface between what and what? between the OS and \sys?
-  between \sys and the cipher configuration? who calls the xorInterface,
-  read/writeInterface? \\
-- ``\sys internals'' \\
-}
+existence of non-length-preserving ciphers, and other differences.
 
 % About: challenge, input, output
 One of the goals of \sys is that we might use any stream cipher regardless of

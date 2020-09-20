@@ -16,17 +16,15 @@ whenever possible. Given that the FDE industry standard is AES-XTS, we consider
 initializing our drive with it. At this point, three primary concerns present
 themselves: performance, vulnerability and inflexibility.
 
-First, it is well known that AES-XTS adds significant latency and
-power overhead to I/O operations, especially on mobile and
-battery-constrained devices~\cite{google-engadget,
-  android-M-mobile-motivation, android-M-mobile-motivation-2}. As the
-drive must be encrypted at all times, we must accept this hit to
-performance and battery life. Worse, if our device does not support
-hardware accelerated AES (which is hardly ubiquitous) performance will
-be degraded even further; I/O latency can be as high as
-3--5x~\cite{StrongBox}. To provide the security without the overhead,
-there are {\em faster, more energy-efficient} stream ciphers we might
-consider instead.
+First, it is well known that AES-XTS adds significant latency and power overhead
+to I/O operations, especially on mobile and battery-constrained
+devices~\cite{google-engadget, android-M-mobile-motivation,
+android-M-mobile-motivation-2}. As the drive must be encrypted at all times, we
+must accept this hit to performance and battery life. Worse, if our device does
+not support hardware accelerated AES (which is hardly ubiquitous) performance
+will be degraded even further; I/O latency can be as high as
+3--5x~\cite{StrongBox}. To provide the security without the overhead, there are
+{\em faster, more energy-efficient} stream ciphers we might consider instead.
 
 Second, AES-XTS is designed to mitigate threats to drive data ``at rest,'' which
 assumes an attacker cannot access snapshots of our encrypted data nor manipulate
@@ -36,8 +34,9 @@ vulnerability: an attacker can passively glean information about the plaintext
 over time by contrasting those snapshots, leading to confidentiality violations
 in some situations~\cite{XEX, XTS}. Unfortunately, the backups required by this
 scenario function as snapshots for an attacker. There are {\em ciphertext
-randomizing} stream ciphers we can use that can be safely backed up, but they are
-known to be an additional source of latency and power overhead~\cite{Freestyle}.
+randomizing} stream ciphers we can use that can be safely backed up, but they
+are known to be an additional source of latency and power
+overhead~\cite{Freestyle}.
 
 Third, our device is battery constrained, placing a cap on our energy budget
 that can change at any moment as we transition from line power to battery power
@@ -45,12 +44,11 @@ and back. Our storage system should respond to these changing requirements,
 including reducing energy use when the user wants to conserve power (i.e.
 ``battery saver mode''), all without violating any other concerns.
 
-The fundamental challenge is that there is no single cipher that
-addresses all concerns simultaneously; however, these concerns change
-over time (e.g., energy efficieny is more important when battery is
-low).  Hence, a homogeneous FDE solution will always sacrifice one
-concern for the other where a flexible {\em heterogeneous} approach
-may not.
+The fundamental challenge is that there is no single cipher that addresses all
+concerns simultaneously; however, these concerns change over time (e.g., energy
+efficieny is more important when battery is low).  Hence, a homogeneous FDE
+solution will always sacrifice one concern for the other where a flexible {\em
+heterogeneous} approach may not.
 
 
 % =======================================================
@@ -93,35 +91,18 @@ after leaving battery-saver mode. Clearly, there is no one-size-fits-all
 encryption solution and some flexibility is demanded. Below we present \numCases
 such case studies.
 
-\hank{I noticed two issues here with the introduction of these case
-  studies in the intro and their presentation here.  First, they are
-  presented in two different orders.  Second, they use two different
-  names without tying them together.  The intro order is forward,
-  selective, mirrored.  Here is is battery, upgrade, scalable.  My
-  suggestion is to use the same orderig in both cases and then remind
-  readers in this section why these case studies exist. So, it should
-  be battery needs forward switching, different file security needs
-  selective, and upgrade needs mirrored.  In other words, use the same
-  ordering everywhere (later in the paper as well) and remind readers
-  that each case study connects to a technical contribution of the
-  paper.  Added after reading further, so it looks like the ordering
-  is just inconsistent everywhere.  In section2 and section 3, the
-  orderings match, but the intro and the usecases subsection swap
-  mirrored and selective.  I think I like the ordering here and in
-  section 3, so let's keep that and change the intro and usecases
-  subsection to match. }
+{\em ``Battery saver'' mode and Forward switching.} In situations like the
+netbook example above, the user might want to prioritize reducing the total
+energy use when the battery is low. While in this ``battery saver mode,'' it
+would be beneficial if the storage system could switch to a more
+energy-efficient cipher and pause the cloud backup momentarily. A user would be
+willing to accept this tradeoff knowing that within a few hours they will have
+access to power and could resume uploads when the storage system switches back,
+which is no different from an internet connection problem. This case is
+pervasive~\cite{battery-saver1, battery-saver2, battery-saver3, battery-saver4,
+battery-saver5}.
 
-{\em ``Battery saver'' mode.} In situations like the netbook example above, the
-user might want to prioritize reducing the total energy use when the battery is
-low. While in this ``battery saver mode,'' it would be beneficial if the storage
-system could switch to a more energy-efficient cipher and pause the cloud backup
-momentarily. A user would be willing to accept this tradeoff knowing that within
-a few hours they will have access to power and could resume uploads when the
-storage system switches back, which is no different from an internet connection
-problem. This case is pervasive~\cite{battery-saver1, battery-saver2,
-battery-saver3, battery-saver4, battery-saver5}.
-
-{\em Cipher upgrade without downtime.} From mobile devices, we now turn to
+{\em Cipher upgrade and Mirrored switching.} From mobile devices, we now turn to
 server-side storage where we might require an encryption
 upgrade~\cite{upgrade-encryption1,upgrade-encryption2,upgrade-encryption3}. A
 server provider might decide to completely upgrade from one encryption
@@ -132,12 +113,13 @@ must write application-level software that performs the whole switching
 operation and manually redirects users to the appropriate files. It would be
 beneficial if this could be handled entirely at the storage layer instead.
 
-{\em Scalable encryption.} It is known that systems communicating over a network
-transmit both high- and low-priority data and those priority levels  should be encrypted
-differently~\cite{ScalableSecurity}. It would be beneficial if our storage system could take
-advantage of the heterogeneous block-by-block ``scalable'' nature of such an
-encryption requirement to reduce latency and conserve energy. Examples of data
-with variable encryption requirements include corporate and government documents
+{\em Scalable encryption and Selective switching.} It is known that systems
+communicating over a network transmit both high- and low-priority data and those
+priority levels  should be encrypted differently~\cite{ScalableSecurity}. It
+would be beneficial if our storage system could take advantage of the
+heterogeneous block-by-block ``scalable'' nature of such an encryption
+requirement to reduce latency and conserve energy. Examples of data with
+variable encryption requirements include corporate and government documents
 where information is routinely classified/redacted, credit card or information
 in a shopping transaction~\cite{ScalableSecurity}, and directory or file-level
 encryption transparent to the filesystem.
