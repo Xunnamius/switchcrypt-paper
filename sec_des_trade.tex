@@ -2,21 +2,16 @@
 Properties}\label{subsec:des-trade}
 
 % About: background
-To reason about when to trade off between the ciphers evaluated in this work, we
-must have a way to compare ciphers' utility in the context of \sys FDE. To
-obtain a space of configurations that we might reason about, it is necessary to
-compare certain properties of stream ciphers useful in the FDE context. However,
-different ciphers have a wide range of security properties, performance
-profiles, and output characteristics, including those that randomize their
-outputs and those with non-length-preserving outputs---\ie{the cipher outputs
-more data than it takes in}. To address this, we propose a framework for
-quantitative cipher comparison in the FDE context; we use this framework to
-define our configurations. \TODO{Combine what follows with what precedes.} To
-address this need, we propose a novel evaluation framework. Our framework
-classifies stream ciphers according to three quantitative features: relative
-round count, ciphertext randomization, and ciphertext expansion. Taken together,
-these features reveal a rich tradeoff space of cipher configurations optimizing
-for different combinations of concerns.
+To reason about when to switch cipher configurations, we must have a way to
+compare their utility in the context of heterogeneous FDE. However, different
+ciphers have a wide range of security properties, performance profiles, and
+output characteristics, including those that randomize their outputs and those
+with non-length-preserving outputs. To address this need, we propose \sysC, a
+novel evaluation framework that classifies stream ciphers according to three
+relevant features: relative round count, ciphertext randomization, and
+ciphertext expansion. Taken together, these features reveal a rich tradeoff
+space of cipher configurations optimizing for different combinations of
+concerns.
 
 Table \cref{tbl:trade} \TODO{explanation}. We limit our analysis to groups of
 three implementations, each using a different number of rounds. In the case of
