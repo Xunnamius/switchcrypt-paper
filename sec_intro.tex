@@ -19,7 +19,7 @@ For local storage, the state of the art for securing data at rest---such as the
 contents of a laptop's SSD---is Full Drive Encryption (FDE). Popular FDE
 solutions include dm-crypt~\cite{dmcrypt, DmC-Android} for Linux and BitLocker
 for Windows~\cite{bitlocker1, bitlocker2}. Behind these implementations is the
-industry standard AES \emph{block cipher} in XTS mode: AES-XTS~\cite{XTS,
+industry standard AES {\em block cipher} in XTS mode: AES-XTS~\cite{XTS,
 XTSComments, NISTXTS}. Unfortunately, using AES-XTS introduces overhead that
 drastically impacts system performance and energy consumption. The story of FDE
 on Google's Android OS illustrates the problem. Android supported FDE with the

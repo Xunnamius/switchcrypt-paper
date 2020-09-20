@@ -20,12 +20,12 @@ pair/ratios, explained below); 30 results per byte size, 120 results per
 workload. Results are accumulated and the median is taken for each byte size.
 
 When evaluating switching strategies, a finer breakdown in workloads is made
-using a pre-selected pair of ciphers we call the \emph{primary cipher
-configuration} and \emph{secondary cipher configuration}. \sys is initialized at
+using a pre-selected pair of ciphers we call the {\em primary cipher
+configuration} and {\em secondary cipher configuration}. \sys is initialized at
 the primary configuration. Once we trigger a cipher switch, \sys moves towards
 the secondary configuration via switching model.
 
-The cipher switch is triggered according to a certain \emph{ratio} of I/O
+The cipher switch is triggered according to a certain {\em ratio} of I/O
 operations. For example: given 10 40MB read-write operations, we may write and
 then read back 40MB 3 times using the primary cipher, initiate a cipher switch,
 and then write and then read back (write-read) 40MB 7 times. This would be a 3:7
@@ -38,7 +38,7 @@ primary cipher for every other file write-read operation in the secondary cipher
 write-read operation in the secondary cipher (3:7).
 
 To reason about the desirability of cipher configurations, we define the
-\emph{security vector}, R+R, as a vector consisting of a configuration's
+{\em security vector}, R+R, as a vector consisting of a configuration's
 relative rounds (Rounds) quantification and its ciphertext randomization
 (Randomization) quantification defined in \cref{sec:des}. We define the norm
 over this vector as the sum of its components. Hence, we consider a cipher
@@ -66,14 +66,14 @@ In this section we answer the following questions:
 
 \input{graphics/fig-eval-baseline}
 
-\cref{fig:eval-baseline} shows the normalized relative round count and
+\cref{fig:eval-baseline} shows the normalized relative rounds and
 ciphertext randomization (normed R+R vector) versus median normalized latency
 tradeoff between different stream cipher configurations for our sequential and
 random I/O workloads. Trends for median hold when looking at tail latencies as
 well. Each line represents one workload: 4KB, 512KB, 5MB, and 40MB respectively
 (see legend). Each symbol represents one of our ciphers: ChaCha8, ChaCha20,
 Freestyle Fast, Freestyle Balanced, and Freestyle Strong. Of the ciphers we
-tested, those with higher round counts and higher ciphertext randomization
+tested, those with higher rounds and higher ciphertext randomization
 scores resulted in higher overall latency and increased energy use for I/O
 operations. The relationship between these concerns is not always linear,
 however, which exposes a rich tradeoff space.
@@ -97,13 +97,13 @@ normalized 4KB workloads. ChaCha8 is not slower than ChaCha20.
 
 \input{graphics/fig-eval-forward}
 
-\cref{fig:eval-forward} shows the normalized relative round count and ciphertext
+\cref{fig:eval-forward} shows the normalized relative rounds and ciphertext
 randomization (normed R+R vector) versus median normalized latency tradeoff
 between different stream ciphers for our sequential and random I/O workloads
 with cipher switching using the Forward model. After a certain number of
 write-read I/O operations, a cipher switch is initiated and \sys begins using
 the secondary cipher to encrypt and decrypt data. For each pair of ciphers, this
-is repeated three times: once at every ratio point \emph{between} our static
+is repeated three times: once at every ratio point {\em between} our static
 configuration points (\ie{7:3, 5:5, and 3:7 described above}).
 
 The point of this experiment is to determine if \sys can effectively transition
@@ -128,11 +128,11 @@ configuration means these penalties are paid more often.
 with the same configuration of ratios as \cref{fig:eval-forward}.
 
 For the 40MB, 5MB, and 512KB workloads (40MB is shown), we see that Mirrored and
-Selective \emph{read} workloads and the Selective \emph{write} workload achieve
+Selective {\em read} workloads and the Selective {\em write} workload achieve
 parity with the Forward model experiments. This makes sense, as most of the
 overhead for Selective and Mirrored reads is determining which part of the drive
 to commit data to. The same applies to Selective writes. For the 4KB Mirrored
-and Selective \emph{read} workloads and the Selective \emph{write} workload, we
+and Selective {\em read} workloads and the Selective {\em write} workload, we
 see behavior similar to that in \cref{fig:eval-forward}, as expected.
 
 Mirrored writes across all workloads are very slow. This is to be expected,
