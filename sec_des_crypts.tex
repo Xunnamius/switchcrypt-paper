@@ -1,43 +1,37 @@
 \subsection{\sysB: Generic Cipher Interface}\label{subsec:des-crypts}
 
-\textbf{Decoupling ciphers from the encryption process.} To flexibly switch
-between configurations in \sys requires a generic cipher interface. This is
-challenging given the variety of inputs required by various stream ciphers, the
-existence of non-length-preserving ciphers, and other differences.
-
 % About: challenge, input, output
 One of the goals of \sys is that we might use any stream cipher regardless of
-its implementation details. Yet this is entirely non-trivial. There are many
-cipher implementations that we might use with \sys, each with unique input
-requirements and output considerations. For instance, Salsa and Chacha
-implementations require a certain IV and key size and handle plaintext input
-through successive invocations of a single state update
-function~\cite{Floodyberry}. Using OpenSSL's AES implementation in CTR mode
-requires manually tracking the counter state and individual ciphertext blocks
-are retrieved though corresponding function invocations~\cite{OpenSSL}.
-Freestyle's reference implementation requires we calculate the extra space
-necessary per nugget (due to ciphertext expansion) along with
-configuration-dependent minimum and maximum rounds-per-block, hash interval, and
-pepper bits~\cite{Freestyle}. HC-128 and other ciphers have similarly disparate
-requirements.
+its implementation details. However, allowing these ciphers to co-exist in the
+same volume is entirely non-trivial. There are many cipher implementations that
+we might use with \sys, each with unique input requirements and output
+considerations. For instance, Salsa and Chacha implementations require a certain
+IV and key size and handle plaintext input through successive invocations of a
+single state update function~\cite{Floodyberry}. Using OpenSSL's AES
+implementation in CTR mode requires manually tracking the counter state and
+individual ciphertext blocks are retrieved though corresponding function
+invocations~\cite{OpenSSL}. Freestyle's reference implementation requires we
+calculate the extra space necessary per nugget (due to ciphertext expansion)
+along with configuration-dependent minimum and maximum rounds-per-block, hash
+interval, and pepper bits~\cite{Freestyle}. HC-128 and other ciphers have
+similarly disparate requirements.
 
-\hsg{need a figure to show what is going on}
-
-% About: the goals
-Unlike prior work, \sys must be able to encrypt and decrypt arbitrary nuggets
-\emph{with any of these ciphers} at any moment with low overhead and without
-tight coupling to any specific implementation detail. Hence, there is a need for
-an interface that completely decouples cipher implementations from the
-encryption/decryption process. Our novel cipher interface allows any stream
-cipher to be integrated into \sys without modifications to third-party code,
-enabling normally incompatible ciphers to encrypt and decrypt arbitrary nuggets.
-The ability for disparate cipher implementations to co-exist forms the
-foundation for \sys's ability to switch the system between different cipher
-configurations in our tradeoff space efficiently and effectively.
+Further, unlike prior work, \sys must be able to encrypt and decrypt arbitrary
+nuggets \emph{with any of these ciphers} at any moment with low overhead and
+without tight coupling to any specific implementation detail. Hence, we must
+normalize these input and output requirements by decoupling cipher
+implementations from the core encryption process. We present \sysB, a collection
+of interfaces that allow implementors to write light (<100 LOC) wrapper
+functions around cipher implementations without modifications to third-party
+code; we call these {\em crypts}. Crypts present \sys with a uniform encryption
+and decryption interface for each cipher, enabling normally incompatible ciphers
+to encrypt and decrypt arbitrary nuggets.
 
 % About: single enc/dec model, the OS has one way to talk to \sys
-To facilitate this, the Generic Stream Cipher Interface presents the
-cryptographic driver with a single unified encryption/decryption model. \sys
+The ability for disparate cipher implementations to co-exist forms the
+foundation for \sys's ability to switch the system between different cipher
+configurations efficiently and effectively. To facilitate this, \sysB presents
+the cryptographic driver with a single uniform encryption/decryption model. \sys
 receives I/O requests from the operating system at the block device level like
 any other device-mapper. These requests come in the form of either reads or
 writes. When a read request is received, the OS hands \sys an offset and a
