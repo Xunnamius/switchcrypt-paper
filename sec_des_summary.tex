@@ -12,8 +12,8 @@ that can be built on top of existing block-level encryption module (aka.
 data structures. There were a couple of open source choices to start with such
 as Linux encryption device mapper~\cite{dmcrypt,DmC-Android}, encryption-ready
 F2FS filesystem~\cite{F2FS}, or StrongBox \cite{StrongBox}. We decided to build
-atop StrongBox because it already implements stream ciphers such as ChaCha which
-is more secure than block cipher.
+atop StrongBox because it already implements stream ciphers such as ChaCha and
+already employs a nugget-based drive layout.
 
 \sys depends on several data structure management provided in StrongBox, such as
 its transaction and rekeying journals (for never writing data encrypted with the
@@ -61,19 +61,21 @@ already rewrite the design section.}
 
 % ---------------------------------- integration
 \mysub{Higher-level integration.} \sys expects a higher-level integration/policy
-that will tell \sys what kind of switching should be performed and when. For
-example, for the battery life saving scenario, \sys expects that the OS battery
-saver application will trigger the forward switching. We provide more in the
-case studies section.
+that communicates what kind of switching should be performed and when. An
+example is the battery saver scenario, where the OS battery saver application is
+expected to notify \sys when to move to an energy-efficient crypt versus a
+backup-ready crypt using Forward switching. See \cref*{sec:usecases} for more
+integrations.
 
 % ---------------------------------- generality
 \mysub{Generality.} \sys can be seen as a drop-in replacement for the popular
-Linux dm-crypt layer (encryption driver). For performance reasons, just like
-StrongBox, \sys recommends a log-based file system such as F2FS, \xxx, or \xxx,
-which are commonly used for flash devices. The reason for this is that
-supporting streaming ciphers is more efficient in storage systems with no
-in-place updates. \sys is a software solution, however the same logic can be
-adopted to storage devices in the future, especially flash devices. For example,
-the no in-place update of the FTL nature will help stream ciphers be performance
-while at the same time users can use other popular in-place update file systems
+Linux dm-crypt layer (encryption driver). For performance reasons, like
+StrongBox, \sys recommends a Log-structured File System (LFS) such as F2FS,
+YAFFS, or LogFS, which are commonly used for flash devices. The reason for this
+is that supporting streaming ciphers is more efficient in storage systems with
+no in-place updates~\cite{StrongBox}. Though \sys is a software solution, the
+same LFS-based logic can be adopted by hardware like flash devices. For example,
+the LFS-like ``no in-place updates'' nature of Flash Transition Layers (FTL)
+would allow heterogeneous FDE implementations be performant at the device
+controller level, allowing the use of other popular in-place update file systems
 such as ext4, btrfs, and xfs.
