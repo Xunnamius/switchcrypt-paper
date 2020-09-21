@@ -30,6 +30,8 @@ ChaCha12 (score: 0.5), which is a reduced-round version of the standardized
 ChaCha20 (score: 1), all using the ChaCha
 algorithm~\cite{ChaCha20,ChaCha-Cryptanalysis}.
 
+\hank{My previous comments about the scoring apply to this draft as well. This score is presented arbitrarily.  Why does it start at 0?  Is ChaCha12 infinitely harder to break than ChaCha8 and only half as hard to break as ChaCha20?  Does breaking the cipher have nothing to do with this score?  If so, then what does it mean? }
+
 % ---------------------------------- CR
 
 \mysub{Ciphertext Randomization (Randomization).} A cipher with ciphertext
@@ -54,6 +56,11 @@ can customize the computational burden an attacker must bear by choosing lower
 or higher minimums and maximums. Hence, this is not a binary feature; scores
 range from 0 (no ciphertext randomization support) to 1 (lowest minimum and
 maximum rounds per block) to 3 (highest minimum and maximum rounds per block).
+
+\hank{Again, why is 3 the highest here, where 1 is the highest before?
+Can we compare across these dimensions?  For example, is it more
+important to have output randomization, so that is why the max in this
+dimension is higher than in round count?}
 
 % ---------------------------------- CE
 
@@ -87,3 +94,11 @@ configuration of our Freestyle implementation (see \cref{sec:impl}) using the
 minimum possible ciphertext randomization options.
 
 \input{graphics/tbl-trade}
+
+\hank{I think this really needs a couple sentences of summary that
+show that these scores are useful.  Maybe use the battery saver case
+study again and say how you can read the scores to find a cipher that
+works for high battery and another that would be appropriate for low
+battery (or at least would be appropriate for times when the backups
+aren't happening since you probably don't want to talk about
+performance here since this scoring section is only about security).}

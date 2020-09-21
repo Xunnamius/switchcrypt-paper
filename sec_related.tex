@@ -36,7 +36,12 @@ performance~\cite{Adiantum}. While not an FDE solution, LastPass has dealt with
 scaling the number of iterations of PBKDF\#2, trading security for performance
 during login sessions~\cite{LastPass}.
 
-\mysub{Energy-aware mobile devices.} On mobile energy/battery life, prior works
-have shown the importance of energy-saving mode and bugs that drain
-energy~\cite{energy-doctor, power-aware}. \sys brings the benefits of a dynamic
-energy-saving mode to the storage layer.
+\mysub{Energy-aware mobile devices.} On mobile energy/battery life,
+prior works have shown the importance of energy-saving mode and bugs
+that drain energy~\cite{energy-doctor, power-aware}. Additional work
+shows that significant energy savings can be achieved by dynamically
+adapting resource usage to the current workload
+\cite{Mishra18,Flinn99,Hoffmann15,LeSueur11}. That work, however, is
+almost entirely focused on the compute and memory subsystems.  \sys
+brings the benefits of a dynamic energy-saving mode to the storage
+layer.

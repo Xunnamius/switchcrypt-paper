@@ -1,3 +1,70 @@
+@inproceedings{Flinn99,
+author = {Flinn, Jason and Satyanarayanan, M.},
+title = {Energy-Aware Adaptation for Mobile Applications},
+year = {1999},
+isbn = {1581131402},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/319151.319155},
+doi = {10.1145/319151.319155},
+abstract = {In this paper, we demonstrate that a collaborative relationship between the operating system and applications can be used to meet user-specified goals for battery duration. We first show how applications can dynamically modify their behavior to conserve energy. We then show how the Linux operating system can guide such adaptation to yield a battery-life of desired duration. By monitoring energy supply and demand, it is able to select the correct tradeoff between energy conservation and application quality. Our evaluation shows that this approach can meet goals that extend battery life by as much as 30%.},
+booktitle = {Proceedings of the Seventeenth ACM Symposium on Operating Systems Principles},
+pages = {4863},
+numpages = {16},
+location = {Charleston, South Carolina, USA},
+series = {SOSP '99}
+}
+
+@inproceedings{LeSueur11,
+author = {Le Sueur, Etienne and Heiser, Gernot},
+title = {Slow down or Sleep, That is the Question},
+year = {2011},
+publisher = {USENIX Association},
+address = {USA},
+abstract = {Energy consumption has become a major concern for all computing systems, from servers in data-centres to mobile phones. Processor manufacturers have reacted to this by implementing power-management mechanisms in the hardware and researchers have investigated how operating systems can make use of those mechanisms to minimise energy consumption. Much of this research has focused on a single class of systems and compute-intensive workloads.Missing is an examination of how much energy can actually be saved when running realistic workloads on different classes of systems. This paper compares the effects of using dynamic voltage and frequency scaling (DVFS) and sleep states on platforms using server, desktop and embedded processors. It also analyses workloads that represent real-world uses of those systems. In these circumstances, we find that usage of power-management mechanisms is not clear-cut, and that it is critical to analyse the system as a whole, including the workload, to determine whether using mechanisms such as DVFS will be effective at reducing energy consumption.},
+booktitle = {Proceedings of the 2011 USENIX Conference on USENIX Annual Technical Conference},
+pages = {16},
+numpages = {1},
+location = {Portland, OR},
+series = {USENIXATC'11}
+}
+
+@inproceedings{Hoffmann15,
+author = {Hoffmann, Henry},
+title = {JouleGuard: Energy Guarantees for Approximate Applications},
+year = {2015},
+isbn = {9781450338349},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2815400.2815403},
+doi = {10.1145/2815400.2815403},
+abstract = {Energy consumption limits battery life in mobile devices and increases costs for servers and data centers. Approximate computing addresses energy concerns by allowing applications to trade accuracy for decreased energy consumption. Approximation frameworks can guarantee accuracy or performance and generally reduce energy usage; however, they provide no energy guarantees. Such guarantees would be beneficial for users who have a fixed energy budget and want to maximize application accuracy within that budget. We address this need by presenting JouleGuard: a runtime control system that coordinates approximate applications with system resource usage to provide control theoretic formal guarantees of energy consumption, while maximizing accuracy. We implement JouleGuard and test it on three different platforms (a mobile, tablet, and server) with eight different approximate applications created from two different frameworks. We find that JouleGuard respects energy budgets, provides near optimal accuracy, adapts to phases in application workload, and provides better outcomes than application approximation or system resource adaptation alone. JouleGuard is general with respect to the applications and systems it controls, making it a suitable runtime for a number of approximate computing frameworks.},
+booktitle = {Proceedings of the 25th Symposium on Operating Systems Principles},
+pages = {198214},
+numpages = {17},
+keywords = {control theory, dynamic systems, adaptive software},
+location = {Monterey, California},
+series = {SOSP '15}
+}
+
+@inproceedings{Mishra18,
+author = {Mishra, Nikita and Imes, Connor and Lafferty, John D. and Hoffmann, Henry},
+title = {CALOREE: Learning Control for Predictable Latency and Low Energy},
+year = {2018},
+isbn = {9781450349116},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3173162.3173184},
+doi = {10.1145/3173162.3173184},
+abstract = {Many modern computing systems must provide reliable latency with minimal energy. Two central challenges arise when allocating system resources to meet these conflicting goals: (1) complexity modern hardware exposes diverse resources with complicated interactions and (2) dynamics latency must be maintained despite unpredictable changes in operating environment or input. Machine learning accurately models the latency of complex, interacting resources, but does not address system dynamics; control theory adjusts to dynamic changes, but struggles with complex resource interaction. We therefore propose CALOREE, a resource manager that learns key control parameters to meet latency requirements with minimal energy in complex, dynamic en- vironments. CALOREE breaks resource allocation into two sub-tasks: learning how interacting resources affect speedup, and controlling speedup to meet latency requirements with minimal energy. CALOREE deines a general control system whose parameters are customized by a learning framework while maintaining control-theoretic formal guarantees that the latency goal will be met. We test CALOREE's ability to deliver reliable latency on heterogeneous ARM big.LITTLE architectures in both single and multi-application scenarios. Compared to the best prior learning and control solutions, CALOREE reduces deadline misses by 60% and energy consumption by 13%.},
+booktitle = {Proceedings of the Twenty-Third International Conference on Architectural Support for Programming Languages and Operating Systems},
+pages = {184198},
+numpages = {15},
+keywords = {heterogeneous architectures, control theory, energy, machine learning, resource allocation, real-time systems},
+location = {Williamsburg, VA, USA},
+series = {ASPLOS '18}
+}
+
 @InProceedings{Thereska,
   author =       "Eno Thereska and Austin Donnelly and Dushyanth
                  Narayanan",
