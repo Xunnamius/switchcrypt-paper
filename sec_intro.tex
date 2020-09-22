@@ -84,7 +84,7 @@ by balancing competing security and latency requirements.  \sys is composed
 primarily of three components that realize these benefits. These represent the
 three main contributions of this work.
 
-% About: switching strategies
+% About: switching models
 First, we introduce \sysA, a kernel configuration that exposes three switching
 models: {\em Forward}, {\em Mirrored} and {\em Selective}. Switching allows us
 to ``re-cipher'' storage units dynamically, enabling us to tradeoff different
@@ -118,15 +118,12 @@ effectively normalize the inputs and outputs required when switching between
 ciphers.
 
 % About: tradeoffs
-Finally, we present \sysC, a scheme that attempts to {\em quantify} the
-tradeoffs in the the rich configuration space of stream ciphers made available
-by the above. Using this scheme, we define a tradeoff space of cipher
-configurations over competing concerns: total energy use, desirable security
-properties, read and write performance (latency), total writable space on the
-drive, and how quickly the contents of the drive can converge to a single
-encryption configuration. \sysC helps users in understanding their cipher
-choices as they come with a variety of performance, energy efficiency, and
-security properties in the FDE context.
+Finally, we present \sysC, an framework that evaluates crypts based on concerns
+important in the context of heterogeneous FDE. Using this framework, we expose a
+rich tradeoff space of crypts over three competing concerns: read/write
+performance (latency) and total energy use, desirable security properties, and
+total writable space on the drive. In this way, \sysC gives non-cryptographers a
+quick and intuitive method to reason about which crypt to use and when.
 
 % About: evaluation
 We conclude with a comprehensive evaluation of \sys.

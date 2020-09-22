@@ -21,7 +21,7 @@ must address three key challenges:
   nature of storage access to support the flexible heterogeneous encryption that
   users demand. For this, we introduce the \sysA (\cref{subsec:des-switch})
   component of \sys that exposes three switching models to users: Forward,
-  Selective and Mirrored switching.
+  Selective, and Mirrored switching.
 
 \item We must allow arbitrary cipher implementations to be easily integrated
   into \sys. This is non-trivial, however, as different ciphers and encryption
@@ -32,11 +32,14 @@ must address three key challenges:
   interfaces that allow different encryption algorithms (``crypts'') to
   co-exist in the storage layer.
 
-\item We must help users understand the tradeoffs of different cipher
-  configurations, hence we introduce \sysC (\cref{subsec:des-trade}), a method
-  that quantifies the desirable properties of different cipher
-  configurations using several metrics such as the round count, ciphertext
-  randomization, and ciphertext expansion cost.
+\item Most users do not care about this crypt or that crypt, they just want a
+  solution that does what they want; hence, we must help users quickly and
+  intuitively understand the tradeoffs between different crypts. To facilitate
+  this, we introduce \sysC (\cref{subsec:des-trade}), an evaluation framework
+  that scores crypts according to three properties important in the context of
+  heterogeneous FDE: a crypt's round count (relative to other crypts of the same
+  cipher implementation), if a crypt randomizes its output, and if a crypt
+  generates more output bytes than input bytes.
 
 \end{enumerate}
 

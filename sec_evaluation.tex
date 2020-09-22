@@ -19,11 +19,11 @@ three times for a total of 240 tests per cipher (720 runs per cipher
 pair/ratios, explained below); 30 results per byte size, 120 results per
 workload. Results are accumulated and the median is taken for each byte size.
 
-When evaluating switching strategies, a finer breakdown in workloads is made
-using a pre-selected pair of ciphers we call the {\em primary cipher
-configuration} and {\em secondary cipher configuration}. \sys is initialized at
-the primary configuration. Once we trigger a cipher switch, \sys moves towards
-the secondary configuration via switching model.
+When evaluating switching models, a finer breakdown in workloads is made using a
+pre-selected pair of ciphers we call the {\em primary cipher configuration} and
+{\em secondary cipher configuration}. \sys is initialized at the primary
+configuration. Once we trigger a cipher switch, \sys moves towards the secondary
+configuration via switching model.
 
 The cipher switch is triggered according to a certain {\em ratio} of I/O
 operations. For example: given 10 40MB read-write operations, we may write and
@@ -62,7 +62,7 @@ In this section we answer the following questions:
 
 
 % =======================================================
-\subsection{Switching Strategies Under Workloads}\label{subsec:eval-baseline}
+\subsection{Switching Models Under Load}\label{subsec:eval-baseline}
 
 \input{graphics/fig-eval-baseline}
 
@@ -124,7 +124,7 @@ configuration means these penalties are paid more often.
 
 \input{graphics/fig-eval-ms}
 
-\cref{fig:eval-ms} show the performance of the Mirrored and Selective strategies
+\cref{fig:eval-ms} show the performance of the Mirrored and Selective models
 with the same configuration of ratios as \cref{fig:eval-forward}.
 
 For the 40MB, 5MB, and 512KB workloads (40MB is shown), we see that Mirrored and
