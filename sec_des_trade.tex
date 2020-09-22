@@ -8,12 +8,12 @@ performance profiles, and output characteristics, including those that randomize
 their outputs and those with non-length-preserving outputs. To address this
 need, we propose \sysC, a novel evaluation framework that quantifies stream
 ciphers according to three features relevant to heterogeneous FDE: {\em relative
-rounds}, which gives users a sense for the strength of the implementation;
-{\em ciphertext randomization}, which gives a sense for how safe a cipher's
-output is to backup/snapshot (see \cref{sec:motivation}); and {\em ciphertext
-expansion}, which gives users a sense for how a cipher configuration impacts the
-total available drive space. Taken together, these features illustrate a rich
-tradeoff space of cipher configurations optimizing for different combinations of
+rounds}, which gives users a sense for the strength of the implementation; {\em
+ciphertext randomization}, which gives a sense for how safe a cipher's output is
+to backup/snapshot (see \cref{sec:motivation}); and {\em ciphertext expansion},
+which gives users a sense for how a cipher configuration impacts the total
+available drive space. Taken together, these features illustrate a rich tradeoff
+space of cipher configurations optimizing for different combinations of
 energy-efficiency, security, and performance concerns.
 
 % ---------------------------------- RR
@@ -57,10 +57,10 @@ or higher minimums and maximums. Hence, this is not a binary feature; scores
 range from 0 (no ciphertext randomization support) to 1 (lowest minimum and
 maximum rounds per block) to 3 (highest minimum and maximum rounds per block).
 
-\hank{Again, why is 3 the highest here, where 1 is the highest before?
-Can we compare across these dimensions?  For example, is it more
-important to have output randomization, so that is why the max in this
-dimension is higher than in round count?}
+\hank{Again, why is 3 the highest here, where 1 is the highest before? Can we
+compare across these dimensions?  For example, is it more important to have
+output randomization, so that is why the max in this dimension is higher than in
+round count?}
 
 % ---------------------------------- CE
 
@@ -95,10 +95,10 @@ minimum possible ciphertext randomization options.
 
 \input{graphics/tbl-trade}
 
-\hank{I think this really needs a couple sentences of summary that
-show that these scores are useful.  Maybe use the battery saver case
-study again and say how you can read the scores to find a cipher that
-works for high battery and another that would be appropriate for low
-battery (or at least would be appropriate for times when the backups
-aren't happening since you probably don't want to talk about
-performance here since this scoring section is only about security).}
+\hank{I think this really needs a couple sentences of summary that show that
+these scores are useful.  Maybe use the battery saver case study again and say
+how you can read the scores to find a cipher that works for high battery and
+another that would be appropriate for low battery (or at least would be
+appropriate for times when the backups aren't happening since you probably don't
+want to talk about performance here since this scoring section is only about
+security).}

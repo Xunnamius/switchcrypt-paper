@@ -10,14 +10,18 @@ transact block layer requests in user space, reducing implementation complexity.
 
 \input{graphics/tbl-impl}
 
-Among the many ciphers \sys supports, we focus on the five implementations
-described here for our evaluation and cases studies: ChaCha8,
-ChaCha20~\cite{ChaCha20}, and Freestyle~\cite{Freestyle} in three different
-configurations: a ``fast'' mode with parameters
+Among the many ciphers \sys supports and that we implemented as crypts over the
+course of this research, we focus on the five crypts described here for our
+evaluation and cases studies: ChaCha8, ChaCha20~\cite{ChaCha20}, and
+Freestyle~\cite{Freestyle} in three different configurations: a ``fast'' mode
+with parameters
 \texttt{FFast($R_{min}$=$8$,$R_{max}$=$20$,$H_I$=$4$,$I_C$=$8$)}, a ``balanced''
 mode with parameters \texttt{FBalanced($R_{min}$=$12$,
 $R_{max}$=$28$,$H_I$=$2$,$I_C$=$10$)}, and a ``strong'' mode with parameters
-\texttt{FStrong($R_{min}$=$20$,$R_{max}$=$36$,$H_I$=$1$,$I_C$=$12$)}.
+\texttt{FStrong($R_{min}$=$20$,$R_{max}$=$36$,$H_I$=$1$,$I_C$=$12$)}. Note that
+we also implemented a ``vacuous'' mode using minimum parameters ({\em
+Freestyle*} in \cref{tbl:trade}), but this mode is not included in our
+evaluation.
 
-Table \cref{tbl:impl} shows the cipher implementations we use (wrapped into
-crypts with \sysB; see \cref{subsec:des-crypts}).
+Table \cref{tbl:impl} shows the cipher implementations we use wrapped into
+crypts with \sysB; see \cref{subsec:des-crypts}.
