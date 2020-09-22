@@ -1,4 +1,4 @@
-\subsection{Putting It All Together}\label{subsec:des-summary}
+\subsection{Discussion}\label{subsec:des-summary}
 
 Here we discuss other details surrounding our three main contributions.
 
@@ -36,26 +36,28 @@ support \sysA and \sysB.
 
 \mysub{Threat model under switching.} In terms of {\em confidentiality}, an
 adversary should not be able to reveal any information about encrypted plaintext
-without the proper key. As with prior works, encryption is achieved via a binary
+without the proper key. As with prior work, encryption is achieved via a binary
 additive approach: cipher output (keystream) is combined with plaintext nugget
-contents using XOR, with metadata to track writes and ensure that pad reuse
-never occurs during overwrites and that the system can recover from crashes into
-a secure state.
+contents using XOR, generating confidential outputs, with metadata to track
+writes and ensure 1) that pad reuse never occurs and 2) that the system can
+recover from crashes into a secure state. Hence, confidentiality is guaranteed.
 
-In terms of {\em data integrity}, an adversary should not be able to tamper with
-ciphertext and it go unnoticed. Nugget integrity is tracked by StrongBox's
+In terms of {\em integrity}, an adversary should not be able to tamper with
+drive state and it go unnoticed. Nugget integrity is guaranteed by StrongBox's
 in-memory Merkle tree~\cite{StrongBox}.
 
-Switching strategies add an additional security concern not addressed by prior
-work: even if we initiate a ``cipher switch,'' there may still be data on the
-drive that was encrypted with an inactive configuration. Is this a problem? For
-the Forward model, this implies data may at any time be encrypted using the
-``least desirable cipher''. For the Mirrored and Selective strategies, the drive
-is partitioned into regions where nuggets are guaranteed to be encrypted with
-each cipher, including the ``least desirable cipher''. However, in terms of
-confidentiality, the confidentiality guarantee of \sys can be reduced to the
-individual confidentiality guarantees of the available ciphers used to encrypt
-nuggets.
+Our switching models add an additional security concern: even if we switch the
+drive to a new crypt, depending on the switching model, there may still be data
+on the drive that was encrypted with an old crypt. Does this create a
+confidentiality problem? For the Forward model, this implies any nugget may at
+any time be encrypted using the old crypt. For the Mirrored model, the volume is
+divided into regions where nuggets use a specific crypt per region; hence, there
+exists at least one region using the old crypt. However, like StrongBox, since
+nuggets are encrypted and decrypted independently, the confidentiality guarantee
+of \sys can be reduced to the confidentiality guarantee of the ``weakest''
+cipher~\cite{StrongBox}. Hence, there is no problem unless the user purposely
+chooses a broken cipher. For the Selective model, there is never a problem since
+the user directly selects which crypt encrypts which nugget every time.
 
 % ---------------------------------- integration
 \mysub{Higher-level integration.} \sys expects a higher-level integration/policy
