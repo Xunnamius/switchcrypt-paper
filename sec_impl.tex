@@ -4,30 +4,20 @@ Our \sys implementation consists of \locTotal lines of C code (excluding
 StrongBox components we re-use as is). To ensure high quality code, we also
 wrote a \locTest line test suite. Our implementation is available open
 source~\footnoteref{ftn:foss}. We deploy \sys on top of the BUSE virtual block
-device~\cite{BUSE} as our device controller. BUSE is a thin (200 LoC)
-wrapper around the standard Linux Network Block Device (NBD), allowing our
-system to transact block layer requests in user space, reducing implementation
-complexity.
+device~\cite{BUSE} as our device controller. BUSE is a thin (200 LoC) wrapper
+around the standard Linux Network Block Device (NBD), allowing our system to
+transact block layer requests in user space, reducing implementation complexity.
 
 \input{graphics/tbl-impl}
 
-Among the many ciphers our implementation supports, we focus on five
-in this research: ChaCha8, ChaCha20~\cite{ChaCha20}, and
-Freestyle~\cite{Freestyle} in three different configurations: a
-``fast'' mode with parameters
-\texttt{FFast($R_{min}$=$8$,$R_{max}$=$20$,$H_I$=$4$,$I_C$=$8$)}, a
-``balanced'' mode with parameters \texttt{FBalanced($R_{min}$=$12$,
-  $R_{max}$=$28$,$H_I$=$2$,$I_C$=$10$)}, and a ``strong'' mode with
-parameters
+Among the many ciphers \sys supports, we focus on the five implementations
+described here for our evaluation and cases studies: ChaCha8,
+ChaCha20~\cite{ChaCha20}, and Freestyle~\cite{Freestyle} in three different
+configurations: a ``fast'' mode with parameters
+\texttt{FFast($R_{min}$=$8$,$R_{max}$=$20$,$H_I$=$4$,$I_C$=$8$)}, a ``balanced''
+mode with parameters \texttt{FBalanced($R_{min}$=$12$,
+$R_{max}$=$28$,$H_I$=$2$,$I_C$=$10$)}, and a ``strong'' mode with parameters
 \texttt{FStrong($R_{min}$=$20$,$R_{max}$=$36$,$H_I$=$1$,$I_C$=$12$)}.
-\hank{Doesn't this contradict the sec\_des\_crypts section?  That
-  section says that there are implementations AES, Rabbit, HC-128,
-  Sosemanuk...  I am guessing that you implemented the large set to
-  test stuff, but those mentioned here are just for the use cases. If
-  that is right, then say that so that people don't get confused or
-  think the paper is contradicting itself.}
-
 
 Table \cref{tbl:impl} shows the cipher implementations we use (wrapped into
 crypts with \sysB; see \cref{subsec:des-crypts}).
-
