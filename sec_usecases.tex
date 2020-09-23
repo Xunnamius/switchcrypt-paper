@@ -2,68 +2,42 @@
 
 In this section, we provide \numCases case studies demonstrating the practical
 utility of heterogeneous FDE not achievable with prior work. We cover a wide
-range of situations, highlighting concerns like meeting latency goals, trading
-off security and writable space, and keeping within an energy budget, all
-demonstrating the utility of our switching models. All experiments are repeated
-multiple times.
+range of situations, highlighting concerns like meeting latency goals and
+keeping within an energy budget. Each experiment below was repeated 10 times
+with the median result taken.
 
 
 % ===========================================================
 \subsection{Battery Saver Mode}\label{subsec:usecase-battery}
 
 % About: motivation
-In this first case study, we revisit the motivational example. Here, the mobile
-device is ``forced'' to locally encrypt files with Freestyle Balanced Cipher
-(``\cone'') for safely backing up the file to the backend cloud, but when the
-battery saver mode is on, the device will switch to a more energy-efficient
-cipher, ChaCha8 (``\ctwo''), and at the same time pausing the backup upload to
-the cloud momentarily (\eg the company does not want files to be saved in the
-cloud without \cone encryption. Our goal is to complete I/Os as much as we can
-before the device dies.
+In this first case study, we revisit the motivational example (see
+\cref{sec:motivation}). Here, our netbook's storage layer will use the {\em
+Freestyle Balanced} crypt when operating normally. When battery saver mode is
+activated, storage will switch to the more energy-efficient {\em ChaCha8} crypt.
+At the same time, uploading backups will be paused since ChaCha8 is not
+ciphertext randomizing. Our goal is to complete our workload before the device
+dies.
 
 % About: setup
-To simulate I/O activity, we begin randomly writing 10 40MB files using the
-Freestyle Balanced cipher for 2 minutes. After the first 5 seconds, the device
-enters ``battery saver'' mode, which we simulate by underclocking the cores to
-their lowest frequencies and using \texttt{taskset} to transition \sys processes
-to the energy-efficient LITTLE cores. In this ``battery saver'' mode, \sys
-switches to the ChaCha8 cipher.
+To simulate this, we repeat the following two times: 1) we begin
+writing 10 40MB files using Freestyle Balanced. 2) After five seconds, our
+device simulates entering battery saver mode using \texttt{taskset} to
+transition \sys processes to the energy-efficient LITTLE cores and underclocking
+them to their lowest frequency. 3) We complete the workload.
 
-\hsg{I don't understand \cref{fig:usecase-battery}. You said after 5 seconds. we
-switch to ChaCha8. But why the FB+ChaCha line is still going up? Why it doesn't
-flat out like the ChaCha line?? and why do even need to show the ChaCha8 only
-line?}
-
-\input{graphics/fig-usecase-battery} \hsg{we should exlude ChaCha8 only, unless
-you have a major point here}
+\input{graphics/fig-usecase-battery}
 
 % About: result
-\cref{fig:usecase-battery} shows the time versus energy used. At 0 seconds, we
-begin writing. At 5 seconds, the ``battery saver'' event occurs, causing the
-system to be underclocked. At 120 seconds, the system will die. If we blow past
-our energy ceiling, the system will die. The figure shows two lines:
-%
-{\bf (1)} {\em Freestyle Balanced only}, that favors security even when backups
-are paused; the device dies before the I/Os complete.
-%
-{\bf (2)} {\em Freestyle Balanced $+$ ChaCha8}, that performs the switch when
-the system enters the low power state. Our results show that, while the system
-uses slightly more power in the short term, we stay within our energy budget and
-finish before the devices dies.
-%
-When we get the device to a charger (not shown), the cloud backup is enabled
-again and when the nuggets are read, \sys automatically converges them back to
-Freestyle Balanced.
-
-% About: overall result
-On average, using forward switching resulted in a 3.3x total energy reduction
-compared to exclusively using Freestyle Balanced, allowing us to remain within
-our energy budget. \hsg{I don't see this 3.3x in the graph. Did you accidentally
-label the lines incorrectly?}. We note, however, that the energy savings is not
-the point of this experiment. Rather, the lesson learned is that \sys enables
-the system to move to the right point in the energy/security tradeoff space so
-that the current task can still be accomplished before the battery is drained
-and without compromising backup security at any point.
+On the first run, the workload is completed normally. On the second run, when
+entering battery saver mode, we additionally trigger a switch to the ChaCha8
+crypt using the Forward switching model. \Cref{fig:usecase-battery} shows the
+total energy used after completing both runs. {\em Freestyle Balanced only}
+favors security even when backups are paused while {\em Freestyle Balanced $+$
+ChaCha8} performs the switch when the system enters battery saver mode. Our
+results show that using Forward switching resulted in a 3.3x total energy
+reduction compared to exclusively using Freestyle Balanced only, allowing us to
+remain within our energy budget.
 
 
 % ===============================
@@ -73,7 +47,7 @@ In our second case study, \TODO{finish}.
 
 
 % ================================================================
-\subsection{Select Data Encryption}\label{subsec:usecase-agnostic}
+\subsection{Scalable Encryption}\label{subsec:usecase-agnostic}
 
 % About: background
 This case study illustrates utility of selective switching to achieve a

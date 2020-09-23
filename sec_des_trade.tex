@@ -13,7 +13,6 @@ ciphertext randomization}, which gives a sense for how safe a crypt's output is
 when encrypting ``data in motion'' (\eg to backup/snapshot; see
 \cref{sec:motivation}); and {\em ciphertext expansion}, which gives users a
 sense for how a crypt will impact total available drive space.
-
 \cref{subsec:des-discussion} describes how we might apply \sysC to reason about
 crypt choice.
 
@@ -33,7 +32,7 @@ These crypts are scored across a discrete uniform distribution from 0,
 representing the lowest round configuration (\eg 8-round ChaCha) to 1,
 representing the highest round configuration (\eg 20-round ChaCha).
 
-Table \cref{tbl:trade} shows the relative round score for twelve crypts grouped
+\Cref{tbl:trade} shows the relative round score for twelve crypts grouped
 by the four ciphers they implement: ChaCha, Salsa, HC-X, and Freestyle. ChaCha
 and Salsa each have three crypts that differ only by round count, yielding the
 scores {\em 0, 0.5, and 1}. HC-X has two, yielding {\em 0 and 1}. Freestyle has
@@ -63,7 +62,7 @@ number of rounds used per block in this non-deterministic mode of operation, we
 can customize the computational burden an attacker must bear by choosing lower
 or higher minimums and maximums.
 
-Table \cref{tbl:trade} shows the ciphertext randomization score for twelve
+\Cref{tbl:trade} shows the ciphertext randomization score for twelve
 crypts grouped by the four ciphers they implement: ChaCha, Salsa, HC-X, and
 Freestyle. ChaCha, Salsa, and HC-X {\em do not employ ciphertext randomization
 at all}, so the crypts implementing them score a 0. Freestyle {\em does} employ

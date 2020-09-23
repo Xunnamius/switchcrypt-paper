@@ -35,7 +35,7 @@ during I/O. This switching model would be enabled as part of a
 higher-level policy (\ie battery saver mode) enacted by the OS or
 user.
 
-Table \cref{tbl:switch} summarizes what happens on I/Os immediately after the
+\Cref{tbl:switch} summarizes what happens on I/Os immediately after the
 active cipher is switched to \ctwo. For nugget-sized writes, new data is
 ciphered with \ctwo and committed as normal. For intra-nugget writes, the nugget
 is first decrypted using \cone and then re-ciphered using \ctwo with the new
@@ -78,7 +78,7 @@ available storage into two regions. That is, to support a full drive cipher
 switching supported by the block layer and without application/file system
 modification, we must pay the space cost to anticipate such a switch.
 
-During the migration, as summarized in Table \cref{tbl:switch}, all write
+During the migration, as summarized in \cref{tbl:switch}, all write
 operations that hit \cone's region will be mirrored to \ctwo's region.
 Meanwhile, in the background, the data in \cone's region is incrementally
 re-ciphered and written to \ctwo's region. Until the migration is complete, read
@@ -116,7 +116,7 @@ between two cipher configurations to trade off battery life and security; with
 Selective switching, we want to select a specific cipher configuration each time
 we encrypt a nugget to trade off performance and security.
 
-Table \cref{tbl:switch} summarizes what happens on I/Os when \sys is initialized
+\Cref{tbl:switch} summarizes what happens on I/Os when \sys is initialized
 using the Selective model with two available cipher configurations: the
 high-overhead high-security \cone and the low-overhead reduced-security \ctwo.
 Suppose we have a multi-gigabyte corporate document that needs to be continually
