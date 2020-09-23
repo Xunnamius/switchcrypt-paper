@@ -1,104 +1,94 @@
 \subsection{\sysC: An Evaluation Framework}\label{subsec:des-trade}
 
 % About: background
-To reason about when to switch cipher configurations, users must have a way to
-compare and evaluate their utility in the novel context of heterogeneous FDE.
+To reason about which crypt to use and when, non-expert users must have a way to
+evaluate and compare their utility in the novel context of heterogeneous FDE.
 However, different ciphers have a wide range of desirable security properties,
 performance profiles, and output characteristics, including those that randomize
-their outputs and those with non-length-preserving outputs. To address this
-need, we propose \sysC, a novel evaluation framework that quantifies stream
-ciphers according to three features relevant to heterogeneous FDE: {\em relative
-rounds}, which gives users a sense for the strength of the implementation; {\em
-ciphertext randomization}, which gives a sense for how safe a cipher's output is
-to backup/snapshot (see \cref{sec:motivation}); and {\em ciphertext expansion},
-which gives users a sense for how a cipher configuration impacts the total
-available drive space. Taken together, these features illustrate a rich tradeoff
-space of cipher configurations optimizing for different combinations of
-energy-efficiency, security, and performance concerns.
+their outputs and those with non-length-preserving outputs. To simplify
+comparison, we propose \sysC, a novel evaluation framework that quantifies
+crypts according to three features relevant to generic heterogeneous FDE: {\em
+relative rounds}, which gives users a sense for the strength of the crypt; {\em
+ciphertext randomization}, which gives a sense for how safe a crypt's output is
+when encrypting ``data in motion'' (\eg to backup/snapshot; see
+\cref{sec:motivation}); and {\em ciphertext expansion}, which gives users a
+sense for how a crypt will impact total available drive space.
+
+\cref{subsec:des-discussion} describes how a user might use \sysC to reason
+about crypt choice.
+
+\input{graphics/tbl-trade}
 
 % ---------------------------------- RR
 
-\mysub{Relative Rounds (Rounds).} The ciphers we examine in this paper are all
-constructed around the notion of {\em rounds}, where a higher number of rounds
-(and/or possibly longer key) is positively correlated with a higher resistance
-to brute force given no fatal related-key or other
-attacks~\cite{ChaCha-Cryptanalysis}. Hence, this feature, scored from 0 (lowest
-relative round count) to 1 (highest relative round count), represents how many
-rounds a cipher executes relative to other implementations of the same
-algorithm. For instance: ChaCha8 (score: 0) is a reduced-round version of
-ChaCha12 (score: 0.5), which is a reduced-round version of the standardized
-ChaCha20 (score: 1), all using the ChaCha
-algorithm~\cite{ChaCha20,ChaCha-Cryptanalysis}.
+\mysub{Relative Rounds (Rounds).} The cipher implementations we examine in this
+paper are all constructed around the notion of {\em rounds}, where a higher
+number of rounds (and/or larger key space) is positively correlated with a
+higher resistance to brute force given no fatal related-key or other
+attacks~\cite{ChaCha-Cryptanalysis}; in other words: more rounds implies
+stronger encryption. Groups of crypts implement the same cipher but use
+different configurations, \eg the crypts for the ChaCha cipher configured for 8
+rounds (ChaCha8), 12 rounds (ChaCha12), and the standard 20 rounds (ChaCha20).
+These crypts are scored across a discrete uniform distribution from 0,
+representing the lowest round configuration (\eg 8-round ChaCha) to 1,
+representing the highest round configuration (\eg 20-round ChaCha).
 
-\hank{My previous comments about the scoring apply to this draft as well. This score is presented arbitrarily.  Why does it start at 0?  Is ChaCha12 infinitely harder to break than ChaCha8 and only half as hard to break as ChaCha20?  Does breaking the cipher have nothing to do with this score?  If so, then what does it mean? }
+Table \cref{tbl:trade} shows the relative round score for twelve crypts grouped
+by the four ciphers they implement: ChaCha, Salsa, HC-X, and Freestyle. ChaCha
+and Salsa each have three crypts that differ only by round count, yielding the
+scores {\em 0, 0.5, and 1}. HC-X has two, yielding {\em 0 and 1}. Freestyle has
+four crypts, but only three of them differ by round count ({\em Freestyle (F)}
+and {\em Freestyle*} use the same number of rounds). If a crypt is the singular
+implementation of some cipher, it receives a 1.
 
 % ---------------------------------- CR
 
-\mysub{Ciphertext Randomization (Randomization).} A cipher with ciphertext
+\mysub{Ciphertext Randomization (Randomization).} A cipher employing ciphertext
 randomization generates different ciphertexts non-deterministically given the
 same key, nonce, and plaintext. This makes it much more difficult to execute
 chosen-ciphertext attacks (CCA), key re-installation attacks, XOR-based
-cryptanalysis and other comparison attacks, and other confidentiality-violating
-schemes where the ciphertext is in full control of the adversary
-~\cite{Freestyle}. This property is useful in cases where we cannot prevent the
-same key, nonce, and plaintext from being reused, such as with data ``in
-motion'' (see \cref{sec:motivation}). Ciphers without this property---such as
-ChaCha20 and AES-XTS on which prior work is based---are trivially broken when
-key-nonce-plaintext 3-tuples are reused. In StrongBox, this is referred to as an
-``overwrite condition'' or simply ``overwrite''~\cite{StrongBox}.
+cryptanalysis, and other confidentiality-violating schemes where the ciphertext
+is in full control of the adversary ~\cite{Freestyle}. This property is useful
+in cases where we cannot prevent the same key, nonce, and plaintext from being
+reused, such as with data ``in motion'' (see \cref{sec:motivation}). Ciphers
+without this property---such as ChaCha20 and AES-XTS on which prior work is
+based---are trivially broken when key-nonce-plaintext 3-tuples are reused. In
+StrongBox, this is referred to as an ``overwrite''~\cite{StrongBox}.
 
-Though there are many ways to achieve ciphertext randomization, the ciphers
+Though there are many ways to achieve ciphertext randomization, the crypts
 included in our analysis implement it using a random number of rounds for each
 block of the message where the exact number of rounds are unknown to the
 receiver a priori~\cite{Freestyle}. In configuring the minimum and maximum
 number of rounds used per block in this non-deterministic mode of operation, we
 can customize the computational burden an attacker must bear by choosing lower
-or higher minimums and maximums. Hence, this is not a binary feature; scores
-range from 0 (no ciphertext randomization support) to 1 (lowest minimum and
-maximum rounds per block) to 3 (highest minimum and maximum rounds per block).
+or higher minimums and maximums.
 
-\hank{Again, why is 3 the highest here, where 1 is the highest before? Can we
-compare across these dimensions?  For example, is it more important to have
-output randomization, so that is why the max in this dimension is higher than in
-round count?}
+Table \cref{tbl:trade} shows the ciphertext randomization score for twelve
+crypts grouped by the four ciphers they implement: ChaCha, Salsa, HC-X, and
+Freestyle. ChaCha, Salsa, and HC-X {\em do not employ ciphertext randomization
+at all}, so the crypts implementing them score a 0. Freestyle {\em does} employ
+ciphertext randomization (see \cref{sec:impl}), so the four crypts implementing
+them are scored from 1 (least randomized output) to 2 (most randomized output)
+across an even distribution similar to relative rounds yielding the scores {\em
+1, 1.34, 1.67, and 2}.
 
 % ---------------------------------- CE
 
 \mysub{Ciphertext Expansion (Expansion).} A cipher that exhibits ciphertext
-expansion is non-length-preserving: it outputs more ciphertext than was
-originally input as plaintext. This can cause major problems in any FDE context.
-For instance, cryptosystems that rely on AES-XTS (e.g. Linux's
+expansion is non-length-preserving: it outputs more bytes of ciphertext after
+encryption than were input. This can cause major problems in any FDE context.
+For instance, cryptosystems that are tightly coupled to AES-XTS (e.g. Linux's
 dm-crypt~\cite{dmcrypt} and Microsoft's BitLocker~\cite{bitlocker1}) or ChaCha
 (e.g. StrongBox~\cite{StrongBox}, Google's Adiantum~\cite{Adiantum}) have
 storage layouts that hold length-preserving ciphertext output as an invariant,
 making ciphers that do not exhibit this property incompatible with their
-implementations; yet, ciphertext expansion is often {\em but not always} a
-necessary side-effect of ciphertext randomization. Further,
-non-length-preserving ciphers {\em use more drive space} than length-preserving
-ciphers when encrypting the same plaintext, meaning users will have less total
-available drive space.
+implementations; yet, ciphertext expansion is often (but not always) a necessary
+side-effect of ciphertext randomization. Further, since non-length-preserving
+ciphers {\em use more drive space} than length-preserving ciphers when
+encrypting the same plaintext, users will have less total writable drive space.
 
-The ciphers included in our analysis that exhibit ciphertext expansion have an
-overhead of around 1.56\% per plaintext message block~\cite{Freestyle}. Even a
-single byte of additional ciphertext vs plaintext would make a cipher
-inappropriate for use with prior work. Hence, this is a binary feature in that a
-cipher either outputs ciphertext of the same length as its plaintext input or it
-does not. A cipher scores either a 0 if it {\em is not} length-preserving in
-this way or a 1 if the ciphertext is always the same length as the plaintext.
-
-% About: describing the table
-Table \cref{tbl:trade} shows the result of using \sysC to evaluate 12 cipher
-crypts (see \cref{subsec:des-crypts}) as described below. Note that we have
-included the special crypt {\em Freestyle*} in our analysis, which is a vacuous
-configuration of our Freestyle implementation (see \cref{sec:impl}) using the
-minimum possible ciphertext randomization options.
-
-\input{graphics/tbl-trade}
-
-\hank{I think this really needs a couple sentences of summary that show that
-these scores are useful.  Maybe use the battery saver case study again and say
-how you can read the scores to find a cipher that works for high battery and
-another that would be appropriate for low battery (or at least would be
-appropriate for times when the backups aren't happening since you probably don't
-want to talk about performance here since this scoring section is only about
-security).}
+The crypts included in our analysis that exhibit ciphertext expansion have an
+overhead of around 1.56\% per plaintext message block~\cite{Freestyle}. Hence,
+this is a binary feature in that a crypt either outputs ciphertext of the same
+length as its plaintext input or it does not. A crypt scores a 0 if it {\em is
+not} length-preserving or a 1 if it is, as shown in \cref{tbl:trade}.
