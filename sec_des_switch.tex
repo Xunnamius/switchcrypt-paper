@@ -3,12 +3,12 @@
 % About: when and where
 Though not a technical limitation, it is helpful to think of \sys as having a
 single {\em active cipher configuration} among several available. With \sysA,
-our storage system has the flexibility to switch from one cipher configuration
-to another, or even employ multiple configurations in a way unachievable with
-prior work. When a cipher switch is triggered, a different configuration becomes
-the active configuration, and ``re-ciphering'' must be done, \ie using the
-deactivated configuration to decrypt a nugget's contents and using the active
-configuration to re-cipher it.
+\sys has the flexibility to switch from one cipher configuration to another, or
+even employ multiple configurations in a way unachievable with prior work. When
+a cipher switch is triggered, a different configuration becomes the active
+configuration, and ``re-ciphering'' must be done, \ie using the deactivated
+configuration to decrypt a nugget's contents and using the active configuration
+to re-cipher it.
 
 % About: challenge
 The challenge here is to accomplish re-ciphering while minimizing overhead. A
@@ -16,7 +16,7 @@ naive approach would switch every nugget to the active configuration
 immediately, but the latency and energy cost would be unacceptable. Hence, a
 more strategic approach is is necessary. For example, depending on the use case,
 it may make the most sense to re-cipher a nugget immediately, or eventually, or
-to maintain several areas of differently-ciphered nuggets concurrently. Our
+to maintain several areas of differently-ciphered nuggets concurrently. These
 models allow for nuggets to be re-ciphered in a variety of cases with minimal
 impact on performance and battery life and without compromising security; they
 are: Forward, Mirrored, and Selective. How \sys reacts to I/Os under each model
@@ -26,24 +26,23 @@ is summarized in \cref{tbl:switch}.
 
 % ---------------------------------- Forward switching
 
-\mysub{Forward switching.} In the case of the battery saver mode
-example, we want to switch from cipher ``\cone'', a highly-secure,
-energy-expensive cipher to cipher ``\ctwo,'' a less-secure but more
-energy-efficient cipher. However, for efficiency, {\em we only switch
-nuggets on demand}; \ie we change those nuggets that are touched
-during I/O. This switching model would be enabled as part of a
-higher-level policy (\ie battery saver mode) enacted by the OS or
+\mysub{Forward switching.} In the case of the battery saver mode example, we
+want to switch from cipher ``\cone'', a highly-secure, energy-expensive cipher
+to cipher ``\ctwo,'' a less-secure but more energy-efficient cipher. However,
+for efficiency, {\em we only switch nuggets on demand}; \ie we change those
+nuggets that are touched during I/O. This switching model would be enabled as
+part of a higher-level policy (\ie battery saver mode) enacted by the OS or
 user.
 
-\Cref{tbl:switch} summarizes what happens on I/Os immediately after the
-active cipher is switched to \ctwo. For nugget-sized writes, new data is
-ciphered with \ctwo and committed as normal. For intra-nugget writes, the nugget
-is first decrypted using \cone and then re-ciphered using \ctwo with the new
-data included. The new nugget is then committed as normal. Re-ciphering only
-occurs when necessary; once a nugget is ciphered with \ctwo, no further
-switching is required. For reads, the nugget is decrypted using \cone, it is
-re-ciphered with \ctwo, and then the data is returned. On subsequent reads, the
-nugget is decrypted with \ctwo and read as normal.
+\Cref{tbl:switch} summarizes what happens on I/Os immediately after the active
+cipher is switched to \ctwo. For nugget-sized writes, new data is ciphered with
+\ctwo and committed as normal. For intra-nugget writes, the nugget is first
+decrypted using \cone and then re-ciphered using \ctwo with the new data
+included. The new nugget is then committed as normal. Re-ciphering only occurs
+when necessary; once a nugget is ciphered with \ctwo, no further switching is
+required. For reads, the nugget is decrypted using \cone, it is re-ciphered with
+\ctwo, and then the data is returned. On subsequent reads, the nugget is
+decrypted with \ctwo and read as normal.
 
 Later, when battery saver mode is turned off and \cone becomes the active cipher
 again, nuggets are not automatically re-ciphered as, again, that would be
@@ -78,14 +77,14 @@ available storage into two regions. That is, to support a full drive cipher
 switching supported by the block layer and without application/file system
 modification, we must pay the space cost to anticipate such a switch.
 
-During the migration, as summarized in \cref{tbl:switch}, all write
-operations that hit \cone's region will be mirrored to \ctwo's region.
-Meanwhile, in the background, the data in \cone's region is incrementally
-re-ciphered and written to \ctwo's region. Until the migration is complete, read
-operations will be served by \cone's region. This is very similar to VM live
-migration \cite{live-vm-migration}. After the migration completes, one can use a
-mechanism such as SSD Instant/Secure Erase~\cite{ISE1,ISE2,ISE3} to securely
-erase the previous storage region's data.
+During the migration, as summarized in \cref{tbl:switch}, all write operations
+that hit \cone's region will be mirrored to \ctwo's region. Meanwhile, in the
+background, the data in \cone's region is incrementally re-ciphered and written
+to \ctwo's region. Until the migration is complete, read operations will be
+served by \cone's region. This is very similar to VM live migration
+\cite{live-vm-migration}. After the migration completes, one can use a mechanism
+such as SSD Instant/Secure Erase~\cite{ISE1,ISE2,ISE3} to securely erase the
+previous storage region's data.
 
 In general, Mirrored switching allows us to converge a drive volume to a single
 cipher configuration without losing any data, suffering outages or downtime,
@@ -116,16 +115,15 @@ between two cipher configurations to trade off battery life and security; with
 Selective switching, we want to select a specific cipher configuration each time
 we encrypt a nugget to trade off performance and security.
 
-\Cref{tbl:switch} summarizes what happens on I/Os when \sys is initialized
-using the Selective model with two available cipher configurations: the
-high-overhead high-security \cone and the low-overhead reduced-security \ctwo.
-Suppose we have a multi-gigabyte corporate document that needs to be continually
-disseminated to and consumed by multiple parties. On writes, we want certain
-high priority secrets in this document to be available to only a subset of
-receivers, so we should use our powerful but resource-intensive \cone to encrypt
-nuggets containing these secrets. On the other hand, the remainder of
-surrounding nuggets should use the more performant \ctwo, allowing other parties
-to interact with the low-priority data (perhaps on a lightweight mobile device)
-without experiencing degraded storage performance. On reads, \sys uses its own
-metadata to automatically determine which cipher configuration to use for
-decryption.
+\Cref{tbl:switch} summarizes what happens on I/Os when \sys is initialized using
+the Selective model with two available cipher configurations: the high-overhead
+high-security \cone and the low-overhead reduced-security \ctwo. Suppose we have
+a multi-gigabyte corporate document that needs to be continually disseminated to
+and consumed by multiple parties. On writes, we want certain high priority
+secrets in this document to be available to only a subset of receivers, so we
+should use our powerful but resource-intensive \cone to encrypt nuggets
+containing these secrets. On the other hand, the remainder of surrounding
+nuggets should use the more performant \ctwo, allowing other parties to interact
+with the low-priority data (perhaps on a lightweight mobile device) without
+experiencing degraded storage performance. On reads, \sys uses its own metadata
+to automatically determine which cipher configuration to use for decryption.
