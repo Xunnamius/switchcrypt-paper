@@ -45,7 +45,7 @@ without downtime or degraded service. Our operator wants to upgrade from {\em
 ChaCha20} to {\em Freestyle Fast}.
 
 % About: setup
-To simulate pre- and post-migration state, we execute 10 5MB write-then-read
+To simulate pre- and post-migration state, we execute 10 5MB write-read
 operations to two \sys instances using ChaCha20 and Freestyle Fast respectively.
 To simulate the activity during migration, we repeat the operations on a third
 instance using Mirrored switching.
@@ -74,11 +74,11 @@ stored in the inode. Because the \sys layer is file-oblivious, every block I/O
 through the \sys layer will be labeled with the corresponding crypt.
 
 % About: setup
-We begin with 10 5MB and 10 4KB write-then-read operations to two \sys
-instances: one using {\em ChaCha8}, a high performance crypt, and the other
-using {\em Freestyle Strong}, a high security crypt. We repeat the operations on
-a third instance using Selective switching where 30\% of the data is considered
-highly sensitive and uses Freestyle Strong.
+We begin with 10 5MB and 10 4KB write-read operations to two \sys instances: one
+using {\em ChaCha8}, a high performance crypt, and the other using {\em
+Freestyle Strong}, a high security crypt. We repeat the operations on a third
+instance using Selective switching where 30\% of the data is considered highly
+sensitive and uses Freestyle Strong.
 
 \input{graphics/fig-usecase-agnostic}
 
