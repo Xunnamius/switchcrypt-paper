@@ -94,9 +94,9 @@ I/Os during the switching. These three switching models are motivated by real
 case studies. For example, Forward switching is motivated by the battery case
 study above; Mirrored switching is motivated by scenarios where system
 administrators want to change ciphers with zero downtime and without
-re-initializing the filesystem or device mapper; and
-Selective switching is motivated by cases where users require certain files (\eg
-legal documents) to be stored more securely than others.
+re-initializing the filesystem or device mapper; and Selective switching is
+motivated by cases where users require certain files (\eg legal documents) to be
+stored more securely than others.
 
 % About: crypts
 Second, to support the switching models above, we implement \sysB, a block layer
@@ -139,7 +139,7 @@ Sosemanuk~\cite{Sosemanuk}, HC-128~\cite{HC128}.
 %
 Second, we showcase the benefits of \sys with experiments illustrating \numCases
 real-world case studies (\ie storage system responds to critical battery state,
-filesystem-agnostic file-level encryption, and datacenter downtime avoidance)
+datacenter downtime avoidance, and filesystem-agnostic file-level encryption)
 and show the performance/energy tradeoffs.
 %
 Finally, we perform several benchmarks to demonstrate the flexibility and
