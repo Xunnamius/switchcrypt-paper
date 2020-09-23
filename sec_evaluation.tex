@@ -22,28 +22,28 @@ workload. Results are accumulated and the median is taken for each byte size.
 When evaluating switching models, a finer breakdown in workloads is made using a
 pre-selected pair of ciphers we call the {\em primary cipher configuration} and
 {\em secondary cipher configuration}. \sys is initialized at the primary
-configuration. Once we trigger a cipher switch, \sys moves towards the secondary
+configuration. Once we trigger a switch, \sys moves towards the secondary
 configuration via switching model.
 
-The cipher switch is triggered according to a certain {\em ratio} of I/O
-operations. For example: given 10 40MB read-write operations, we may write and
-then read back 40MB 3 times using the primary cipher, initiate a cipher switch,
-and then write and then read back (write-read) 40MB 7 times. This would be a 3:7
-ratio. It follows that there are three ratios we use to evaluate \sys's
-performance in this regard: 7:3, 5:5, and 3:7. Respectively, that is 7 file
-write-read operation in the primary cipher for every 3 file write-read
-operations in the secondary cipher (7:3), 7 file write-read operation in the
-primary cipher for every other file write-read operation in the secondary cipher
-(5:5), and 3 file write-read operations in the primary cipher for every 7 file
-write-read operation in the secondary cipher (3:7).
+The switch is triggered according to a certain {\em ratio} of I/O operations.
+For example: given 10 40MB read-write operations, we may write and then read
+back 40MB 3 times using the primary cipher, initiate a switch, and then write
+and then read back (write-read) 40MB 7 times. This would be a 3:7 ratio. It
+follows that there are three ratios we use to evaluate \sys's performance in
+this regard: 7:3, 5:5, and 3:7. Respectively, that is 7 file write-read
+operation in the primary cipher for every 3 file write-read operations in the
+secondary cipher (7:3), 7 file write-read operation in the primary cipher for
+every other file write-read operation in the secondary cipher (5:5), and 3 file
+write-read operations in the primary cipher for every 7 file write-read
+operation in the secondary cipher (3:7).
 
-To reason about the desirability of cipher configurations, we define the
-{\em security vector}, R+R, as a vector consisting of a configuration's
-relative rounds (Rounds) quantification and its ciphertext randomization
-(Randomization) quantification defined in \cref{sec:des}. We define the norm
-over this vector as the sum of its components. Hence, we consider a cipher
-configuration ``stronger'' if it has higher ciphertext randomization and uses
-more rounds, \ie has a higher normed R+R.
+To reason about the desirability of cipher configurations, we define the {\em
+security vector}, R+R, as a vector consisting of a configuration's relative
+rounds (Rounds) quantification and its ciphertext randomization (Randomization)
+quantification defined in \cref{sec:des}. We define the norm over this vector as
+the sum of its components. Hence, we consider a cipher configuration
+``stronger'' if it has higher ciphertext randomization and uses more rounds, \ie
+has a higher normed R+R.
 
 All experiments are performed with basic Linux I/O commands, bypassing system
 caching.
@@ -56,8 +56,8 @@ In this section we answer the following questions:
   \item Can \sys achieve dynamic security/energy tradeoffs by reaching
   configuration points not accessible with prior work?
   (\cref{subsec:eval-dynamic})
-  \item What is the performance and storage overhead of each cipher switching
-  model? (\cref{subsec:eval-overhead})
+  \item What is the performance and storage overhead of each switching model?
+  (\cref{subsec:eval-overhead})
 \end{enumerate}
 
 
@@ -66,17 +66,17 @@ In this section we answer the following questions:
 
 \input{graphics/fig-eval-baseline}
 
-\Cref{fig:eval-baseline} shows the normalized relative rounds and
-ciphertext randomization (normed R+R vector) versus median normalized latency
-tradeoff between different stream cipher configurations for our sequential and
-random I/O workloads. Trends for median hold when looking at tail latencies as
-well. Each line represents one workload: 4KB, 512KB, 5MB, and 40MB respectively
-(see legend). Each symbol represents one of our ciphers: ChaCha8, ChaCha20,
-Freestyle Fast, Freestyle Balanced, and Freestyle Strong. Of the ciphers we
-tested, those with higher rounds and higher ciphertext randomization
-scores resulted in higher overall latency and increased energy use for I/O
-operations. The relationship between these concerns is not always linear,
-however, which exposes a rich tradeoff space.
+\Cref{fig:eval-baseline} shows the normalized relative rounds and ciphertext
+randomization (normed R+R vector) versus median normalized latency tradeoff
+between different stream cipher configurations for our sequential and random I/O
+workloads. Trends for median hold when looking at tail latencies as well. Each
+line represents one workload: 4KB, 512KB, 5MB, and 40MB respectively (see
+legend). Each symbol represents one of our ciphers: ChaCha8, ChaCha20, Freestyle
+Fast, Freestyle Balanced, and Freestyle Strong. Of the ciphers we tested, those
+with higher rounds and higher ciphertext randomization scores resulted in higher
+overall latency and increased energy use for I/O operations. The relationship
+between these concerns is not always linear, however, which exposes a rich
+tradeoff space.
 
 Besides the 4KB workload, the shape of each workload follows a similar trend,
 hence we will focus on 40MB and 4KB workloads going forward. Due to the overhead
@@ -100,11 +100,11 @@ normalized 4KB workloads. ChaCha8 is not slower than ChaCha20.
 \Cref{fig:eval-forward} shows the normalized relative rounds and ciphertext
 randomization (normed R+R vector) versus median normalized latency tradeoff
 between different stream ciphers for our sequential and random I/O workloads
-with cipher switching using the Forward model. After a certain number of
-write-read I/O operations, a cipher switch is initiated and \sys begins using
-the secondary cipher to encrypt and decrypt data. For each pair of ciphers, this
-is repeated three times: once at every ratio point {\em between} our static
-configuration points (\ie{7:3, 5:5, and 3:7 described above}).
+with switching using the Forward model. After a certain number of write-read I/O
+operations, a switch is initiated and \sys begins using the secondary cipher to
+encrypt and decrypt data. For each pair of ciphers, this is repeated three
+times: once at every ratio point {\em between} our static configuration points
+(\ie{7:3, 5:5, and 3:7 described above}).
 
 The point of this experiment is to determine if \sys can effectively transition
 the drive between ciphers without devastating performance. For the 40MB, 5MB,
@@ -145,13 +145,13 @@ entire region.
 
 
 % =======================================================
-\subsection{Cipher Switching Overhead}\label{subsec:eval-overhead}
+\subsection{Switching Overhead}\label{subsec:eval-overhead}
 
 We calculate that Forward switching has average overhead at 0.08x/0.10x for
 40MB, 5MB and 512KB read/write workloads compared to baseline I/O, demonstrating
-\sys's amortization of cipher switching costs. Average overhead is\\0.38x/0.44x
-for 4KB read/write workloads when \sys is unable to amortize cost. There is no
-spatial overhead with the Forward switching model.
+\sys's amortization of switching costs. Average overhead is\\0.38x/0.44x for 4KB
+read/write workloads when \sys is unable to amortize cost. There is no spatial
+overhead with the Forward switching model.
 
 Similarly, we calculate that Selective switching has average overhead at 0x/0.3x
 for 40MB, 5MB and 512KB read/write workloads compared to baseline I/O. Average
