@@ -41,19 +41,24 @@ allowing us to remain within our energy budget.
 % About: background
 In this second case study we revisit the Mirrored switching example
 (\cref{subsec:des-switch}): to upgrade live storage from one cipher to another
-without downtime or egregious overhead. Our operator wants to upgrade from {\em
+without downtime or degraded service. Our operator wants to upgrade from {\em
 ChaCha20} to {\em Freestyle Fast}.
 
 % About: setup
-To simulate pre- and post-migration storage, we execute 10 5MB write-then-read
+To simulate pre- and post-migration state, we execute 10 5MB write-then-read
 operations to two \sys instances using ChaCha20 and Freestyle Fast respectively.
-We repeat the operations on a third instance using Mirrored switching.
+To simulate the activity during migration, we repeat the operations on a third
+instance using Mirrored switching.
 
 \input{graphics/fig-usecase-upgrade}
 
 % About: outcome
-\Cref{fig:usecase-upgrade} shows the performance impact of Mirrored switching
-on our . Bars. These results show.
+\Cref{fig:usecase-upgrade} shows the overhead of Mirrored switching on our
+system's performance. On the left we see similar read latency between pre-,
+during-, and post-migration workloads of \TODO{X}s. On the right, we see write
+latency increase by \TODO{X}s during the migration but recover post-migration.
+Thus, Mirrored switching allows us to transition our storage from one cipher to
+another without interruption or egregious overhead.
 
 
 % ================================================================
@@ -62,11 +67,11 @@ on our . Bars. These results show.
 % About: background
 In this final case study we revisit the Selective switching example
 (\cref{subsec:des-switch}): to achieve a performance win by ensuring that the
-only data encrypted using the strongest crypt (with the highest overhead) is the
-small percentage of our data that needs it. The Selective switching model
-requires users to annotate certain files with a special tag via file system
-calls and stored in the inode. Because the \sys layer is file-oblivious, every
-block I/O through the \sys layer will be labeled with the corresponding cipher.
+only data encrypted using the strongest highest-overhead crypt is the small
+percentage of data that needs it. We note the Selective switching model requires
+users to annotate certain files with a special tag via file system calls and
+stored in the inode. Because the \sys layer is file-oblivious, every block I/O
+through the \sys layer will be labeled with the corresponding crypt.
 
 % About: setup
 We begin with 10 5MB and 10 4KB write-then-read operations to two \sys
@@ -85,4 +90,4 @@ to 20s latency depending on the workload. {\em Selective (C8+FS)} (middle) shows
 a reduction of 3.1x to 4.8x for read latency and 1.6x to 2.8x for write latency,
 all without compromising on security. Thus, Selective switching keeps our
 sensitive data at the mandated security level while keeping the performance
-benefits of using a fast cipher.
+benefits of using a fast crypt.
