@@ -160,7 +160,7 @@
     }
   \if@titlepage
   \newcommand\maketitle{\begin{titlepage}%
-  \let\footnotesize\small
+  \let\scriptsize\small
   \let\footnoterule\relax
   \let \footnote \thanks
   \null\vfil

@@ -5,7 +5,7 @@
 
     \begin{groupplot}[
         group style={
-            group size=2 by 4,
+            group size=2 by 2,
             xlabels at=edge bottom,
             ylabels at=edge left,
             xticklabels at=edge bottom,
@@ -54,7 +54,7 @@
         %%major x tick style=transparent,
         %enlarge x limits=0.2, % add some breathing room along the x axis's sides
         %
-        ylabel={\footnotesize Latency (norm)},
+        ylabel={\scriptsize Latency (norm)},
         ylabel near ticks,
         %label shift={-1.5mm},
         ymajorgrids=true,
@@ -88,7 +88,7 @@
             anchor=south,
         },
     ]
-        \nextgroupplot[title={40M Mirrored Reads}]
+        \nextgroupplot[title={\footnotesize 40M Mirrored Reads}]
             \addlegendimage{mark=none,red}
             \addlegendimage{mark=otimes,only marks,black}
             \addlegendimage{mark=oplus,only marks,black}
@@ -107,7 +107,7 @@
                 discard if symbol not={ratio}{0},
                 discard if symbol not={strategy}{mirrored},
                 col sep=space,
-            ] {data/mirrored-selective-baseline.dat};
+            ] {data/tradeoff-ms.dat};
             \addplot [only marks] table [
                 meta=strategy,
                 x=score,
@@ -116,7 +116,7 @@
                 discard if symbol not={ratio}{1},
                 discard if symbol not={strategy}{mirrored},
                 col sep=space
-            ] {data/mirrored-selective-baseline.dat};
+            ] {data/tradeoff-ms.dat};
             \addplot [only marks] table [
                 meta=strategy,
                 x=score,
@@ -125,7 +125,7 @@
                 discard if symbol not={ratio}{2},
                 discard if symbol not={strategy}{mirrored},
                 col sep=space
-            ] {data/mirrored-selective-baseline.dat};
+            ] {data/tradeoff-ms.dat};
             \addplot [only marks] table [
                 meta=strategy,
                 x=score,
@@ -134,121 +134,10 @@
                 discard if symbol not={ratio}{3},
                 discard if symbol not={strategy}{mirrored},
                 col sep=space
-            ] {data/mirrored-selective-baseline.dat};
-        \nextgroupplot[legend to name={throwaway19}, title={40M Selective Reads}]
-            \addplot [thick, red] table [
-                meta=cipher,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{40m-r},
-                discard if symbol not={ratio}{0},
-                discard if symbol not={strategy}{selective},
-                col sep=space,
-            ] {data/mirrored-selective-baseline.dat};
-            \addplot [only marks] table [
-                meta=strategy,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{40m-r},
-                discard if symbol not={ratio}{1},
-                discard if symbol not={strategy}{selective},
-                col sep=space
-            ] {data/mirrored-selective-baseline.dat};
-            \addplot [only marks] table [
-                meta=strategy,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{40m-r},
-                discard if symbol not={ratio}{2},
-                discard if symbol not={strategy}{selective},
-                col sep=space
-            ] {data/mirrored-selective-baseline.dat};
-            \addplot [only marks] table [
-                meta=strategy,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{40m-r},
-                discard if symbol not={ratio}{3},
-                discard if symbol not={strategy}{selective},
-                col sep=space
-            ] {data/mirrored-selective-baseline.dat};
-        \nextgroupplot[legend to name={throwaway20}, title={4K Mirrored Reads}]
-            \addplot [thick, red] table [
-                meta=cipher,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-r},
-                discard if symbol not={ratio}{0},
-                discard if symbol not={strategy}{mirrored},
-                col sep=space,
-            ] {data/mirrored-selective-baseline.dat};
-            \addplot [only marks] table [
-                meta=strategy,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-r},
-                discard if symbol not={ratio}{1},
-                discard if symbol not={strategy}{mirrored},
-                col sep=space
-            ] {data/mirrored-selective-baseline.dat};
-            \addplot [only marks] table [
-                meta=strategy,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-r},
-                discard if symbol not={ratio}{2},
-                discard if symbol not={strategy}{mirrored},
-                col sep=space
-            ] {data/mirrored-selective-baseline.dat};
-            \addplot [only marks] table [
-                meta=strategy,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-r},
-                discard if symbol not={ratio}{3},
-                discard if symbol not={strategy}{mirrored},
-                col sep=space
-            ] {data/mirrored-selective-baseline.dat};
-        \nextgroupplot[legend to name={throwaway14}, title={4K Selective Reads}]
-            \addplot [thick, red] table [
-                meta=cipher,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-r},
-                discard if symbol not={ratio}{0},
-                discard if symbol not={strategy}{selective},
-                col sep=space,
-            ] {data/mirrored-selective-baseline.dat};
-            \addplot [only marks] table [
-                meta=strategy,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-r},
-                discard if symbol not={ratio}{1},
-                discard if symbol not={strategy}{selective},
-                col sep=space
-            ] {data/mirrored-selective-baseline.dat};
-            \addplot [only marks] table [
-                meta=strategy,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-r},
-                discard if symbol not={ratio}{2},
-                discard if symbol not={strategy}{selective},
-                col sep=space
-            ] {data/mirrored-selective-baseline.dat};
-            \addplot [only marks] table [
-                meta=strategy,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-r},
-                discard if symbol not={ratio}{3},
-                discard if symbol not={strategy}{selective},
-                col sep=space
-            ] {data/mirrored-selective-baseline.dat};
+            ] {data/tradeoff-ms.dat};
         \nextgroupplot[
             legend to name={throwaway15},
-            title={40M Mirrored Writes}
+            title={\footnotesize 40M Mirrored Writes}
         ]
             \addplot [thick, red] table [
                 meta=cipher,
@@ -258,7 +147,7 @@
                 discard if symbol not={ratio}{0},
                 discard if symbol not={strategy}{mirrored},
                 col sep=space,
-            ] {data/mirrored-selective-baseline.dat};
+            ] {data/tradeoff-ms.dat};
             \addplot [only marks] table [
                 meta=strategy,
                 x=score,
@@ -267,7 +156,7 @@
                 discard if symbol not={ratio}{1},
                 discard if symbol not={strategy}{mirrored},
                 col sep=space
-            ] {data/mirrored-selective-baseline.dat};
+            ] {data/tradeoff-ms.dat};
             \addplot [only marks] table [
                 meta=strategy,
                 x=score,
@@ -276,7 +165,7 @@
                 discard if symbol not={ratio}{2},
                 discard if symbol not={strategy}{mirrored},
                 col sep=space
-            ] {data/mirrored-selective-baseline.dat};
+            ] {data/tradeoff-ms.dat};
             \addplot [only marks] table [
                 meta=strategy,
                 x=score,
@@ -285,51 +174,128 @@
                 discard if symbol not={ratio}{3},
                 discard if symbol not={strategy}{mirrored},
                 col sep=space
-            ] {data/mirrored-selective-baseline.dat};
+            ] {data/tradeoff-ms.dat};
+        % \nextgroupplot[legend to name={throwaway20}, title={\footnotesize 4K Mirrored Reads}]
+        %     \addplot [thick, red] table [
+        %         meta=cipher,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-r},
+        %         discard if symbol not={ratio}{0},
+        %         discard if symbol not={strategy}{mirrored},
+        %         col sep=space,
+        %     ] {data/tradeoff-ms.dat};
+        %     \addplot [only marks] table [
+        %         meta=strategy,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-r},
+        %         discard if symbol not={ratio}{1},
+        %         discard if symbol not={strategy}{mirrored},
+        %         col sep=space
+        %     ] {data/tradeoff-ms.dat};
+        %     \addplot [only marks] table [
+        %         meta=strategy,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-r},
+        %         discard if symbol not={ratio}{2},
+        %         discard if symbol not={strategy}{mirrored},
+        %         col sep=space
+        %     ] {data/tradeoff-ms.dat};
+        %     \addplot [only marks] table [
+        %         meta=strategy,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-r},
+        %         discard if symbol not={ratio}{3},
+        %         discard if symbol not={strategy}{mirrored},
+        %         col sep=space
+        %     ] {data/tradeoff-ms.dat};
+        % \nextgroupplot[legend to name={throwaway14}, title={\footnotesize 4K Selective Reads}]
+        %     \addplot [thick, red] table [
+        %         meta=cipher,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-r},
+        %         discard if symbol not={ratio}{0},
+        %         discard if symbol not={strategy}{selective},
+        %         col sep=space,
+        %     ] {data/tradeoff-ms.dat};
+        %     \addplot [only marks] table [
+        %         meta=strategy,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-r},
+        %         discard if symbol not={ratio}{1},
+        %         discard if symbol not={strategy}{selective},
+        %         col sep=space
+        %     ] {data/tradeoff-ms.dat};
+        %     \addplot [only marks] table [
+        %         meta=strategy,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-r},
+        %         discard if symbol not={ratio}{2},
+        %         discard if symbol not={strategy}{selective},
+        %         col sep=space
+        %     ] {data/tradeoff-ms.dat};
+        %     \addplot [only marks] table [
+        %         meta=strategy,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-r},
+        %         discard if symbol not={ratio}{3},
+        %         discard if symbol not={strategy}{selective},
+        %         col sep=space
+        %     ] {data/tradeoff-ms.dat};
+        \nextgroupplot[
+            legend to name={throwaway19},
+            title={\footnotesize 40M Selective Reads},
+            xlabel={\scriptsize Trade Score},
+            xtick={ 0, 1, 2, 3, 4 },
+            xticklabels={ 0,,, 1, \empty }
+        ]
+            \addplot [thick, red] table [
+                meta=cipher,
+                x=score,
+                y=latency,
+                discard if symbol not={iop}{40m-r},
+                discard if symbol not={ratio}{0},
+                discard if symbol not={strategy}{selective},
+                col sep=space,
+            ] {data/tradeoff-ms.dat};
+            \addplot [only marks] table [
+                meta=strategy,
+                x=score,
+                y=latency,
+                discard if symbol not={iop}{40m-r},
+                discard if symbol not={ratio}{1},
+                discard if symbol not={strategy}{selective},
+                col sep=space
+            ] {data/tradeoff-ms.dat};
+            \addplot [only marks] table [
+                meta=strategy,
+                x=score,
+                y=latency,
+                discard if symbol not={iop}{40m-r},
+                discard if symbol not={ratio}{2},
+                discard if symbol not={strategy}{selective},
+                col sep=space
+            ] {data/tradeoff-ms.dat};
+            \addplot [only marks] table [
+                meta=strategy,
+                x=score,
+                y=latency,
+                discard if symbol not={iop}{40m-r},
+                discard if symbol not={ratio}{3},
+                discard if symbol not={strategy}{selective},
+                col sep=space
+            ] {data/tradeoff-ms.dat};
         \nextgroupplot[
             legend to name={throwaway16},
-            title={40M Selective Writes}
-        ]
-            \addplot [thick, red] table [
-                meta=cipher,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{40m-w},
-                discard if symbol not={ratio}{0},
-                discard if symbol not={strategy}{selective},
-                col sep=space,
-            ] {data/mirrored-selective-baseline.dat};
-            \addplot [only marks] table [
-                meta=strategy,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{40m-w},
-                discard if symbol not={ratio}{1},
-                discard if symbol not={strategy}{selective},
-                col sep=space
-            ] {data/mirrored-selective-baseline.dat};
-            \addplot [only marks] table [
-                meta=strategy,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{40m-w},
-                discard if symbol not={ratio}{2},
-                discard if symbol not={strategy}{selective},
-                col sep=space
-            ] {data/mirrored-selective-baseline.dat};
-            \addplot [only marks] table [
-                meta=strategy,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{40m-w},
-                discard if symbol not={ratio}{3},
-                discard if symbol not={strategy}{selective},
-                col sep=space
-            ] {data/mirrored-selective-baseline.dat};
-        \nextgroupplot[
-            legend to name={throwaway17},
-            title={4K Mirrored Writes},
-            xlabel={\footnotesize R+R (norm)},
+            title={\footnotesize 40M Selective Writes},
+            xlabel={\scriptsize Trade Score},
             xtick={ 0, 1, 2, 3, 4 },
             xticklabels={ 0,,, 1, \empty }
         ]
@@ -337,80 +303,123 @@
                 meta=cipher,
                 x=score,
                 y=latency,
-                discard if symbol not={iop}{4k-w},
-                discard if symbol not={ratio}{0},
-                discard if symbol not={strategy}{mirrored},
-                col sep=space,
-            ] {data/mirrored-selective-baseline.dat};
-            \addplot [only marks] table [
-                meta=strategy,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-w},
-                discard if symbol not={ratio}{1},
-                discard if symbol not={strategy}{mirrored},
-                col sep=space
-            ] {data/mirrored-selective-baseline.dat};
-            \addplot [only marks] table [
-                meta=strategy,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-w},
-                discard if symbol not={ratio}{2},
-                discard if symbol not={strategy}{mirrored},
-                col sep=space
-            ] {data/mirrored-selective-baseline.dat};
-            \addplot [only marks] table [
-                meta=strategy,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-w},
-                discard if symbol not={ratio}{3},
-                discard if symbol not={strategy}{mirrored},
-                col sep=space
-            ] {data/mirrored-selective-baseline.dat};
-        \nextgroupplot[
-            legend to name={throwaway18},
-            title={4K Selective Writes},
-            xlabel={\footnotesize R+R (norm)},
-            xtick={ 0, 1, 2, 3, 4 },
-            xticklabels={ 0,,, 1, \empty }
-        ]
-            \addplot [thick, red] table [
-                meta=cipher,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-w},
+                discard if symbol not={iop}{40m-w},
                 discard if symbol not={ratio}{0},
                 discard if symbol not={strategy}{selective},
                 col sep=space,
-            ] {data/mirrored-selective-baseline.dat};
+            ] {data/tradeoff-ms.dat};
             \addplot [only marks] table [
                 meta=strategy,
                 x=score,
                 y=latency,
-                discard if symbol not={iop}{4k-w},
+                discard if symbol not={iop}{40m-w},
                 discard if symbol not={ratio}{1},
                 discard if symbol not={strategy}{selective},
                 col sep=space
-            ] {data/mirrored-selective-baseline.dat};
+            ] {data/tradeoff-ms.dat};
             \addplot [only marks] table [
                 meta=strategy,
                 x=score,
                 y=latency,
-                discard if symbol not={iop}{4k-w},
+                discard if symbol not={iop}{40m-w},
                 discard if symbol not={ratio}{2},
                 discard if symbol not={strategy}{selective},
                 col sep=space
-            ] {data/mirrored-selective-baseline.dat};
+            ] {data/tradeoff-ms.dat};
             \addplot [only marks] table [
                 meta=strategy,
                 x=score,
                 y=latency,
-                discard if symbol not={iop}{4k-w},
+                discard if symbol not={iop}{40m-w},
                 discard if symbol not={ratio}{3},
                 discard if symbol not={strategy}{selective},
                 col sep=space
-            ] {data/mirrored-selective-baseline.dat};
+            ] {data/tradeoff-ms.dat};
+        % \nextgroupplot[
+        %     legend to name={throwaway17},
+        %     title={\footnotesize 4K Mirrored Writes},
+        %     xlabel={\scriptsize Trade Score},
+        %     xtick={ 0, 1, 2, 3, 4 },
+        %     xticklabels={ 0,,, 1, \empty }
+        % ]
+        %     \addplot [thick, red] table [
+        %         meta=cipher,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-w},
+        %         discard if symbol not={ratio}{0},
+        %         discard if symbol not={strategy}{mirrored},
+        %         col sep=space,
+        %     ] {data/tradeoff-ms.dat};
+        %     \addplot [only marks] table [
+        %         meta=strategy,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-w},
+        %         discard if symbol not={ratio}{1},
+        %         discard if symbol not={strategy}{mirrored},
+        %         col sep=space
+        %     ] {data/tradeoff-ms.dat};
+        %     \addplot [only marks] table [
+        %         meta=strategy,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-w},
+        %         discard if symbol not={ratio}{2},
+        %         discard if symbol not={strategy}{mirrored},
+        %         col sep=space
+        %     ] {data/tradeoff-ms.dat};
+        %     \addplot [only marks] table [
+        %         meta=strategy,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-w},
+        %         discard if symbol not={ratio}{3},
+        %         discard if symbol not={strategy}{mirrored},
+        %         col sep=space
+        %     ] {data/tradeoff-ms.dat};
+        % \nextgroupplot[
+        %     legend to name={throwaway18},
+        %     title={\footnotesize 4K Selective Writes},
+        %     xlabel={\scriptsize Trade Score},
+        %     xtick={ 0, 1, 2, 3, 4 },
+        %     xticklabels={ 0,,, 1, \empty }
+        % ]
+        %     \addplot [thick, red] table [
+        %         meta=cipher,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-w},
+        %         discard if symbol not={ratio}{0},
+        %         discard if symbol not={strategy}{selective},
+        %         col sep=space,
+        %     ] {data/tradeoff-ms.dat};
+        %     \addplot [only marks] table [
+        %         meta=strategy,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-w},
+        %         discard if symbol not={ratio}{1},
+        %         discard if symbol not={strategy}{selective},
+        %         col sep=space
+        %     ] {data/tradeoff-ms.dat};
+        %     \addplot [only marks] table [
+        %         meta=strategy,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-w},
+        %         discard if symbol not={ratio}{2},
+        %         discard if symbol not={strategy}{selective},
+        %         col sep=space
+        %     ] {data/tradeoff-ms.dat};
+        %     \addplot [only marks] table [
+        %         meta=strategy,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-w},
+        %         discard if symbol not={ratio}{3},
+        %         discard if symbol not={strategy}{selective},
+        %         col sep=space
+        %     ] {data/tradeoff-ms.dat};
     \end{groupplot}
 \end{tikzpicture}%

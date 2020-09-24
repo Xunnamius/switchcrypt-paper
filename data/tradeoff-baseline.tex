@@ -5,7 +5,7 @@
 
     \begin{groupplot}[
         group style={
-            group size=2 by 2,
+            group size=2 by 1,
             xlabels at=edge bottom,
             ylabels at=edge left,
             xticklabels at=edge bottom,
@@ -14,8 +14,8 @@
             horizontal sep=15pt,
         },
         %axis x line*=bottom,
-        height=3.5cm,
-        width=\linewidth/1.75,
+        height=3cm,
+        width=\textwidth/4,
         tick align=outside,
         tick pos=bottom, % make sure ticks only appear at the bottom and left axes
         title style={yshift=-1.5ex},
@@ -46,7 +46,7 @@
         % clip=false, % allow clip to protrude beyond ymax
         % Custom stuff to edit per template
         %
-        xlabel={\footnotesize R+R (norm)},
+        xlabel={\scriptsize Trade Score},
         xlabel near ticks,
         %xlabel shift={-1.5mm},
         xmin=0, xmax=4,
@@ -55,7 +55,7 @@
         %major x tick style=transparent,
         %enlarge x limits=0.2, % add some breathing room along the x axis's sides
         %
-        ylabel={\footnotesize Latency (normalized)},
+        ylabel={\scriptsize Latency (norm)},
         ylabel near ticks,
         ylabel shift={-1.5mm},
         ymajorgrids=true,
@@ -89,18 +89,18 @@
             anchor=south,
         },
     ]
-        \nextgroupplot[title={Sequential Reads}]
-            \addlegendimage{no markers,red}
-            \addlegendimage{no markers,green,dashed}
-            \addlegendimage{no markers,blue,dashdotted}
-            \addlegendimage{no markers,orange,densely dotted}
+        \nextgroupplot[title={\footnotesize Sequential Reads}]
+            \addlegendimage{no markers,pinkDark}
+            \addlegendimage{no markers,purpleDark,dashed}
+            \addlegendimage{no markers,orangeLight,dashdotted}
+            \addlegendimage{no markers,blueDark,densely dotted}
             \addlegendimage{only marks,mark=square*,white}
             \addlegendimage{only marks,mark=square*,black}
             \addlegendimage{only marks,mark=triangle*,black}
             \addlegendimage{only marks,mark=diamond*,black}
             \addlegendimage{only marks,mark=pentagon*,black}
             \addlegendimage{only marks,mark=otimes,black}
-            \addplot [thick, red] table [
+            \addplot [thick, pinkDark] table [
                 meta=cipher,
                 x=score,
                 y=latency,
@@ -113,7 +113,7 @@
             % \label[ff]{fig:tnr:ff}
             % \label[fb]{fig:tnr:fb}
             % \label[fs]{fig:tnr:fs}
-            \addplot [thick, dashed, green] table [
+            \addplot [thick, dashed, purpleDark] table [
                 meta=cipher,
                 x=score,
                 y=latency,
@@ -121,7 +121,7 @@
                 discard if symbol not={order}{seq},
                 col sep=space
             ] {data/tradeoff-baseline.dat};
-            \addplot [thick, dashdotted, blue] table [
+            \addplot [thick, dashdotted, orangeLight] table [
                 meta=cipher,
                 x=score,
                 y=latency,
@@ -129,7 +129,7 @@
                 discard if symbol not={order}{seq},
                 col sep=space
             ] {data/tradeoff-baseline.dat};
-            \addplot [thick, densely dotted, orange] table [
+            \addplot [thick, densely dotted, blueDark] table [
                 meta=cipher,
                 x=score,
                 y=latency,
@@ -137,41 +137,41 @@
                 discard if symbol not={order}{seq},
                 col sep=space
             ] {data/tradeoff-baseline.dat};
-        \nextgroupplot[legend to name={throwaway1}, title={Random Reads}]
-            \addplot [thick, red] table [
-                meta=cipher,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-r},
-                discard if symbol not={order}{rnd},
-                col sep=space,
-            ] {data/tradeoff-baseline.dat};
-            \addplot [thick, dashed, green] table [
-                meta=cipher,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{512k-r},
-                discard if symbol not={order}{rnd},
-                col sep=space
-            ] {data/tradeoff-baseline.dat};
-            \addplot [thick, dashdotted, blue] table [
-                meta=cipher,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{5m-r},
-                discard if symbol not={order}{rnd},
-                col sep=space
-            ] {data/tradeoff-baseline.dat};
-            \addplot [thick, densely dotted, orange] table [
-                meta=cipher,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{40m-r},
-                discard if symbol not={order}{rnd},
-                col sep=space
-            ] {data/tradeoff-baseline.dat};
-        \nextgroupplot[legend to name={throwaway2}, title={Sequential Writes}]
-            \addplot [thick, red] table [
+        % \nextgroupplot[legend to name={throwaway1}, title={\footnotesize Random Reads}]
+        %     \addplot [thick, pinkDark] table [
+        %         meta=cipher,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-r},
+        %         discard if symbol not={order}{rnd},
+        %         col sep=space,
+        %     ] {data/tradeoff-baseline.dat};
+        %     \addplot [thick, dashed, purpleDark] table [
+        %         meta=cipher,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{512k-r},
+        %         discard if symbol not={order}{rnd},
+        %         col sep=space
+        %     ] {data/tradeoff-baseline.dat};
+        %     \addplot [thick, dashdotted, orangeLight] table [
+        %         meta=cipher,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{5m-r},
+        %         discard if symbol not={order}{rnd},
+        %         col sep=space
+        %     ] {data/tradeoff-baseline.dat};
+        %     \addplot [thick, densely dotted, blueDark] table [
+        %         meta=cipher,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{40m-r},
+        %         discard if symbol not={order}{rnd},
+        %         col sep=space
+        %     ] {data/tradeoff-baseline.dat};
+        \nextgroupplot[legend to name={throwaway2}, title={\footnotesize Sequential Writes}]
+            \addplot [thick, pinkDark] table [
                 meta=cipher,
                 x=score,
                 y=latency,
@@ -179,7 +179,7 @@
                 discard if symbol not={order}{seq},
                 col sep=space,
             ] {data/tradeoff-baseline.dat};
-            \addplot [thick, dashed, green] table [
+            \addplot [thick, dashed, purpleDark] table [
                 meta=cipher,
                 x=score,
                 y=latency,
@@ -187,7 +187,7 @@
                 discard if symbol not={order}{seq},
                 col sep=space
             ] {data/tradeoff-baseline.dat};
-            \addplot [thick, dashdotted, blue] table [
+            \addplot [thick, dashdotted, orangeLight] table [
                 meta=cipher,
                 x=score,
                 y=latency,
@@ -195,7 +195,7 @@
                 discard if symbol not={order}{seq},
                 col sep=space
             ] {data/tradeoff-baseline.dat};
-            \addplot [thick, densely dotted, orange] table [
+            \addplot [thick, densely dotted, blueDark] table [
                 meta=cipher,
                 x=score,
                 y=latency,
@@ -203,38 +203,38 @@
                 discard if symbol not={order}{seq},
                 col sep=space
             ] {data/tradeoff-baseline.dat};
-        \nextgroupplot[legend to name={throwaway3}, title={Random Writes}]
-            \addplot [thick, red] table [
-                meta=cipher,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-w},
-                discard if symbol not={order}{rnd},
-                col sep=space,
-            ] {data/tradeoff-baseline.dat};
-            \addplot [thick, dashed, green] table [
-                meta=cipher,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{512k-w},
-                discard if symbol not={order}{rnd},
-                col sep=space
-            ] {data/tradeoff-baseline.dat};
-            \addplot [thick, dashdotted, blue] table [
-                meta=cipher,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{5m-w},
-                discard if symbol not={order}{rnd},
-                col sep=space
-            ] {data/tradeoff-baseline.dat};
-            \addplot [thick, densely dotted, orange] table [
-                meta=cipher,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{40m-w},
-                discard if symbol not={order}{rnd},
-                col sep=space
-            ] {data/tradeoff-baseline.dat};
+        % \nextgroupplot[legend to name={throwaway3}, title={\footnotesize Random Writes}]
+        %     \addplot [thick, pinkDark] table [
+        %         meta=cipher,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{4k-w},
+        %         discard if symbol not={order}{rnd},
+        %         col sep=space,
+        %     ] {data/tradeoff-baseline.dat};
+        %     \addplot [thick, dashed, purpleDark] table [
+        %         meta=cipher,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{512k-w},
+        %         discard if symbol not={order}{rnd},
+        %         col sep=space
+        %     ] {data/tradeoff-baseline.dat};
+        %     \addplot [thick, dashdotted, orangeLight] table [
+        %         meta=cipher,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{5m-w},
+        %         discard if symbol not={order}{rnd},
+        %         col sep=space
+        %     ] {data/tradeoff-baseline.dat};
+        %     \addplot [thick, densely dotted, blueDark] table [
+        %         meta=cipher,
+        %         x=score,
+        %         y=latency,
+        %         discard if symbol not={iop}{40m-w},
+        %         discard if symbol not={order}{rnd},
+        %         col sep=space
+        %     ] {data/tradeoff-baseline.dat};
     \end{groupplot}%
 \end{tikzpicture}%

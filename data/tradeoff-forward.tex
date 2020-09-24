@@ -14,8 +14,8 @@
             horizontal sep=15pt,
         },
         %axis x line*=bottom,
-        height=3.5cm,
-        width=\linewidth/1.75,
+        height=3cm,
+        width=\textwidth/4,
         tick align=outside,
         tick pos=bottom, % make sure ticks only appear at the bottom and left axes
         title style={yshift=-1.5ex},
@@ -46,7 +46,7 @@
         % clip=false, % allow clip to protrude beyond ymax
         % Custom stuff to edit per template
         %
-        xlabel={\footnotesize R+R (norm)},
+        xlabel={\scriptsize Trade Score},
         xlabel near ticks,
         %xlabel shift={-1.5mm},
         xmin=0, xmax=4,
@@ -55,7 +55,7 @@
         %major x tick style=transparent,
         %enlarge x limits=0.2, % add some breathing room along the x axis's sides
         %
-        ylabel={\footnotesize Latency (normalized)},
+        ylabel={\scriptsize Latency (norm)},
         ylabel near ticks,
         ylabel shift={-1.5mm},
         ymajorgrids=true,
@@ -89,7 +89,7 @@
             anchor=south,
         },
     ]
-        \nextgroupplot[title={Sequential 40M Reads}]
+        \nextgroupplot[title={\footnotesize Sequential 40M Reads}]
             \addlegendimage{no markers,red}
             \addlegendimage{mark=otimes*,only marks,black}
             \addlegendimage{only marks,mark=square*,white}
@@ -108,7 +108,7 @@
                 discard if number not={ratio}{0},
                 discard if symbol not={order}{seq},
                 col sep=space,
-            ] {data/tradeoff-ratios.dat};
+            ] {data/tradeoff-forward.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -116,7 +116,7 @@
                 discard if number not={ratio}{1},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {data/tradeoff-ratios.dat};
+            ] {data/tradeoff-forward.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -124,7 +124,7 @@
                 discard if number not={ratio}{2},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {data/tradeoff-ratios.dat};
+            ] {data/tradeoff-forward.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -132,42 +132,8 @@
                 discard if number not={ratio}{3},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {data/tradeoff-ratios.dat};
-        \nextgroupplot[legend to name={throwaway4}, title={Sequential 4K Reads}]
-            \addplot [thick, red] table [
-                meta=cipher,
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-r},
-                discard if number not={ratio}{0},
-                discard if symbol not={order}{seq},
-                col sep=space,
-            ] {data/tradeoff-ratios.dat};
-            \addplot [only marks] table [
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-r},
-                discard if number not={ratio}{1},
-                discard if symbol not={order}{seq},
-                col sep=space
-            ] {data/tradeoff-ratios.dat};
-            \addplot [only marks] table [
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-r},
-                discard if number not={ratio}{2},
-                discard if symbol not={order}{seq},
-                col sep=space
-            ] {data/tradeoff-ratios.dat};
-            \addplot [only marks] table [
-                x=score,
-                y=latency,
-                discard if symbol not={iop}{4k-r},
-                discard if number not={ratio}{3},
-                discard if symbol not={order}{seq},
-                col sep=space
-            ] {data/tradeoff-ratios.dat};
-        \nextgroupplot[legend to name={throwaway5}, title={Sequential 40M Writes}]
+            ] {data/tradeoff-forward.dat};
+        \nextgroupplot[legend to name={throwaway5}, title={\footnotesize Sequential 40M Writes}]
             \addplot [thick, red] table [
                 meta=cipher,
                 x=score,
@@ -176,7 +142,7 @@
                 discard if number not={ratio}{0},
                 discard if symbol not={order}{seq},
                 col sep=space,
-            ] {data/tradeoff-ratios.dat};
+            ] {data/tradeoff-forward.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -184,7 +150,7 @@
                 discard if number not={ratio}{1},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {data/tradeoff-ratios.dat};
+            ] {data/tradeoff-forward.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -192,7 +158,7 @@
                 discard if number not={ratio}{2},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {data/tradeoff-ratios.dat};
+            ] {data/tradeoff-forward.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -200,8 +166,42 @@
                 discard if number not={ratio}{3},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {data/tradeoff-ratios.dat};
-        \nextgroupplot[legend to name={throwaway6}, title={Sequential 4K Writes}]
+            ] {data/tradeoff-forward.dat};
+        \nextgroupplot[legend to name={throwaway4}, title={\footnotesize Sequential 4K Reads}]
+            \addplot [thick, red] table [
+                meta=cipher,
+                x=score,
+                y=latency,
+                discard if symbol not={iop}{4k-r},
+                discard if number not={ratio}{0},
+                discard if symbol not={order}{seq},
+                col sep=space,
+            ] {data/tradeoff-forward.dat};
+            \addplot [only marks] table [
+                x=score,
+                y=latency,
+                discard if symbol not={iop}{4k-r},
+                discard if number not={ratio}{1},
+                discard if symbol not={order}{seq},
+                col sep=space
+            ] {data/tradeoff-forward.dat};
+            \addplot [only marks] table [
+                x=score,
+                y=latency,
+                discard if symbol not={iop}{4k-r},
+                discard if number not={ratio}{2},
+                discard if symbol not={order}{seq},
+                col sep=space
+            ] {data/tradeoff-forward.dat};
+            \addplot [only marks] table [
+                x=score,
+                y=latency,
+                discard if symbol not={iop}{4k-r},
+                discard if number not={ratio}{3},
+                discard if symbol not={order}{seq},
+                col sep=space
+            ] {data/tradeoff-forward.dat};
+        \nextgroupplot[legend to name={throwaway6}, title={\footnotesize Sequential 4K Writes}]
             \addplot [thick, red] table [
                 meta=cipher,
                 x=score,
@@ -210,7 +210,7 @@
                 discard if number not={ratio}{0},
                 discard if symbol not={order}{seq},
                 col sep=space,
-            ] {data/tradeoff-ratios.dat};
+            ] {data/tradeoff-forward.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -218,7 +218,7 @@
                 discard if number not={ratio}{1},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {data/tradeoff-ratios.dat};
+            ] {data/tradeoff-forward.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -226,7 +226,7 @@
                 discard if number not={ratio}{2},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {data/tradeoff-ratios.dat};
+            ] {data/tradeoff-forward.dat};
             \addplot [only marks] table [
                 x=score,
                 y=latency,
@@ -234,6 +234,6 @@
                 discard if number not={ratio}{3},
                 discard if symbol not={order}{seq},
                 col sep=space
-            ] {data/tradeoff-ratios.dat};
+            ] {data/tradeoff-forward.dat};
     \end{groupplot}
 \end{tikzpicture}%

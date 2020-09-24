@@ -5,8 +5,8 @@
 
     \begin{axis}[
         %axis x line*=bottom,
-        height=4cm,
-        width=\linewidth,
+        height=1in,
+        width=2.5in,
         tick align=outside,
         tick pos=bottom, % make sure ticks only appear at the bottom and left axes
         tick style={ black },
@@ -27,22 +27,24 @@
         clip=false, % allow clip to protrude beyond ymax
         % Custom stuff to edit per template
         %
-        xlabel={\footnotesize Cipher Configuration},
+        xlabel={\scriptsize Cipher Configuration},
         xlabel near ticks,
-        xmin=C8, xmax=FS,
+        xmin=C8+FS, xmax=FS,
         xtick=data,
-        symbolic x coords={C8,C8+FS,FS},
-        enlarge x limits=0.2, % add some breathing room along the x axis's sides
+        symbolic x coords={C8+FS,FS},
+        xticklabels={Selective (C8+FS),FS only},
+        enlarge x limits=0.5, % add some breathing room along the x axis's sides
         %major x tick style=transparent,
         %
-        ylabel={\footnotesize Latency (s)},
+        ylabel={\scriptsize Latency (s)},
         ylabel near ticks,
-        ylabel shift={-1mm},
+        %ylabel shift={-1mm},
+        ylabel style={at={(ticklabel cs:0.4)}},
         ymajorgrids=true,
-        ymin=0, ymax=\ymax,
+        ymin=0, ymax=30,
         ybar, % value will shift bars
-        ytick={ 0, 5, ..., \ymax },
-        %yticklabels={ 0, 0.5, 1.5, 2 },
+        ytick={ 5, 15, 25 },
+        %yticklabels={ 5, 15, 25},
         % extra y ticks={1},
         % extra y tick style={grid=major, grid style={dashed, black}},
         % extra y tick label={\empty},
@@ -58,18 +60,18 @@
         },
         legend style={
             draw=none,
-            legend columns=2,
+            legend columns=4,
             at={(0.5,1.02)},
             anchor=south,
         },
     ]
-        \addplot[fill=orangeDark, every node near coord/.append style={color=orangeDark}]
-        table[x=conf, y=latr-4k, col sep=space] {data/usecase-agnostic-tradeoff.dat};
-        \addplot[fill=orangeDark, postaction={pattern=north east lines}, every node near coord/.append style={color=purpleDark}]
-        table[x=conf, y=latw-4k, col sep=space] {data/usecase-agnostic-tradeoff.dat};
-        \addplot[fill=purpleDark, every node near coord/.append style={color=orangeDark}]
-        table[x=conf, y=latr-5m, col sep=space] {data/usecase-agnostic-tradeoff.dat};
+        \addplot[fill=pinkDark, every node near coord/.append style={color=pinkDark}]
+        table[x=conf, y=latr-4k, col sep=space] {data/usecase-agnostic.dat};
+        \addplot[fill=pinkDark, postaction={pattern=north east lines}, every node near coord/.append style={color=purpleDark}]
+        table[x=conf, y=latw-4k, col sep=space] {data/usecase-agnostic.dat};
+        \addplot[fill=purpleDark, every node near coord/.append style={color=pinkDark}]
+        table[x=conf, y=latr-5m, col sep=space] {data/usecase-agnostic.dat};
         \addplot[fill=purpleDark, postaction={pattern=north east lines}, every node near coord/.append style={color=purpleDark}]
-        table[x=conf, y=latw-5m, col sep=space] {data/usecase-agnostic-tradeoff.dat};
+        table[x=conf, y=latw-5m, col sep=space] {data/usecase-agnostic.dat};
     \end{axis}%
 \end{tikzpicture}%

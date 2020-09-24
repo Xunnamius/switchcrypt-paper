@@ -1,0 +1,7 @@
+op  latency stage
+r   5       pre
+r   5       dur
+r   5       post
+w   7       pre
+w   10      dur
+w   7       post
