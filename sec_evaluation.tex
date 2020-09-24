@@ -3,13 +3,13 @@
 In this section we answer the following questions:
 
 \begin{enumerate}
-  \item {\bf Why switch?} What shape is the security-latency tradeoff space of
-  crypts given our workloads? (\cref{subsec:eval-baseline})
-  \item {\bf Does heterogeneous FDE work?} Can \sys achieve dynamic
-  security/energy tradeoffs by reaching configuration points not accessible with
-  prior work? (\cref{subsec:eval-dynamic})
-  \item {\bf At what cost?} What is the performance and storage overhead of
-  switching? (\cref{subsec:eval-overhead})
+ \item {\bf Why switch?} What shape is the security-latency tradeoff space of
+ crypts given our workloads? (\cref{subsec:eval-baseline})
+ \item {\bf Does heterogeneous FDE work?} Can \sys achieve dynamic
+ security/energy tradeoffs by reaching configuration points not accessible with
+ prior work? (\cref{subsec:eval-dynamic})
+ \item {\bf At what cost?} What is the performance and storage overhead of
+ switching? (\cref{subsec:eval-overhead})
 \end{enumerate}
 
 \mysub{Experimental Setup.} We implement \sys on a Hardkernel Odroid XU3 ARM
@@ -120,7 +120,7 @@ Mirrored write workload.
 
 
 % =======================================================
-\subsection{Switching Overhead}\label{subsec:eval-overhead}
+\subsection{Summary}\label{subsec:eval-overhead}
 
 We calculate that Forward switching has average latency overhead at 0.08x/0.10x
 (read/write) for 40MB, 5MB and 512KB workloads compared to baseline I/O,
@@ -136,3 +136,11 @@ high write latency due to mirroring. Average overhead is 0.55x/0.77x
 
 Overhead is the penalty paid to implement heterogeneous FDE. \sys's design keeps
 these overheads acceptably low in practice.
+
+In summary, these results show that \sys can reach a wide range of performance
+and security tradeoffs. Furthermore, it can reach points in the tradeoff space
+that were simply unreachable with prior work. This comes at a cost of just X\%
+increased latency overhead compared to existing FDE approaches like StrongBox,
+and at the cost of greatly reduced I/O performance for very small operations. We
+conclude that any FDE approach heavy with I/Os larger than 4KB would benefit
+from the increased flexibility of \sys and heterogeneous FDE.
