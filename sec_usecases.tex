@@ -8,11 +8,10 @@ In this section we conclude our case studies. Each experiment below was repeated
 \subsection{``Battery Saver'' Mode}\label{subsec:usecase-battery}
 
 % About: background
-In this first case study, we revisit the motivational example
-(\cref{sec:motivation}): demonstrating the utility of Forward switching to
-complete a workload within a strict energy budget. Here, our netbook's storage
-will use {\em Freestyle Balanced} when operating normally and {\em ChaCha8} when
-battery saver mode is activated.
+In this first case study, we revisit the motivational Forward switching example
+(\cref{sec:motivation}). Our goal is to complete a workload within a strict
+energy budget. Here, our netbook's storage will use {\em Freestyle Balanced}
+when operating normally and {\em ChaCha8} when battery saver mode is activated.
 
 % About: setup
 To simulate this, we repeat the following twice: 1) we begin writing 10 40MB
@@ -40,9 +39,9 @@ allowing us to remain within our energy budget.
 
 % About: background
 In this second case study we revisit the Mirrored switching example
-(\cref{subsec:des-switch}): to upgrade live storage from one cipher to another
-without downtime or degraded service. Our operator wants to upgrade from {\em
-ChaCha20} to {\em Freestyle Fast}.
+(\cref{subsec:des-switch}). Our goal is to upgrade live storage from one cipher
+to another without downtime or degraded service. Our operator wants to upgrade
+from {\em ChaCha20} to {\em Freestyle Fast}.
 
 % About: setup
 To simulate pre- and post-migration state, we execute 10 5MB write-read
@@ -66,12 +65,12 @@ another without interruption or egregious overhead.
 
 % About: background
 In this final case study we revisit the Selective switching example
-(\cref{subsec:des-switch}): to achieve a performance win by ensuring that the
-only data encrypted using the strongest highest-overhead crypt is the small
-percentage of data that needs it. We note the Selective switching model requires
-users to annotate certain files with a special tag via file system calls and
-stored in the inode. Because the \sys layer is file-oblivious, every block I/O
-through the \sys layer will be labeled with the corresponding crypt.
+(\cref{subsec:des-switch}). Our goal is to achieve a performance win by ensuring
+that the only data encrypted using the strongest highest-overhead crypt is the
+small percentage of data that needs it. We note the Selective switching model
+requires users to annotate certain files with a special tag via file system
+calls and stored in the inode. Because the \sys layer is file-oblivious, every
+block I/O through the \sys layer will be labeled with the corresponding crypt.
 
 % About: setup
 We begin with 10 5MB and 10 4KB write-read operations to two \sys instances: one

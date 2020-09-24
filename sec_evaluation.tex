@@ -3,8 +3,8 @@
 In this section we answer the following questions:
 
 \begin{enumerate}
-  \item What shape does the cipher configuration tradeoff space take under our
-  workloads? (\cref{subsec:eval-baseline})
+  \item What shape does the cipher configuration space take under our workloads?
+  (\cref{subsec:eval-baseline})
   \item Can \sys achieve dynamic security/energy tradeoffs by reaching
   configuration points not accessible with prior work?
   (\cref{subsec:eval-dynamic})
@@ -12,36 +12,35 @@ In this section we answer the following questions:
   (\cref{subsec:eval-overhead})
 \end{enumerate}
 
-\mysub{Experimental Setup.} We implement \sys and our experiments on a
-Hardkernel Odroid XU3 ARM big.LITTLE system with Samsung Exynos 5422 A15/A7
-heterogeneous multi-processing quad core CPUs at maximum clock speed, 2 gigabyte
-LPDDR3 RAM at 933 MHz, and an eMMC5.0 HS400 backing store running Ubuntu Trusty
-14.04.6 LTS, kernel version 3.10.106. Energy monitoring was provided by the
-Odroid's integrated INA-231 power sensors polled every $\approx{260}$
-milliseconds (not including noise/overhead).
+\mysub{Experimental Setup.} We implement \sys on a Hardkernel Odroid XU3 ARM
+big.LITTLE system with Samsung Exynos 5422 A15/A7 heterogeneous multi-processing
+quad core CPUs at maximum clock speed, 2 gigabyte LPDDR3 RAM at 933 MHz, and an
+eMMC5.0 HS400 backing store running Ubuntu Trusty 14.04.6 LTS, kernel version
+3.10.106. Energy monitoring was provided by the Odroid's integrated INA-231
+power sensors polled every $\approx{260}$ milliseconds (not including
+noise/overhead).
 
 We evaluate \sys using a Linux RAM disk (tmpfs). The maximum theoretical memory
 bandwidth for this Odroid model is 14.9GB/s\@. Our observed maximum memory
 bandwidth is 4.5GB/s. Using a RAM disk focuses the evaluation on the performance
-differences due to different ciphers. All experiments are performed with basic
-Linux I/O commands, bypassing system caching.
+differences due to different ciphers.
 
 \mysub{Methodology.} In each experiment below, we evaluate \sys on two high
 level workloads: sequential and random I/O. In both workloads, a number of bytes
 are written and then read (either 4KB, 512KB, 5MB, 40MB) 10 times. Each workload
 is repeated three times for a total of 240 tests per crypt (720 runs per {\em
-ratio}, see below); 30 results per byte size, 120 results per workload. Results
-are accumulated and the median is taken.
+ratio}, see below), 30 results per byte size, 120 results per workload. Results
+are accumulated and the median is taken. All experiments are performed with
+basic Linux I/O commands, bypassing system caching.
 
 When evaluating switching models, a finer breakdown in workloads is made using a
 pre-selected pair of crypts we call the {\em primary} and {\em secondary}. \sys
-is initialized using the primary crypt. Once we trigger a switch, the secondary
-crypt is used. The switch is triggered according to a certain {\em ratio} of I/O
-operations. For example: given 10 40MB ``write-read'' (write and then read back)
-operations, we may write-read 40MB 3 times using the primary crypt, initiate a
-switch, and then write-read 40MB 7 times. This would be a 3:7 ratio. It follows
-that there are three ratios we use to evaluate \sys's performance in this
-regard: 7:3, 5:5, and 3:7.
+is initialized using the primary crypt. Once we trigger a switch, we switch to
+the secondary crypt. The switch is triggered according to a certain {\em ratio}
+of I/O operations. For example: given 10 40MB ``write-read'' (write and then
+read back) operations, we may write-read 40MB 3 times using the primary crypt,
+initiate a switch, and then write-read 40MB 7 times. This would be a 3:7 ratio.
+There are three ratios we use to evaluate \sys in this way: 7:3, 5:5, and 3:7.
 
 
 % =======================================================
@@ -49,9 +48,9 @@ regard: 7:3, 5:5, and 3:7.
 
 \input{graphics/fig-eval-baseline}
 
-\Cref{fig:eval-baseline} shows the normalized relative rounds and ciphertext
-randomization (normed R+R vector) versus median normalized latency tradeoff
-between different stream cipher configurations for our sequential and random I/O
+\Cref{fig:eval-baseline} shows the tradeoff between trade score (see
+\cref{subsec:des-discussion}) and median normalized latency of
+different crypts for our sequential and random I/O
 workloads. Trends for median hold when looking at tail latencies as well. Each
 line represents one workload: 4KB, 512KB, 5MB, and 40MB respectively (see
 legend). Each symbol represents one of our ciphers: ChaCha8, ChaCha20, Freestyle
