@@ -16,8 +16,7 @@ big.LITTLE system with Samsung Exynos 5422 A15/A7 heterogeneous multi-processing
 quad core CPUs at maximum clock speed, 2 gigabyte LPDDR3 RAM at 933 MHz, and an
 eMMC5.0 HS400 backing store running Ubuntu Trusty 14.04.6 LTS, kernel version
 3.10.106. Energy monitoring was provided by the Odroid's integrated INA-231
-power sensors polled every $\approx{260}$ milliseconds (not including
-noise/overhead).
+power sensors polled every $\approx{260}$ milliseconds.
 
 We evaluate \sys using a Linux RAM disk (tmpfs). The maximum theoretical memory
 bandwidth for this Odroid model is 14.9GB/s\@. Our observed maximum memory
@@ -50,14 +49,15 @@ be a 3:7 ratio. There are three ratios we use to evaluate switching performance:
 
 \Cref{fig:eval-baseline} shows the baseline tradeoff between trade score
 (x-axis; see also \cref{subsec:des-discussion}) and median normalized latency
-(y-axis) of different crypts for our sequential and random I/O workloads. Trends
-for median hold when looking at tail latencies as well. Each line represents one
-workload: 4KB, 512KB, 5MB, and 40MB respectively (see legend). Each symbol
-represents one of our crypts: ChaCha8 (C8), ChaCha20 (C20), Freestyle Fast (FF),
-Freestyle Balanced (FB), and Freestyle Strong (FS). Of these crypts, those with
-higher trade scores resulted in higher overall latency and increased energy use
-for I/O operations. The relationship between these concerns is not linear across
-crypts, however, which exposes a rich tradeoff space.
+(y-axis) of different crypts for our sequential and random I/O workloads
+(sequential is shown). Trends for median hold when looking at tail latencies as
+well. Each line represents one workload: 4KB, 512KB, 5MB, and 40MB respectively
+(see legend). Each symbol represents one of our crypts: ChaCha8 (C8), ChaCha20
+(C20), Freestyle Fast (FF), Freestyle Balanced (FB), and Freestyle Strong (FS).
+Of these crypts, those with higher trade scores resulted in higher overall
+latency and increased energy use for I/O operations. The relationship between
+these concerns is not linear across crypts, however, which exposes a rich
+tradeoff space.
 
 Besides the 4KB workload, the shape of each workload follows a similar trend,
 hence we will focus on 40MB and 4KB workloads here. Due to the overhead of
@@ -79,13 +79,14 @@ is not slower than C20.
 
 \Cref{fig:eval-forward} shows the tradeoff between trade score (x-axis; see also
 \cref{subsec:des-discussion}) and median normalized latency (y-axis) of
-different crypts for our sequential and random I/O workloads using Forward
-switching. After a certain number of write-read operations using the primary
-crypt, a switch is initiated and \sys begins using the secondary crypt for I/O.
-For each of the four pairs of crypts in the figure (primary+secondary: C8+C20,
-C20+FF, FF+FB, FB+FS), this is repeated three times: once at every ratio point
-{\em between} our baseline crypt measurements (\ie{7:3, 5:5, and 3:7 described
-above}). Ratio points above baseline measure overhead.
+different crypts for our sequential and random I/O workloads (sequential is
+shown) using Forward switching. After a certain number of write-read operations
+using the primary crypt, a switch is initiated and \sys begins using the
+secondary crypt for I/O. For each of the four pairs of crypts in the figure
+(primary+secondary: C8+C20, C20+FF, FF+FB, FB+FS), this is repeated three times:
+once at every ratio point {\em between} our baseline crypt measurements
+(\ie{7:3, 5:5, and 3:7 described above}). Ratio points above baseline measure
+overhead.
 
 \input{graphics/fig-eval-ms}
 
