@@ -1,0 +1,84 @@
+\begin{tikzpicture}[baseline]
+
+    \pgfmathsetmacro{\ymax}{20} % set the maximum y value
+    \pgfmathsetmacro{\ymaxbreak}{20.1} % set the y value at which overflow is drawn
+
+    \begin{axis}[
+        %axis x line*=bottom,
+        height=1in,
+        width=2.5in,
+        tick align=outside,
+        tick pos=bottom, % make sure ticks only appear at the bottom and left axes
+        tick style={ black },
+        y tick label style={ /pgf/number format/fixed, /pgf/number format/precision=0 },
+        grid style={ dotted, gray },
+        every node near coord/.append style={font=\tiny},
+        %
+        %
+        % magic to make the numbers appear above the overly long bars:
+        visualization depends on={rawy \as \rawy}, % save original y values
+        % restrict y to domain*={ % now clip/restrict any y value to ymax
+        %     \pgfkeysvalueof{/pgfplots/ymin}:\ymaxbreak
+        % },
+        % after end axis/.code={ % draw squiggly line indicating break
+        %     \draw [semithick, white, decoration={snake,amplitude=0.1mm,segment length=0.75mm,post length=0.375mm}, decorate] (rel axis cs:0,1.01) -- (rel axis cs:1,1.01);
+        % },
+        % nodes near coords={\color{.!75!black}\pgfmathprintnumber\rawy}, % print the original y values (darkened in case they are too light)...
+        % nodes near coords greater equal only=\ymax, % ... but ONLY if they are >= ymax
+        % clip=false, % allow clip to protrude beyond ymax
+        %
+        every node near coord/.append style={font=\tiny,yshift=-0.5mm},
+        nodes near coords={\color{black}\pgfmathprintnumber\rawy},
+        nodes near coords align={vertical},
+        %
+        % Custom stuff to edit per template
+        %
+        %xlabel={\scriptsize Cipher Configuration},
+        xlabel near ticks,
+        xmin=FS, xmax=C8+FS,
+        xtick=data,
+        symbolic x coords={FS,C8+FS},
+        xticklabels={Homogeneous,\sys},
+        enlarge x limits=0.5, % add some breathing room along the x axis's sides
+        %bar width=5mm,
+        %major x tick style=transparent,
+        %
+        ylabel={\scriptsize Latency (s)},
+        ylabel near ticks,
+        %ylabel shift={-1mm},
+        ylabel style={at={(ticklabel cs:0.4)}},
+        ymajorgrids=true,
+        ymin=0, ymax=30,
+        ybar, % value will shift bars
+        ytick={ 5, 15, 25 },
+        %yticklabels={ 5, 15, 25},
+        % extra y ticks={1},
+        % extra y tick style={grid=major, grid style={dashed, black}},
+        % extra y tick label={\empty},
+        %bar width=4.5pt, % change size of bars
+        %
+        legend cell align=center,
+        legend style={ column sep=1ex },
+        legend entries={
+            {\scriptsize 4K/reads},
+            {\scriptsize 4K/writes},
+            {\scriptsize 5M/reads},
+            {\scriptsize 5M/writes},
+        },
+        legend style={
+            draw=none,
+            legend columns=4,
+            at={(0.5,1.02)},
+            anchor=south,
+        },
+    ]
+        \addplot[fill=pinkDark, every node near coord/.append style={color=pinkDark}]
+        table[x=conf, y=latr-4k, col sep=space] {data/usecase-scalable.dat};
+        \addplot[fill=pinkDark, postaction={pattern=north east lines}, every node near coord/.append style={color=purpleDark}]
+        table[x=conf, y=latw-4k, col sep=space] {data/usecase-scalable.dat};
+        \addplot[fill=purpleDark, every node near coord/.append style={color=pinkDark}]
+        table[x=conf, y=latr-5m, col sep=space] {data/usecase-scalable.dat};
+        \addplot[fill=purpleDark, postaction={pattern=north east lines}, every node near coord/.append style={color=purpleDark}]
+        table[x=conf, y=latw-5m, col sep=space] {data/usecase-scalable.dat};
+    \end{axis}%
+\end{tikzpicture}%
