@@ -17,7 +17,7 @@ activated.
 \input{graphics/fig-usecase-battery}
 
 % About: setup
-To simulate this, we repeat the following twice: 1) we begin writing 10 40MB
+To simulate this, we run the following twice: 1) we begin writing 10 40MB
 files using FB. 2) After five seconds, our device simulates battery saver mode
 by pinning \sys processes to the energy-efficient LITTLE cores and underclocking
 them to lowest frequency. 3) We complete the workload.
@@ -43,7 +43,7 @@ to another without downtime or degraded service. Our operator wants to upgrade
 from {\em ChaCha20 (C20)} to {\em Freestyle Fast (FF)}.
 
 % About: setup
-To simulate pre- and post-migration state, we execute 10 5MB write-read
+To simulate pre- and post-migration state, we execute 10 40MB write-read
 operations to two \sys instances using C20 and FF respectively. To simulate the
 activity during migration, we repeat the operations on a third instance using
 Mirrored switching.
@@ -52,11 +52,11 @@ Mirrored switching.
 
 % About: outcome
 \Cref{fig:usecase-upgrade} shows the overhead on I/O performance at three stages
-of migration. On the left we see similar read latency between pre-, during-, and
-post-migration workloads of \TODO{X}s. On the right, we see write latency
-increase by \TODO{X}s during the migration but recover post-migration. Thus,
-unlike inflexible prior work, \sys successfully allows one to transition storage
-to another cipher without interruption or egregious performance loss.
+of migration. On the left we see similar read latency between stages of
+\TODO{X}s. On the right, we see write latency increase to \TODO{X}s during the
+migration but recover post-migration. Thus, unlike inflexible prior work, \sys
+successfully allows one to transition storage to another cipher without
+interruption or egregious performance loss.
 
 
 % ================================================================
@@ -72,11 +72,11 @@ calls and stored in the inode. Because the \sys layer is file-oblivious, every
 block I/O through the \sys layer will be labeled with the corresponding crypt.
 
 % About: setup
-We begin with 10 5MB and 10 4KB write-read operations to two \sys instances: one
-using {\em ChaCha8 (C8)}, a high performance crypt, and the other using {\em
-Freestyle Strong (FS)}, a high security crypt. We repeat the operations on a
-third instance using Selective switching where 30\% of the data is considered
-highly sensitive and uses FS.
+We begin with 10 5MB and 10 4KB write-read operations to \sys using {\em
+Freestyle Strong (FS)}, a high security crypt. We repeat these operations on a
+second instance using Selective switching where 30\% of the data is considered
+highly sensitive and so uses FS while the rest uses {\em ChaCha8 (C8)}, a high
+performance crypt.
 
 \input{graphics/fig-usecase-scalable}
 
