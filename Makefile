@@ -41,8 +41,7 @@ clean:
 	find . -name '*.blx*' -type f -delete
 	find . -name '*.dvi*' -type f -delete
 	find . -maxdepth 1 -name '_minted*' -type d -delete
-
-
+	rm -rf out
 
 q: qw
 
@@ -59,8 +58,3 @@ qqw:
 
 x:
 	xdvi -bg white _${PAPER}.dvi &
-
-
-
-
-

@@ -49,23 +49,22 @@
         xlabel={\scriptsize Trade Score},
         xlabel near ticks,
         %xlabel shift={-1.5mm},
-        xmin=0, xmax=4,
-        xtick={ 0, 1, 2, 3, 4 },
-        xticklabels={ 0,,, 1, \empty },
+        xmin=0, xmax=3,
+        xtick={ 0, 1, 2, 3 },
+        xticklabels={ 0, 1, 2, 3 },
         %major x tick style=transparent,
-        %enlarge x limits=0.2, % add some breathing room along the x axis's sides
+        enlarge x limits=0.2, % add some breathing room along the x axis's sides
         %
         ylabel={\scriptsize Latency (norm)},
         ylabel near ticks,
         ylabel shift={-1.5mm},
         ymajorgrids=true,
         ymin=0, ymax=\ymax,
-        ytick={ 0, 1, \ymax },
-        yticklabels={ 0, 1, \empty },
-        %yticklabels={ 0, 0.5, 1.5, 2 },
-        % extra y ticks={1},
-        % extra y tick style={grid=major, grid style={dashed, black}},
-        % extra y tick label={\empty},
+        ytick={ 0, 1 },
+        yticklabels={ 0, 1 },
+        extra y ticks={0.25, 0.5, 0.75},
+        extra y tick style={grid=major, grid style={dotted, gray}, tick style={draw=none}},
+        extra y tick label={\empty},
         %bar width=4.5pt, % change size of bars
         %
         legend cell align=left,
