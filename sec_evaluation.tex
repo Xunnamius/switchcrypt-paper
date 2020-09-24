@@ -87,6 +87,8 @@ For each pair of crypts in the figure (primary+secondary: C8+C20, C20+FF, FF+FB,
 FB+FS), this is repeated three times: once at every ratio point {\em between}
 our crypts (\ie{7:3, 5:5, and 3:7 described above}).
 
+\input{graphics/fig-eval-ms}
+
 The point of this experiment is to determine if \sys can switch the encryption
 efficiently enough to support heterogeneous FDE---that is, contiguous nuggets
 encrypted with different crypts---without devastating performance. For the 40MB,
@@ -100,8 +102,6 @@ see very high latency for ratios between FF and FS crypts. This is because
 Freestyle is non-length-preserving, so extra operations must be performed on
 every write, and the algorithm itself is generally much slower than the ChaCha
 variants.
-
-\input{graphics/fig-eval-ms}
 
 \Cref{fig:eval-ms} shows the performance of the Mirrored and Selective models
 with the same configuration of ratios as \cref{fig:eval-forward}.
