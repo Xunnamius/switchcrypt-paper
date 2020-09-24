@@ -3,7 +3,7 @@
 % INTRO
 
 % About: security in general
-Security is a very important property of storage systems. Decades of systems and
+Security is an essential property of storage systems. Decades of systems and
 storage research in this space have looked into security in the context of disk
 controllers/FTL and secure hardware \cite{hardware1, hardware2, hardware3,
 hardware4}; filesystems \cite{filesystems1, filesystems2, filesystems3,
@@ -34,55 +34,59 @@ versus Android 5.0 unencrypted storage for various
 workloads~\cite{android-M-mobile-motivation-2}.
 
 % About: recent advancements
-Fortunately, in the last two years there have been significant advancements in
-Full Drive Encryption; specifically, the slow AES block cipher can be replaced
-with fast {\em stream} ciphers like \encB. For instance, constructions like
-Google's HBSH (hash, block cipher, stream cipher, hash)/Adiantum~\cite{Adiantum}
-and StrongBox~\cite{StrongBox} bring stream cipher based FDE to devices that do
-not or cannot support hardware accelerated AES, generally providing improved
-performance along the way~\cite{StrongBox}. A key to efficiently adopting stream
-ciphers into the storage layer is to pair it with a Log-structured File System
-(LFS) such as F2FS on flash devices. This is because LFSes naturally avoid
-writing to the same location multiple times, which requires an expensive
-re-keying operation when using stream cipher based FDE.
+Fortunately, recent work has produced significant advancements in Full
+Drive Encryption. Specifically, the slow AES block cipher can be
+replaced with fast {\em stream} ciphers like \encB. For instance, both
+Google's HBSH (hash, block cipher, stream cipher,
+hash)/Adiantum~\cite{Adiantum} and StrongBox~\cite{StrongBox} bring
+the performance benefits of stream cipher based FDE to devices that do
+not or cannot support hardware accelerated AES~\cite{StrongBox}. A key
+to efficiently adopting stream ciphers into the storage layer is to
+pair it with a Log-structured File System (LFS) such as F2FS\cite{F2FS} on flash
+devices. This is because LFSes naturally avoid writing to the same
+location multiple times, which requires an expensive re-keying
+operation when using stream cipher based FDE.
 
 % About: the need flexibility
-Traditionally, FDE at the block level requires enciphering drive contents {\em
-homogeneously} (with a single cipher), but these advancements reveal a new
-opportunity: storage systems that operate beyond the rigid constraints of prior
-work to support flexible {\em heterogeneous} FDE. Yet we find no storage system
-or OS that can support such a feature. To see where this might be useful,
-suppose the user of an mobile device is required to encrypt their drive with
-cipher \encA because it has the useful cryptographic property of being safe to
-back up to cloud storage. In exchange for this property, \encA uses a
-significant amount of energy when executing. Further suppose this device enters
-a critical battery state and the user wishes to conserve as much energy as
-possible. It would be beneficial if an energy-aware storage system could also
-enter a battery saving state. With heterogeneous FDE, such a flexible
-configuration is now achievable: such a system can temporarily switch out the
-energy-inefficient \encA for the extremely energy-efficient \encB when accessing
-data. Since data encrypted with \encB is not suitable for cloud backups, we
-pause backups until we leave the critical battery state and switch ciphers
+Traditionally, FDE at the block level requires enciphering drive
+contents {\em homogeneously} (with a single cipher), but the
+stream-cipher based approaches reveal a new opportunity: storage
+systems that operate beyond the rigid constraints of prior work to
+support flexible {\em heterogeneous} FDE. Yet we find no storage
+system or OS that can support such a feature. To see where this might
+be useful, suppose a mobile device user is required to encrypt their
+drive with cipher \encA because it has the useful cryptographic
+property of being safe to back up to cloud storage. In exchange, \encA
+uses significant energy when executing. Further suppose this device
+enters a critical battery state and the user wishes to conserve as
+much energy as possible. It would be beneficial if an energy-aware
+storage system could also enter a battery saving state.  With
+heterogeneous FDE, such a flexible configuration is now achievable: it
+can temporarily switch out the energy-inefficient \encA for the
+extremely energy-efficient \encB when accessing data. Since data
+encrypted with \encB is not suitable for cloud backups, backups are
+paused until we leave the critical battery state and switch ciphers
 again---saving even more energy.
 
 % OUR SOLUTION
 
 % About: the system and the benefits
-We present \sys, to the best of our knowledge the {\em first} storage system to
-provide block level kernel support for heterogeneous FDE. As FDE's impact on
-drive performance and energy efficiency depends on a multitude of choices,
-different ciphers expose different performance and energy efficiency
-characteristics. By supporting heterogeneous FDE, \sys permits cipher choice to
-be be viewed as a dynamically configurable parameter as opposed to a static
-choice made at format or boot time. As a result, \sys enables the storage system
-to adapt to changes that arise at runtime, including: resource availability and
-environment, desired security properties, and the OS's energy budget. This
-empowers users to perform cipher switching in space and time (\eg using more
-secure storage for more sensitive files, and/or dynamically switching between
-ciphers for one file), allowing the system to navigate the tradeoff space made
-by balancing competing security and latency requirements.  \sys is composed
-primarily of three components that realize these benefits. These represent the
-three main contributions of this work.
+To realize this flexibility, we present \sys, to the best of our
+knowledge the {\em first} storage system to provide block level kernel
+support for heterogeneous FDE. Different ciphers expose different
+performance, energy, and security  characteristics. By supporting
+heterogeneous FDE, \sys permits cipher choice to be be viewed as a
+dynamically configurable parameter as opposed to a static choice made
+at format or boot time. As a result, \sys enables the storage system
+to adapt to runtime changes including: resource
+availability and environment, desired security properties, and the
+OS's energy budget. This empowers users to perform cipher switching in
+space and time (\eg using more secure storage for more sensitive
+files, and/or dynamically switching between ciphers for one file),
+allowing the system to navigate the tradeoff space made by balancing
+competing security and latency requirements.  \sys is composed
+primarily of three components that realize these benefits. These
+represent the three main contributions of this work.
 
 % About: switching models
 First, we introduce \sysA, a kernel configuration that exposes three switching
@@ -122,8 +126,8 @@ Finally, we present \sysC, an framework that evaluates crypts based on concerns
 important in the context of heterogeneous FDE. Using this framework, we expose a
 rich tradeoff space of crypts over three competing concerns: read/write
 performance (latency) and total energy use, desirable security properties, and
-total writable space on the drive. In this way, \sysC gives non-cryptographers a
-quick and intuitive method to reason about which crypt to use and when.
+total writable space on the drive. \sysC gives non-cryptographers a
+quick and intuitive method to reason about which crypt to use when.
 
 % About: evaluation
 We conclude with a comprehensive evaluation of \sys.
