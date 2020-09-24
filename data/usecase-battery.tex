@@ -1,199 +1,57 @@
 \begin{tikzpicture}[baseline]
 
-    \pgfmathsetmacro{\ymax}{25} % set the maximum y value
-    \pgfmathsetmacro{\ymaxbreak}{25.1} % set the y value at which overflow is drawn
+    \pgfmathsetmacro{\ymax}{150} % set the maximum y value
+    \pgfmathsetmacro{\ymaxbreak}{150.1} % set the y value at which overflow is drawn
 
     \begin{axis}[
         %axis x line*=bottom,
         height=1in,
-        width=2.5in,
+        width=2.25in,
         tick align=outside,
         tick pos=bottom, % make sure ticks only appear at the bottom and left axes
         tick style={ black },
         y tick label style={ /pgf/number format/fixed, /pgf/number format/precision=0 },
         grid style={ dotted, gray },
-        every node near coord/.append style={font=\tiny},
+        %
         %
         % magic to make the numbers appear above the overly long bars:
         visualization depends on={rawy \as \rawy}, % save original y values
-        restrict y to domain*={ % now clip/restrict any y value to ymax
-            \pgfkeysvalueof{/pgfplots/ymin}:\ymaxbreak
-        },
-        after end axis/.code={ % draw squiggly line indicating break
-            \draw [semithick, white, decoration={snake,amplitude=0.1mm,segment length=0.75mm,post length=0.375mm}, decorate] (rel axis cs:0,1.01) -- (rel axis cs:1,1.01);
-        },
-        nodes near coords={\color{.!75!black}\pgfmathprintnumber\rawy}, % print the original y values (darkened in case they are too light)...
-        nodes near coords greater equal only=\ymax, % ... but ONLY if they are >= ymax
-        clip=false, % allow clip to protrude beyond ymax
+        % restrict y to domain*={ % now clip/restrict any y value to ymax
+        %     \pgfkeysvalueof{/pgfplots/ymin}:\ymaxbreak
+        % },
+        % after end axis/.code={ % draw squiggly line indicating break
+        %     \draw [semithick, white, decoration={snake,amplitude=0.1mm,segment length=0.75mm,post length=0.375mm}, decorate] (rel axis cs:0,1.01) -- (rel axis cs:1,1.01);
+        % },
+        % nodes near coords={\color{.!75!black}\pgfmathprintnumber\rawy}, % print the original y values (darkened in case they are too light)...
+        % nodes near coords greater equal only=\ymax, % ... but ONLY if they are >= ymax
+        % clip=false, % allow clip to protrude beyond ymax
+        %
+        every node near coord/.append style={font=\tiny,yshift=-0.5mm},
+        nodes near coords={\color{black}\pgfmathprintnumber\rawy},
+        nodes near coords align={vertical},
+        %
         % Custom stuff to edit per template
         %
-        xlabel={\scriptsize Cipher Configuration},
+        %xlabel={\scriptsize Cipher Configuration},
         xlabel near ticks,
-        xmin=FB, xmax=C8+FB,
-        xtick=data,
-        symbolic x coords={FB,C8+FB},
-        xticklabels={FB only,Forward (C8+FB)},
-        enlarge x limits=0.5, % add some breathing room along the x axis's sides
+        xmin=-1, xmax=2,
+        xtick={-1,0,1,2},
+        xticklabels={,Homogeneous\ \ \ \ \ \ \ \ \ \ \ \ ,\ \ \ \ \ \ \ \ \ \ \ \sys,},
+        xtick style=transparent,
+        %enlarge x limits=0.5, % add some breathing room along the x axis's sides
+        bar width=7.5mm,
         %major x tick style=transparent,
         %
         ylabel={\scriptsize Energy (j)},
         ylabel near ticks,
         %ylabel shift={-1mm},
-        ylabel style={at={(ticklabel cs:0.4)}},
         ymajorgrids=true,
-        ymin=0, ymax=30,
+        ymin=0, ymax=\ymax,
         ybar, % value will shift bars
-        ytick={ 5, 15, 25 },
-        %yticklabels={ 5, 15, 25},
-        % extra y ticks={1},
-        % extra y tick style={grid=major, grid style={dashed, black}},
-        % extra y tick label={\empty},
-        %bar width=4.5pt, % change size of bars
-        %
-        legend cell align=center,
-        legend style={ column sep=1ex },
-        legend entries={
-            {\scriptsize 40M/reads},
-            {\scriptsize 40M/writes}
-        },
-        legend style={
-            draw=none,
-            legend columns=4,
-            at={(0.5,1.02)},
-            anchor=south,
-        },
+        ytick={ 0, 30, 60, 90, 120, \ymax },
+        yticklabels={ 0,, 60,, 120 },
     ]
-        \addplot[fill=orangeLight, every node near coord/.append style={color=orangeLight}]
-        table[x=conf, y=energy-r, col sep=space] {data/usecase-battery.dat};
-        \addplot[fill=blueDark, postaction={pattern=north east lines}, every node near coord/.append style={color=blueDark}]
-        table[x=conf, y=energy-w, col sep=space] {data/usecase-battery.dat};
+        \addplot[fill=orangeLight] coordinates {(0, 107.9)};
+        \addplot[fill=blueDark] coordinates {(1, 32.4)};
     \end{axis}%
 \end{tikzpicture}%
-% \begin{tikzpicture}[baseline]
-
-%     \pgfmathsetmacro{\xmax}{130} % set the maximum x value
-%     \pgfmathsetmacro{\ymax}{50} % set the maximum y value
-%     \pgfmathsetmacro{\ymaxbreak}{50.1} % set the y value at which overflow is drawn
-
-%     \begin{groupplot}[
-%         group style={
-%             group size=1 by 2,
-%             ylabels at=edge left,
-%             xlabels at=edge bottom,
-%             yticklabels at=edge left,
-%             xticklabels at=edge bottom,
-%             vertical sep=10pt,
-%         },
-%         %axis x line*=bottom,
-%         height=4cm,
-%         width=\linewidth,
-%         tick align=outside,
-%         tick pos=bottom, % make sure ticks only appear at the bottom and left axes
-%         tick style={ black },
-%         y tick label style={ /pgf/number format/fixed, /pgf/number format/precision=0 },
-%         grid style={ dotted, gray },
-%         every node near coord/.append style={font=\tiny},
-%         %
-%         % % magic to make the numbers appear above the overly long bars:
-%         % visualization depends on={rawy \as \rawy}, % save original y values
-%         % restrict y to domain*={ % now clip/restrict any y value to ymax
-%         %     \pgfkeysvalueof{/pgfplots/ymin}:\ymaxbreak
-%         % },
-%         % after end axis/.code={ % draw squiggly line indicating break
-%         %     \draw [semithick, white, decoration={snake,amplitude=0.1mm,segment length=0.75mm,post length=0.375mm}, decorate] (rel axis cs:0,1.01) -- (rel axis cs:1,1.01);
-%         % },
-%         % nodes near coords={\color{.!75!black}\pgfmathprintnumber\rawy}, % print the original y values (darkened in case they are too light)...
-%         % nodes near coords greater equal only=\ymax, % ... but ONLY if they are >= ymax
-%         clip=true, % allow clip to protrude beyond ymax if false
-%         % % Custom stuff to edit per template
-%         %
-%         xlabel={Time (s)},
-%         xlabel near ticks,
-%         xlabel shift={-4mm},
-%         xmin=0, xmax=\xmax,
-%         xtick={ 0, \xmax },
-%         enlargelimits=false, % add some breathing room along the x axis's sides
-%         % %major x tick style=transparent,
-%         %
-%         ylabel near ticks,
-%         ylabel shift={-2.5mm},
-%         ymajorgrids=true,
-%         %yticklabels={ 0, 0.5, 1.5, 2 },
-%         % extra y ticks={1},
-%         % extra y tick style={grid=major, grid style={dashed, black}},
-%         % extra y tick label={\empty},
-%         %bar width=4.5pt, % change size of bars
-%         %
-%         legend cell align=center,
-%         legend style={ column sep=1ex },
-%         legend entries={
-%             {\scriptsize Freestyle Balanced},
-%             {\scriptsize Freestyle Balanced + ChaCha8},
-%             {\scriptsize ChaCha8},
-%         },
-%         legend style={
-%             draw=none,
-%             legend columns=2,
-%             at={(0.5, 1.02)},
-%             anchor=south,
-%         },
-%     ]
-%         \nextgroupplot[ylabel={Energy Used (j)}, ymin=0, ymax=\ymax, ytick={ 0, \ymax }]
-%             \addplot [thick] table [
-%                 x=time,
-%                 y=energy,
-%                 discard if symbol not={cipher}{fb},
-%                 discard if symbol not={iop}{w},
-%                 col sep=space,
-%                 mark=none
-%             ] {data/usecase-battery.dat};
-%             \addplot [thick, dashdotted] table [
-%                 x=time,
-%                 y=energy,
-%                 discard if symbol not={cipher}{c8+fb},
-%                 discard if symbol not={iop}{w},
-%                 col sep=space,
-%                 mark=none
-%             ] {data/usecase-battery.dat};
-%             \addplot [thick, densely dashed] table [
-%                 x=time,
-%                 y=energy,
-%                 discard if symbol not={cipher}{c8},
-%                 discard if symbol not={iop}{w},
-%                 col sep=space,
-%                 mark=none
-%             ] {data/usecase-battery.dat};
-%             \coordinate (c1) at (35, 16.5);
-%             \coordinate (c2) at (89, 45);
-%             \coordinate (c3) at (1, 45);
-%             \draw [dotted] (0, 34) -- (130, 34) node [above of=c1] {\tiny (energy ceiling)};
-%             \draw [dotted] (120, 0) -- (120, 50) node [right of=c2] {\tiny (battery dies)};
-%             \draw [dotted] (5, 0) -- (5, 50) node [right of=c3] {\tiny (battery critical)};
-%         \nextgroupplot[legend to name={throwaway7}, ylabel={Trade Score}, ymin=0, ymax=3, ytick={ 0, 3 }, yticklabels={ 0, 1 }, ylabel shift={-1.5mm}]
-%             \addplot [thick] table [
-%                 x=time,
-%                 y=score,
-%                 discard if symbol not={cipher}{fb},
-%                 discard if symbol not={iop}{w},
-%                 col sep=space
-%             ] {data/usecase-battery.dat};
-%             \addplot [thick, dashdotted] table [
-%                 x=time,
-%                 y=score,
-%                 discard if symbol not={cipher}{c8+fb},
-%                 discard if symbol not={iop}{w},
-%                 col sep=space
-%             ] {data/usecase-battery.dat};
-%             \addplot [thick, densely dashed] table [
-%                 x=time,
-%                 y=score,
-%                 discard if symbol not={cipher}{c8},
-%                 discard if symbol not={iop}{w},
-%                 col sep=space
-%             ] {data/usecase-battery.dat};
-%             \coordinate (c4) at (35, 2.0);
-%             \draw [dotted] (120, 0) -- (120, 3);
-%             \draw [dotted] (5, 0) -- (5, 3);
-%             \draw [dotted] (0, 0.55) -- (130, 0.55) node [below of=c4] {\tiny (security floor)};
-%     \end{groupplot}%
-% \end{tikzpicture}%

@@ -10,28 +10,29 @@ and methodology behind each study.
 % About: background
 In this first case study, we revisit the motivational Forward switching example
 (\cref{sec:motivation}). Our goal is to complete a workload within a strict
-energy budget. Here, our netbook's storage will use {\em Freestyle Balanced}
-when operating normally and {\em ChaCha8} when battery saver mode is activated.
+energy budget. Here, our netbook's storage will use {\em Freestyle Balanced (FB)}
+when operating normally and {\em ChaCha8 (C8)} when battery saver mode is
+activated.
 
 \input{graphics/fig-usecase-battery}
 
 % About: setup
 To simulate this, we repeat the following twice: 1) we begin writing 10 40MB
-files using Freestyle Balanced. 2) After five seconds, our device simulates
-battery saver mode by pinning \sys processes to the energy-efficient LITTLE
-cores and underclocking them to lowest frequency. 3) We complete the workload.
+files using FB. 2) After five seconds, our device simulates battery saver mode
+by pinning \sys processes to the energy-efficient LITTLE cores and underclocking
+them to lowest frequency. 3) We complete the workload.
 
-On the first run, the workload is completed normally. On the second run, when
-entering battery saver mode, we additionally trigger a switch to the ChaCha8
+On the first run, the workload is completed homogeneously. On the second run,
+when entering battery saver mode, we additionally trigger a switch to the C8
 crypt using the Forward switching model.
 
 % About: outcome
 \Cref{fig:usecase-battery} shows the total energy used after completing both
-runs. {\em FB only} (left) favors security even when backups are paused while
-{\em Forward (C8+FB)} (right) performs the switch when the system enters battery
-saver mode. These results show that using Forward switching resulted in a 3.3x
-total energy reduction compared to exclusively using Freestyle Balanced,
-allowing us to remain within our energy budget.
+runs. {\em Homogeneous} FDE (left) favors security even when backups are paused
+while \sys (right) Forward switches when in battery saver mode. These results
+show using \sys resulted in a \TODO{3.3x} total energy reduction compared to
+prior work using homogeneous FDE, allowing us to remain safely within our energy
+budget.
 
 
 % ===============================
@@ -41,27 +42,27 @@ allowing us to remain within our energy budget.
 In this second case study we revisit the Mirrored switching example
 (\cref{subsec:des-switch}). Our goal is to upgrade live storage from one cipher
 to another without downtime or degraded service. Our operator wants to upgrade
-from {\em ChaCha20} to {\em Freestyle Fast}.
+from {\em ChaCha20 (C20)} to {\em Freestyle Fast (FF)}.
 
 % About: setup
 To simulate pre- and post-migration state, we execute 10 5MB write-read
-operations to two \sys instances using ChaCha20 and Freestyle Fast respectively.
-To simulate the activity during migration, we repeat the operations on a third
-instance using Mirrored switching.
+operations to two \sys instances using C20 and FF respectively. To simulate the
+activity during migration, we repeat the operations on a third instance using
+Mirrored switching.
 
 \input{graphics/fig-usecase-upgrade}
 
 % About: outcome
-\Cref{fig:usecase-upgrade} shows the overhead of Mirrored switching on our
-system's performance. On the left we see similar read latency between pre-,
-during-, and post-migration workloads of \TODO{X}s. On the right, we see write
-latency increase by \TODO{X}s during the migration but recover post-migration.
-Thus, Mirrored switching allows us to transition our storage from one cipher to
-another without interruption or egregious overhead.
+\Cref{fig:usecase-upgrade} shows the overhead on I/O performance at three stages
+of migration. On the left we see similar read latency between pre-, during-, and
+post-migration workloads of \TODO{X}s. On the right, we see write latency
+increase by \TODO{X}s during the migration but recover post-migration. Thus,
+unlike inflexible prior work, \sys successfully allows one to transition storage
+to another cipher without interruption or egregious performance loss.
 
 
 % ================================================================
-\subsection{Scalable Encryption}\label{subsec:usecase-agnostic}
+\subsection{Scalable Encryption}\label{subsec:usecase-scalable}
 
 % About: background
 In this final case study we revisit the Selective switching example
@@ -74,19 +75,17 @@ block I/O through the \sys layer will be labeled with the corresponding crypt.
 
 % About: setup
 We begin with 10 5MB and 10 4KB write-read operations to two \sys instances: one
-using {\em ChaCha8}, a high performance crypt, and the other using {\em
-Freestyle Strong}, a high security crypt. We repeat the operations on a third
-instance using Selective switching where 30\% of the data is considered highly
-sensitive and uses Freestyle Strong.
+using {\em ChaCha8 (C8)}, a high performance crypt, and the other using {\em
+Freestyle Strong (FS)}, a high security crypt. We repeat the operations on a
+third instance using Selective switching where 30\% of the data is considered
+highly sensitive and uses FS.
 
-\input{graphics/fig-usecase-agnostic}
+\input{graphics/fig-usecase-scalable}
 
 % About: outcome
-{\em C8 only} (leftmost) and {\em FS only} (rightmost) in
-\cref{fig:usecase-agnostic} show the two extremes: ChaCha8 exhibits low latency,
-consistently less than 1s across workloads, while Freestyle Strong exhibits 5s
-to 20s latency depending on the workload. {\em Selective (C8+FS)} (middle) shows
-a reduction of 3.1x to 4.8x for read latency and 1.6x to 2.8x for write latency,
-all without compromising on security. Thus, Selective switching keeps our
-sensitive data at the mandated security level while keeping the performance
-benefits of using a fast crypt.
+\Cref{fig:usecase-scalable} shows {\em Homogeneous} FDE (left) exhibits 5s to
+20s latency depending on the workload while \sys (right) outperforms with a
+reduction of \TODO{3.1x to 4.8x for read latency and 1.6x to 2.8x for write
+latency}, all without compromising on security. Thus, \sys keeps our sensitive
+data at the mandated security level while keeping the performance benefits of
+fast crypto.
