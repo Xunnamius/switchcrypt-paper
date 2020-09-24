@@ -129,20 +129,17 @@ We calculate that Forward switching has average latency overhead at 0.08x/0.10x
 demonstrating \sys's amortization of switching costs. Average overhead is
 0.38x/0.44x (read/write) for 4KB workloads, where \sys is unable to amortize
 cost. Similarly, we calculate that Selective switching has average overhead at
-0x/0.3x (read/write) for 40MB, 5MB and 512KB workloads compared to baseline I/O.
-Average overhead is 0.22x/0.71x (read/write) for 4KB workloads. Finally, we
-calculate that Mirrored switching has average overhead at 0.25x/0.61x
+\TODO{0x/Zx} (read/write) for 40MB, 5MB and 512KB workloads compared to baseline
+I/O. Average overhead is \TODO{Yx/Zx} (read/write) for 4KB workloads. Finally,
+we calculate that Mirrored switching has average overhead at \TODO{Yx/Zx}
 (read/write) for 40MB, 5MB and 512KB workloads compared to baseline I/O, with
-high write latency due to mirroring. Average overhead is 0.55x/0.77x
+high write latency due to mirroring. Average overhead is \TODO{Yx/Zx}
 (read/write) for 4KB workloads.
 
-Overhead is the penalty paid to implement heterogeneous FDE. \sys's design keeps
-these overheads acceptably low in practice.
-
-In summary, these results show that \sys can reach a wide range of performance
-and security tradeoffs. Furthermore, it can reach points in the tradeoff space
-that were simply unreachable with prior work. This comes at a cost of just X\%
-increased latency overhead compared to existing FDE approaches like StrongBox,
-and at the cost of reduced I/O performance for very small workloads. We conclude
-that any FDE approach heavy with I/Os larger than 4KB would benefit from the
-increased flexibility of \sys and heterogeneous FDE.
+In summary, these results show that \sys enables a wide range of performance and
+security tradeoffs unachievable with prior work. This useful feature comes at a
+cost of at most \TODO{Yx/Zx} increased read/write overhead (excluding Mirrored)
+compared to existing FDE approaches like StrongBox, and at the cost of reduced
+performance for very small workloads. We conclude that any FDE workload
+dominated by I/Os larger than 4KB would benefit from the increased flexibility
+of \sys and heterogeneous FDE.
