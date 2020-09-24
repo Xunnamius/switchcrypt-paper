@@ -22,11 +22,9 @@ files using FB. 2) After five seconds, our device simulates battery saver mode
 by pinning \sys processes to the energy-efficient LITTLE cores and underclocking
 them to lowest frequency. 3) We complete the workload.
 
-On the first run, the workload is completed homogeneously. On the second run,
-when entering battery saver mode, we additionally trigger a switch to the C8
-crypt using the Forward switching model.
-
 % About: outcome
+The workload is completed homogeneously on the first run. On the second, when
+entering battery saver mode we switch to C8 using the Forward switching model.
 \Cref{fig:usecase-battery} shows the total energy used after completing both
 runs. {\em Homogeneous} FDE (left) favors security even when backups are paused
 while \sys (right) Forward switches when in battery saver mode. These results
