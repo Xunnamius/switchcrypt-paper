@@ -32,27 +32,30 @@ These crypts are scored across a discrete uniform distribution from 0,
 representing the lowest round configuration (\eg 8-round ChaCha) to 1,
 representing the highest round configuration (\eg 20-round ChaCha).
 
-\Cref{tbl:trade} shows the relative round score for twelve crypts grouped
-by the four ciphers they implement: ChaCha, Salsa, HC-X, and Freestyle. ChaCha
-and Salsa each have three crypts that differ only by round count, yielding the
-scores {\em 0, 0.5, and 1}. HC-X has two, yielding {\em 0 and 1}. Freestyle has
-four crypts, but only three of them differ by round count ({\em Freestyle (F)}
-and {\em Freestyle*} use the same number of rounds). If a crypt is the singular
-implementation of some cipher, it receives a 1.
+\Cref{tbl:trade} shows the relative round score for twelve crypts
+grouped by the four ciphers they implement. ChaCha and Salsa each have
+three crypts that differ only by round count, yielding the scores {\em
+0, 0.5, and 1}. HC-X has two, yielding {\em 0 and 1}. Freestyle has
+four crypts, but only three of them differ by round count ({\em
+Freestyle (F)} and {\em Freestyle*} use the same number of rounds). If
+a crypt is the singular implementation of some cipher, it receives a
+1.
 
 % ---------------------------------- CR
 
-\mysub{Ciphertext Randomization (Randomization).} A cipher employing ciphertext
-randomization generates different ciphertexts non-deterministically given the
-same key, nonce, and plaintext. This makes it much more difficult to execute
-chosen-ciphertext attacks (CCA), key re-installation attacks, XOR-based
-cryptanalysis, and other confidentiality-violating schemes where the ciphertext
-is in full control of the adversary ~\cite{Freestyle}. This property is useful
-in cases where we cannot prevent the same key, nonce, and plaintext from being
-reused, such as with data ``in motion'' (see \cref{sec:motivation}). Ciphers
-without this property---such as ChaCha20 and AES-XTS on which prior work is
-based---are trivially broken when key-nonce-plaintext 3-tuples are reused. In
-StrongBox, this is referred to as an ``overwrite''~\cite{StrongBox}.
+\mysub{Ciphertext Randomization (Randomization).} A cipher employing
+ciphertext randomization generates different ciphertexts
+non-deterministically given the same key, nonce, and plaintext. This
+makes it much more difficult to execute chosen-ciphertext attacks
+(CCA), key re-installation attacks, XOR-based cryptanalysis, and other
+confidentiality-violating schemes where the ciphertext is in full
+control of the adversary ~\cite{Freestyle}. This property is useful in
+cases where we cannot prevent the same key, nonce, and plaintext from
+being reused, such as with data ``in motion'' (see
+\cref{sec:motivation}). Ciphers without this property---such as
+ChaCha20 and AES-XTS---are trivially broken when key-nonce-plaintext
+3-tuples are reused. In StrongBox, this is referred to as an
+``overwrite''~\cite{StrongBox}.
 
 Though there are many ways to achieve ciphertext randomization, the crypts
 included in our analysis implement it using a random number of rounds for each
@@ -63,13 +66,13 @@ can customize the computational burden an attacker must bear by choosing lower
 or higher minimums and maximums.
 
 \Cref{tbl:trade} shows the ciphertext randomization score for twelve
-crypts grouped by the four ciphers they implement: ChaCha, Salsa, HC-X, and
-Freestyle. ChaCha, Salsa, and HC-X {\em do not employ ciphertext randomization
-at all}, so the crypts implementing them score a 0. Freestyle {\em does} employ
-ciphertext randomization (see \cref{sec:impl}), so the four crypts implementing
-them are scored from 1 (least randomized output) to 2 (most randomized output)
-across an even distribution similar to relative rounds yielding the scores {\em
-1, 1.34, 1.67, and 2}.
+crypts grouped by the four ciphers they implement. ChaCha, Salsa, and
+HC-X {\em do not employ ciphertext randomization at all}, so the
+crypts implementing them score a 0. Freestyle {\em does} employ
+ciphertext randomization (see \cref{sec:impl}), so the four crypts
+implementing them are scored from 1 (least randomized output) to 2
+(most randomized output) across an even distribution similar to
+relative rounds yielding the scores {\em 1, 1.34, 1.67, and 2}.
 
 % ---------------------------------- CE
 
