@@ -123,7 +123,7 @@ workload.
 
 
 % =======================================================
-\subsection{Summary Discussion}\label{subsec:eval-overhead}
+\subsection{Performance Discussion}\label{subsec:eval-overhead}
 
 We calculate that Forward switching has average latency overhead at
 \TODO{Y\%/Z\%} (read/write) for 40MB, 5MB and 512KB workloads compared to
@@ -133,13 +133,13 @@ cost. Similarly, we calculate that Selective switching has average overhead at
 \TODO{0\%/Z\%} for 40MB, 5MB and 512KB workloads compared to baseline I/O.
 Average overhead is \TODO{Y\%/Z\%} for 4KB workloads. Finally, we calculate that
 Mirrored switching has average overhead at \TODO{Y\%/Z\%} for 40MB, 5MB and
-512KB workloads compared to baseline I/O, with high write latency due to
-mirroring. Average overhead is \TODO{Y\%/Z\%} for 4KB workloads.
+512KB workloads, with high write latency due to mirroring. Average overhead is
+\TODO{Y\%/Z\%} for 4KB workloads.
 
-In summary, these results show that \sys enables a wide range of performance and
-security tradeoffs unachievable with prior work. This useful feature comes at a
+In summary, this section demonstrates \sys enables a wide range of performance
+and security tradeoffs unachievable with prior work. This flexibility comes at a
 cost of at most \TODO{Y\%/Z\%} increased read/write overhead (excluding
 Mirrored) compared to existing FDE approaches like StrongBox, and at the cost of
 reduced performance for very small workloads. We conclude that any FDE workload
-dominated by I/Os larger than 4KB would benefit from the increased flexibility
-of \sys and heterogeneous FDE.
+dominated by I/Os larger than 4KB could benefit from the increased flexibility
+of heterogeneous FDE.

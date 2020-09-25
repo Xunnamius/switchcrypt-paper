@@ -10,35 +10,35 @@ and methodology behind each study.
 % About: background
 In this first case study, we revisit the motivational Forward switching example
 (\cref{sec:motivation}). Our goal is to complete a workload within a strict
-energy budget. Here, our netbook's storage will use {\em Freestyle Balanced (FB)}
-when operating normally and {\em ChaCha8 (C8)} when battery saver mode is
+energy budget. Here, our netbook's storage will use {\em Freestyle Balanced
+(FB)} when operating normally and {\em ChaCha8 (C8)} when battery saver mode is
 activated.
 
 \input{graphics/fig-usecase-battery}
 
 % About: setup
-To simulate this, we run the following twice: Write 10 40MB
-files using FB, after 5s signal low battery.
+To simulate this, we run the following twice: Write 10 40MB files using FB,
+after 5s signal low battery.
+
 % About: outcome
-The workload is completed using homogeneous FDE on the first run. On the
-second, the system enters battery saving mode and \sys switches to C8
-using the Forward switching model.  \Cref{fig:usecase-battery} shows
-the total energy used after completing both runs. {\em Homogeneous}
-FDE (left) favors security even when backups are paused, while \sys
-(right) matches the security and energy tradeoff to the situation.
-\uline{\sys results in a 3.1x total energy reduction compared to prior
-  work (homogeneous FDE), allowing us to remain safely within our
-  energy budget.}
+The workload is completed using homogeneous FDE on the first run. On the second,
+the system enters battery saving mode and \sys switches to C8 using the Forward
+switching model.  \Cref{fig:usecase-battery} shows the total energy used after
+completing both runs. {\em Homogeneous} FDE (left) favors security even when
+backups are paused, while \sys (right) matches the security and energy tradeoff
+to the situation. \uline{\sys results in a 3.1x total energy reduction compared
+to prior work (homogeneous FDE), allowing us to remain safely within our energy
+budget.}
 
 
 % ===============================
 \subsection{No-Downtime Encryption Upgrade}\label{subsec:usecase-upgrade}
 
 % About: background
-We revisit the Mirrored switching example
-(\cref{subsec:des-switch}). Our goal is to upgrade live storage from one cipher
-to another without downtime or degraded service. Our operator wants to upgrade
-from {\em ChaCha20 (C20)} to {\em Freestyle Fast (FF)}.
+We revisit the Mirrored switching example (\cref{subsec:des-switch}). Our goal
+is to upgrade live storage from one cipher to another without degraded service.
+Our operator wants to upgrade from {\em ChaCha20 (C20)} to {\em Freestyle Fast
+(FF)}.
 
 % About: setup
 To simulate pre- and post-migration state, we execute 10 40MB write-read
@@ -54,10 +54,9 @@ migration. On the left we see similar read latency between the first two stages
 since this model does not switch crypts for read I/Os until the migration
 completes, after which performance matches the slower FF. On the right, we see
 write latency increase to 8.1s during the migration as writes are duplicated;
-post-migration, performance recovers to 6.1s.
-Thus, unlike inflexible prior work, \sys \uline{successfully allows one to
-transition storage to another cipher without interruption or egregious
-performance loss.}
+post-migration, performance recovers to 6.1s. Thus, unlike inflexible prior
+work, \sys \uline{successfully allows one to transition storage to another
+cipher without interruption or egregious performance loss.}
 
 
 % ================================================================
@@ -67,10 +66,11 @@ performance loss.}
 In this final case study we revisit the Selective switching example
 (\cref{subsec:des-switch}). Our goal is to achieve a performance win by ensuring
 that the only data encrypted using the strongest, highest-overhead crypt is the
-small percentage of data that requires such high security. We note the Selective switching model
-requires users to annotate certain files with a special tag via file system
-calls and stored in the inode. Because the \sys layer is file-oblivious, every
-block I/O through the \sys layer will be labeled with the corresponding crypt.
+small percentage of data that requires such high security. We note the Selective
+switching model requires users to annotate certain files with a special tag via
+file system calls and stored in the inode. Because the \sys layer is
+file-oblivious, every block I/O through the \sys layer will be labeled with the
+corresponding crypt.
 
 % About: setup
 We begin with 10 5MB and 10 4KB write-read operations to \sys using {\em
@@ -84,7 +84,7 @@ performance crypt.
 % About: outcome
 \Cref{fig:usecase-scalable} shows {\em Homogeneous} FDE (left) exhibits 5s to
 20s latency depending on the workload while \sys (right) \uline{outperforms with
-a reduction of 3.1x to 4.8x for read latency and 1.6x to 2.8x for write
-latency}, all without compromising on security. Thus, \sys keeps our sensitive
-data at the mandated security level while keeping the performance benefits of
-fast crypto.
+a reduction of 3.1x to 4.8x for read latency and 1.6x to 2.8x for write latency,
+all without compromising on security}. Thus, \sys keeps our sensitive data at
+the mandated security level while keeping the performance benefits of fast
+crypto.
