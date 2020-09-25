@@ -18,17 +18,14 @@ activated.
 
 % About: setup
 To simulate this, we run the following twice: Write 10 40MB files using FB,
-after 5s signal low battery.
-
-% About: outcome
-The workload is completed using homogeneous FDE on the first run. On the second,
-the system enters battery saving mode and \sys switches to C8 using the Forward
-switching model.  \Cref{fig:usecase-battery} shows the total energy used after
-completing both runs. {\em Homogeneous} FDE (left) favors security even when
-backups are paused, while \sys (right) matches the security and energy tradeoff
-to the situation. \uline{\sys results in a 3.1x total energy reduction compared
-to prior work (homogeneous FDE), allowing us to remain safely within our energy
-budget.}
+after 5s signal low battery. The workload is completed using homogeneous FDE on
+the first run. On the second, the system enters battery saving mode and \sys
+switches to C8 using the Forward switching model. \Cref{fig:usecase-battery}
+shows the total energy used after completing both runs. {\em Homogeneous} FDE
+(left) favors security even when backups are paused, while \sys (right) matches
+the security and energy tradeoff to the situation. \uline{\sys results in a 3.1x
+total energy reduction compared to prior work (homogeneous FDE), allowing us to
+remain safely within our energy budget.}
 
 
 % ===============================
