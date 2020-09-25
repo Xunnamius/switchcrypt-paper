@@ -5,10 +5,10 @@ We introduce \sys, a storage system that provides block level kernel support for
 Encryption shows that stream ciphers achieve significantly improved performance
 while offering stronger storage security guarantees. However, optimizing for
 performance conflicts with concerns like battery life. \sys takes advantage of
-the vast configuration space of stream ciphers to these concerns via {\em cipher
-switching}. Our key insight in achieving low-overhead switching is to leverage
-the overwrite-averse, append-mostly behavior of underlying solid-state storage
-to dynamically optimize performance, increased battery life, and powerful
+the vast configuration space of stream ciphers to balance these concerns with
+{\em cipher switching}. Our key insight in achieving low-overhead switching is
+to leverage the append-mostly behavior of underlying solid-state storage to
+dynamically optimize for performance, increased battery life, or powerful
 security properties. We implement \sys on an ARM big.LITTLE mobile processor and
 test its performance under the popular F2FS file system. Our evaluation shows
 \sys cipher switching enables secure, flexible, high performance heterogeneous
