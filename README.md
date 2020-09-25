@@ -1,4 +1,4 @@
-# StrongBox-SwitchCrypt (Officially: FlexCrypt) Paper
+# FlexCrypt (internally: SwitchCrypt): Kernel support for Homogeneous Full Drive Encryption (FDE)
 
 Here be dragons!
 
