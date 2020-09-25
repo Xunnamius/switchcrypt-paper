@@ -27,10 +27,10 @@ The workload is completed homogeneously on the first run. On the second, when
 entering battery saver mode we switch to C8 using the Forward switching model.
 \Cref{fig:usecase-battery} shows the total energy used after completing both
 runs. {\em Homogeneous} FDE (left) favors security even when backups are paused
-while \sys (right) Forward switches when in battery saver mode. These results
-show using \sys resulted in a \TODO{3.3x} total energy reduction compared to
-prior work using homogeneous FDE, allowing us to remain safely within our energy
-budget.
+while \sys (right) Forward switches when in battery saver mode. \uline{These
+results show using \sys resulted in a 3.1x total energy reduction for read I/Os
+compared to prior work using homogeneous FDE, allowing us to remain safely
+within our energy budget.}
 
 
 % ===============================
@@ -51,12 +51,15 @@ Mirrored switching.
 \input{graphics/fig-usecase-upgrade}
 
 % About: outcome
-\Cref{fig:usecase-upgrade} shows the overhead on I/O performance at three stages
-of migration. On the left we see similar read latency between stages of
-\TODO{X}s. On the right, we see write latency increase to \TODO{X}s during the
-migration but recover post-migration. Thus, unlike inflexible prior work, \sys
-successfully allows one to transition storage to another cipher without
-interruption or egregious performance loss.
+\Cref{fig:usecase-upgrade} shows I/O performance at the three stages of
+migration. On the left we see similar read latency between the first two stages
+since this model does not switch crypts for read I/Os until the migration
+completes, after which performance matches the slower FF. On the right, we see
+write latency increase to 8.1s during the migration as writes are duplicated;
+post-migration, performance recovers to 6.1s as we complete the switch to FF.
+Thus, unlike inflexible prior work, \sys \uline{successfully allows one to
+transition storage to another cipher without interruption or egregious
+performance loss.}
 
 
 % ================================================================
@@ -82,8 +85,8 @@ performance crypt.
 
 % About: outcome
 \Cref{fig:usecase-scalable} shows {\em Homogeneous} FDE (left) exhibits 5s to
-20s latency depending on the workload while \sys (right) outperforms with a
-reduction of \TODO{3.1x to 4.8x for read latency and 1.6x to 2.8x for write
+20s latency depending on the workload while \sys (right) \uline{outperforms with
+a reduction of 3.1x to 4.8x for read latency and 1.6x to 2.8x for write
 latency}, all without compromising on security. Thus, \sys keeps our sensitive
 data at the mandated security level while keeping the performance benefits of
 fast crypto.

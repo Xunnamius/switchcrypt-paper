@@ -25,11 +25,11 @@ differences due to different crypts.
 
 \mysub{Methodology.} In each experiment below, we evaluate \sys on two high
 level workloads: sequential and random I/O. In both workloads, a number of bytes
-are written and then read (either 4KB, 512KB, 5MB, 40MB) 10 times. Each workload
-is repeated three times for a total of 240 tests per crypt (720 runs per {\em
-ratio}, see below), 30 results per byte size, 120 results per workload. Results
-are accumulated and the median is taken. All experiments are performed with
-basic Linux I/O commands, bypassing system caching.
+are written and then read (either 4KB, 512KB, 5MB, 40MB) 10 times and the median
+taken. Each workload is repeated three times for a total of 240 tests per crypt
+(720 runs per {\em ratio}, see below), 30 results per byte size, 120 results per
+workload. All experiments are performed with basic Linux I/O commands, bypassing
+system caching.
 
 When evaluating switching performance, a finer breakdown in workloads is made
 using a pre-selected pair of crypts we call the {\em primary} and {\em
@@ -47,17 +47,17 @@ be a 3:7 ratio. There are three ratios we use to evaluate switching performance:
 
 \input{graphics/fig-eval-baseline}
 
-\Cref{fig:eval-baseline} shows the baseline tradeoff between trade score
-(x-axis; see also \cref{subsec:des-discussion}) and median normalized latency
-(y-axis) of different crypts for our sequential and random I/O workloads
-(sequential is shown). Trends for median hold when looking at tail latencies as
-well. Each line represents one workload: 4KB, 512KB, 5MB, and 40MB respectively
-(see legend). Each symbol represents one of our crypts: ChaCha8 (C8), ChaCha20
-(C20), Freestyle Fast (FF), Freestyle Balanced (FB), and Freestyle Strong (FS).
-Of these crypts, those with higher trade scores resulted in higher overall
-latency and increased energy use for I/O operations. The relationship between
-these concerns is not linear across crypts, however, which exposes a rich
-tradeoff space.
+\Cref{fig:eval-baseline} shows the tradeoff between trade score (x-axis; see
+also \cref{subsec:des-discussion}) and median normalized latency (y-axis) of
+different crypts for our sequential and random I/O workloads (sequential is
+shown). This represents baseline performance for homogeneous FDE. Trends for
+median hold when looking at tail latencies as well. Each line represents one
+workload: 4KB, 512KB, 5MB, and 40MB respectively (see legend). Each symbol
+represents one of our crypts: ChaCha8 (C8), ChaCha20 (C20), Freestyle Fast (FF),
+Freestyle Balanced (FB), and Freestyle Strong (FS). Of these crypts, those with
+higher trade scores resulted in higher overall latency and increased energy use
+for I/O operations. The relationship between these concerns is not linear across
+crypts, however, which exposes a rich tradeoff space.
 
 Besides the 4KB workload, the shape of each workload follows a similar trend,
 hence we will focus on 40MB and 4KB workloads here. Due to the overhead of
@@ -93,10 +93,10 @@ overhead.
 The point of this experiment is to determine if \sys can switch the encryption
 efficiently enough to support heterogeneous FDE---that is, contiguous nuggets
 encrypted with different crypts---without devastating performance. For the 40MB,
-5MB, and 512KB workloads (40MB is shown), we see that overhead is low,
-demonstrating that with heterogeneous FDE we can in fact achieve flexible
-security/energy tradeoffs unachievable with prior work and all with minimal
-overhead.
+5MB, and 512KB workloads (40MB is shown), we see empirically that overhead is
+low, demonstrating that \uline{with heterogeneous FDE we can in fact achieve
+flexible security/energy tradeoffs unachievable with prior work and all with
+minimal overhead}.
 
 Again, due to the overhead of metadata management and fast completion time of
 the workloads, C8 and C20 take longer to complete than FF for 4KB reads. We also

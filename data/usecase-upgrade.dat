@@ -1,7 +1,7 @@
 op  latency stage
-r   5       pre
-r   5       dur
-r   5       post
-w   7       pre
-w   10      dur
-w   7       post
+r   1.24    pre
+r   1.26    dur
+r   3.82    post
+w   2.45    pre
+w   8.1     dur
+w   6.06    post
