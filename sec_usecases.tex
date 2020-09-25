@@ -60,14 +60,13 @@ cipher without interruption or egregious performance loss.}
 \subsection{Scalable Encryption}\label{subsec:usecase-scalable}
 
 % About: background
-We return to the Selective switching example
-(\cref{subsec:des-switch}). Our goal is to achieve a performance win by ensuring
-that the only data encrypted using the strongest, highest-overhead crypt is the
-small percentage of data that requires such high security. We note the Selective
-switching model requires users to annotate certain files with a special tag via
-file system calls and stored in the inode. Because the \sys layer is
-file-oblivious, every block I/O through the \sys layer will be labeled with the
-corresponding crypt.
+We return to the Selective switching example (\cref{subsec:des-switch}). Our
+goal is to achieve a performance win by ensuring that the only data encrypted
+using the strongest, highest-overhead crypt is the small percentage of data that
+requires such high security. We note the Selective switching model requires
+users to annotate certain files with a special tag via file system calls and
+stored in the inode. Because the \sys layer is file-oblivious, every block I/O
+through the \sys layer will be labeled with the corresponding crypt.
 
 % About: setup
 We begin with 10 5MB and 10 4KB write-read operations to \sys using {\em

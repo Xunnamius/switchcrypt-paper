@@ -14,13 +14,13 @@ to re-cipher it.
 The challenge here is to accomplish re-ciphering while minimizing overhead. A
 naive approach would switch every nugget to the active configuration
 immediately, but the latency and energy cost would be unacceptable. Hence, a
-more strategic approach is necessary. For example, depending on the use case,
-it may make the most sense to re-cipher a nugget immediately, or eventually, or
-to maintain several areas of differently-ciphered nuggets concurrently. These
+more strategic approach is necessary. For example, depending on the use case, it
+may make the most sense to re-cipher a nugget immediately, or eventually, or to
+maintain several areas of differently-ciphered nuggets concurrently. These
 models allow for nuggets to be re-ciphered in a variety of cases with minimal
-impact on performance and energy but without compromising security; they
-are: Forward, Mirrored, and Selective. How \sys reacts to I/Os under each model
-is summarized in \cref{tbl:switch}.
+impact on performance and energy but without compromising security; they are:
+Forward, Mirrored, and Selective. How \sys reacts to I/Os under each model is
+summarized in \cref{tbl:switch}.
 
 \input{graphics/tbl-switch}
 
@@ -44,14 +44,13 @@ required. For reads, the nugget is decrypted using \cone, it is re-ciphered with
 \ctwo, and then the data is returned. On subsequent reads, the nugget is
 decrypted with \ctwo and read as normal.
 
-Later, when battery saver mode is turned off and \cone becomes the
-active cipher again, nuggets are not automatically re-ciphered as,
-again, that would be inefficient. Nuggets will be re-ciphered on
-demand using the converse of the process described above. Thus,
-Forward switching's performance and battery impact is limited to the
-individual nuggets being accessed.  The data at rest (ciphered with
-\cone)---that is never accessed during the switch---remains in its
-original state.
+Later, when battery saver mode is turned off and \cone becomes the active cipher
+again, nuggets are not automatically re-ciphered as, again, that would be
+inefficient. Nuggets will be re-ciphered on demand using the converse of the
+process described above. Thus, Forward switching's performance and battery
+impact is limited to the individual nuggets being accessed.  The data at rest
+(ciphered with \cone)---that is never accessed during the switch---remains in
+its original state.
 
 % About: variants
 We note that there can be variants to the Forward switching model. For instance,
