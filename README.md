@@ -1,4 +1,4 @@
-# FlexCrypt (internally: SwitchCrypt): Kernel support for Homogeneous Full Drive Encryption (FDE)
+# FlexCrypt (internally: SwitchCrypt): Kernel support for Heterogeneous Full Drive Encryption (FDE)
 
 Here be dragons!
 
